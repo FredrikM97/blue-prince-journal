@@ -3,42 +3,10 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
-import { cloudflare } from "@cloudflare/vite-plugin";
-
 const base = process.env.BASE_PATH ?? "/";
 const isTestRun = process.env.VITEST === "true" || process.env.NODE_ENV === "test";
 
-const plugins = [
-  tailwindcss(),
-  tanstackStart({
-    importProtection: {
-      behavior: "error",
-      client: {
-        files: ["**/server/**"],
-        specifiers: ["server-only"],
-      },
-    },
-    spa: {
-      enabled: true,
-      prerender: {
-        outputPath: "/index",
-      },
-    },
-    // Keep the server runtime entry for prerendering the SPA shell at build time.
-    server: { entry: "server" },
-  }),
-  react(),
-];
-
-if (!isTestRun) {
-  plugins.push(
-    cloudflare({
-      viteEnvironment: {
-        name: "ssr",
-      },
-    }),
-  );
-}
+const plugins = [tailwindcss(), tanstackStart({}), react()];
 
 export default defineConfig({
   base,
@@ -56,6 +24,7 @@ export default defineConfig({
   },
   build: {
     target: "es2022",
+    outDir: "dist",
     sourcemap: false,
     reportCompressedSize: true,
     chunkSizeWarningLimit: 600,
