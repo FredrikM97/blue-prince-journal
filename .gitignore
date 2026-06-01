@@ -34,3 +34,8 @@ coverage
 playwright-report
 test-results
 blob-report
+
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
