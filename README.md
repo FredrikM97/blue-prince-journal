@@ -43,3 +43,4 @@ A client-first notes and todo tracker for Blue Prince. Blue Prince Journal is cu
 - Build output is `dist/client`.
 - Deploy command: `npx wrangler pages deploy dist/client --project-name blue-prince-journal`
 - Dry run command: `npx wrangler pages deploy dist/client --project-name blue-prince-journal --dry-run`
+- Local preview: `npx wrangler pages dev dist/client`
