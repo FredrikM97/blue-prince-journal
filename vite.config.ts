@@ -1,18 +1,14 @@
 import tailwindcss from "@tailwindcss/vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 const base = process.env.BASE_PATH ?? "/";
-const isTestRun = process.env.VITEST === "true" || process.env.NODE_ENV === "test";
-
-const plugins = [tailwindcss(), tanstackStart({}), react()];
 
 export default defineConfig({
   base,
-  plugins,
+  plugins: [tsconfigPaths(), tailwindcss(), react()],
   resolve: {
-    tsconfigPaths: true,
     dedupe: [
       "react",
       "react-dom",
@@ -24,7 +20,7 @@ export default defineConfig({
   },
   build: {
     target: "es2022",
-    outDir: "dist",
+    outDir: "dist/client",
     sourcemap: false,
     reportCompressedSize: true,
     chunkSizeWarningLimit: 600,
