@@ -37,7 +37,6 @@
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-router": "^1.168.25",
-    "@tanstack/react-start": "^1.167.50",
     "clsx": "^2.1.1",
     "idb": "^8.0.3",
     "jszip": "^3.10.1",

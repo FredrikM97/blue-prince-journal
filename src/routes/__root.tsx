@@ -34,21 +34,7 @@ type RouterContext = {
 };
 
 export function RootShellView({ children }: { children: React.ReactNode }) {
-  const themeScript =
-    "try{const v=localStorage.getItem('bp-theme');const d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.toggle('dark',v?v==='dark':d);}catch{}";
-
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
+  return <>{children}</>;
 }
 
 function AppFrame({ children }: { children: React.ReactNode }) {
@@ -170,6 +156,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell">
+      <HeadContent />
       <AppHeader />
       <div className="app-page-container">{children}</div>
       <Toaster />
