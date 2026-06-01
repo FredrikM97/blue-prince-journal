@@ -7,7 +7,10 @@ type FeedbackPayload = {
 
 export async function onRequest(context: {
   request: Request;
-  env: { FEEDBACK_WEBHOOK_URL?: string };
+  env: {
+    DB: D1Database;
+    FEEDBACK_WEBHOOK_URL?: string;
+  };
 }): Promise<Response> {
   if (context.request.method !== "POST") {
     return new Response("Method Not Allowed", {
@@ -17,37 +20,48 @@ export async function onRequest(context: {
   }
 
   let body: FeedbackPayload;
+
   try {
-    body = (await context.request.json()) as FeedbackPayload;
+    body = await context.request.json();
   } catch {
-    return Response.json({ error: "Invalid feedback payload" }, { status: 400 });
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   const message = typeof body.message === "string" ? body.message.trim() : "";
+
   if (!message) {
     return Response.json({ error: "Message is required" }, { status: 400 });
   }
 
+  const contact = typeof body.contact === "string" ? body.contact.trim() : "";
+
+  const pageUrl = typeof body.pageUrl === "string" ? body.pageUrl : "";
+
+  const userAgent = typeof body.userAgent === "string" ? body.userAgent : "";
+
   const payload = {
     message,
-    contact: typeof body.contact === "string" ? body.contact.trim() : "",
-    pageUrl: typeof body.pageUrl === "string" ? body.pageUrl : "",
-    userAgent: typeof body.userAgent === "string" ? body.userAgent : "",
+    contact,
+    pageUrl,
+    userAgent,
     receivedAt: new Date().toISOString(),
   };
 
-  if (context.env.FEEDBACK_WEBHOOK_URL) {
-    const response = await fetch(context.env.FEEDBACK_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      return Response.json({ error: "Unable to forward feedback" }, { status: 502 });
-    }
-  } else {
-    console.log("feedback", payload);
+  // Save to D1
+  await context.env.DB.prepare(
+    `
+    INSERT INTO feedback (
+      message,
+      contact,
+      page_url,
+      user_agent,
+      created_at
+    )
+    VALUES (?, ?, ?, ?, ?)
+    `,
+  )
+    .bind(payload.message, payload.contact, payload.pageUrl, payload.userAgent, payload.receivedAt)
+    .run();
   }
 
   return Response.json({ ok: true });
