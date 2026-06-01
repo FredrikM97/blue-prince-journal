@@ -9,7 +9,6 @@ export async function onRequest(context: {
   request: Request;
   env: {
     DB: D1Database;
-    FEEDBACK_WEBHOOK_URL?: string;
   };
 }): Promise<Response> {
   if (context.request.method !== "POST") {
@@ -39,15 +38,6 @@ export async function onRequest(context: {
 
   const userAgent = typeof body.userAgent === "string" ? body.userAgent : "";
 
-  const payload = {
-    message,
-    contact,
-    pageUrl,
-    userAgent,
-    receivedAt: new Date().toISOString(),
-  };
-
-  // Save to D1
   await context.env.DB.prepare(
     `
     INSERT INTO feedback (
@@ -60,9 +50,8 @@ export async function onRequest(context: {
     VALUES (?, ?, ?, ?, ?)
     `,
   )
-    .bind(payload.message, payload.contact, payload.pageUrl, payload.userAgent, payload.receivedAt)
+    .bind(message, contact, pageUrl, userAgent, new Date().toISOString())
     .run();
-  }
 
   return Response.json({ ok: true });
 }
