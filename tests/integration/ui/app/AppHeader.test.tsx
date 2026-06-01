@@ -223,6 +223,7 @@ describe("AppHeader", () => {
         expect.objectContaining({
           message: "Great app, please add more filters.",
           contact: "agent@example.com",
+          appVersion: expect.any(String),
         }),
       );
       expect(toastSuccess).toHaveBeenCalledWith("Feedback sent");

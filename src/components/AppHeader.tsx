@@ -139,8 +139,7 @@ export function AppHeader() {
       await submitFeedback({
         message,
         contact: feedbackContact.trim(),
-        pageUrl: window.location.href,
-        userAgent: window.navigator.userAgent,
+        appVersion: __APP_COMMIT_HASH__,
       });
       toast.success("Feedback sent");
       setFeedbackMessage("");
@@ -162,6 +161,12 @@ export function AppHeader() {
             <DialogDescription>
               Share a bug report, feature idea, or anything that would make the journal better.
             </DialogDescription>
+            <p className="text-xs text-muted-foreground">
+              Build: {" "}
+              <code className="rounded bg-muted px-1 py-0.5 text-[0.8em]">
+                {__APP_COMMIT_HASH__}
+              </code>{" "}
+            </p>
           </DialogHeader>
 
           <form
@@ -194,7 +199,10 @@ export function AppHeader() {
               <Button type="button" variant="outline" onClick={() => setFeedbackOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={feedbackSubmitting || feedbackMessage.trim().length === 0}>
+              <Button
+                type="submit"
+                disabled={feedbackSubmitting || feedbackMessage.trim().length === 0}
+              >
                 <Send className="app-menu-icon" />
                 {feedbackSubmitting ? "Sending…" : "Send"}
               </Button>
@@ -282,7 +290,9 @@ export function AppHeader() {
                 </IconButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => exportAll().then(() => toast.success("Exported"))}>
+                <DropdownMenuItem
+                  onSelect={() => exportAll().then(() => toast.success("Exported"))}
+                >
                   <Download className="app-menu-icon" /> Export all (ZIP)
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => fileRef.current?.click()}>

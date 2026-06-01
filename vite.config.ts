@@ -1,12 +1,17 @@
 import tailwindcss from "@tailwindcss/vite";
+import { execSync } from "node:child_process";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 const base = process.env.BASE_PATH ?? "/";
+const appCommitHash = execSync("git rev-parse --short HEAD").toString().trim();
 
 export default defineConfig({
   base,
+  define: {
+    __APP_COMMIT_HASH__: JSON.stringify(appCommitHash),
+  },
   plugins: [tsconfigPaths(), tailwindcss(), react()],
   resolve: {
     dedupe: [

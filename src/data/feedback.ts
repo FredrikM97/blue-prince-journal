@@ -3,8 +3,7 @@ export const FEEDBACK_ENDPOINT = "/api/feedback";
 export interface FeedbackSubmission {
   message: string;
   contact: string;
-  pageUrl: string;
-  userAgent: string;
+  appVersion: string;
 }
 
 export async function submitFeedback(payload: FeedbackSubmission): Promise<void> {

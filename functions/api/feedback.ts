@@ -1,8 +1,9 @@
+import type { D1Database } from "@cloudflare/workers-types";
+
 type FeedbackPayload = {
   message?: unknown;
   contact?: unknown;
-  pageUrl?: unknown;
-  userAgent?: unknown;
+  appVersion?: unknown;
 };
 
 export async function onRequestPost(context: {
@@ -26,25 +27,30 @@ export async function onRequestPost(context: {
   }
 
   const contact = typeof body.contact === "string" ? body.contact.trim() : "";
+  const appVersion = typeof body.appVersion === "string" ? body.appVersion : "";
 
-  const pageUrl = typeof body.pageUrl === "string" ? body.pageUrl : "";
-
-  const userAgent = typeof body.userAgent === "string" ? body.userAgent : "";
+  const tableInfo = await context.env.DB.prepare("PRAGMA table_info(feedback)").all<{
+    name: string;
+  }>();
+  if (!tableInfo.results.some((column) => column.name === "version")) {
+    await context.env.DB.exec("ALTER TABLE feedback ADD COLUMN version TEXT");
+  }
 
   await context.env.DB.prepare(
     `
     INSERT INTO feedback (
       message,
       contact,
-      page_url,
-      user_agent,
+      version,
       created_at
     )
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?)
     `,
   )
-    .bind(message, contact, pageUrl, userAgent, new Date().toISOString())
+    .bind(message, contact, appVersion, new Date().toISOString())
     .run();
+
+  console.log("feedback context", { appVersion });
 
   return Response.json({ ok: true });
 }
