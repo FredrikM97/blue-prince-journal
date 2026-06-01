@@ -3,31 +3,33 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 const base = process.env.BASE_PATH ?? "/";
 
 export default defineConfig({
   base,
-  plugins: [
-    tailwindcss(),
-    tanstackStart({
-      importProtection: {
-        behavior: "error",
-        client: {
-          files: ["**/server/**"],
-          specifiers: ["server-only"],
-        },
+  plugins: [tailwindcss(), tanstackStart({
+    importProtection: {
+      behavior: "error",
+      client: {
+        files: ["**/server/**"],
+        specifiers: ["server-only"],
       },
-      spa: {
-        enabled: true,
-        prerender: {
-          outputPath: "/index",
-        },
+    },
+    spa: {
+      enabled: true,
+      prerender: {
+        outputPath: "/index",
       },
-      // Keep the server runtime entry for prerendering the SPA shell at build time.
-      server: { entry: "server" },
-    }),
-    react(),
-  ],
+    },
+    // Keep the server runtime entry for prerendering the SPA shell at build time.
+    server: { entry: "server" },
+  }), react(), cloudflare({
+    viteEnvironment: {
+      name: "ssr"
+    }
+  })],
   resolve: {
     tsconfigPaths: true,
     dedupe: [
