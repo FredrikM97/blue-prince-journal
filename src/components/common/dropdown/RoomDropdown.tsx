@@ -105,16 +105,15 @@ function RoomDropdownComponent({
         <Button
           type="button"
           variant="outline"
-          className="h-9 w-full justify-between bg-card/65 px-3 py-2 text-sm font-normal"
+          className="room-dropdown-trigger"
+          data-has-value={!!activeRoom}
         >
-          <span className={activeRoom ? "text-foreground" : "text-muted-foreground"}>
-            {activeRoom || placeholder}
-          </span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          <span className="room-trigger-label">{activeRoom || placeholder}</span>
+          <ChevronDown className="icon-md opacity-50" />
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+      <DropdownMenuContent align="start" className="dropdown-select-content">
         <div className="px-1 pb-1">
           <input
             ref={searchRef}
@@ -122,41 +121,49 @@ function RoomDropdownComponent({
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => event.stopPropagation()}
             placeholder="Search rooms..."
-            className="h-8 w-full rounded border border-input bg-card/65 px-2 text-sm outline-none focus:ring-1 focus:ring-ring"
+            className="room-dropdown-search"
           />
         </div>
 
-        <DropdownMenuItem
-          className={!activeRoom ? "bg-accent" : undefined}
-          onSelect={() => onValueChange("")}
-        >
-          {clearLabel}
-        </DropdownMenuItem>
+        {(() => {
+          const clearClass = !activeRoom ? "menu-item-active" : "";
+          return (
+            <DropdownMenuItem className={clearClass} onSelect={() => onValueChange("")}>
+              {clearLabel}
+            </DropdownMenuItem>
+          );
+        })()}
 
-        {normalizedQuery ? (
+        {normalizedQuery && (
           <>
-            {searchResults.map((room) => (
-              <DropdownMenuItem
-                key={`${room.category}-${room.name}`}
-                className={room.name === activeRoom ? "bg-accent" : undefined}
-                onSelect={() => onValueChange(room.name)}
-              >
-                <div className="flex min-w-0 flex-col">
-                  <span>{room.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">{room.category}</span>
-                </div>
-              </DropdownMenuItem>
-            ))}
-            {showAddOption ? (
+            {searchResults.map((room) => {
+              const itemClass = room.name === activeRoom ? "menu-item-active" : "";
+              return (
+                <DropdownMenuItem
+                  key={`${room.category}-${room.name}`}
+                  className={itemClass}
+                  onSelect={() => onValueChange(room.name)}
+                >
+                  <div className="flex min-w-0 flex-col">
+                    <span>{room.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">{room.category}</span>
+                  </div>
+                </DropdownMenuItem>
+              );
+            })}
+            {showAddOption && (
               <DropdownMenuItem onSelect={handleAddCustomRoom} className="text-muted-foreground">
-                <Plus className="mr-2 h-4 w-4 shrink-0" />
+                <Plus className="icon-md shrink-0" />
                 Add "{targetRoom}" to {targetGroup}
               </DropdownMenuItem>
-            ) : searchResults.length === 0 ? (
-              <div className="px-2 py-1.5 text-sm text-muted-foreground">No matching rooms</div>
-            ) : null}
+            )}
+            {!showAddOption && searchResults.length === 0 && (
+              <div className="room-dropdown-empty">No matching rooms</div>
+            )}
           </>
-        ) : (
+        )}
+
+        {!normalizedQuery &&
           allGroups
             .filter((group) => (groupedRooms[group]?.length ?? 0) > 0)
             .map((group) => (
@@ -170,20 +177,22 @@ function RoomDropdownComponent({
                   </div>
                 </DropdownMenuSubTrigger>
 
-                <DropdownMenuSubContent className="max-h-72 min-w-56">
-                  {groupedRooms[group]?.map((room) => (
-                    <DropdownMenuItem
-                      key={room.name}
-                      className={room.name === activeRoom ? "bg-accent" : undefined}
-                      onSelect={() => onValueChange(room.name)}
-                    >
-                      {room.name}
-                    </DropdownMenuItem>
-                  ))}
+                <DropdownMenuSubContent className="room-submenu-content">
+                  {groupedRooms[group]?.map((room) => {
+                    const itemClass = room.name === activeRoom ? "menu-item-active" : "";
+                    return (
+                      <DropdownMenuItem
+                        key={room.name}
+                        className={itemClass}
+                        onSelect={() => onValueChange(room.name)}
+                      >
+                        {room.name}
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
-            ))
-        )}
+            ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

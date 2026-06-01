@@ -24,7 +24,7 @@ export function groupTodosByStatus(todos: Todo[]): Record<TodoStatus, Todo[]> {
 }
 
 export function todoPriorityClass(priority: Todo["priority"]): string {
-  if (priority === "high") return "bg-destructive/30 text-red-200";
-  if (priority === "low") return "bg-muted text-muted-foreground";
-  return "bg-brass/20 text-brass";
+  if (priority === "high") return "chip-priority-high";
+  if (priority === "low") return "chip-priority-low";
+  return "chip-priority-normal";
 }

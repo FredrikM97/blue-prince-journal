@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
 import { FolderOpen, FolderSync, Unlink } from "lucide-react";
 import { useStore } from "@/data/store";
 import { Button, BrassButton } from "@/components/common/Button";
 import { KeyboardKey } from "@/components/common/KeyboardKey";
 import { PageLayout } from "@/components/common/PageLayout";
+import { TextInput } from "@/components/common/input/TextInput";
 import {
   addCustomRoom,
   getAllRoomGroups,
@@ -32,23 +32,16 @@ import {
   openSyncFolderInPicker,
 } from "@/data/sync";
 import {
-  isSteamImportSupported,
+  connectSteamImportFolder,
+  disconnectSteamImportFolder,
+  getActiveSteamFolderName,
+  isSteamFolderSyncSupported,
   loadSteamImportStatus,
-  pickAndImportSteamFiles,
+  restoreSteamImportFolder,
+  syncConnectedSteamFolder,
 } from "@/data/steamImport";
 import { toast } from "sonner";
-
-function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="space-y-5">
-      <h2 className="flex items-center gap-3 font-serif text-xl leading-tight">
-        <span aria-hidden className="h-5 w-px bg-border/80" />
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
+import { SettingsSection, SettingsSubsection } from "./SettingsSection";
 
 export function SettingsPage() {
   const load = useStore((s) => s.load);
@@ -90,11 +83,9 @@ export function SettingsPage() {
   }
 
   return (
-    <PageLayout
-      className="h-full max-w-none px-0 py-0 sm:px-0 sm:py-0"
-      prioritizeMiddleScroll
-      middle={
-        <div className="mx-auto w-full max-w-2xl space-y-12 px-3 py-3 pb-6 sm:px-4 sm:py-6 sm:pb-8">
+    <PageLayout className="h-full max-w-none px-0 py-0 sm:px-0 sm:py-0" prioritizeMiddleScroll>
+      <PageLayout.Middle>
+        <div className="settings-content">
           <header>
             <h1 className="font-serif text-3xl">Settings</h1>
             <p className="text-sm text-muted-foreground">
@@ -143,24 +134,15 @@ export function SettingsPage() {
               }}
             />
 
-            <div className="space-y-3 border-t border-border/70 pt-4">
-              <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Sync folder
-              </h3>
+            <SettingsSubsection title="Sync folder">
               <SyncFolderSection />
-            </div>
+            </SettingsSubsection>
 
-            <div className="space-y-3 border-t border-border/70 pt-4">
-              <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Steam screenshots import (optional)
-              </h3>
+            <SettingsSubsection title="Steam screenshots import (optional)">
               <SteamImportSection />
-            </div>
+            </SettingsSubsection>
 
-            <div className="space-y-3 border-t border-border/70 pt-4">
-              <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Dev utilities
-              </h3>
+            <SettingsSubsection title="Dev utilities">
               <Button
                 variant="outline"
                 onClick={async () => {
@@ -174,7 +156,7 @@ export function SettingsPage() {
               >
                 Seed graph test data (~70 rooms)
               </Button>
-            </div>
+            </SettingsSubsection>
           </SettingsSection>
 
           <div className="border-t border-border/70 pt-6">
@@ -184,12 +166,11 @@ export function SettingsPage() {
                 dropdowns.
               </p>
 
-              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_14rem_auto]">
-                <input
+              <div className="settings-input-grid">
+                <TextInput
                   value={newRoomName}
-                  onChange={(e) => setNewRoomName(e.target.value)}
+                  onChange={setNewRoomName}
                   placeholder="New room name"
-                  className="h-9 rounded-md border border-input bg-card/65 px-3 text-sm"
                 />
 
                 <DropdownSelect
@@ -203,22 +184,20 @@ export function SettingsPage() {
                 </Button>
               </div>
 
-              <div className="space-y-3 rounded-md border border-border p-3">
+              <div className="panel-card space-y-3">
                 {[...customRoomsByCategory.entries()].map(([group, rooms]) => {
                   if (rooms.length === 0) return null;
 
                   return (
                     <div key={group} className="space-y-2">
-                      <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        {group}
-                      </h3>
+                      <h3 className="section-label">{group}</h3>
                       <div className="flex flex-wrap gap-1.5">
                         {rooms.map((name) => (
                           <button
                             key={`${group}-${name}`}
                             type="button"
                             onClick={() => removeRoom(name)}
-                            className="rounded border border-border bg-secondary px-2 py-1 text-xs text-foreground hover:border-destructive hover:text-destructive"
+                            className="settings-room-chip"
                             title="Remove room"
                           >
                             {name}
@@ -252,8 +231,8 @@ export function SettingsPage() {
             </SettingsSection>
           </div>
         </div>
-      }
-    />
+      </PageLayout.Middle>
+    </PageLayout>
   );
 }
 
@@ -262,8 +241,10 @@ function SteamImportSection() {
   const [lastRefreshAt, setLastRefreshAt] = useState<number | null>(null);
   const [lastImported, setLastImported] = useState(0);
   const [lastSkipped, setLastSkipped] = useState(0);
+  const [connected, setConnected] = useState(false);
+  const [folderName, setFolderName] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const isSupported = isSteamImportSupported();
+  const isSupported = isSteamFolderSyncSupported();
 
   useEffect(() => {
     if (!isSupported) return;
@@ -272,23 +253,60 @@ function SteamImportSection() {
       setLastImported(s.lastImported);
       setLastSkipped(s.lastSkipped);
     });
+    void restoreSteamImportFolder().then((handle) => {
+      if (!handle) return;
+      setConnected(true);
+      setFolderName(handle.name);
+    });
   }, [isSupported]);
 
-  async function handlePickFiles() {
+  async function handleConnect() {
     setBusy(true);
     try {
-      const result = await pickAndImportSteamFiles(addImage);
-      if (result === null) return; // user cancelled
+      const handle = await connectSteamImportFolder();
+      if (!handle) return;
+      setConnected(true);
+      setFolderName(handle.name);
+      toast.success(`Connected Steam folder: ${handle.name}`);
+    } catch {
+      toast.error("Could not connect Steam folder");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleSync() {
+    setBusy(true);
+    try {
+      const result = await syncConnectedSteamFolder(addImage);
+      if (result === null) {
+        toast.error("No Steam folder connected");
+        return;
+      }
       setLastRefreshAt(Date.now());
       setLastImported(result.imported);
       setLastSkipped(result.skipped);
       if (result.imported > 0) {
         toast.success(`Imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`);
       } else {
-        toast.success("No new screenshots — all already imported");
+        toast.success("No new screenshots in connected folder");
       }
     } catch {
-      toast.error("Could not import Steam screenshots");
+      toast.error("Could not sync Steam screenshots");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDisconnect() {
+    setBusy(true);
+    try {
+      await disconnectSteamImportFolder();
+      setConnected(false);
+      setFolderName(null);
+      toast.success("Steam folder disconnected");
+    } catch {
+      toast.error("Could not disconnect Steam folder");
     } finally {
       setBusy(false);
     }
@@ -305,16 +323,45 @@ function SteamImportSection() {
   return (
     <div className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Pick screenshot files directly — works with any folder including Steam&apos;s installation
-        directory. Already-imported files are skipped automatically.
+        Connect a Steam screenshots folder once, then sync from it any time. Imported files are
+        skipped automatically.
       </p>
 
-      <Button variant="outline" size="sm" onClick={handlePickFiles} disabled={busy}>
-        Pick screenshots…
-      </Button>
+      {!connected && (
+        <BrassButton
+          size="sm"
+          onClick={handleConnect}
+          disabled={busy}
+          className="settings-steam-action"
+        >
+          <FolderOpen className="icon-sm" />
+          Connect folder…
+        </BrassButton>
+      )}
+
+      {connected && (
+        <div className="settings-steam-actions-row">
+          <BrassButton
+            size="sm"
+            onClick={handleSync}
+            disabled={busy}
+            className="settings-steam-action"
+          >
+            <FolderSync className="icon-sm" />
+            Sync now
+          </BrassButton>
+          <Button variant="ghost" size="sm" onClick={handleDisconnect} disabled={busy}>
+            <Unlink className="icon-sm" />
+            Disconnect
+          </Button>
+          <span className="settings-steam-connected-label">
+            Connected: {folderName ?? getActiveSteamFolderName() ?? "Unknown"}
+          </span>
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground">
-        Last import:{" "}
+        Last sync:{" "}
         {lastRefreshAt
           ? `${new Date(lastRefreshAt).toLocaleString()} · imported ${lastImported}, skipped ${lastSkipped}`
           : "Never"}
@@ -451,7 +498,7 @@ function SyncFolderSection() {
   if (syncFolderName) {
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-card/40 px-3 py-2.5 text-sm">
+        <div className="panel-row">
           <FolderSync className="h-4 w-4 shrink-0 text-green-500" />
           <span className="min-w-0 flex-1 truncate font-medium">{syncFolderName}</span>
           <span className="shrink-0 text-xs text-muted-foreground">

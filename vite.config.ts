@@ -39,6 +39,36 @@ export default defineConfig({
       "@tanstack/query-core",
     ],
   },
+  build: {
+    target: "es2022",
+    sourcemap: false,
+    reportCompressedSize: true,
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (
+            id.includes("node_modules/react/") ||
+            id.includes("node_modules/react-dom/") ||
+            id.includes("node_modules/@tanstack/react-router/") ||
+            id.includes("node_modules/@tanstack/react-query/")
+          ) {
+            return "vendor";
+          }
+          if (
+            id.includes("node_modules/react-markdown/") ||
+            id.includes("node_modules/remark-gfm/")
+          ) {
+            return "markdown";
+          }
+          if (id.includes("node_modules/jszip/")) {
+            return "zip";
+          }
+          return undefined;
+        },
+      },
+    },
+  },
   server: { host: "::", port: 8080 },
   test: {
     environment: "jsdom",

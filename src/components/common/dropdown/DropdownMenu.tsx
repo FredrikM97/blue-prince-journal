@@ -7,7 +7,7 @@
  *     <DropdownMenuContent>
  *       <DropdownMenuItem onSelect={...}>Action</DropdownMenuItem>
  *       <DropdownMenuSeparator />
- *       <DropdownMenuSub>                      ← grouped sub-menu (e.g. room categories)
+ *       <DropdownMenuSub>
  *         <DropdownMenuSubTrigger>Group</DropdownMenuSubTrigger>
  *         <DropdownMenuSubContent>
  *           <DropdownMenuItem onSelect={...}>Item</DropdownMenuItem>
@@ -15,11 +15,12 @@
  *       </DropdownMenuSub>
  *     </DropdownMenuContent>
  *   </DropdownMenu>
+ *
+ * All visual styles are defined in dropdown.css — do not pass className.
  */
 
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 /** Root controller — manages open/close state. Pass modal={false} for inline panels. */
 export const DropdownMenu = DropdownMenuPrimitive.Root;
@@ -30,20 +31,17 @@ export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 /** Root of a sub-menu section. Must contain a SubTrigger and SubContent. */
 export const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
-/** Renders menu content in a Portal above the page. */
+/** Renders menu content in a Portal above the page. Accepts an optional extra CSS class. */
 export function DropdownMenuContent({
-  className,
   sideOffset = 4,
+  className = "",
   ...props
 }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>) {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
-        className={cn(
-          "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md [scrollbar-gutter:stable] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-          className,
-        )}
+        className={`dropdown-content ${className}`.trim()}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -52,37 +50,25 @@ export function DropdownMenuContent({
 
 /** Row that opens a nested sub-menu. Automatically appends a chevron icon. */
 export function DropdownMenuSubTrigger({
-  className,
-  inset,
   children,
   ...props
-}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & { inset?: boolean }) {
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger>) {
   return (
-    <DropdownMenuPrimitive.SubTrigger
-      className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-        inset && "pl-8",
-        className,
-      )}
-      {...props}
-    >
+    <DropdownMenuPrimitive.SubTrigger className="dropdown-sub-trigger" {...props}>
       {children}
-      <ChevronRight className="ml-auto" />
+      <ChevronRight className="ml-auto icon-sm" />
     </DropdownMenuPrimitive.SubTrigger>
   );
 }
 
-/** Content panel for a nested sub-menu. */
+/** Content panel for a nested sub-menu. Accepts an optional extra CSS class. */
 export function DropdownMenuSubContent({
-  className,
+  className = "",
   ...props
 }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>) {
   return (
     <DropdownMenuPrimitive.SubContent
-      className={cn(
-        "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-lg [scrollbar-gutter:stable] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=right]:slide-in-from-left-2 data-[side=left]:slide-in-from-right-2",
-        className,
-      )}
+      className={`dropdown-content ${className}`.trim()}
       {...props}
     />
   );
@@ -90,31 +76,21 @@ export function DropdownMenuSubContent({
 
 /** A single clickable menu row. Use onSelect for actions; use asChild to render a link. */
 export function DropdownMenuItem({
-  className,
-  inset,
+  className = "",
   ...props
-}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & { inset?: boolean }) {
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item>) {
   return (
     <DropdownMenuPrimitive.Item
-      className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
-        inset && "pl-8",
-        className,
-      )}
+      className={`dropdown-item ${className}`.trim()}
       {...props}
     />
   );
 }
 
 /** Horizontal divider between menu sections. */
-export function DropdownMenuSeparator({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>) {
-  return (
-    <DropdownMenuPrimitive.Separator
-      className={cn("-mx-1 my-1 h-px bg-muted", className)}
-      {...props}
-    />
-  );
+export function DropdownMenuSeparator(
+  props: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>,
+) {
+  return <DropdownMenuPrimitive.Separator className="dropdown-separator" {...props} />;
 }
+

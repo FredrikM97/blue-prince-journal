@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import type { ButtonHTMLAttributes } from "react";
 
 type Variant = "default" | "ghost" | "outline" | "destructive" | "secondary";
@@ -32,16 +31,18 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export function Button({
   variant = "default",
   size = "default",
-  className,
+  className = "",
   ...props
 }: ButtonProps) {
-  return <button {...props} className={cn(BASE, VARIANT[variant], SIZE[size], className)} />;
+  return (
+    <button {...props} className={`${BASE} ${VARIANT[variant]} ${SIZE[size]} ${className}`.trim()} />
+  );
 }
 
-/** Ghost icon button — used for toolbars and row actions. Always square, non-shrinking.
- *  type="button" is set by default so it never accidentally submits a form. */
+/** Ghost icon button — used for toolbars and row actions.
+ *  Always square, non-shrinking. `type="button"` is set by default. */
 export function IconButton({
-  className,
+  className = "",
   type = "button",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement>) {
@@ -49,50 +50,41 @@ export function IconButton({
     <button
       type={type}
       {...props}
-      className={cn(BASE, VARIANT.ghost, SIZE.icon, "shrink-0", className)}
+      className={`${BASE} ${VARIANT.ghost} ${SIZE.icon} shrink-0 ${className}`.trim()}
     />
   );
 }
 
 /** Primary action button styled with the brass accent. */
-export function BrassButton({ size = "default", className, ...props }: ButtonProps) {
+export function BrassButton({ size = "default", className = "", ...props }: ButtonProps) {
   return (
     <button
       {...props}
-      className={cn(
-        BASE,
-        VARIANT.default,
-        SIZE[size],
-        "bg-brass text-brass-foreground hover:bg-brass/90",
-        className,
-      )}
+      className={`${BASE} ${VARIANT.default} ${SIZE[size]} bg-brass text-brass-foreground hover:bg-brass/90 ${className}`.trim()}
     />
   );
 }
 
 /** Small ghost button for secondary row/panel actions. */
-export function GhostButton({ size = "sm", className, ...props }: ButtonProps) {
-  return <button {...props} className={cn(BASE, VARIANT.ghost, SIZE[size], className)} />;
+export function GhostButton({ size = "sm", className = "", ...props }: ButtonProps) {
+  return (
+    <button {...props} className={`${BASE} ${VARIANT.ghost} ${SIZE[size]} ${className}`.trim()} />
+  );
 }
 
-/** Toggle/filter button — shows a distinct active state. Used for filter chips and section selectors. */
+/** Toggle/filter button — shows a distinct active state.
+ *  Used for filter chips and section selectors. */
 export function SelectButton({
   active,
-  className,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
+  const stateClass = active ? "select-btn-active" : "select-btn-inactive";
   return (
     <button
       type="button"
       {...props}
-      className={cn(
-        BASE,
-        "h-auto rounded px-2 py-0.5 text-xs",
-        active
-          ? "bg-brass font-medium text-brass-foreground"
-          : "text-muted-foreground hover:bg-brass/20 hover:text-foreground",
-        className,
-      )}
+      className={`${BASE} h-auto rounded px-2 py-0.5 text-xs ${stateClass}`}
     />
   );
 }
+

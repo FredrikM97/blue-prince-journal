@@ -1,22 +1,22 @@
-import { useMemo, useRef, useState, type MouseEvent, type ReactNode, type WheelEvent } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent,
+  type ReactNode,
+  type WheelEvent,
+} from "react";
 import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
 import { Dialog, DialogContent } from "@/components/common/Dialog";
 import { EmptyState } from "@/components/common/EmptyState";
+import { FilterSection } from "@/components/common/filter/FilterSection";
+import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
 import { PageLayout } from "@/components/common/PageLayout";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
-import {
-  BookOpen,
-  ChevronDown,
-  ChevronRight,
-  Eye,
-  Key,
-  Lightbulb,
-  ListTodo,
-  Maximize2,
-  Sparkles,
-} from "lucide-react";
+import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
 import { useGraphStoreData } from "@/hooks/useGraphStoreData";
+import { getRoomCatalog, ROOM_GROUPS } from "@/data/rooms";
 import type { Note, Todo } from "@/lib/types";
 
 const ALL_NOTE_TYPES = ["clue", "code", "observation", "theory", "story", "task"] as const;
@@ -112,8 +112,8 @@ export function GraphPage() {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [hiddenRooms, setHiddenRooms] = useState<Set<string>>(new Set());
   const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set());
-  const [roomsOpen, setRoomsOpen] = useState(false);
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
+  const [hideIsolated, setHideIsolated] = useState(false);
 
   const graphEntries = useMemo(() => toGraphEntries(notes, todos), [notes, todos]);
 
@@ -122,6 +122,54 @@ export function GraphPage() {
     for (const n of graphEntries) rooms.add(n.room?.trim() || "");
     return [...rooms].sort((a, b) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b)));
   }, [graphEntries]);
+
+  const roomCategoryByName = useMemo(() => {
+    const map = new Map<string, string>();
+    const catalog = getRoomCatalog();
+    for (const room of catalog) {
+      map.set(room.name.toLowerCase(), String(room.category));
+    }
+    return map;
+  }, []);
+
+  const groupedRoomFilters = useMemo(() => {
+    const grouped = new Map<string, string[]>();
+    for (const group of ROOM_GROUPS) {
+      grouped.set(group, []);
+    }
+    grouped.set("Ungrouped", []);
+
+    for (const room of allRooms) {
+      if (room === "") {
+        const emptyRooms = grouped.get("Ungrouped");
+        if (emptyRooms) emptyRooms.push(room);
+        continue;
+      }
+
+      const category = roomCategoryByName.get(room.toLowerCase());
+      if (!category) {
+        const unknownGroup = grouped.get("Ungrouped");
+        if (unknownGroup) unknownGroup.push(room);
+        continue;
+      }
+
+      const knownGroup = grouped.get(category);
+      if (knownGroup) {
+        knownGroup.push(room);
+      } else {
+        const fallback = grouped.get("Ungrouped");
+        if (fallback) fallback.push(room);
+      }
+    }
+
+    const result: Array<{ name: string; rooms: string[] }> = [];
+    grouped.forEach((rooms, name) => {
+      if (rooms.length === 0) return;
+      result.push({ name, rooms: [...rooms].sort((a, b) => a.localeCompare(b)) });
+    });
+
+    return result;
+  }, [allRooms, roomCategoryByName]);
 
   const visibleEntries = useMemo(
     () =>
@@ -137,19 +185,37 @@ export function GraphPage() {
 
   const { nodes, edges, clusters } = useMemo(() => buildGraph(visibleEntries), [visibleEntries]);
 
-  const nodeById = useMemo(() => indexNodes(nodes), [nodes]);
+  // IDs of nodes that have at least one edge (used by the isolated-nodes filter)
+  const connectedNodeIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const e of edges) {
+      ids.add(e.from);
+      ids.add(e.to);
+    }
+    return ids;
+  }, [edges]);
+
+  // Nodes to actually render — optionally hiding isolated (no-edge) ones
+  const displayNodes = useMemo(
+    () => (hideIsolated ? nodes.filter((n) => connectedNodeIds.has(n.id)) : nodes),
+    [nodes, hideIsolated, connectedNodeIds],
+  );
+
+  const nodeById = useMemo(() => indexNodes(displayNodes), [displayNodes]);
   const renderedEdges = useMemo(
     () => buildRenderedEdges(edges, nodeById, clusters),
     [edges, nodeById, clusters],
   );
   const selectedNodeId = useMemo(
     () =>
-      selectedNoteId && nodes.some((node) => node.id === selectedNoteId) ? selectedNoteId : null,
-    [nodes, selectedNoteId],
+      selectedNoteId && displayNodes.some((node) => node.id === selectedNoteId)
+        ? selectedNoteId
+        : null,
+    [displayNodes, selectedNoteId],
   );
   const selectedNode = useMemo(
-    () => nodes.find((node) => node.id === selectedNodeId) ?? null,
-    [nodes, selectedNodeId],
+    () => displayNodes.find((node) => node.id === selectedNodeId) ?? null,
+    [displayNodes, selectedNodeId],
   );
 
   const incomingCount = selectedNode
@@ -159,8 +225,36 @@ export function GraphPage() {
     ? edges.filter((edge) => edge.from === selectedNode.id).length
     : 0;
 
+  // Isolated node count — for showing the badge on the toggle
+  const isolatedCount = nodes.length - connectedNodeIds.size;
+
+  let onResetTypes: (() => void) | undefined = undefined;
+  if (hiddenTypes.size > 0) onResetTypes = () => setHiddenTypes(new Set());
+
+  let onResetRooms: (() => void) | undefined = undefined;
+  if (hiddenRooms.size > 0) onResetRooms = () => setHiddenRooms(new Set());
+
+  let roomBadge: string | undefined = undefined;
+  if (hiddenRooms.size > 0) {
+    roomBadge = `(${allRooms.length - hiddenRooms.size}/${allRooms.length})`;
+  }
+
+  const typeFilterItems = ALL_NOTE_TYPES.map((type) => ({
+    key: type,
+    label: type,
+    active: !hiddenTypes.has(type),
+    dotColor: TYPE_COLOR[type],
+    onToggle: () =>
+      setHiddenTypes((prev) => {
+        const next = new Set(prev);
+        if (next.has(type)) next.delete(type);
+        else next.add(type);
+        return next;
+      }),
+  }));
+
   const canvasProps = {
-    nodes,
+    nodes: displayNodes,
     clusters,
     renderedEdges,
     selectedNoteId,
@@ -170,112 +264,100 @@ export function GraphPage() {
 
   return (
     <>
-      <PageLayout
-        leftSidebar={
+      <PageLayout>
+        <PageLayout.Left>
           <div className="page-layout-panel space-y-3">
-            {/* Stats */}
             <p className="text-xs text-muted-foreground">
-              {nodes.length} entries · {edges.length} links
+              {displayNodes.length} entries · {edges.length} links
             </p>
 
-            {/* Types — compact 2-column grid */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                <span>Types</span>
-                {hiddenTypes.size > 0 && (
-                  <button
-                    className="normal-case text-[10px] text-amber-500 hover:underline"
-                    onClick={() => setHiddenTypes(new Set())}
-                  >
-                    All
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                {ALL_NOTE_TYPES.map((type) => {
-                  const active = !hiddenTypes.has(type);
-                  return (
-                    <button
-                      key={type}
-                      onClick={() =>
-                        setHiddenTypes((prev) => {
-                          const next = new Set(prev);
-                          if (next.has(type)) next.delete(type);
-                          else next.add(type);
-                          return next;
-                        })
-                      }
-                      className={`flex w-full cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 text-xs transition-opacity hover:bg-muted/40 ${
-                        active ? "opacity-100" : "opacity-35"
-                      }`}
-                    >
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-full"
-                        style={{ background: TYPE_COLOR[type] }}
-                      />
-                      <span className="capitalize">{type}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <FilterSection title="Types" onReset={onResetTypes}>
+              <FilterToggleGrid items={typeFilterItems} />
+            </FilterSection>
 
-            {/* Rooms — collapsible */}
             {allRooms.length > 1 && (
-              <div className="space-y-1.5">
-                <button
-                  className="flex w-full cursor-pointer items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground"
-                  onClick={() => setRoomsOpen((v) => !v)}
-                >
-                  <span>
-                    Rooms
-                    {!roomsOpen && hiddenRooms.size > 0 && (
-                      <span className="ml-1 text-[10px] normal-case text-amber-500">
-                        ({allRooms.length - hiddenRooms.size}/{allRooms.length})
-                      </span>
-                    )}
-                  </span>
-                  {roomsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                </button>
-                {roomsOpen && (
-                  <div className="space-y-0.5">
-                    {hiddenRooms.size > 0 && (
-                      <button
-                        className="mb-1 text-[10px] text-amber-500 hover:underline"
-                        onClick={() => setHiddenRooms(new Set())}
+              <FilterSection
+                title="Rooms"
+                collapsible
+                defaultOpen={false}
+                badge={roomBadge}
+                onReset={onResetRooms}
+              >
+                <div className="space-y-2">
+                  {groupedRoomFilters.map((group) => {
+                    const hiddenInGroup = group.rooms.filter((room) =>
+                      hiddenRooms.has(room),
+                    ).length;
+                    let groupBadge: string | undefined = undefined;
+                    if (hiddenInGroup > 0) {
+                      groupBadge = `(${group.rooms.length - hiddenInGroup}/${group.rooms.length})`;
+                    }
+
+                    let onResetGroup: (() => void) | undefined = undefined;
+                    if (hiddenInGroup > 0) {
+                      onResetGroup = () => {
+                        setHiddenRooms((prev) => {
+                          const next = new Set(prev);
+                          for (const room of group.rooms) {
+                            next.delete(room);
+                          }
+                          return next;
+                        });
+                      };
+                    }
+
+                    const groupItems = group.rooms.map((room) => ({
+                      key: room || "__ungrouped__",
+                      label: room || "Ungrouped",
+                      active: !hiddenRooms.has(room),
+                      onToggle: () =>
+                        setHiddenRooms((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(room)) next.delete(room);
+                          else next.add(room);
+                          return next;
+                        }),
+                    }));
+
+                    return (
+                      <FilterSection
+                        key={group.name}
+                        title={group.name}
+                        collapsible
+                        defaultOpen={false}
+                        badge={groupBadge}
+                        onReset={onResetGroup}
                       >
-                        Show all
-                      </button>
-                    )}
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                      {allRooms.map((room) => {
-                        const active = !hiddenRooms.has(room);
-                        return (
-                          <button
-                            key={room || "__ungrouped__"}
-                            onClick={() =>
-                              setHiddenRooms((prev) => {
-                                const next = new Set(prev);
-                                if (next.has(room)) next.delete(room);
-                                else next.add(room);
-                                return next;
-                              })
-                            }
-                            className={`flex w-full cursor-pointer items-center rounded px-1 py-0.5 text-left text-xs transition-opacity hover:bg-muted/40 ${
-                              active ? "opacity-100" : "opacity-35"
-                            }`}
-                          >
-                            <span className="truncate capitalize">{room || "Ungrouped"}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
+                        <FilterToggleGrid items={groupItems} leftAligned />
+                      </FilterSection>
+                    );
+                  })}
+                </div>
+              </FilterSection>
             )}
 
-            {/* Selected note inspector */}
+            {isolatedCount > 0 && (
+              <FilterSection title="Visibility">
+                {(() => {
+                  let toggleClass = "filter-toggle gap-1.5 filter-toggle-off";
+                  if (hideIsolated) toggleClass = "filter-toggle gap-1.5 filter-toggle-on";
+                  const dotBg = hideIsolated ? "currentColor" : "transparent";
+                  return (
+                    <button onClick={() => setHideIsolated((v) => !v)} className={toggleClass}>
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-full border border-current"
+                        style={{ background: dotBg }}
+                      />
+                      <span>Connected only</span>
+                      <span className="ml-auto text-[10px] tabular-nums text-muted-foreground">
+                        {isolatedCount} hidden
+                      </span>
+                    </button>
+                  );
+                })()}
+              </FilterSection>
+            )}
+
             {selectedNode && (
               <>
                 <div className="border-t border-border" />
@@ -283,7 +365,9 @@ export function GraphPage() {
                   <h3 className="font-serif text-base leading-snug">{selectedNode.note.title}</h3>
                   <div className="flex flex-wrap gap-1">
                     <Chip>{selectedNode.note.type}</Chip>
-                    {selectedNode.note.room && <Chip>@{selectedNode.note.room}</Chip>}
+                    {selectedNode.note.room && (
+                      <Chip variant="room">@{selectedNode.note.room}</Chip>
+                    )}
                     {selectedNode.note.tags.map((tag) => (
                       <Chip key={tag}>#{tag}</Chip>
                     ))}
@@ -292,7 +376,7 @@ export function GraphPage() {
                     ↑ {outgoingCount} out · ↓ {incomingCount} in
                   </p>
                   {selectedNode.note.body.trim() && (
-                    <div className="rounded-md border border-border/60 bg-card/50 p-2 text-sm">
+                    <div className="panel-card text-sm">
                       <MarkdownPreview>{selectedNode.note.body}</MarkdownPreview>
                     </div>
                   )}
@@ -300,13 +384,14 @@ export function GraphPage() {
               </>
             )}
           </div>
-        }
-        middle={
-          nodes.length === 0 ? (
+        </PageLayout.Left>
+        <PageLayout.Middle>
+          {nodes.length === 0 && (
             <EmptyState>
               No notes or todos yet. Add entries to build your connection graph.
             </EmptyState>
-          ) : (
+          )}
+          {nodes.length > 0 && (
             <GraphCanvas
               {...canvasProps}
               svgClassName="h-[78vh] min-h-[460px]"
@@ -317,12 +402,12 @@ export function GraphPage() {
                 </Button>
               }
             />
-          )
-        }
-      />
+          )}
+        </PageLayout.Middle>
+      </PageLayout>
 
       <Dialog open={fullscreenOpen} onOpenChange={setFullscreenOpen}>
-        <DialogContent className="flex h-[calc(100dvh-2rem)] max-h-none w-[calc(100vw-2rem)] max-w-none flex-col gap-0 p-3 pr-10">
+        <DialogContent variant="fullscreen">
           <GraphCanvas
             {...canvasProps}
             plain
@@ -361,9 +446,12 @@ function GraphCanvas({
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(
-    null,
-  );
+  const dragRef = useRef<{
+    startSvgX: number;
+    startSvgY: number;
+    panX: number;
+    panY: number;
+  } | null>(null);
 
   function toSvgPoint(clientX: number, clientY: number, element: SVGSVGElement) {
     const pt = element.createSVGPoint();
@@ -382,23 +470,32 @@ function GraphCanvas({
     setPan({ x: 0, y: 0 });
   }
 
-  function startDrag(event: MouseEvent<SVGSVGElement>) {
+  function startDrag(event: PointerEvent<SVGSVGElement>) {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
     const tag = (event.target as Element).tagName.toLowerCase();
     if (tag !== "svg" && tag !== "rect") return;
-    dragRef.current = { startX: event.clientX, startY: event.clientY, panX: pan.x, panY: pan.y };
+    const svgPt = toSvgPoint(event.clientX, event.clientY, event.currentTarget);
+    dragRef.current = { startSvgX: svgPt.x, startSvgY: svgPt.y, panX: pan.x, panY: pan.y };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
     setIsDragging(true);
   }
 
-  function updateDrag(event: MouseEvent<SVGSVGElement>) {
+  function updateDrag(event: PointerEvent<SVGSVGElement>) {
     const drag = dragRef.current;
     if (!drag) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const dx = ((event.clientX - drag.startX) / rect.width) * GRAPH_VB_W;
-    const dy = ((event.clientY - drag.startY) / rect.height) * GRAPH_VB_H;
-    setPan({ x: drag.panX + dx, y: drag.panY + dy });
+    const svgPt = toSvgPoint(event.clientX, event.clientY, event.currentTarget);
+    setPan({
+      x: drag.panX + (svgPt.x - drag.startSvgX),
+      y: drag.panY + (svgPt.y - drag.startSvgY),
+    });
+    event.preventDefault();
   }
 
-  function stopDrag() {
+  function stopDrag(event?: PointerEvent<SVGSVGElement>) {
+    if (event && event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
     dragRef.current = null;
     setIsDragging(false);
   }
@@ -425,20 +522,33 @@ function GraphCanvas({
     });
   }
 
+  let frameClass = plain ? "graph-canvas-frame-plain" : "graph-canvas-frame";
+  if (className) frameClass = `${frameClass} ${className}`;
+
+  let svgClass = "w-full cursor-grab touch-none";
+  if (isDragging) svgClass = "w-full cursor-grabbing";
+  if (svgClassName) svgClass = `${svgClass} ${svgClassName}`;
+
   return (
-    <div
-      className={`flex flex-col gap-2 overflow-hidden rounded-lg p-2${plain ? "" : " border border-border bg-card/40"}${className ? ` ${className}` : ""}`}
-    >
-      <div className="flex shrink-0 items-center justify-between text-sm text-muted-foreground">
-        <p className="text-xs">Drag to pan · scroll to zoom.</p>
-        <div className="flex items-center gap-1.5">
+    <div className={frameClass}>
+      <div className="graph-toolbar">
+        <p className="graph-toolbar-hint">Drag to pan · scroll to zoom.</p>
+        <div className="graph-toolbar-controls">
           {actions}
           <div className="flex items-center">
             <Button
               variant="outline"
               size="sm"
               className="rounded-r-none border-r-0 px-2"
-              onClick={() => setZoom((z) => Math.max(MIN_ZOOM, parseFloat((z / 1.3).toFixed(4))))}
+              onClick={() => {
+                const cx = GRAPH_VB_W / 2;
+                const cy = GRAPH_VB_H / 2;
+                setZoom((z) => {
+                  const nz = Math.max(MIN_ZOOM, parseFloat((z / 1.3).toFixed(4)));
+                  setPan((p) => ({ x: cx - ((cx - p.x) / z) * nz, y: cy - ((cy - p.y) / z) * nz }));
+                  return nz;
+                });
+              }}
             >
               −
             </Button>
@@ -446,7 +556,15 @@ function GraphCanvas({
               variant="outline"
               size="sm"
               className="rounded-l-none px-2"
-              onClick={() => setZoom((z) => Math.min(MAX_ZOOM, parseFloat((z * 1.3).toFixed(4))))}
+              onClick={() => {
+                const cx = GRAPH_VB_W / 2;
+                const cy = GRAPH_VB_H / 2;
+                setZoom((z) => {
+                  const nz = Math.min(MAX_ZOOM, parseFloat((z * 1.3).toFixed(4)));
+                  setPan((p) => ({ x: cx - ((cx - p.x) / z) * nz, y: cy - ((cy - p.y) / z) * nz }));
+                  return nz;
+                });
+              }}
             >
               +
             </Button>
@@ -460,11 +578,11 @@ function GraphCanvas({
       <svg
         key={`graph-${dataVersion}`}
         viewBox={GRAPH_VIEWBOX}
-        className={`w-full ${isDragging ? "cursor-grabbing" : "cursor-grab"}${svgClassName ? ` ${svgClassName}` : ""}`}
-        onMouseDown={startDrag}
-        onMouseMove={updateDrag}
-        onMouseUp={stopDrag}
-        onMouseLeave={stopDrag}
+        className={svgClass}
+        onPointerDown={startDrag}
+        onPointerMove={updateDrag}
+        onPointerUp={stopDrag}
+        onPointerCancel={stopDrag}
         onWheel={zoomWithWheel}
       >
         <rect x="0" y="0" width={GRAPH_VB_W} height={GRAPH_VB_H} fill="transparent" />
@@ -492,17 +610,22 @@ function GraphCanvas({
           ))}
         </defs>
 
-        <g transform={`translate(${pan.x} ${pan.y}) scale(${zoom})`}>
+        <g transform={`matrix(${zoom} 0 0 ${zoom} ${pan.x} ${pan.y})`}>
           {clusters.map((cluster) => renderCluster(cluster))}
           {renderedEdges.map(({ key, x1, y1, x2, y2, weight, relations }) => {
             const { stroke, marker } = edgeAppearance(relations);
+            const mx = (x1 + x2) / 2;
+            const my = (y1 + y2) / 2;
+            const len = Math.hypot(x2 - x1, y2 - y1) || 1;
+            const curvature = Math.min(len * 0.1, 32);
+            // Curve perpendicular-right relative to edge direction
+            const cpx = mx + ((y1 - y2) / len) * curvature;
+            const cpy = my + ((x2 - x1) / len) * curvature;
             return (
-              <line
+              <path
                 key={key}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
+                d={`M ${x1},${y1} Q ${cpx},${cpy} ${x2},${y2}`}
+                fill="none"
                 stroke={stroke}
                 strokeWidth={Math.min(1 + weight * 0.4, 2.5)}
                 markerEnd={marker}
@@ -519,15 +642,15 @@ function GraphCanvas({
         </g>
       </svg>
 
-      <div className="flex shrink-0 flex-wrap items-center gap-4 text-[10px] text-muted-foreground">
-        <span className="font-medium uppercase tracking-wide">Links:</span>
+      <div className="graph-legend-row">
+        <span className="graph-legend-label">Links:</span>
         {[
           { color: "rgba(224,150,40,0.85)", label: "room" },
           { color: "rgba(70,150,210,0.85)", label: "tag" },
           { color: "rgba(140,100,210,0.85)", label: "room + tag" },
           { color: "rgba(50,190,100,0.85)", label: "note" },
         ].map(({ color, label }) => (
-          <span key={label} className="flex items-center gap-1.5 uppercase tracking-wide">
+          <span key={label} className="graph-legend-item">
             <span style={{ background: color }} className="inline-block h-0.5 w-6 rounded-full" />
             {label}
           </span>
@@ -602,7 +725,107 @@ function buildGraph(notes: Note[]): GraphModel {
   const roomWeights = buildRoomWeights(notes, edges);
   const { nodes, clusters } = buildClusteredLayout(notes, roomWeights);
 
+  // Refine node positions: bring intra-cluster connected notes closer together
+  // and push overlapping nodes apart. Skipped for very large graphs (O(n²)).
+  refineNodePositions(nodes, edges);
+
   return { nodes, clusters, edges };
+}
+
+/**
+ * Short node-level spring simulation run after the cluster layout.
+ * Attracts same-room connected notes toward each other and repels overlapping
+ * nodes, while anchoring each node near its initial cluster position so the
+ * overall room grouping is preserved.
+ * Capped at 100 nodes to stay O(n²)-practical.
+ */
+function refineNodePositions(nodes: GraphNode[], edges: GraphEdge[]): void {
+  if (nodes.length <= 1 || nodes.length > 100) return;
+
+  const nodeById = new Map<string, GraphNode>();
+  nodes.forEach((n) => nodeById.set(n.id, n));
+
+  // Collect intra-cluster edge weights (same room only — cross-cluster
+  // attraction is already expressed by the cluster-level simulation).
+  const pairWeight = new Map<string, number>();
+  for (const e of edges) {
+    const a = nodeById.get(e.from);
+    const b = nodeById.get(e.to);
+    if (!a || !b) continue;
+    if ((a.note.room?.trim() ?? "") !== (b.note.room?.trim() ?? "")) continue;
+    const key = e.from < e.to ? `${e.from}|${e.to}` : `${e.to}|${e.from}`;
+    pairWeight.set(key, (pairWeight.get(key) ?? 0) + e.weight);
+  }
+
+  // Record initial positions as soft anchors to prevent drift from cluster.
+  const anchor = new Map<string, { x: number; y: number }>();
+  nodes.forEach((n) => anchor.set(n.id, { x: n.x, y: n.y }));
+
+  const REPULSE = NODE_RADIUS * 3.4; // minimum centre-to-centre separation
+  const ANCHOR_K = 0.07; // strength of pull back toward initial position
+  const ATTRACT_K = 0.045; // attraction strength per unit weight
+  const ITERS = 50;
+
+  for (let iter = 0; iter < ITERS; iter++) {
+    const forces = new Map<string, { fx: number; fy: number }>();
+    nodes.forEach((n) => forces.set(n.id, { fx: 0, fy: 0 }));
+
+    // Short-range repulsion: push overlapping nodes apart
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i];
+        const b = nodes[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const dist = Math.hypot(dx, dy) || 0.01;
+        if (dist < REPULSE) {
+          const push = ((REPULSE - dist) / REPULSE) * 4.5;
+          const fa = forces.get(a.id)!;
+          const fb = forces.get(b.id)!;
+          fa.fx += (dx / dist) * push;
+          fa.fy += (dy / dist) * push;
+          fb.fx -= (dx / dist) * push;
+          fb.fy -= (dy / dist) * push;
+        }
+      }
+    }
+
+    // Intra-cluster edge attraction: pull connected notes together
+    pairWeight.forEach((w, key) => {
+      const sep = key.indexOf("|");
+      const a = nodeById.get(key.slice(0, sep));
+      const b = nodeById.get(key.slice(sep + 1));
+      if (!a || !b) return;
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy) || 0.01;
+      const attract = ATTRACT_K * w * Math.min(dist, 90);
+      const fa = forces.get(a.id)!;
+      const fb = forces.get(b.id)!;
+      fa.fx += (dx / dist) * attract;
+      fa.fy += (dy / dist) * attract;
+      fb.fx -= (dx / dist) * attract;
+      fb.fy -= (dy / dist) * attract;
+    });
+
+    // Anchor: pull back toward the initial cluster-circle position
+    nodes.forEach((n) => {
+      const a = anchor.get(n.id)!;
+      const f = forces.get(n.id)!;
+      f.fx += (a.x - n.x) * ANCHOR_K;
+      f.fy += (a.y - n.y) * ANCHOR_K;
+    });
+
+    // Apply forces with cooling schedule
+    const temp = 7 * Math.max(0.1, 1 - iter / ITERS);
+    nodes.forEach((n) => {
+      const f = forces.get(n.id)!;
+      const mag = Math.hypot(f.fx, f.fy) || 1;
+      const step = Math.min(mag, temp);
+      n.x += (f.fx / mag) * step;
+      n.y += (f.fy / mag) * step;
+    });
+  }
 }
 
 function toGraphEntries(notes: Note[], todos: Todo[]): Note[] {
@@ -762,10 +985,16 @@ function buildClusteredLayout(
     });
   }
 
-  // Normalize cluster centers to fit within the fixed 1000×680 viewBox.
+  // Normalize cluster centers to fit within the viewBox.
   // This keeps the initial zoom=1 view useful regardless of how far the
   // physics simulation spread things.
-  if (roomIds.length > 1) {
+  if (roomIds.length === 1) {
+    // Single cluster: the force simulation has no repulsion partner so it
+    // stays near the origin (top-left). Just translate it to the viewbox center.
+    const pos = positions.get(roomIds[0])!;
+    pos.x = GRAPH_VB_W / 2;
+    pos.y = GRAPH_VB_H / 2;
+  } else if (roomIds.length > 1) {
     const xs = roomIds.map((id) => positions.get(id)!.x);
     const ys = roomIds.map((id) => positions.get(id)!.y);
     const minX = Math.min(...xs);

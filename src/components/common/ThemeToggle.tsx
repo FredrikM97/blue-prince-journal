@@ -26,17 +26,23 @@ export function ThemeToggle() {
   }, [theme]);
 
   function toggle() {
-    setTheme((current) => (current === "dark" ? "light" : "dark"));
+    setTheme((current) => {
+      if (current === "dark") return "light";
+      return "dark";
+    });
+  }
+
+  let ariaLabel = "Switch to light theme";
+  let title = "Light theme";
+  if (theme === "light") {
+    ariaLabel = "Switch to dark theme";
+    title = "Dark theme";
   }
 
   return (
-    <IconButton
-      onClick={toggle}
-      className="app-icon-button"
-      aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-      title={theme === "dark" ? "Light theme" : "Dark theme"}
-    >
-      {theme === "dark" ? <Sun className="app-icon-sm" /> : <Moon className="app-icon-sm" />}
+    <IconButton onClick={toggle} className="app-icon-button" aria-label={ariaLabel} title={title}>
+      {theme === "dark" && <Sun className="app-icon-sm" />}
+      {theme === "light" && <Moon className="app-icon-sm" />}
     </IconButton>
   );
 }

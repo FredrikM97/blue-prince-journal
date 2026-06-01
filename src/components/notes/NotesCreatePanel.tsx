@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useStore } from "@/data/store";
-import { INPUT_BASE_CLASS } from "@/components/common/FormClasses";
 import { GhostButton, BrassButton, IconButton } from "@/components/common/Button";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { Tabs, TabsList, TabsTrigger } from "@/components/common/Tabs";
@@ -15,6 +14,7 @@ import { PendingImageList } from "@/components/common/input/PendingImageList";
 import { DetailsField } from "@/components/common/input/DetailsField";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
+import { SidePanel } from "@/components/common/SidePanel";
 
 const NOTE_PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
@@ -139,16 +139,6 @@ function NotesRoomField({
   );
 }
 
-function NotesCreateHeader({ mode, isEditing }: { mode: "note" | "todo"; isEditing: boolean }) {
-  return (
-    <div className="capture-header">
-      <h2 className="font-serif text-lg">
-        {isEditing ? "Edit" : "New"} {mode === "todo" ? "todo" : "note"}
-      </h2>
-    </div>
-  );
-}
-
 function NotesModeTabs({
   mode,
   setMode,
@@ -218,14 +208,12 @@ function NotesMetaFields({
       </div>
 
       {mode === "note" && (
-        <div>
-          <input
-            type="date"
-            value={dateInput}
-            onChange={(e) => setDateInput(e.target.value)}
-            className={INPUT_BASE_CLASS}
-          />
-        </div>
+        <InputField
+          label="Date"
+          value={dateInput}
+          onChange={setDateInput}
+          placeholder="Spring 1, Day 3"
+        />
       )}
     </>
   );
@@ -245,7 +233,7 @@ function NotesTagsField({
         value={tagsInput}
         onChange={(e) => setTagsInput(e.target.value)}
         placeholder="safe, gem, puzzle"
-        className={INPUT_BASE_CLASS}
+        className="input-base"
       />
     </div>
   );
@@ -514,10 +502,30 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   const submit = form.mode === "todo" ? submitTodo : submitNote;
 
   const isEditing = Boolean(store.editNoteId ?? store.editTodoId);
+  let panelTitle = "New note";
+  if (form.mode === "todo") {
+    panelTitle = "New todo";
+  }
+  if (isEditing && form.mode === "note") {
+    panelTitle = "Edit note";
+  }
+  if (isEditing && form.mode === "todo") {
+    panelTitle = "Edit todo";
+  }
+
+  let panelKey = "capture:new:note";
+  if (form.mode === "todo") {
+    panelKey = "capture:new:todo";
+  }
+  if (store.editNoteId) {
+    panelKey = `capture:edit-note:${store.editNoteId}`;
+  }
+  if (store.editTodoId) {
+    panelKey = `capture:edit-todo:${store.editTodoId}`;
+  }
 
   const content = (
     <>
-      <NotesCreateHeader mode={form.mode} isEditing={isEditing} />
       {!isEditing && <NotesModeTabs mode={form.mode} setMode={form.setMode} />}
 
       <div className="capture-form-stack">
@@ -527,7 +535,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
             value={form.title}
             onChange={form.setTitle}
             placeholder={form.mode === "todo" ? "Check Den bookshelf" : "Parlor safe = 4271"}
-            inputClassName={`${INPUT_BASE_CLASS} h-10`}
+            inputClassName="input-base h-10"
             autoFocus
           />
         </SuggestionsDropdown>
@@ -581,8 +589,14 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   }
 
   return (
-    <div className="notes-view-panel capture-panel rounded-lg border border-border bg-card p-4 sm:p-6">
-      {content}
-    </div>
+    <SidePanel.Right
+      title={panelTitle}
+      onClose={() => {
+        void closeWithReturn();
+      }}
+      panelKey={panelKey}
+    >
+      <div className="capture-panel">{content}</div>
+    </SidePanel.Right>
   );
 }

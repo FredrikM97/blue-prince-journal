@@ -1,4 +1,290 @@
 @layer components {
+  /* ─── Root shell ────────────────────────────────────────────────────────── */
+
+  /* Full-viewport flex column that clips horizontal overflow. */
+  .app-shell {
+    @apply flex h-dvh flex-col overflow-hidden bg-background text-foreground;
+  }
+
+  /* Scrollable page area inside the shell.
+     On mobile (< lg) the page scrolls vertically so stacked sidebar + content
+     are reachable. On desktop the container clips and each column manages its
+     own overflow (handled by page-layout-middle-scroll-priority). */
+  .app-page-container {
+    @apply min-h-0 flex-1 overflow-x-hidden overflow-y-auto lg:overflow-hidden;
+  }
+
+  /* ─── Shared structural utilities ──────────────────────────────────────── */
+
+  /* Vertically + horizontally centred full-height placeholder (404, error…) */
+  .page-center {
+    @apply flex min-h-[60vh] items-center justify-center px-4;
+  }
+
+  /* Micro uppercase section label (sidebar headers, info rows, …) */
+  .section-label {
+    @apply text-xs font-medium uppercase tracking-wider text-muted-foreground;
+  }
+
+  /* Same label but laid out as a flex row (used with a right-side action) */
+  .section-label-row {
+    @apply flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground;
+  }
+
+  /* Panel header divider row (title + close/action on the right) */
+  .panel-header {
+    @apply flex items-start justify-between gap-2 border-b border-border pb-3;
+  }
+
+  /* Wraps panel title + subtitle stack in panel headers */
+  .panel-header-title-wrap {
+    @apply min-w-0;
+  }
+
+  /* Standard panel container with vertical spacing used by sidebars */
+  .side-panel-shell {
+    @apply rounded-lg border border-border bg-card/40 p-2.5 text-sm flex flex-col gap-3 sm:p-3;
+  }
+
+  /* Scrollable body inside a flex-column dialog or panel */
+  .dialog-scroll-body {
+    @apply min-h-0 flex-1 overflow-y-auto;
+  }
+
+  /* ─── Dialog primitives ──────────────────────────────────────────────────── */
+
+  /* Backdrop — shown behind every dialog */
+  .dialog-overlay {
+    @apply fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+  }
+
+  /* Shared positioning + animation — applied directly to all dialog content variants */
+  .dialog-content-default,
+  .dialog-content-compact,
+  .dialog-content-preview,
+  .dialog-content-expand,
+  .dialog-content-wide,
+  .dialog-content-fullscreen,
+  .dialog-content-editor {
+    @apply fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95;
+  }
+
+  /* Standard modal (≤ lg) */
+  .dialog-content-default {
+    @apply grid w-full max-w-lg gap-4 p-6;
+  }
+
+  /* Compact modal (≤ md) */
+  .dialog-content-compact {
+    @apply grid w-full max-w-md gap-4 p-6;
+  }
+
+  /* Standard preview/note dialog: tall, wide, flex-col */
+  .dialog-content-preview {
+    @apply flex max-h-[85vh] w-[90vw] max-w-2xl flex-col gap-4 p-6;
+  }
+
+  /* Expand dialog (4xl wide, used by PreviewExpandDialog) */
+  .dialog-content-expand {
+    @apply flex max-h-[90vh] w-[90vw] max-w-4xl flex-col gap-3 p-6;
+  }
+
+  /* Wide dialog (5xl, used for markdown expand) */
+  .dialog-content-wide {
+    @apply flex max-h-[90vh] w-[90vw] max-w-5xl flex-col gap-3 p-4;
+  }
+
+  /* Full-screen-ish dialog (graph fullscreen, leaves 1rem margin) */
+  .dialog-content-fullscreen {
+    @apply flex max-h-none w-[calc(100vw-2rem)] max-w-none flex-col gap-0 p-3 pr-10;
+    height: calc(100dvh - 2rem);
+  }
+
+  /* Editor dialog — close button hidden, managed by caller */
+  .dialog-content-editor {
+    @apply max-h-[80vh] max-w-2xl overflow-hidden p-0;
+  }
+
+  /* Close button inside DialogContent */
+  .dialog-close-btn {
+    @apply absolute right-4 top-4 cursor-pointer rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground;
+  }
+
+  /* Dialog header: title + optional description stacked */
+  .dialog-header {
+    @apply flex flex-col gap-1.5;
+  }
+
+  /* Dialog footer: actions row */
+  .dialog-footer {
+    @apply flex flex-col-reverse gap-2 sm:flex-row sm:justify-end;
+  }
+
+  /* Dialog title element */
+  .dialog-title-elem {
+    @apply text-lg font-semibold leading-none tracking-tight;
+  }
+
+  /* Dialog description element */
+  .dialog-description-elem {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .input-base {
+    @apply flex h-9 w-full rounded-md border border-input bg-card/65 px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+  }
+
+  .textarea-base {
+    @apply flex min-h-[60px] w-full rounded-md border border-input bg-card/65 px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+  }
+
+  /* Subtitle under a panel title (e.g. status, date) */
+  .preview-subtitle {
+    @apply text-[11px] text-muted-foreground capitalize;
+  }
+
+  /* Flex row for icons/buttons on the right of a panel header */
+  .preview-header-actions {
+    @apply flex shrink-0 items-center gap-1;
+  }
+
+  /* Inline label for a metadata row (e.g. "Type", "Room" in preview panels) */
+  .preview-field-label {
+    @apply w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
+  }
+
+  /* Flex row for a section title with a right-side count/action */
+  .section-header-row {
+    @apply mb-2 flex items-center justify-between gap-2;
+  }
+
+  /* Panel title — serif heading used in SidePanel / RightPreviewPanel */
+  .panel-title {
+    @apply font-serif text-lg leading-snug;
+  }
+
+  /* Applied alongside .panel-title when the item is completed/done */
+  .panel-title-done {
+    @apply text-muted-foreground line-through;
+  }
+
+  /* ─── Icon sizing ────────────────────────────────────────────────────────── */
+  /* Use on lucide icon elements outside of Button (which auto-sizes via [&_svg]:size-4). */
+
+  .icon-xs { @apply h-3 w-3; }
+  .icon-sm { @apply h-3.5 w-3.5; }
+  .icon-md { @apply h-4 w-4; }
+
+  /* ─── Chip / tag pills ───────────────────────────────────────────────────── */
+
+  /* Default: muted border + muted text (metadata tags) */
+  .chip {
+    @apply inline-flex items-center rounded border border-border/60 px-1.5 py-0.5 text-[10px] text-muted-foreground;
+  }
+
+  /* Solid: full border + foreground text (prominent chips in lists) */
+  .chip-solid {
+    @apply inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] text-foreground;
+  }
+
+  /* Room: brass-tinted for @room references */
+  .chip-room {
+    @apply inline-flex items-center rounded border border-brass/40 px-1.5 py-0.5 text-[10px] text-brass;
+  }
+
+  /* Tag: secondary bg + foreground text (for #tag pills) */
+  .chip-tag {
+    @apply inline-flex items-center rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] text-foreground;
+  }
+
+  /* ─── SelectButton states ────────────────────────────────────────────────── */
+
+  .select-btn-active {
+    @apply bg-brass font-medium text-brass-foreground;
+  }
+
+  .select-btn-inactive {
+    @apply text-muted-foreground hover:bg-brass/20 hover:text-foreground;
+  }
+
+  /* ─── Dropdown active item ───────────────────────────────────────────────── */
+
+  /* Applied to a DropdownMenuItem that represents the current selection */
+  .menu-item-active {
+    @apply bg-accent;
+  }
+
+  /* ─── Panel cards ────────────────────────────────────────────────────────── */
+
+  /* General-purpose bordered content card (info boxes, lists, snippets) */
+  .panel-card {
+    @apply rounded-md border border-border/70 bg-card/50 p-3;
+  }
+
+  /* Single-line bordered status/info row */
+  .panel-row {
+    @apply flex items-center gap-2 rounded-lg border border-border bg-card/40 px-3 py-2.5 text-sm;
+  }
+
+  /* ─── Filter sections ────────────────────────────────────────────────────── */
+
+  /* Outer wrapper — adds consistent vertical rhythm between title and body */
+  .filter-section {
+    @apply space-y-1.5;
+  }
+
+  /* Non-collapsible header: label on the left, optional reset on the right */
+  .filter-section-header {
+    @apply flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground;
+  }
+
+  /* Collapsible toggle: same label-row layout + pointer cursor */
+  .filter-section-toggle {
+    @apply flex w-full cursor-pointer select-none items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground;
+  }
+
+  /* Inline count badge shown in a collapsed header, e.g. "(3/8)" */
+  .filter-section-badge {
+    @apply ml-1 normal-case text-[10px] text-amber-500;
+  }
+
+  /* Content area below the header (no intrinsic layout — children own it) */
+  .filter-section-body {
+    @apply space-y-0.5;
+  }
+
+  /* "All" / "Show all" reset link inside filter headers and bodies */
+  .filter-clear-btn {
+    @apply normal-case text-[10px] text-amber-500 hover:underline;
+  }
+
+  /* ─── Filter toggle buttons ──────────────────────────────────────────────── */
+  /* Multi-select visibility toggle (dimmed when inactive) */
+
+  .filter-toggle {
+    @apply flex w-full cursor-pointer items-center rounded px-1 py-0.5 text-xs transition-opacity hover:bg-muted/40;
+  }
+
+  .filter-toggle-on {
+    @apply opacity-100;
+  }
+
+  .filter-toggle-off {
+    @apply opacity-35;
+  }
+
+  /* Two-column grid for compact toggle lists (e.g. type selectors) */
+  .filter-grid {
+    @apply grid grid-cols-2 gap-x-2 gap-y-0.5;
+  }
+
+  /* Flex-wrap row for radio-style filter chips (e.g. SelectButton groups) */
+  .filter-options {
+    @apply flex flex-wrap gap-1;
+  }
+
+  /* ─── Page layout ───────────────────────────────────────────────────────── */
+
   /* Outer wrapper — centers content, limits max width */
   .page-layout {
     @apply mx-auto h-full min-h-0 w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-6;
@@ -22,8 +308,12 @@
 
   /* Left sticky sidebar column */
   .page-layout-sidebar {
-    @apply lg:sticky lg:self-start;
+    @apply max-h-[calc(100dvh-7rem)] overflow-y-auto lg:sticky lg:self-start;
     top: 0;
+  }
+
+  .page-layout-sidebar-desktop {
+    display: none;
   }
 
   /* Main content area ("middle") */
@@ -40,6 +330,56 @@
   .page-layout-rightbar {
     @apply lg:sticky lg:self-start;
     top: 0;
+  }
+
+  .page-layout-rightbar-desktop {
+    display: none;
+  }
+
+  .page-layout-mobile-controls {
+    @apply fixed inset-x-0 bottom-2 z-30 mx-auto flex w-fit items-center gap-2 rounded-full border border-border/70 bg-background/95 px-2 py-1.5 shadow-lg backdrop-blur;
+  }
+
+  .page-layout-mobile-toggle {
+    @apply shrink-0 rounded-full;
+  }
+
+  .page-layout-mobile-backdrop {
+    @apply fixed inset-0 z-40 bg-black/45;
+  }
+
+  .page-layout-mobile-drawer {
+    --page-layout-mobile-drawer-width: min(92vw, 24rem);
+    width: var(--page-layout-mobile-drawer-width);
+    @apply fixed top-0 z-50 h-dvh overflow-y-auto border-border bg-background p-3 shadow-xl;
+  }
+
+  .page-layout-mobile-drawer-left {
+    @apply left-0 border-r;
+  }
+
+  .page-layout-mobile-drawer-right {
+    @apply right-0 border-l;
+  }
+
+  .page-layout-mobile-drawer-header {
+    @apply mb-2 flex items-center justify-between gap-2 border-b border-border pb-2;
+  }
+
+  .page-layout-mobile-drawer-body {
+    @apply min-h-0;
+  }
+
+  @media (max-width: 63.99rem) and (orientation: portrait) {
+    .page-layout-mobile-drawer {
+      --page-layout-mobile-drawer-width: min(92vw, 24rem);
+    }
+  }
+
+  @media (max-width: 63.99rem) and (orientation: landscape) {
+    .page-layout-mobile-drawer {
+      --page-layout-mobile-drawer-width: min(68vw, 21rem);
+    }
   }
 
   /* SidebarPanel — fixed right overlay, slides in from the right edge */
@@ -61,6 +401,17 @@
     align-items: stretch;
   }
 
+  /* On mobile the grid is single-column; 1fr on the first implicit row would
+     consume all container height and push the content off screen. Reset to
+     auto so items size naturally and the page-level scroll (overflow-y-auto
+     on the root container) takes over. */
+  @media (max-width: 1023px) {
+    .page-layout-middle-scroll-priority {
+      grid-template-rows: auto;
+      align-items: start;
+    }
+  }
+
   .page-layout-single-column-scroll {
     @apply flex flex-col;
   }
@@ -69,11 +420,31 @@
     flex: 1 1 auto;
   }
 
+  @media (min-width: 64rem) {
+    .page-layout-sidebar-desktop,
+    .page-layout-rightbar-desktop {
+      display: block;
+    }
+
+    .page-layout-mobile-controls,
+    .page-layout-mobile-backdrop,
+    .page-layout-mobile-drawer {
+      display: none;
+    }
+  }
+
   .page-layout-middle-scroll-priority .page-layout-content {
     min-height: 0;
     height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+
+  @media (max-width: 1023px) {
+    .page-layout-middle-scroll-priority .page-layout-content {
+      height: auto;
+      overflow-y: visible;
+    }
   }
 
   .page-layout-middle-scroll-priority .page-layout-sidebar,

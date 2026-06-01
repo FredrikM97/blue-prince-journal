@@ -8,7 +8,6 @@
  */
 
 import { useId } from "react";
-import { INPUT_BASE_CLASS } from "@/components/common/FormClasses";
 
 /** Plain labeled text input. Zero suggestion or key-handling logic. */
 export function InputField({
@@ -38,7 +37,7 @@ export function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={inputClassName ?? INPUT_BASE_CLASS}
+        className={inputClassName ?? "input-base"}
       />
     </>
   );

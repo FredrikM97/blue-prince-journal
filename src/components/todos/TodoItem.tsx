@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { Todo, TodoStatus } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
-import { INPUT_BASE_CLASS } from "@/components/common/FormClasses";
 import { Maximize2, Trash2 } from "lucide-react";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { todoPriorityClass } from "./Constants";
@@ -29,7 +28,7 @@ export function TodoItem({
   const [title, setTitle] = useState(todo.title);
 
   return (
-    <li className="group flex items-start gap-2 px-3 py-2 hover:bg-muted/30">
+    <li className="todo-row-item">
       <input
         type="checkbox"
         className="mt-1"
@@ -53,7 +52,7 @@ export function TodoItem({
                 setEditing(false);
               }
             }}
-            className={`${INPUT_BASE_CLASS} h-7`}
+            className="input-base h-7"
           />
         ) : (
           <button
@@ -66,38 +65,26 @@ export function TodoItem({
           </button>
         )}
         <div className="mt-1 flex flex-wrap items-center gap-1">
-          <Chip className={`border-transparent ${todoPriorityClass(todo.priority)}`}>
-            {todo.priority}
-          </Chip>
-          <Chip className="border-border text-foreground">{todo.scope}</Chip>
-          {todo.room && <Chip className="border-brass/40 text-brass">@{todo.room}</Chip>}
+          <span className={todoPriorityClass(todo.priority)}>{todo.priority}</span>
+          <Chip variant="solid">{todo.scope}</Chip>
+          {todo.room && <Chip variant="room">@{todo.room}</Chip>}
           {todo.tags.map((tag) => (
-            <Chip key={tag} className="border-border bg-secondary text-foreground">
+            <Chip key={tag} variant="tag">
               #{tag}
             </Chip>
           ))}
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100">
+      <div className="todo-row-actions">
         <DropdownSelect
           value={todo.status}
           onValueChange={(value) => onToggle(value as TodoStatus)}
           options={TODO_STATUS_OPTIONS}
-          className="h-6 w-auto rounded border border-input bg-background px-1 text-[11px]"
-          contentClassName="min-w-32"
         />
-        <button
-          onClick={onOpenPreview}
-          className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-          aria-label="Preview todo"
-        >
+        <button onClick={onOpenPreview} className="todo-action-btn" aria-label="Preview todo">
           <Maximize2 className="h-3.5 w-3.5" />
         </button>
-        <button
-          onClick={onDelete}
-          className="rounded p-1 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
-          aria-label="Delete"
-        >
+        <button onClick={onDelete} className="todo-action-btn-danger" aria-label="Delete">
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>

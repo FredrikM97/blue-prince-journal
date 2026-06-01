@@ -1,10 +1,11 @@
-export function MapLeftPanel() {
+import { SidePanel } from "@/components/common/SidePanel";
+
+export function MapLeftPanel({ onClose }: { onClose?: () => void }) {
   return (
-    <div className="page-layout-panel">
-      <h1 className="font-serif text-2xl">House Map</h1>
-      <p className="mt-1 text-xs text-muted-foreground">
-        5 × 9 grid — click a cell to place a room and add comments.
-      </p>
-    </div>
+    <SidePanel.Left
+      title="House Map"
+      subtitle="5 × 9 grid — click a cell to place a room and add comments."
+      onClose={onClose}
+    />
   );
 }

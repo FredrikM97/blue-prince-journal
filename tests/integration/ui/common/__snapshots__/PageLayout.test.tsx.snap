@@ -3,7 +3,7 @@
 exports[`PageLayout > matches snapshot for single-column middle-scroll mode 1`] = `
 <DocumentFragment>
   <div
-    class="page-layout page-layout-middle-scroll-priority"
+    class="page-layout page-layout-single-column-scroll page-layout-middle-scroll-priority"
   >
     <main
       class="page-layout-content"
@@ -21,8 +21,70 @@ exports[`PageLayout > matches snapshot for three-column layout 1`] = `
   <div
     class="page-layout page-layout-three-column"
   >
+    <div
+      class="page-layout-mobile-controls lg:hidden"
+    >
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs page-layout-mobile-toggle"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-left icon-sm"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M9 3v18"
+          />
+        </svg>
+        Left panel
+      </button>
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs page-layout-mobile-toggle"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-right icon-sm"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M15 3v18"
+          />
+        </svg>
+        Right panel
+      </button>
+    </div>
     <aside
-      class="page-layout-sidebar"
+      class="page-layout-sidebar page-layout-sidebar-desktop"
     >
       <div>
         left
@@ -36,7 +98,7 @@ exports[`PageLayout > matches snapshot for three-column layout 1`] = `
       </div>
     </main>
     <aside
-      class="page-layout-rightbar"
+      class="page-layout-rightbar page-layout-rightbar-desktop"
     >
       <div>
         right

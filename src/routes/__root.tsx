@@ -134,7 +134,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 
   if (!loaded && effectiveInitState === "checking") {
     return (
-      <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
+      <div className="app-shell">
         <AppHeader />
         <Toaster />
       </div>
@@ -146,7 +146,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
       notes.length > 0 || todos.length > 0 || Boolean(getActiveSyncFolderName());
 
     return (
-      <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
+      <div className="app-shell">
         <AppHeader />
         <div className="min-h-0 flex-1 overflow-auto">
           <WelcomeScreen
@@ -169,9 +169,9 @@ function AppFrame({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
+    <div className="app-shell">
       <AppHeader />
-      <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+      <div className="app-page-container">{children}</div>
       <Toaster />
     </div>
   );
@@ -189,7 +189,7 @@ export function RootLayoutView({ queryClient }: { queryClient: QueryClient }) {
 
 export function NotFoundView() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
+    <div className="page-center">
       <div className="max-w-md text-center">
         <h1 className="font-serif text-7xl text-brass">404</h1>
         <h2 className="mt-4 font-serif text-xl">A door that doesn't open</h2>
@@ -213,7 +213,7 @@ export function ErrorView({ error, reset }: { error: Error; reset: () => void })
   console.error(error);
   const router = useRouter();
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
+    <div className="page-center">
       <div className="max-w-md text-center">
         <h1 className="font-serif text-xl">Something went wrong</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
@@ -267,8 +267,8 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Blue Prince Notes" },
-      { name: "description", content: "A keyboard-first notes & todos tracker for Blue Prince." },
+      { title: "Blue Prince Journal" },
+      { name: "description", content: "A keyboard-first journal and todos tracker for Blue Prince." },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -280,7 +280,7 @@ const indexRoute = createRoute({
   component: NotesIndexView,
   head: () => ({
     meta: [
-      { title: "Notes - Blue Prince Notes" },
+      { title: "Notes - Blue Prince Journal" },
       { name: "description", content: "All your Blue Prince notes, clues, codes and theories." },
     ],
   }),
@@ -290,14 +290,14 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "settings",
   component: SettingsPage,
-  head: () => ({ meta: [{ title: "Settings - Blue Prince Notes" }] }),
+  head: () => ({ meta: [{ title: "Settings - Blue Prince Journal" }] }),
 });
 
 const sectionRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "section/$id",
   component: () => <SectionView id={sectionRoute.useParams().id} />,
-  head: () => ({ meta: [{ title: "Section - Blue Prince Notes" }] }),
+  head: () => ({ meta: [{ title: "Section - Blue Prince Journal" }] }),
 });
 
 const routeTree = rootRoute.addChildren([indexRoute, settingsRoute, sectionRoute]);

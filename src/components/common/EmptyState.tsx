@@ -1,14 +1,5 @@
-import type { HTMLAttributes } from "react";
-import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
 
-export function EmptyState({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      {...props}
-      className={cn(
-        "rounded-lg border border-dashed border-border p-12 text-center text-sm text-muted-foreground",
-        className,
-      )}
-    />
-  );
+export function EmptyState({ children }: { children: ReactNode }) {
+  return <div className="page-layout-panel empty-state">{children}</div>;
 }

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Expand, Trash2 } from "lucide-react";
 import { Button, GhostButton } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
-import { INPUT_BASE_CLASS } from "@/components/common/FormClasses";
 import { PagedNotesList } from "@/components/common/PagedNotesList";
 import { StoredImageView } from "@/components/StoredImageView";
 import type { Note, StoredImage } from "@/lib/types";
@@ -103,14 +102,12 @@ function ImagesInspectorPanel({
 
         <div className="images-inspector-meta">
           <div className="space-y-2">
-            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Label
-            </label>
+            <label className="section-label">Label</label>
             <div className="flex items-center gap-2">
               <input
                 value={labelInput}
                 onChange={(e) => setLabelInput(e.target.value)}
-                className={`${INPUT_BASE_CLASS} h-8 flex-1`}
+                className="input-base h-8 flex-1"
                 placeholder={img.name}
               />
               <Button
@@ -152,7 +149,7 @@ function ImagesInspectorPanel({
       </div>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="images-zoom-dialog">
+        <DialogContent variant="expand">
           <DialogHeader>
             <DialogTitle>{img.name}</DialogTitle>
           </DialogHeader>

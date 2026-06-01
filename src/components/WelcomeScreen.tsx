@@ -30,7 +30,7 @@ function WelcomeCard({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`flex w-full max-w-sm flex-col items-center gap-3 rounded-xl border border-border bg-card/60 p-6 text-center transition-colors hover:border-brass/60 hover:bg-card disabled:pointer-events-none disabled:opacity-50 sm:w-[17rem] ${className ?? ""}`}
+      className={`welcome-card ${className ?? ""}`}
     >
       <Icon className="h-8 w-8 text-brass" />
       <div>
@@ -110,13 +110,13 @@ export function WelcomeScreen({
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center px-4 py-12">
+    <div className="welcome-shell">
       <div className="w-full max-w-6xl space-y-8 text-center">
         <div>
-          <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-brass/15 text-brass">
+          <div className="welcome-icon">
             <span className="font-serif text-3xl font-bold">B</span>
           </div>
-          <h1 className="font-serif text-3xl">Welcome to Blue Prince Notes</h1>
+          <h1 className="font-serif text-3xl">Welcome to Blue Prince Journal</h1>
           <p className="mt-2 text-sm text-muted-foreground">How would you like to get started?</p>
         </div>
 

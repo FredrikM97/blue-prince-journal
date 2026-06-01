@@ -11,7 +11,6 @@ import {
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/data/store";
 import { exportAll, importAll } from "@/data/io";
-import { INPUT_BASE_CLASS } from "@/components/common/FormClasses";
 import { Button, IconButton } from "@/components/common/Button";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { toast } from "sonner";
@@ -121,7 +120,7 @@ export function AppHeader() {
       <div className="app-header-inner">
         <Link to="/" className="app-brand-link" onClick={openWelcomeScreen}>
           <span className="app-brand-badge">B</span>
-          <span className="app-brand-title">Blue Prince Notes</span>
+          <span className="app-brand-title">Blue Prince Journal</span>
         </Link>
 
         <nav className="app-nav">
@@ -129,13 +128,13 @@ export function AppHeader() {
             .filter((s) => !s.hidden && (Boolean(s.builtin) || s.id === "books"))
             .map((s) => {
               const href = hrefFor(s);
-              const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+              const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+              let linkClass = "app-nav-link";
+              if (isActive) {
+                linkClass = "app-nav-link app-nav-link-active";
+              }
               return (
-                <Link
-                  key={s.id}
-                  to={href}
-                  className={`app-nav-link ${active ? "app-nav-link-active" : ""}`}
-                >
+                <Link key={s.id} to={href} className={linkClass}>
                   {s.label}
                 </Link>
               );
@@ -147,7 +146,7 @@ export function AppHeader() {
             <Link
               to="/settings"
               title={`Syncing to "${syncFolderName}"`}
-              className="hidden items-center gap-1.5 text-xs text-green-500 sm:flex"
+              className="header-sync-status"
             >
               <FolderSync className="h-3.5 w-3.5" />
               <span className="max-w-[10rem] truncate">{syncFolderName}</span>
@@ -155,7 +154,7 @@ export function AppHeader() {
           )}
           <ThemeToggle />
           <div className="app-search-wrap">
-            {!searchInput && <Search className="app-search-icon" />}
+            <Search className="app-search-icon" />
             <input
               ref={searchInputRef}
               value={searchInput}
@@ -166,9 +165,9 @@ export function AppHeader() {
                   searchInputRef.current?.blur();
                 }
               }}
-              placeholder="Search…"
+              placeholder=""
               aria-label="Search notes"
-              className={`${INPUT_BASE_CLASS} h-8 w-44 transition-[padding] ${searchInput ? "pl-3" : "pl-8"}`}
+              className="input-base app-search-input"
             />
           </div>
           <Button

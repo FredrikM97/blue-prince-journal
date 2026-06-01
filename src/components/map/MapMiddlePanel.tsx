@@ -22,7 +22,8 @@ export function MapMiddlePanel({
         className="map-grid"
         style={{
           gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))`,
-          maxWidth: `clamp(28rem, calc((100dvh - 8rem) * ${GRID_COLS} / ${GRID_ROWS}), 36rem)`,
+          width: "100%",
+          maxWidth: `min(100%, clamp(16rem, calc((100dvh - 9rem) * ${GRID_COLS} / ${GRID_ROWS}), 36rem))`,
         }}
       >
         {Array.from({ length: GRID_ROWS }).flatMap((_, row) =>

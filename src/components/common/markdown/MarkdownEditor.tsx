@@ -10,7 +10,6 @@ import {
   Table,
   WandSparkles,
 } from "lucide-react";
-import { TEXTAREA_BASE_CLASS } from "@/components/common/FormClasses";
 import { IconButton } from "@/components/common/Button";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { MarkdownShortcutHelp } from "@/components/common/markdown/MarkdownShortcutHelp";
@@ -288,13 +287,18 @@ export function MarkdownEditor({
   const localRef = useRef<HTMLTextAreaElement>(null);
   const ref = textareaRef ?? localRef;
 
+  let previewToggleLabel = "Show preview";
+  let expandLabel = "Expand editor";
+  let dialogTitle = "Edit details";
+  if (preview) {
+    previewToggleLabel = "Hide preview";
+    expandLabel = "Expand preview";
+    dialogTitle = "Preview";
+  }
+
   return (
     <div className={className}>
-      <div
-        className="flex flex-wrap items-center gap-0.5 rounded-t-md border border-b-0 border-input bg-muted/40 px-1.5 py-1"
-        role="toolbar"
-        aria-label="Formatting tools"
-      >
+      <div className="md-toolbar" role="toolbar" aria-label="Formatting tools">
         {ACTIONS.map((action) => (
           <IconButton
             key={action.label}
@@ -323,19 +327,20 @@ export function MarkdownEditor({
         <MarkdownShortcutHelp />
         <div className="mx-1 h-4 w-px bg-border" />
         <IconButton
-          aria-label={preview ? "Hide preview" : "Show preview"}
-          title={preview ? "Hide preview" : "Show preview"}
+          aria-label={previewToggleLabel}
+          title={previewToggleLabel}
           className="h-7 w-7"
           onClick={() => setPreview((v) => !v)}
         >
-          {preview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          {preview && <EyeOff className="icon-sm" />}
+          {!preview && <Eye className="icon-sm" />}
         </IconButton>
         {allowExpand && (
           <>
             <div className="mx-1 h-4 w-px bg-border" />
             <IconButton
-              aria-label={preview ? "Expand preview" : "Expand editor"}
-              title={preview ? "Expand preview" : "Expand editor"}
+              aria-label={expandLabel}
+              title={expandLabel}
               className="h-7 w-7"
               onClick={() => setExpanded(true)}
             >
@@ -345,11 +350,12 @@ export function MarkdownEditor({
         )}
       </div>
 
-      {preview ? (
-        <div className="min-h-[6rem] rounded-b-md border border-input bg-background p-3">
+      {preview && (
+        <div className="md-editor-body">
           <MarkdownPreview>{value}</MarkdownPreview>
         </div>
-      ) : (
+      )}
+      {!preview && (
         <textarea
           ref={ref}
           value={value}
@@ -394,14 +400,14 @@ export function MarkdownEditor({
           }}
           placeholder={placeholder}
           rows={rows}
-          className={`${TEXTAREA_BASE_CLASS} rounded-t-none rounded-b-md border-t-0 font-mono text-[13px] leading-6 [font-variant-numeric:tabular-nums]`}
+          className="textarea-base rounded-t-none rounded-b-md border-t-0 font-mono text-[13px] leading-6 [font-variant-numeric:tabular-nums]"
         />
       )}
       {allowExpand && (
         <Dialog open={expanded} onOpenChange={setExpanded}>
-          <DialogContent className="flex max-h-[90vh] w-[90vw] max-w-5xl flex-col gap-3 p-4">
+          <DialogContent variant="wide">
             <DialogHeader>
-              <DialogTitle>{preview ? "Preview" : "Edit details"}</DialogTitle>
+              <DialogTitle>{dialogTitle}</DialogTitle>
             </DialogHeader>
             <div className="min-h-0 flex-1 overflow-auto">
               <MarkdownEditor

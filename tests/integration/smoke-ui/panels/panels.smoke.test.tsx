@@ -3,10 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 import { NotesView } from "@/components/notes/NotesView";
 import { MapLeftPanel } from "@/components/map/MapLeftPanel";
 import { MapMiddlePanel } from "@/components/map/MapMiddlePanel";
-import { ImagesLeftPanel } from "@/components/images/ImagesLeftPanel";
+import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
 import { TodoLeftPanel } from "@/components/todos/TodoLeftPanel";
-import type { Note, Todo } from "@/lib/types";
+import type { Note } from "@/lib/types";
 
 vi.mock("@/components/common/AttachedImagesGallery", () => ({
   AttachedImagesGallery: () => <div data-testid="attached-images-gallery" />,
@@ -22,20 +22,6 @@ const baseNote: Note = {
   status: "open",
   scope: "this-run",
   imageIds: [],
-  createdAt: 1,
-  updatedAt: 1,
-};
-
-const baseTodo: Todo = {
-  id: "todo-1",
-  title: "Check west wing",
-  notes: "Look for clues",
-  room: "Parlor",
-  tags: ["path"],
-  status: "open",
-  priority: "med",
-  scope: "this-run",
-  linkedNoteIds: [],
   createdAt: 1,
   updatedAt: 1,
 };
@@ -86,15 +72,18 @@ describe("smoke panels", () => {
   });
 
   it("matches snapshot for images left panel", () => {
-    const { asFragment } = render(
-      <ImagesLeftPanel
-        total={3}
-        steamImportActive
-        steamLastRefreshAt={1_700_000_000_000}
-        refreshBusy={false}
-        onRefreshSteam={async () => {}}
-      />,
-    );
+    const steamSync: SteamSyncPanelModel = {
+      supported: true,
+      connected: true,
+      folderName: "steam-7656119",
+      lastSyncAt: 1_700_000_000_000,
+      busy: false,
+      connect: async () => {},
+      syncNow: async () => {},
+      disconnect: async () => {},
+    };
+
+    const { asFragment } = render(<ImagesLeftPanel total={3} steamSync={steamSync} />);
 
     expect(asFragment()).toMatchSnapshot();
   });
@@ -122,9 +111,6 @@ describe("smoke panels", () => {
         doneCount={0}
         scopeFilter={null}
         setScopeFilter={vi.fn()}
-        showRunCard
-        thisRunOpen={[baseTodo]}
-        onToggleDone={vi.fn()}
       />,
     );
 

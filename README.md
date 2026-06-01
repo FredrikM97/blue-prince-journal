@@ -1,6 +1,6 @@
 <img width="1147" height="361" alt="image" src="https://github.com/user-attachments/assets/2f7b266e-6e08-4eee-8331-a63386a0099b" />
 
-A client-first notes and todo tracker for Blue Prince. This project is run on [github pages](https://fredrikm97.github.io/blue-prince-notes/). It is client first and possible to download or upload documentation.
+A client-first notes and todo tracker for Blue Prince. Blue Prince Journal is currently hosted on [GitHub Pages](https://fredrikm97.github.io/blue-prince-journal/). It is local-first and supports downloading or uploading your data.
 
 # Features
 
@@ -37,3 +37,9 @@ A client-first notes and todo tracker for Blue Prince. This project is run on [g
 - `src/routeTree.gen.ts`: auto-generated route/type registry; do not edit manually.
 - `src/routeTree.gen.ts` should be the only generated route tree file checked in.
 - If route files are added/renamed, regenerate the route tree via your normal dev/build flow.
+
+# Cloudflare Pages Deploy
+
+- Build output is `dist/client`.
+- Deploy command: `npx wrangler pages deploy dist/client --project-name blue-prince-journal`
+- Dry run command: `npx wrangler pages deploy dist/client --project-name blue-prince-journal --dry-run`

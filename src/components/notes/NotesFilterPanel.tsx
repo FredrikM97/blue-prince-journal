@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import type { NoteType } from "@/lib/types";
-import { SelectButton } from "@/components/common/Button";
+import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
+import { FilterSection } from "@/components/common/filter/FilterSection";
 
 const TYPE_OPTIONS: { value: NoteType; label: string }[] = [
   { value: "observation", label: "Observations" },
@@ -17,114 +16,63 @@ const STATUS_OPTIONS = [
 ];
 
 export function NotesFilterPanel({
-  filterType,
-  typeFilter,
-  setTypeFilter,
-  statusFilter,
-  setStatusFilter,
-  roomFilter,
-  setRoomFilter,
-  tagFilter,
-  setTagFilter,
-  rooms,
-  tags,
+  filters,
+  actions,
 }: {
-  filterType?: NoteType;
-  typeFilter: NoteType | null;
-  setTypeFilter: (value: NoteType | null) => void;
-  statusFilter: "open" | "solved" | null;
-  setStatusFilter: (value: "open" | "solved" | null) => void;
-  roomFilter: string | null;
-  setRoomFilter: (value: string | null) => void;
-  tagFilter: string | null;
-  setTagFilter: (value: string | null) => void;
-  rooms: string[];
-  tags: string[];
+  filters: {
+    filterType?: NoteType;
+    typeFilter: NoteType | null;
+    statusFilter: "open" | "solved" | null;
+    roomFilter: string | null;
+    tagFilter: string | null;
+    rooms: string[];
+    tags: string[];
+  };
+  actions: {
+    setTypeFilter: (value: NoteType | null) => void;
+    setStatusFilter: (value: "open" | "solved" | null) => void;
+    setRoomFilter: (value: string | null) => void;
+    setTagFilter: (value: string | null) => void;
+  };
 }) {
+  const { filterType, typeFilter, statusFilter, roomFilter, tagFilter, rooms, tags } = filters;
+  const { setTypeFilter, setStatusFilter, setRoomFilter, setTagFilter } = actions;
+
   const typeOptions = TYPE_OPTIONS;
   const statusOptions = STATUS_OPTIONS;
   const roomOptions = rooms.map((r) => ({ value: r, label: r }));
   const tagOptions = tags.map((t) => ({ value: t, label: `#${t}` }));
 
   return (
-    <div className="notes-view-filters-panel">
+    <>
       {!filterType && (
-        <FilterGroup
-          label="Type"
-          options={typeOptions}
-          value={typeFilter}
-          onChange={(v) => setTypeFilter(v as NoteType | null)}
-        />
+        <FilterSection title="Type" collapsible defaultOpen>
+          <FilterButtonGroup value={typeFilter} options={typeOptions} onChange={setTypeFilter} />
+        </FilterSection>
       )}
-      <FilterGroup
-        label="Status"
-        options={statusOptions}
-        value={statusFilter}
-        onChange={(v) => setStatusFilter(v as "open" | "solved" | null)}
-      />
-      {rooms.length > 0 && (
-        <FilterGroup
-          label="Room"
-          options={roomOptions}
-          value={roomFilter}
-          onChange={setRoomFilter}
-          defaultCollapsed={rooms.length > 4}
+      <FilterSection title="Status" collapsible defaultOpen>
+        <FilterButtonGroup
+          value={statusFilter}
+          options={statusOptions}
+          onChange={(next) => {
+            if (!next) {
+              setStatusFilter(null);
+              return;
+            }
+            setStatusFilter(next as "open" | "solved");
+          }}
         />
+      </FilterSection>
+      {rooms.length > 0 && (
+        <FilterSection title="Room" collapsible defaultOpen={rooms.length <= 4}>
+          <FilterButtonGroup value={roomFilter} options={roomOptions} onChange={setRoomFilter} />
+        </FilterSection>
       )}
       {tags.length > 0 && (
-        <FilterGroup
-          label="Tag"
-          options={tagOptions}
-          value={tagFilter}
-          onChange={setTagFilter}
-          defaultCollapsed={tags.length > 4}
-        />
+        <FilterSection title="Tag" collapsible defaultOpen={tags.length <= 4}>
+          <FilterButtonGroup value={tagFilter} options={tagOptions} onChange={setTagFilter} />
+        </FilterSection>
       )}
-    </div>
-  );
-}
-
-function FilterGroup({
-  label,
-  options,
-  value,
-  onChange,
-  defaultCollapsed = false,
-}: {
-  label: string;
-  options: { value: string; label: string }[];
-  value: string | null;
-  onChange: (v: string | null) => void;
-  defaultCollapsed?: boolean;
-}) {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
-  const Chevron = collapsed ? ChevronRight : ChevronDown;
-  return (
-    <div>
-      <button
-        type="button"
-        className="notes-filter-label w-full"
-        onClick={() => setCollapsed((c) => !c)}
-      >
-        <Chevron className="h-3 w-3 shrink-0" />
-        {label}
-      </button>
-      {!collapsed && (
-        <div className="notes-filter-wrap">
-          <SelectButton active={value === null} onClick={() => onChange(null)}>
-            All
-          </SelectButton>
-          {options.map((o) => (
-            <SelectButton
-              key={o.value}
-              active={value === o.value}
-              onClick={() => onChange(value === o.value ? null : o.value)}
-            >
-              {o.label}
-            </SelectButton>
-          ))}
-        </div>
-      )}
-    </div>
+    </>
   );
 }

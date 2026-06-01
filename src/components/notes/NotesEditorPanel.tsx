@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import type { Note } from "@/lib/types";
-import { INPUT_BASE_CLASS } from "@/components/common/FormClasses";
 import { BrassButton, Button, GhostButton } from "@/components/common/Button";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
@@ -127,7 +126,7 @@ export function NotesEditorPanel({
               setDraft({ ...draft, tags: parseTagsInput(next) });
             }}
             placeholder="safe, gem, puzzle"
-            className={INPUT_BASE_CLASS}
+            className="input-base"
           />
         </div>
       </div>
@@ -135,11 +134,10 @@ export function NotesEditorPanel({
       <div className="note-editor-grid-3">
         <div>
           <label className="capture-label">Date</label>
-          <input
+          <InputField
             value={draft.date ?? ""}
-            onChange={(e) => setDraft({ ...draft, date: e.target.value || undefined })}
-            placeholder="Free text (e.g. Day 3, after library puzzle)"
-            className={INPUT_BASE_CLASS}
+            onChange={(e) => setDraft({ ...draft, date: e })}
+            label={""}
           />
         </div>
         <div>
@@ -148,7 +146,6 @@ export function NotesEditorPanel({
             value={draft.type}
             onValueChange={(value) => setDraft({ ...draft, type: value as Note["type"] })}
             options={NOTE_TYPE_OPTIONS}
-            className="note-editor-select w-full"
           />
         </div>
         <div>
@@ -157,7 +154,6 @@ export function NotesEditorPanel({
             value={draft.status}
             onValueChange={(value) => setDraft({ ...draft, status: value as Note["status"] })}
             options={NOTE_STATUS_OPTIONS}
-            className="note-editor-select w-full"
           />
         </div>
       </div>
@@ -203,11 +199,8 @@ export function NotesEditorPanel({
           <div className="note-editor-images-grid">
             {draft.imageIds.map((id) => (
               <div key={id} className="note-editor-image-wrap">
-                <StoredImageView
-                  id={id}
-                  className="h-16 w-16 rounded border border-border object-cover"
-                />
-                <p className="mt-1 max-w-16 truncate text-[10px] text-muted-foreground" title={id}>
+                <StoredImageView id={id} className="note-attached-thumb" />
+                <p className="note-attached-thumb-label" title={id}>
                   {getImageLabel(imageById.get(id) ?? { name: "Image" })}
                 </p>
                 <button
@@ -279,8 +272,8 @@ function SelectExistingImagesDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] max-w-2xl overflow-hidden p-0 [&>button]:hidden">
-        <DialogHeader className="border-b border-border px-6 py-4">
+      <DialogContent variant="editor">
+        <div className="note-dialog-header">
           <div className="flex items-center justify-between gap-3">
             <DialogTitle>Attach existing image</DialogTitle>
             <div className="flex items-center gap-2">
@@ -288,7 +281,6 @@ function SelectExistingImagesDialog({
                 value={imageSort}
                 onValueChange={(value) => setImageSort(value as ImageSort)}
                 options={IMAGE_SORT_OPTIONS}
-                className="note-editor-select h-8 w-44 rounded-md border border-input bg-background px-2 text-xs"
               />
               <Button
                 type="button"
@@ -305,18 +297,18 @@ function SelectExistingImagesDialog({
           <p className="text-xs text-muted-foreground">
             Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
           </p>
-        </DialogHeader>
+        </div>
 
         {sortedImages.length > 0 ? (
-          <div className="grid max-h-[60vh] grid-cols-2 gap-3 overflow-y-auto p-4 sm:grid-cols-3">
+          <div className="note-image-picker-grid">
             {sortedImages.map((img) => {
               const selected = selectedSet.has(img.id);
               return (
                 <button
                   key={img.id}
                   type="button"
-                  className={`rounded-md border p-2 text-left transition-colors hover:border-brass/60 hover:bg-muted/40 ${
-                    selected ? "border-brass bg-brass/10" : "border-border"
+                  className={`note-image-picker-card ${
+                    selected ? "note-image-picker-card-selected" : ""
                   }`}
                   onClick={() => {
                     setDraft((prev) => {
@@ -328,23 +320,15 @@ function SelectExistingImagesDialog({
                     toast.success(selected ? "Image detached" : "Image attached");
                   }}
                 >
-                  <StoredImageView
-                    id={img.id}
-                    alt={img.name}
-                    className="h-20 w-full rounded border border-border object-cover"
-                  />
-                  <div className="mt-2 flex items-center justify-between gap-2">
+                  <StoredImageView id={img.id} alt={img.name} className="note-image-picker-thumb" />
+                  <div className="note-image-picker-caption">
                     <p
-                      className="min-w-0 flex-1 truncate text-xs text-muted-foreground"
+                      className="note-image-picker-name"
                       title={`${getImageLabel(img)} (${img.name})`}
                     >
                       {getImageLabel(img)}
                     </p>
-                    {selected ? (
-                      <span className="rounded bg-brass px-1.5 py-0.5 text-[10px] font-medium text-brass-foreground">
-                        Selected
-                      </span>
-                    ) : null}
+                    {selected ? <span className="note-image-picker-badge">Selected</span> : null}
                   </div>
                 </button>
               );

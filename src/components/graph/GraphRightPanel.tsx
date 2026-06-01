@@ -51,10 +51,8 @@ export function GraphRightPanel({
         <h3 className="font-serif text-lg">{selectedNote.title}</h3>
       </div>
 
-      <div className="space-y-2 rounded-md border border-border/70 bg-card/50 p-3">
-        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Info
-        </div>
+      <div className="panel-card space-y-2">
+        <div className="section-label">Info</div>
         <div className="space-y-2 text-base">
           <div className="flex items-center gap-2">
             <span className="w-18 text-sm text-muted-foreground">Type</span>
@@ -64,7 +62,7 @@ export function GraphRightPanel({
           {selectedNote.room && (
             <div className="flex items-center gap-2">
               <span className="w-18 text-sm text-muted-foreground">Room</span>
-              <Chip>@{selectedNote.room}</Chip>
+              <Chip variant="room">@{selectedNote.room}</Chip>
             </div>
           )}
 
@@ -79,7 +77,7 @@ export function GraphRightPanel({
             </div>
           )}
 
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="graph-info-row">
             <span>Outgoing: {outgoingCount}</span>
             <span>Incoming: {incomingCount}</span>
           </div>
@@ -89,24 +87,14 @@ export function GraphRightPanel({
       <div className="h-px bg-border/80" />
 
       <div className="space-y-1">
-        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Details
-        </div>
+        <div className="section-label">Details</div>
         {selectedNote.body.trim() ? (
           <MarkdownPreview>{selectedNote.body}</MarkdownPreview>
         ) : (
           <p className="text-xs text-muted-foreground">No details written for this note yet.</p>
         )}
 
-        <AttachedImagesGallery
-          imageIds={selectedNote.imageIds}
-          wrapperClassName="mt-3"
-          gridClassName="grid grid-cols-2 gap-2"
-          itemButtonClassName="rounded p-1 transition-colors hover:bg-muted/40"
-          imageClassName="h-20 w-full rounded object-cover"
-          labelClassName="mt-1 truncate text-[11px] text-muted-foreground"
-          dialogPreviewClassName="mx-auto max-h-[70vh] w-full overflow-hidden rounded-md bg-muted/20 p-2"
-        />
+        <AttachedImagesGallery imageIds={selectedNote.imageIds} compact />
       </div>
     </div>
   );

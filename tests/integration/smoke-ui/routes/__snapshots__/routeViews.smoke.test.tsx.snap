@@ -73,7 +73,7 @@ exports[`route views smoke snapshots > matches snapshot for missing section rout
 exports[`route views smoke snapshots > matches snapshot for not-found route shell 1`] = `
 <DocumentFragment>
   <div
-    class="flex min-h-[60vh] items-center justify-center px-4"
+    class="page-center"
   >
     <div
       class="max-w-md text-center"

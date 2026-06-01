@@ -39,10 +39,10 @@ exports[`smoke panels > matches snapshot for graph details panel 1`] = `
       </h3>
     </div>
     <div
-      class="space-y-2 rounded-md border border-border/70 bg-card/50 p-3"
+      class="panel-card space-y-2"
     >
       <div
-        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+        class="section-label"
       >
         Info
       </div>
@@ -58,7 +58,7 @@ exports[`smoke panels > matches snapshot for graph details panel 1`] = `
             Type
           </span>
           <span
-            class="inline-flex items-center rounded border px-1.5 py-0.5 text-[10px]"
+            class="chip"
           >
             clue
           </span>
@@ -72,7 +72,7 @@ exports[`smoke panels > matches snapshot for graph details panel 1`] = `
             Room
           </span>
           <span
-            class="inline-flex items-center rounded border px-1.5 py-0.5 text-[10px]"
+            class="chip"
           >
             @Entrance Hall
           </span>
@@ -89,14 +89,14 @@ exports[`smoke panels > matches snapshot for graph details panel 1`] = `
             class="flex flex-wrap gap-1.5"
           >
             <span
-              class="inline-flex items-center rounded border px-1.5 py-0.5 text-[10px]"
+              class="chip"
             >
               #keys
             </span>
           </div>
         </div>
         <div
-          class="flex items-center gap-3 text-sm text-muted-foreground"
+          class="graph-info-row"
         >
           <span>
             Outgoing: 0
@@ -114,7 +114,7 @@ exports[`smoke panels > matches snapshot for graph details panel 1`] = `
       class="space-y-1"
     >
       <div
-        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+        class="section-label"
       >
         Details
       </div>
@@ -170,23 +170,33 @@ exports[`smoke panels > matches snapshot for images left panel 1`] = `
       <h2
         class="font-serif text-base"
       >
-        Steam Images
+        Steam Folder
       </h2>
+      <p
+        class="text-xs text-muted-foreground"
+      >
+        Connected: steam-7656119
+      </p>
       <div
-        class="flex items-center justify-between gap-2"
+        class="flex items-center gap-2"
       >
         <button
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"
         >
-          Refresh
+          Sync now
         </button>
-        <span
-          class="text-xs text-muted-foreground"
-          title="11/14/2023, 10:13:20 PM"
+        <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"
         >
-          Last refresh: 22:13
-        </span>
+          Disconnect
+        </button>
       </div>
+      <span
+        class="text-xs text-muted-foreground"
+        title="11/14/2023, 10:13:20 PM"
+      >
+        Last sync: 22:13
+      </span>
     </div>
   </div>
 </DocumentFragment>
@@ -195,25 +205,33 @@ exports[`smoke panels > matches snapshot for images left panel 1`] = `
 exports[`smoke panels > matches snapshot for map shell and supports opening a cell 1`] = `
 <DocumentFragment>
   <div
-    class="page-layout-panel"
+    class="side-panel-shell"
   >
-    <h1
-      class="font-serif text-2xl"
+    <div
+      class="panel-header"
     >
-      House Map
-    </h1>
-    <p
-      class="mt-1 text-xs text-muted-foreground"
-    >
-      5 × 9 grid — click a cell to place a room and add comments.
-    </p>
+      <div
+        class="panel-header-title-wrap"
+      >
+        <h2
+          class="panel-title"
+        >
+          House Map
+        </h2>
+        <p
+          class="preview-subtitle"
+        >
+          5 × 9 grid — click a cell to place a room and add comments.
+        </p>
+      </div>
+    </div>
   </div>
   <div
     class="map-layout-main"
   >
     <div
       class="map-grid"
-      style="grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: clamp(28rem, calc((100dvh - 8rem) * 5 / 9), 36rem);"
+      style="grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; max-width: min(100%, clamp(16rem, calc((100dvh - 9rem) * 5 / 9), 36rem));"
     >
       <button
         class="map-cell map-cell-neutral"
@@ -688,7 +706,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
                   <span
                     class="note-summary-time"
                   >
-                    20602d
+                    20605d
                   </span>
                   <div
                     class="note-summary-pills"
@@ -736,7 +754,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
           </button>
           <button
             aria-label="Delete note"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-9 w-9 shrink-0 text-destructive hover:text-destructive"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 shrink-0 text-destructive hover:text-destructive"
             type="button"
           >
             <svg
@@ -802,23 +820,31 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
 exports[`smoke panels > matches snapshot for todo sidebar panel 1`] = `
 <DocumentFragment>
   <div
-    class="space-y-4"
+    class="todos-left-stack"
   >
     <div
-      class="page-layout-panel"
+      class="side-panel-shell"
     >
-      <h1
-        class="font-serif text-2xl"
-      >
-        Todo
-      </h1>
-      <p
-        class="mt-1 text-xs text-muted-foreground"
-      >
-        1 item
-      </p>
       <div
-        class="mt-3 space-y-1 text-xs text-muted-foreground"
+        class="panel-header"
+      >
+        <div
+          class="panel-header-title-wrap"
+        >
+          <h2
+            class="panel-title"
+          >
+            Todo
+          </h2>
+          <p
+            class="preview-subtitle"
+          >
+            1 item
+          </p>
+        </div>
+      </div>
+      <div
+        class="todos-left-stats"
       >
         <p>
           Open: 1
@@ -832,78 +858,48 @@ exports[`smoke panels > matches snapshot for todo sidebar panel 1`] = `
       </div>
     </div>
     <div
-      class="page-layout-panel"
+      class="side-panel-shell"
     >
-      <p
-        class="todos-sidebar-label"
+      <div
+        class="panel-header"
       >
-        Scope
-      </p>
+        <div
+          class="panel-header-title-wrap"
+        >
+          <h2
+            class="panel-title"
+          >
+            Scope
+          </h2>
+        </div>
+      </div>
       <div
         class="flex flex-wrap gap-1"
       >
         <button
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-auto rounded px-2 py-0.5 text-xs bg-brass font-medium text-brass-foreground"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-auto rounded px-2 py-0.5 text-xs select-btn-active"
           type="button"
         >
           All
         </button>
         <button
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-auto rounded px-2 py-0.5 text-xs text-muted-foreground hover:bg-brass/20 hover:text-foreground"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-auto rounded px-2 py-0.5 text-xs select-btn-inactive"
           type="button"
         >
           This run
         </button>
         <button
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-auto rounded px-2 py-0.5 text-xs text-muted-foreground hover:bg-brass/20 hover:text-foreground"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-auto rounded px-2 py-0.5 text-xs select-btn-inactive"
           type="button"
         >
           Cross-run
         </button>
         <button
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-auto rounded px-2 py-0.5 text-xs text-muted-foreground hover:bg-brass/20 hover:text-foreground"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-auto rounded px-2 py-0.5 text-xs select-btn-inactive"
           type="button"
         >
           Someday
         </button>
-      </div>
-    </div>
-    <div
-      class="page-layout-panel"
-    >
-      <p
-        class="todos-sidebar-label"
-      >
-        This run
-      </p>
-      <div
-        class="todos-run-open-card"
-      >
-        <div
-          class="todos-run-open-title"
-        >
-          This run · 1 open
-        </div>
-        <ul
-          class="todos-run-open-list"
-        >
-          <li
-            class="todos-run-open-item"
-          >
-            <input
-              class="todos-run-open-checkbox"
-              type="checkbox"
-            />
-            <span>
-              Check west wing
-            </span>
-            <span
-              class="inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] todos-run-open-chip"
-            >
-              @Parlor
-            </span>
-          </li>
-        </ul>
       </div>
     </div>
   </div>

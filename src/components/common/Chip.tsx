@@ -1,11 +1,15 @@
-import { cn } from "@/lib/utils";
-
-export function Chip({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <span
-      className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px]", className)}
-    >
-      {children}
-    </span>
-  );
+/** Small inline label chip. Variants map to named CSS classes in layout.css. */
+export function Chip({
+  children,
+  variant = "default",
+}: {
+  children: React.ReactNode;
+  /** "default" = muted; "solid" = full border foreground; "room" = brass tint. */
+  variant?: "default" | "solid" | "room" | "tag";
+}) {
+  let cls = "chip";
+  if (variant === "solid") cls = "chip-solid";
+  if (variant === "room") cls = "chip-room";
+  if (variant === "tag") cls = "chip-tag";
+  return <span className={cls}>{children}</span>;
 }

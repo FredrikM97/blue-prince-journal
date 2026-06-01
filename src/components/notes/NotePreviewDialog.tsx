@@ -3,27 +3,27 @@ import { Chip } from "@/components/common/Chip";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
 import { MetaRow, PreviewSection, PreviewTimestamps } from "@/components/common/PreviewContent";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
+import { PreviewDialog } from "@/components/common/PreviewDialog";
 
 export function NotePreviewContent({ note }: { note: Note }) {
   return (
     <>
       <MetaRow label="Status">
-        <Chip className="border-border text-foreground">{note.status}</Chip>
+        <Chip variant="solid">{note.status}</Chip>
       </MetaRow>
       <MetaRow label="Scope">
-        <Chip className="border-border text-foreground">{note.scope}</Chip>
+        <Chip variant="solid">{note.scope}</Chip>
       </MetaRow>
       {note.room && (
         <MetaRow label="Room">
-          <Chip className="border-brass/40 text-brass">@{note.room}</Chip>
+          <Chip variant="room">@{note.room}</Chip>
         </MetaRow>
       )}
       {note.tags.length > 0 && (
         <MetaRow label="Tags">
           <span className="flex flex-wrap gap-1">
             {note.tags.map((tag) => (
-              <Chip key={tag} className="border-border bg-secondary text-foreground">
+              <Chip key={tag} variant="tag">
                 #{tag}
               </Chip>
             ))}
@@ -58,27 +58,19 @@ export function NotePreviewDialog({
 }) {
   if (!note) return null;
 
+  const subtitleParts: string[] = [note.type];
+  if (note.date) subtitleParts.push(note.date);
+  subtitleParts.push(`Created ${new Date(note.createdAt).toLocaleDateString()}`);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85vh] w-[90vw] max-w-2xl flex-col gap-4 p-6">
-        <DialogHeader>
-          <DialogTitle
-            className={`font-serif text-xl ${
-              note.status === "solved" ? "text-muted-foreground line-through" : ""
-            }`}
-          >
-            {note.title}
-          </DialogTitle>
-          <p className="mt-0.5 text-xs text-muted-foreground capitalize">
-            {note.type}
-            {note.date ? ` · ${note.date}` : ""}
-            {` · Created ${new Date(note.createdAt).toLocaleDateString()}`}
-          </p>
-        </DialogHeader>
-        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
-          <NotePreviewContent note={note} />
-        </div>
-      </DialogContent>
-    </Dialog>
+    <PreviewDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={note.title}
+      subtitle={subtitleParts.join(" · ")}
+      strikeTitle={note.status === "solved"}
+    >
+      <NotePreviewContent note={note} />
+    </PreviewDialog>
   );
 }

@@ -4,11 +4,11 @@
   }
 
   .app-header-inner {
-    @apply mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-4 py-2;
+    @apply mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-2 py-2 sm:px-4;
   }
 
   .app-brand-link {
-    @apply mr-2 inline-flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-accent;
+    @apply mr-2 inline-flex shrink-0 items-center gap-2 rounded-md px-1.5 py-1 hover:bg-accent;
   }
 
   .app-brand-badge {
@@ -20,7 +20,18 @@
   }
 
   .app-nav {
-    @apply flex min-w-0 flex-1 flex-wrap items-center gap-1;
+    @apply order-3 flex basis-full min-w-0 flex-nowrap items-center gap-1 overflow-x-auto pb-0.5;
+    scrollbar-width: none;
+  }
+
+  .app-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .app-nav {
+      @apply order-none basis-auto flex-1 flex-wrap overflow-visible pb-0;
+    }
   }
 
   .app-nav-link {
@@ -32,7 +43,11 @@
   }
 
   .app-header-controls {
-    @apply ml-auto flex items-center gap-1.5;
+    @apply order-2 ml-auto flex shrink-0 items-center gap-1.5;
+  }
+
+  .app-header-controls > * {
+    @apply shrink-0;
   }
 
   .app-icon-button {
@@ -44,7 +59,7 @@
   }
 
   .app-search-wrap {
-    @apply relative hidden sm:block;
+    @apply relative hidden lg:block;
   }
 
   .app-search-icon {
@@ -52,11 +67,20 @@
   }
 
   .app-search-input {
-    @apply h-8 w-44 pl-8;
+    @apply h-8 w-44 pl-8 transition-[padding];
+  }
+
+  /* When the user has typed something, pull text left and hide the icon */
+  .app-search-input:not(:placeholder-shown) {
+    padding-left: 0.75rem;
+  }
+
+  .app-search-wrap:has(.app-search-input:not(:placeholder-shown)) .app-search-icon {
+    display: none;
   }
 
   .app-add-button {
-    @apply bg-brass text-brass-foreground hover:bg-brass/90;
+    @apply bg-brass px-2 text-brass-foreground hover:bg-brass/90;
   }
 
   .app-add-icon {
@@ -67,11 +91,31 @@
     @apply rounded border border-black/15 px-1 py-0 text-[10px] leading-4 opacity-70;
   }
 
+  @media (max-width: 639px) {
+    .app-brand-title {
+      @apply hidden;
+    }
+
+    .app-add-button {
+      @apply h-8 w-8 justify-center p-0;
+    }
+
+    .app-add-button span,
+    .app-add-shortcut {
+      display: none;
+    }
+  }
+
   .app-menu-icon {
     @apply mr-1 h-4 w-4;
   }
 
   .app-hidden-file-input {
     @apply hidden;
+  }
+
+  /* Sync folder indicator shown in the header (desktop only) */
+  .header-sync-status {
+    @apply hidden items-center gap-1.5 text-xs text-green-500 xl:flex;
   }
 }
