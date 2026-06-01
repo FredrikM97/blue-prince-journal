@@ -1,5 +1,16 @@
 import { Button } from "@/components/common/Button";
 
+export type SteamSyncPanelModel = {
+  supported: boolean;
+  connected: boolean;
+  folderName: string | null;
+  lastSyncAt: number | null;
+  busy: boolean;
+  connect: () => Promise<void>;
+  syncNow: () => Promise<void>;
+  disconnect: () => Promise<void>;
+};
+
 function formatLastRefreshTime(lastRefreshAt: number | null): string {
   if (!lastRefreshAt) return "Never";
   return new Date(lastRefreshAt).toLocaleTimeString([], {
@@ -14,18 +25,16 @@ function formatLastRefreshTime(lastRefreshAt: number | null): string {
  */
 export function ImagesLeftPanel({
   total,
-  steamImportActive,
-  steamLastRefreshAt,
-  refreshBusy,
-  onRefreshSteam,
+  steamSync,
 }: {
   total: number;
-  steamImportActive: boolean;
-  steamLastRefreshAt: number | null;
-  refreshBusy: boolean;
-  onRefreshSteam: () => Promise<void>;
+  steamSync: SteamSyncPanelModel;
 }) {
-  const refreshTime = formatLastRefreshTime(steamLastRefreshAt);
+  const refreshTime = formatLastRefreshTime(steamSync.lastSyncAt);
+  let lastSyncTitle = "Never";
+  if (steamSync.lastSyncAt) {
+    lastSyncTitle = new Date(steamSync.lastSyncAt).toLocaleString();
+  }
 
   return (
     <div className="page-layout-panel">
@@ -36,27 +45,49 @@ export function ImagesLeftPanel({
         size.
       </p>
 
-      {steamImportActive ? (
+      {steamSync.supported && (
         <div className="mt-2 space-y-1.5">
-          <h2 className="font-serif text-base">Steam Images</h2>
-          <div className="flex items-center justify-between gap-2">
+          <h2 className="font-serif text-base">Steam Folder</h2>
+
+          {!steamSync.connected && (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => void onRefreshSteam()}
-              disabled={refreshBusy}
+              onClick={() => void steamSync.connect()}
+              disabled={steamSync.busy}
             >
-              Refresh
+              Connect folder
             </Button>
-            <span
-              className="text-xs text-muted-foreground"
-              title={steamLastRefreshAt ? new Date(steamLastRefreshAt).toLocaleString() : "Never"}
-            >
-              Last refresh: {refreshTime}
-            </span>
-          </div>
+          )}
+
+          {steamSync.connected && (
+            <>
+              <p className="text-xs text-muted-foreground">Connected: {steamSync.folderName}</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void steamSync.syncNow()}
+                  disabled={steamSync.busy}
+                >
+                  Sync now
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void steamSync.disconnect()}
+                  disabled={steamSync.busy}
+                >
+                  Disconnect
+                </Button>
+              </div>
+              <span className="text-xs text-muted-foreground" title={lastSyncTitle}>
+                Last sync: {refreshTime}
+              </span>
+            </>
+          )}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

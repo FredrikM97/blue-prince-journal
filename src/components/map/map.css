@@ -4,14 +4,6 @@
     @apply flex flex-col items-center pt-1;
   }
 
-  .map-panel {
-    @apply rounded-lg border border-border bg-card p-4;
-  }
-
-  .map-panel-header {
-    @apply mb-0 flex items-start justify-between gap-2 border-b border-border pb-3;
-  }
-
   .map-grid {
     @apply mx-auto grid gap-2;
   }
@@ -41,10 +33,6 @@
   }
 
   /* Map cell editor panel */
-  .map-sheet-title {
-    @apply font-serif text-xl;
-  }
-
   .map-sheet-body {
     @apply mt-4 space-y-4;
   }
@@ -104,5 +92,24 @@
 
   .map-todo-done {
     @apply text-muted-foreground line-through;
+  }
+
+  @media (max-width: 40rem) {
+    .map-grid {
+      @apply gap-1.5;
+    }
+
+    .map-cell {
+      @apply p-1;
+    }
+
+    .map-cell-room-name {
+      font-size: 10px;
+    }
+
+    .map-cell-meta,
+    .map-cell-coord {
+      font-size: 8px;
+    }
   }
 }

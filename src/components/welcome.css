@@ -1,0 +1,18 @@
+@layer components {
+  /* ─── Welcome screen ────────────────────────────────────────────────────── */
+
+  /* Full-height centered flex column */
+  .welcome-shell {
+    @apply flex h-full flex-col items-center justify-center px-4 py-12;
+  }
+
+  /* Logo icon badge */
+  .welcome-icon {
+    @apply mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-brass/15 text-brass;
+  }
+
+  /* Selectable option card */
+  .welcome-card {
+    @apply flex w-full max-w-sm flex-col items-center gap-3 rounded-xl border border-border bg-card/60 p-6 text-center transition-colors hover:border-brass/60 hover:bg-card disabled:pointer-events-none disabled:opacity-50 sm:w-[17rem];
+  }
+}

@@ -6,9 +6,7 @@
 export function MetaRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2 text-sm">
-      <span className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
+      <span className="preview-field-label">{label}</span>
       <span className="min-w-0">{children}</span>
     </div>
   );

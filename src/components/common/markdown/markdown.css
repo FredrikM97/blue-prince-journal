@@ -1,0 +1,35 @@
+@layer components {
+  /* ─── Markdown editor ────────────────────────────────────────────────────── */
+
+  /* Formatting toolbar strip at the top of the editor */
+  .md-toolbar {
+    @apply flex flex-wrap items-center gap-0.5 rounded-t-md border border-b-0 border-input bg-muted/40 px-1.5 py-1;
+  }
+
+  /* Preview/edit body below the toolbar */
+  .md-editor-body {
+    @apply min-h-[6rem] rounded-b-md border border-input bg-background p-3;
+  }
+
+  /* ─── Shortcut help popover ─────────────────────────────────────────────── */
+
+  /* Floating popover container */
+  .md-shortcut-popover {
+    @apply w-72 rounded-md border border-border bg-popover p-3 shadow-lg text-[11px];
+  }
+
+  /* Section title inside the popover */
+  .md-shortcut-title {
+    @apply mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground;
+  }
+
+  /* Two-column grid: keys | descriptions */
+  .md-shortcut-grid {
+    @apply grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-1.5;
+  }
+
+  /* Key badge (keyboard shortcut pill) */
+  .md-shortcut-key {
+    @apply rounded bg-accent px-1 py-0.5 font-mono text-foreground;
+  }
+}

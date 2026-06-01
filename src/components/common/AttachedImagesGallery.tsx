@@ -4,34 +4,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/c
 import { IconButton } from "@/components/common/Button";
 import { StoredImageView } from "@/components/StoredImageView";
 import { useStore } from "@/data/store";
-import { cn } from "@/lib/utils";
 
 export function AttachedImagesGallery({
   imageIds,
   title = "Images",
   collapsible = false,
-  wrapperClassName,
-  titleClassName,
-  headerClassName,
-  gridClassName,
-  itemButtonClassName,
-  imageClassName,
-  labelClassName,
-  collapseButtonClassName,
-  dialogPreviewClassName,
+  compact = false,
 }: {
   imageIds: string[];
   title?: string;
   collapsible?: boolean;
-  wrapperClassName?: string;
-  titleClassName?: string;
-  headerClassName?: string;
-  gridClassName?: string;
-  itemButtonClassName?: string;
-  imageClassName?: string;
-  labelClassName?: string;
-  collapseButtonClassName?: string;
-  dialogPreviewClassName?: string;
+  /**
+   * Compact mode — smaller thumbnails, lighter hover styling, tighter spacing.
+   * Use inside sidebar panels (e.g. GraphRightPanel). Default mode is for full
+   * note detail views.
+   */
+  compact?: boolean;
 }) {
   const images = useStore((s) => s.images);
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
@@ -46,44 +34,44 @@ export function AttachedImagesGallery({
     return img.caption?.trim() || img.name;
   };
 
+  const wrapperClass = compact ? "note-details-images-compact" : "note-details-images";
+  const gridClass = compact ? "note-details-images-grid-compact" : "note-details-images-grid";
+  const btnClass = compact
+    ? "note-details-image-btn-compact text-left"
+    : "note-details-image-btn text-left";
+  const thumbClass = compact ? "h-20 w-full rounded object-cover" : "h-28 w-full object-cover";
+
   return (
-    <section className={cn("note-details-images", wrapperClassName)}>
-      <div className={cn("mb-2 flex items-center gap-2", headerClassName)}>
-        <div className={cn("note-details-images-label", titleClassName)}>
+    <section className={wrapperClass}>
+      <div className="mb-2 flex items-center gap-2">
+        <div className="note-details-images-label">
           {title} ({imageIds.length})
         </div>
         {collapsible && (
           <IconButton
             aria-label={collapsed ? "Expand images" : "Collapse images"}
             title={collapsed ? "Expand images" : "Collapse images"}
-            className={cn("h-6 w-6 rounded border border-input", collapseButtonClassName)}
+            className="h-6 w-6 rounded border border-input"
             onClick={() => setCollapsed((v) => !v)}
           >
-            {collapsed ? (
-              <ChevronDown className="h-3.5 w-3.5" />
-            ) : (
-              <ChevronUp className="h-3.5 w-3.5" />
-            )}
+            {collapsed && <ChevronDown />}
+            {!collapsed && <ChevronUp />}
           </IconButton>
         )}
       </div>
 
       {!collapsed && (
-        <div className={cn("note-details-images-grid", gridClassName)}>
+        <div className={gridClass}>
           {imageIds.map((id) => (
             <button
               key={id}
               type="button"
-              className={cn("note-details-image-btn text-left", itemButtonClassName)}
+              className={btnClass}
               onClick={() => setZoomedImageId(id)}
               aria-label={`Open image preview: ${getImageLabel(id)}`}
             >
-              <StoredImageView
-                id={id}
-                className={cn("h-28 w-full object-cover", imageClassName)}
-                alt={getImageLabel(id)}
-              />
-              <p className={cn("mt-1 truncate px-1 text-xs text-muted-foreground", labelClassName)}>
+              <StoredImageView id={id} className={thumbClass} alt={getImageLabel(id)} />
+              <p className="mt-1 truncate px-1 text-xs text-muted-foreground">
                 {getImageLabel(id)}
               </p>
             </button>
@@ -91,14 +79,19 @@ export function AttachedImagesGallery({
         </div>
       )}
 
-      <Dialog open={!!zoomedImageId} onOpenChange={(open) => !open && setZoomedImageId(null)}>
-        <DialogContent className="max-w-4xl">
+      <Dialog
+        open={!!zoomedImageId}
+        onOpenChange={(open) => {
+          if (!open) setZoomedImageId(null);
+        }}
+      >
+        <DialogContent variant="expand">
           <DialogHeader>
             <DialogTitle className="font-serif">
               {zoomedImageId ? getImageLabel(zoomedImageId) : "Image preview"}
             </DialogTitle>
           </DialogHeader>
-          <div className={cn("note-details-zoom-preview", dialogPreviewClassName)}>
+          <div className="note-details-zoom-preview">
             {zoomedImageId && (
               <StoredImageView
                 id={zoomedImageId}

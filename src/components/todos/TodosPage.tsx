@@ -27,19 +27,16 @@ export function TodosPage() {
   }, [todos, search, scopeFilter]);
 
   const grouped = groupTodosByStatus(filtered);
-  const thisRunOpen = filtered.filter((t) => t.scope === "this-run" && t.status !== "done");
   const openCount = filtered.filter((t) => t.status === "open").length;
   const progressCount = filtered.filter((t) => t.status === "in-progress").length;
   const doneCount = filtered.filter((t) => t.status === "done").length;
-  const showRunCard =
-    thisRunOpen.length > 0 && scopeFilter !== "cross-run" && scopeFilter !== "someday";
 
   const previewTodo = previewTodoId ? (todos.find((t) => t.id === previewTodoId) ?? null) : null;
 
   return (
     <>
-      <PageLayout
-        leftSidebar={
+      <PageLayout>
+        <PageLayout.Left>
           <TodoLeftPanel
             total={filtered.length}
             openCount={openCount}
@@ -47,12 +44,10 @@ export function TodosPage() {
             doneCount={doneCount}
             scopeFilter={scopeFilter}
             setScopeFilter={setScopeFilter}
-            showRunCard={showRunCard}
-            thisRunOpen={thisRunOpen}
-            onToggleDone={(id) => toggle(id, "done")}
           />
-        }
-        middle={
+        </PageLayout.Left>
+
+        <PageLayout.Middle>
           <TodoMiddlePanel
             grouped={grouped}
             onToggle={(id, next) => toggle(id, next)}
@@ -62,9 +57,7 @@ export function TodosPage() {
             onEdit={save}
             onOpenPreview={(todo) => setPreviewTodoId(todo.id)}
           />
-        }
-      >
-        {/* middle content is provided via the `middle` prop */}
+        </PageLayout.Middle>
       </PageLayout>
 
       <TodoPreviewDialog

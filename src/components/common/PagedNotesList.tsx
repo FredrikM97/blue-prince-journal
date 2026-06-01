@@ -31,10 +31,8 @@ export function PagedNotesList({
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <h3 className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          {title}
-        </h3>
+      <div className="section-header-row">
+        <h3 className="section-label">{title}</h3>
         {total > 1 && (
           <div className="flex items-center gap-1">
             <Button
@@ -63,16 +61,16 @@ export function PagedNotesList({
       </div>
 
       {note ? (
-        <div className="rounded bg-card/60 p-2 text-sm space-y-1.5">
+        <div className="panel-card space-y-1.5 text-sm">
           <p className="font-medium leading-snug">{note.title}</p>
           {note.body.trim() && <MarkdownPreview>{note.body}</MarkdownPreview>}
           <div className="flex flex-wrap gap-1">
-            <Chip className="border-border text-foreground">{note.type}</Chip>
+            <Chip variant="solid">{note.type}</Chip>
             {note.imageIds.length > 0 && (
-              <Chip className="border-border text-foreground">📎 {note.imageIds.length}</Chip>
+              <Chip variant="solid">📎 {note.imageIds.length}</Chip>
             )}
             {note.tags.map((tag) => (
-              <Chip key={tag} className="border-border text-foreground">
+              <Chip key={tag} variant="tag">
                 #{tag}
               </Chip>
             ))}

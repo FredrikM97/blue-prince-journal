@@ -1,16 +1,19 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import { EmptyState } from "@/components/common/EmptyState";
 import { useStore } from "@/data/store";
 import { PageLayout } from "@/components/common/PageLayout";
 import { StoredImageView } from "@/components/StoredImageView";
-import { ImagesLeftPanel } from "@/components/images/ImagesLeftPanel";
+import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
 import type { Note, StoredImage } from "@/lib/types";
 import { toast } from "sonner";
 import {
-  isSteamImportSupported,
+  connectSteamImportFolder,
+  disconnectSteamImportFolder,
+  getActiveSteamFolderName,
+  isSteamFolderSyncSupported,
   loadSteamImportStatus,
-  pickAndImportSteamFiles,
+  restoreSteamImportFolder,
+  syncConnectedSteamFolder,
 } from "@/data/steamImport";
 
 function getImageLabel(img: StoredImage): string {
@@ -27,31 +30,7 @@ export function ImagesPage() {
   const deferredSearch = useDeferredValue(search);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const steamImportActive = isSteamImportSupported();
-  const [steamLastRefreshAt, setSteamLastRefreshAt] = useState<number | null>(null);
-  const [refreshBusy, setRefreshBusy] = useState(false);
-
-  useEffect(() => {
-    void loadSteamImportStatus().then((s) => setSteamLastRefreshAt(s.lastRefreshAt));
-  }, []);
-
-  async function handleRefreshSteamImages() {
-    setRefreshBusy(true);
-    try {
-      const result = await pickAndImportSteamFiles(addImage);
-      if (result === null) return; // user cancelled
-      setSteamLastRefreshAt(Date.now());
-      if (result.imported > 0) {
-        toast.success(`Imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`);
-      } else {
-        toast.success("No new Steam screenshots found");
-      }
-    } catch {
-      toast.error("Could not import Steam screenshots");
-    } finally {
-      setRefreshBusy(false);
-    }
-  }
+  const steamSync = useSteamSyncPanel(addImage);
 
   const filtered = useMemo(() => {
     const q = deferredSearch.trim().toLowerCase();
@@ -112,22 +91,19 @@ export function ImagesPage() {
   }, [selected, selectByOffset]);
 
   return (
-    <PageLayout
-      leftSidebar={
-        <ImagesLeftPanel
-          total={filtered.length}
-          steamImportActive={steamImportActive}
-          steamLastRefreshAt={steamLastRefreshAt}
-          refreshBusy={refreshBusy}
-          onRefreshSteam={handleRefreshSteamImages}
-        />
-      }
-      middle={
-        filtered.length === 0 ? (
-          <EmptyState>
+    <PageLayout>
+      <PageLayout.Left>
+        <ImagesLeftPanel total={filtered.length} steamSync={steamSync} />
+      </PageLayout.Left>
+
+      <PageLayout.Middle>
+        {filtered.length === 0 && (
+          <div className="empty-state">
             No images yet. Add one from note capture or from a note&apos;s editor.
-          </EmptyState>
-        ) : (
+          </div>
+        )}
+
+        {filtered.length > 0 && (
           <div className="images-grid">
             {filtered.map((img) => (
               <ImageThumb
@@ -138,9 +114,10 @@ export function ImagesPage() {
               />
             ))}
           </div>
-        )
-      }
-      rightSidebar={
+        )}
+      </PageLayout.Middle>
+
+      <PageLayout.Right>
         <ImagesRightPanel
           img={selected}
           relatedNotes={relatedNotes}
@@ -165,11 +142,92 @@ export function ImagesPage() {
             toast.success("Image label updated");
           }}
         />
-      }
-    >
-      {/* middle content is provided via the `middle` prop */}
+      </PageLayout.Right>
     </PageLayout>
   );
+}
+
+function useSteamSyncPanel(
+  addImage: (blob: Blob, name?: string, caption?: string) => Promise<unknown>,
+) {
+  const [connected, setConnected] = useState(false);
+  const [folderName, setFolderName] = useState<string | null>(null);
+  const [lastSyncAt, setLastSyncAt] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    void loadSteamImportStatus().then((s) => setLastSyncAt(s.lastRefreshAt));
+    void restoreSteamImportFolder().then((handle) => {
+      if (!handle) return;
+      setConnected(true);
+      setFolderName(handle.name);
+    });
+  }, []);
+
+  async function connect() {
+    setBusy(true);
+    try {
+      const handle = await connectSteamImportFolder();
+      if (!handle) return;
+      setConnected(true);
+      setFolderName(handle.name);
+      toast.success(`Connected Steam folder: ${handle.name}`);
+      await syncNow();
+    } catch {
+      toast.error("Could not connect Steam folder");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function syncNow() {
+    setBusy(true);
+    try {
+      const result = await syncConnectedSteamFolder(addImage);
+      if (result === null) {
+        toast.error("No Steam folder connected");
+        return;
+      }
+      setLastSyncAt(Date.now());
+      if (result.imported > 0) {
+        toast.success(`Imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`);
+      }
+      if (result.imported === 0) {
+        toast.success("No new Steam screenshots found in connected folder");
+      }
+    } catch {
+      toast.error("Could not sync Steam screenshots");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function disconnect() {
+    setBusy(true);
+    try {
+      await disconnectSteamImportFolder();
+      setConnected(false);
+      setFolderName(null);
+      toast.success("Disconnected Steam folder sync");
+    } catch {
+      toast.error("Could not disconnect Steam folder sync");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const steamSync: SteamSyncPanelModel = {
+    supported: isSteamFolderSyncSupported(),
+    connected,
+    folderName: folderName ?? getActiveSteamFolderName(),
+    lastSyncAt,
+    busy,
+    connect,
+    syncNow,
+    disconnect,
+  };
+
+  return steamSync;
 }
 
 function ImageThumb({
@@ -181,11 +239,10 @@ function ImageThumb({
   selected: boolean;
   onClick: () => void;
 }) {
+  let thumbClass = "group images-thumb";
+  if (selected) thumbClass = "group images-thumb images-thumb-selected";
   return (
-    <button
-      onClick={onClick}
-      className={`group images-thumb ${selected ? "images-thumb-selected" : ""}`}
-    >
+    <button onClick={onClick} className={thumbClass}>
       <StoredImageView id={img.id} alt={img.name} className="images-thumb-image" />
       <div className="images-thumb-overlay">
         <div className="images-thumb-name">{getImageLabel(img)}</div>

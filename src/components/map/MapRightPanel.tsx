@@ -1,11 +1,12 @@
-import { BrassButton, Button, GhostButton, IconButton } from "@/components/common/Button";
+import { BrassButton, Button, GhostButton } from "@/components/common/Button";
 import { useNavigate } from "@tanstack/react-router";
 import { PagedNotesList } from "@/components/common/PagedNotesList";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { DetailsField } from "@/components/common/input/DetailsField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
-import { Eraser, Trash2, X } from "lucide-react";
+import { Eraser, Trash2 } from "lucide-react";
 import type { GridCell, Note, Todo } from "@/lib/types";
+import { SidePanel } from "@/components/common/SidePanel";
 
 export interface MapRightPanelProps {
   coordLabel: string;
@@ -43,6 +44,8 @@ export function MapRightPanel({
 }: MapRightPanelProps) {
   const navigate = useNavigate();
   const activeRoom = activeCell?.roomName;
+  let panelTitle = `Cell ${coordLabel}`;
+  if (activeCell?.roomName) panelTitle = activeCell.roomName;
 
   async function openCaptureFromMap(kind: "note" | "todo") {
     if (!activeRoom) return;
@@ -51,16 +54,7 @@ export function MapRightPanel({
   }
 
   return (
-    <div className="map-panel">
-      <div className="map-panel-header">
-        <div>
-          <h2 className="map-sheet-title">{activeCell?.roomName ?? `Cell ${coordLabel}`}</h2>
-        </div>
-        <IconButton onClick={onClose} aria-label="Close panel">
-          <X />
-        </IconButton>
-      </div>
-
+    <SidePanel.Right title={panelTitle} onClose={onClose} panelKey={`map:${coordLabel}`}>
       <div className="map-sheet-body">
         <div>
           <label className="map-field-label">Room</label>
@@ -139,7 +133,7 @@ export function MapRightPanel({
         )}
         {activeTodos.length > 0 && <MapRoomTodos todos={activeTodos} />}
       </div>
-    </div>
+    </SidePanel.Right>
   );
 }
 
@@ -148,11 +142,15 @@ function MapRoomTodos({ todos }: { todos: Todo[] }) {
     <div>
       <div className="map-list-title">Todo items in this room</div>
       <ul className="map-todo-list">
-        {todos.map((todo) => (
-          <li key={todo.id} className={todo.status === "done" ? "map-todo-done" : ""}>
-            · {todo.title}
-          </li>
-        ))}
+        {todos.map((todo) => {
+          let liClass = "";
+          if (todo.status === "done") liClass = "map-todo-done";
+          return (
+            <li key={todo.id} className={liClass}>
+              · {todo.title}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

@@ -69,20 +69,15 @@ export function MarkdownShortcutHelp() {
           <div
             ref={popupRef}
             style={{ position: "fixed", top: popupPos.top, right: popupPos.right, zIndex: 9999 }}
-            className="w-72 rounded-md border border-border bg-popover p-3 shadow-lg text-[11px]"
+            className="md-shortcut-popover"
           >
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Token shortcuts
-            </p>
-            <div className="grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-1.5">
+            <p className="md-shortcut-title">Token shortcuts</p>
+            <div className="md-shortcut-grid">
               {SHORTCUTS.map(({ tokens, desc }) => (
                 <Fragment key={desc}>
                   <div className="flex flex-wrap gap-1">
                     {tokens.map((t) => (
-                      <code
-                        key={t}
-                        className="rounded bg-accent px-1 py-0.5 font-mono text-foreground"
-                      >
+                      <code key={t} className="md-shortcut-key">
                         {t}
                       </code>
                     ))}

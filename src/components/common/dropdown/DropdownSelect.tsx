@@ -12,7 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/common/dropdown/DropdownMenu";
-import { cn } from "@/lib/utils";
 
 export interface DropdownSelectOption {
   value: string;
@@ -24,17 +23,14 @@ export function DropdownSelectComponent({
   onValueChange,
   options,
   placeholder = "Select...",
-  className,
-  contentClassName,
 }: {
   value: string;
   onValueChange: (next: string) => void;
   options: DropdownSelectOption[];
   placeholder?: string;
-  className?: string;
-  contentClassName?: string;
 }) {
   const activeOption = options.find((option) => option.value === value);
+  const triggerTextClass = activeOption ? "text-foreground" : "text-muted-foreground";
 
   return (
     <DropdownMenu modal={false}>
@@ -42,34 +38,32 @@ export function DropdownSelectComponent({
         <Button
           type="button"
           variant="outline"
-          className={cn(
-            "h-9 w-full justify-between bg-card/65 px-3 py-2 text-sm font-normal",
-            className,
-          )}
+          className="h-9 w-full justify-between bg-card/65 px-3 py-2 text-sm font-normal"
         >
-          <span className={activeOption ? "text-foreground" : "text-muted-foreground"}>
+          <span className={triggerTextClass}>
             {activeOption?.label ?? placeholder}
           </span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          <ChevronDown className="icon-md opacity-50" />
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent
-        align="start"
-        className={cn("w-[var(--radix-dropdown-menu-trigger-width)]", contentClassName)}
-      >
-        {options.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            className={option.value === value ? "bg-accent" : undefined}
-            onSelect={() => onValueChange(option.value)}
-          >
-            {option.label}
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent align="start" className="dropdown-select-content">
+        {options.map((option) => {
+          const activeClass = option.value === value ? "menu-item-active" : "";
+          return (
+            <DropdownMenuItem
+              key={option.value}
+              className={activeClass}
+              onSelect={() => onValueChange(option.value)}
+            >
+              {option.label}
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
 export const DropdownSelect = memo(DropdownSelectComponent);
+

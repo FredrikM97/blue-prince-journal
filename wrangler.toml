@@ -1,0 +1,5 @@
+name = "blue-prince-journal"
+pages_build_output_dir = "dist/client"
+
+[vars]
+BASE_PATH = "/"

@@ -369,22 +369,26 @@ function SuggestionItems({
       aria-label="Token suggestions"
       style={style}
     >
-      {suggestions.map((suggestion, index) => (
-        <button
-          key={suggestion.value}
-          type="button"
-          className={`capture-suggestion-item${index === activeIndex ? " capture-suggestion-item-active" : ""}`}
-          aria-selected={index === activeIndex}
-          onMouseEnter={() => onHover(index)}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            onApply(suggestion);
-          }}
-        >
-          <span>{suggestion.value}</span>
-          <span className="capture-suggestion-hint">{suggestion.hint}</span>
-        </button>
-      ))}
+      {suggestions.map((suggestion, index) => {
+        let itemClass = "capture-suggestion-item";
+        if (index === activeIndex) itemClass = "capture-suggestion-item capture-suggestion-item-active";
+        return (
+          <button
+            key={suggestion.value}
+            type="button"
+            className={itemClass}
+            aria-selected={index === activeIndex}
+            onMouseEnter={() => onHover(index)}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onApply(suggestion);
+            }}
+          >
+            <span>{suggestion.value}</span>
+            <span className="capture-suggestion-hint">{suggestion.hint}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

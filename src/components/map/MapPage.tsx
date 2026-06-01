@@ -59,32 +59,38 @@ export function MapPage() {
     setCommentDraft(c?.comment ?? "");
   }
 
-  const rightSidebar = active ? (
-    <MapRightPanel
-      row={active.row}
-      col={active.col}
-      coordLabel={coordLabel(active.row, active.col)}
-      activeCell={activeCell}
-      activeNotes={activeNotes}
-      activeTodos={activeTodos}
-      commentDraft={commentDraft}
-      setCommentDraft={setCommentDraft}
-      onClose={() => setActive(null)}
-      upsertCell={upsertCell}
-      clearCell={clearCell}
-      openCapture={openCapture}
-    />
-  ) : (
+  let rightSidebar = (
     <div className="page-layout-panel text-muted-foreground">
       Select a map cell to edit room details, notes, and todos.
     </div>
   );
+  if (active) {
+    rightSidebar = (
+      <MapRightPanel
+        row={active.row}
+        col={active.col}
+        coordLabel={coordLabel(active.row, active.col)}
+        activeCell={activeCell}
+        activeNotes={activeNotes}
+        activeTodos={activeTodos}
+        commentDraft={commentDraft}
+        setCommentDraft={setCommentDraft}
+        onClose={() => {
+          setActive(null);
+        }}
+        upsertCell={upsertCell}
+        clearCell={clearCell}
+        openCapture={openCapture}
+      />
+    );
+  }
 
   return (
-    <PageLayout
-      leftSidebar={<MapLeftPanel />}
-      rightSidebar={rightSidebar}
-      middle={
+    <PageLayout>
+      <PageLayout.Left>
+        <MapLeftPanel />
+      </PageLayout.Left>
+      <PageLayout.Middle>
         <MapMiddlePanel
           byId={byId}
           noteCountByRoom={noteCountByRoom}
@@ -92,9 +98,8 @@ export function MapPage() {
           coordLabel={coordLabel}
           onOpenCell={openCell}
         />
-      }
-    >
-      {/* middle content is provided via the `middle` prop */}
+      </PageLayout.Middle>
+      <PageLayout.Right>{rightSidebar}</PageLayout.Right>
     </PageLayout>
   );
 }
