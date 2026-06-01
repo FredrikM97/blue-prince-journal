@@ -6,7 +6,6 @@ import {
   HeadContent,
   Link,
   Outlet,
-  Scripts,
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
