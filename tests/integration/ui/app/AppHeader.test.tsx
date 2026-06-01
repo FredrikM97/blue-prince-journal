@@ -6,6 +6,7 @@ const mockNavigate = vi.fn();
 const hoisted = vi.hoisted(() => ({
   mockExportAll: vi.fn(async () => {}),
   mockImportAll: vi.fn(async () => {}),
+  mockSubmitFeedback: vi.fn(async () => {}),
 }));
 
 const mockState = {
@@ -49,6 +50,10 @@ vi.mock("@/data/io", () => ({
   importAll: hoisted.mockImportAll,
 }));
 
+vi.mock("@/data/feedback", () => ({
+  submitFeedback: hoisted.mockSubmitFeedback,
+}));
+
 vi.mock("sonner", () => ({
   toast: {
     success: (...args: unknown[]) => toastSuccess(...args),
@@ -67,11 +72,13 @@ vi.mock("@/components/common/dropdown/DropdownMenu", () => ({
   DropdownMenuItem: ({
     children,
     onClick,
+    onSelect,
   }: {
     children: React.ReactNode;
     onClick?: () => void;
+    onSelect?: () => void;
   }) => (
-    <button type="button" onClick={onClick}>
+    <button type="button" onClick={onClick ?? onSelect}>
       {children}
     </button>
   ),
@@ -91,6 +98,7 @@ describe("AppHeader", () => {
     mockNavigate.mockClear();
     hoisted.mockExportAll.mockClear();
     hoisted.mockImportAll.mockClear();
+    hoisted.mockSubmitFeedback.mockClear();
     toastSuccess.mockClear();
     toastError.mockClear();
   });
@@ -98,7 +106,7 @@ describe("AppHeader", () => {
   it("renders core nav links and hides hidden sections", () => {
     render(<AppHeader />);
 
-    expect(screen.getByText("Blue Prince Notes")).toBeInTheDocument();
+    expect(screen.getByText("Blue Prince Journal")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Notes" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Todo" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Map" })).toBeInTheDocument();
@@ -189,9 +197,35 @@ describe("AppHeader", () => {
     window.addEventListener("bp:show-welcome", listener);
     render(<AppHeader />);
 
-    fireEvent.click(screen.getByRole("link", { name: /Blue Prince Notes/i }));
+    fireEvent.click(screen.getByRole("link", { name: /Blue Prince Journal/i }));
 
     expect(listener).toHaveBeenCalled();
     window.removeEventListener("bp:show-welcome", listener);
+  });
+
+  it("opens the feedback dialog and sends a submission", async () => {
+    render(<AppHeader />);
+
+    fireEvent.click(screen.getByRole("button", { name: /send feedback/i }));
+
+    expect(screen.getByRole("heading", { name: /send feedback/i })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "Great app, please add more filters." },
+    });
+    fireEvent.change(screen.getByLabelText("Contact"), {
+      target: { value: "agent@example.com" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^send$/i }));
+
+    await waitFor(() => {
+      expect(hoisted.mockSubmitFeedback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Great app, please add more filters.",
+          contact: "agent@example.com",
+        }),
+      );
+      expect(toastSuccess).toHaveBeenCalledWith("Feedback sent");
+    });
   });
 });

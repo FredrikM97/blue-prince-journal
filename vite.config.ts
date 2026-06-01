@@ -6,10 +6,11 @@ import { defineConfig } from "vitest/config";
 import { cloudflare } from "@cloudflare/vite-plugin";
 
 const base = process.env.BASE_PATH ?? "/";
+const isTestRun = process.env.VITEST === "true" || process.env.NODE_ENV === "test";
 
-export default defineConfig({
-  base,
-  plugins: [tailwindcss(), tanstackStart({
+const plugins = [
+  tailwindcss(),
+  tanstackStart({
     importProtection: {
       behavior: "error",
       client: {
@@ -25,11 +26,23 @@ export default defineConfig({
     },
     // Keep the server runtime entry for prerendering the SPA shell at build time.
     server: { entry: "server" },
-  }), react(), cloudflare({
-    viteEnvironment: {
-      name: "ssr"
-    }
-  })],
+  }),
+  react(),
+];
+
+if (!isTestRun) {
+  plugins.push(
+    cloudflare({
+      viteEnvironment: {
+        name: "ssr",
+      },
+    }),
+  );
+}
+
+export default defineConfig({
+  base,
+  plugins,
   resolve: {
     tsconfigPaths: true,
     dedupe: [
