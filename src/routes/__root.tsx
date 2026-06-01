@@ -9,7 +9,6 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import appCss from "../styles.css?url";
 import { AppHeader } from "@/components/AppHeader";
 import { Toaster } from "@/components/common/Sonner";
 import { toast } from "sonner";
@@ -254,9 +253,11 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Blue Prince Journal" },
-      { name: "description", content: "A keyboard-first journal and todos tracker for Blue Prince." },
+      {
+        name: "description",
+        content: "A keyboard-first journal and todos tracker for Blue Prince.",
+      },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
   }),
 });
 
