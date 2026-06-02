@@ -1,4 +1,13 @@
 @layer components {
+  .graph-page-layout .page-layout-content {
+    overflow: hidden;
+    height: calc(100dvh - 5.5rem);
+  }
+
+  .graph-page-middle {
+    @apply flex h-full min-h-0 flex-col;
+  }
+
   /* ─── Graph canvas wrapper ─────────────────────────────────────────────── */
 
   /* Border + background variant (non-plain mode) */
@@ -49,6 +58,13 @@
   /* Type filter toggle: extends .filter-toggle with icon gap */
   .filter-type-toggle {
     @apply flex w-full cursor-pointer items-center rounded px-1 py-0.5 text-xs transition-opacity hover:bg-muted/40 gap-1.5;
+  }
+
+  @media (max-width: 1023px) {
+    .graph-page-layout .page-layout-content {
+      overflow: hidden;
+      height: calc(100dvh - 5.5rem);
+    }
   }
 }
 

@@ -18,6 +18,7 @@ import { useNotesPageUI } from "@/hooks/useNotesPageUI";
 import { TodoRightPanel } from "@/components/todos/TodoRightPanel";
 import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
 import { SidePanel } from "@/components/common/SidePanel";
+import { MetaText } from "@/components/common/Typography";
 
 export function NotesPage({
   filterType,
@@ -62,23 +63,32 @@ export function NotesPage({
     removeTodo,
   });
 
-  let rightPanelContent = (
-    <NotesRightPanel
-      activeNote={activeNote}
-      draft={currentDraft}
-      panelMode={uiState.panelMode}
-      setDraft={setEditorDraft}
-      onSave={async () => {
-        if (!currentDraft) return;
-        await saveNote(currentDraft);
-        uiActions.openPreview(currentDraft);
-      }}
-      onClose={() => {
-        uiActions.clearSelection();
-        closeCapture();
-      }}
-    />
+  let rightPanelContent: React.ReactNode = (
+    <SidePanel.Right title="Preview">
+      <MetaText>Select a note to preview or edit details.</MetaText>
+    </SidePanel.Right>
   );
+
+  const hasActiveNote = activeNote !== null;
+  if (hasActiveNote) {
+    rightPanelContent = (
+      <NotesRightPanel
+        activeNote={activeNote}
+        draft={currentDraft}
+        panelMode={uiState.panelMode}
+        setDraft={setEditorDraft}
+        onSave={async () => {
+          if (!currentDraft) return;
+          await saveNote(currentDraft);
+          uiActions.openPreview(currentDraft);
+        }}
+        onClose={() => {
+          uiActions.clearSelection();
+          closeCapture();
+        }}
+      />
+    );
+  }
 
   if (previewTodo) {
     rightPanelContent = <TodoRightPanel todo={previewTodo} onClose={() => setPreviewTodo(null)} />;
@@ -100,10 +110,7 @@ export function NotesPage({
 
   return (
     <>
-      <PageLayout
-        className="lg:[grid-template-columns:240px_minmax(0,1fr)_420px]"
-        prioritizeMiddleScroll
-      >
+      <PageLayout variant="panel">
         <PageLayout.Left>
           <SidePanel.Left title={title} subtitle={`${filtered.length} ${entryLabel}`}>
             <NotesFilterPanel filters={filterState} actions={filterActions} />
@@ -128,7 +135,7 @@ export function NotesPage({
       >
         <DialogContent variant="compact">
           <DialogHeader>
-            <DialogTitle className="font-serif">Delete note</DialogTitle>
+            <DialogTitle>Delete note</DialogTitle>
             <DialogDescription>{deleteDescription}</DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
@@ -170,11 +177,7 @@ function NotesRightPanel({
   const [previewExpanded, setPreviewExpanded] = useState(false);
 
   if (!activeNote) {
-    return (
-      <div className="page-layout-panel text-muted-foreground">
-        Select a note to preview or edit details.
-      </div>
-    );
+    return null;
   }
 
   if (panelMode === "edit") {

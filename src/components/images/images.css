@@ -4,7 +4,7 @@
   }
 
   .images-page-header h1 {
-    @apply font-serif text-2xl;
+    @apply text-2xl;
   }
 
   .images-page-header p {
@@ -64,7 +64,6 @@
   }
 
   .images-detail-title {
-    @apply font-serif;
   }
 
   .images-detail-preview {
@@ -80,7 +79,7 @@
   }
 
   .images-linked-notes-title {
-    @apply font-serif text-sm;
+    @apply text-sm;
   }
 
   .images-linked-notes-list {

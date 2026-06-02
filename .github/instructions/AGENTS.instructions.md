@@ -36,12 +36,34 @@ applyTo: "src/**/*.{ts,tsx,css},tests/**/*.{ts,tsx},.github/instructions/*.md"
 - Prefer shared primitives (`SidePanel`, `PanelHeader`, `FilterSection`, shared dropdown/input components) over one-off panel markup.
 - If multiple features share the same structure, extract a reusable component.
 - Keep state/effects in the component that owns the UI interaction.
+- Prefer shared custom components (`Button`, `GhostButton`, `IconButton`, layout primitives) over raw native elements with ad-hoc class strings. Only use native elements directly when no shared primitive fits.
+- Avoid divergence across similar screens: when two features use the same UI pattern, keep structure, component choice, and visual treatment aligned unless the user explicitly requests a difference.
 
 # Panel / Dialog Rules
 
 - Prefer `SidePanel` + `PanelHeader` for sidebar panel shells and header actions.
 - Prefer `DialogContent` variants and shared dialog helpers over per-caller structural overrides.
 - Avoid custom per-screen dialog structure unless behavior differs materially.
+
+# SidePanel Title Bar Contract
+
+- The SidePanel title bar is owned by `SidePanel`/`PanelHeader` only.
+- Do not recreate title/subtitle/close/expand rows inside feature panels that already use `SidePanel.Left` or `SidePanel.Right`.
+- Always pass header intent via props (`title`, `subtitle`, `onClose`, `onExpand`) instead of custom header markup.
+- Use `panelKey` only when intentional mobile auto-open is required; omit it for passive panels that should stay closed by default.
+
+# Notes Row Stability
+
+- Treat `src/components/notes/NotesView.tsx` + `src/components/notes/notes.css` note-row structure as layout-sensitive.
+- Do not change note row wrapper hierarchy or preview-button geometry unless the task explicitly asks for note row layout changes.
+- Keep note summary content anchored left and preserve action-button column alignment.
+
+# Button API Safety
+
+- Do not add or use freeform `className` escape hatches on `GhostButton`.
+- Extend `GhostButton` using typed props/variants (`tone`, `surface`, `active`) when new visual states are needed.
+- Shared custom components should not require consumer-provided `className` strings for core visual states.
+- Add typed variants/props on the shared component instead of expecting callers to assemble styling classes.
 
 # Input / Markdown Rules
 

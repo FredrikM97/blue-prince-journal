@@ -42,6 +42,9 @@ import {
 } from "@/data/steamImport";
 import { toast } from "sonner";
 import { SettingsSection, SettingsSubsection } from "./SettingsSection";
+import { Heading, MetaText, Text } from "@/components/common/Typography";
+import { Stack } from "@/components/common/Stack";
+import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
 
 export function SettingsPage() {
   const load = useStore((s) => s.load);
@@ -83,25 +86,31 @@ export function SettingsPage() {
   }
 
   return (
-    <PageLayout className="h-full max-w-none px-0 py-0 sm:px-0 sm:py-0" prioritizeMiddleScroll>
+    <PageLayout>
       <PageLayout.Middle>
         <div className="settings-content">
           <header>
-            <h1 className="font-serif text-3xl">Settings</h1>
-            <p className="text-sm text-muted-foreground">
+            <Heading as="h1" size="3xl">
+              Settings
+            </Heading>
+            <Text size="sm" tone="muted">
               All data lives in your browser. Export regularly to keep a backup.
-            </p>
+            </Text>
           </header>
 
           <SettingsSection title="Data">
-            <div className="flex flex-wrap gap-2">
-              <BrassButton onClick={() => exportAll().then(() => toast.success("Exported"))}>
+            <Inline gap="2" wrap>
+              <BrassButton
+                size="sm"
+                onClick={() => exportAll().then(() => toast.success("Exported"))}
+              >
                 Export ZIP
               </BrassButton>
-              <Button variant="outline" onClick={() => fileRef.current?.click()}>
+              <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
                 Import (merge)...
               </Button>
               <Button
+                size="sm"
                 variant="outline"
                 onClick={async () => {
                   const f = fileRef.current;
@@ -112,7 +121,7 @@ export function SettingsPage() {
               >
                 Import (replace)...
               </Button>
-            </div>
+            </Inline>
             <input
               ref={fileRef}
               type="file"
@@ -144,6 +153,7 @@ export function SettingsPage() {
 
             <SettingsSubsection title="Dev utilities">
               <Button
+                size="sm"
                 variant="outline"
                 onClick={async () => {
                   const notes = buildGraphTestNotes();
@@ -159,12 +169,12 @@ export function SettingsPage() {
             </SettingsSubsection>
           </SettingsSection>
 
-          <div className="border-t border-border/70 pt-6">
+          <SectionBlock>
             <SettingsSection title="Rooms">
-              <p className="text-xs text-muted-foreground">
+              <MetaText>
                 Add custom rooms under any group. They appear in Map, New Note, and Edit Note room
                 dropdowns.
-              </p>
+              </MetaText>
 
               <div className="settings-input-grid">
                 <TextInput
@@ -179,57 +189,65 @@ export function SettingsPage() {
                   options={categoryOptions}
                 />
 
-                <Button variant="outline" onClick={addRoom}>
+                <Button size="sm" variant="outline" onClick={addRoom}>
                   Add room
                 </Button>
               </div>
 
-              <div className="panel-card space-y-3">
+              <Stack gap="3" variant="panel-card">
                 {[...customRoomsByCategory.entries()].map(([group, rooms]) => {
                   if (rooms.length === 0) return null;
 
                   return (
-                    <div key={group} className="space-y-2">
-                      <h3 className="section-label">{group}</h3>
-                      <div className="flex flex-wrap gap-1.5">
+                    <Stack key={group} gap="2">
+                      <Heading as="h3" size="base" variant="section-label">
+                        {group}
+                      </Heading>
+                      <Inline gap="1.5" wrap>
                         {rooms.map((name) => (
-                          <button
+                          <Button
                             key={`${group}-${name}`}
                             type="button"
+                            size="sm"
+                            variant="ghost"
                             onClick={() => removeRoom(name)}
                             className="settings-room-chip"
                             title="Remove room"
                           >
                             {name}
-                          </button>
+                          </Button>
                         ))}
-                      </div>
-                    </div>
+                      </Inline>
+                    </Stack>
                   );
                 })}
-                {customRooms.length === 0 && (
-                  <p className="text-xs text-muted-foreground">No custom rooms yet.</p>
-                )}
-              </div>
+                {customRooms.length === 0 && <MetaText>No custom rooms yet.</MetaText>}
+              </Stack>
             </SettingsSection>
-          </div>
+          </SectionBlock>
 
-          <div className="border-t border-border/70 pt-6">
+          <SectionBlock>
             <SettingsSection title="Keyboard">
-              <ul className="space-y-1 text-sm text-muted-foreground">
+              <Stack as="ul" gap="1">
                 <li>
-                  <KeyboardKey>N</KeyboardKey> - open quick capture
+                  <Text size="sm" tone="muted">
+                    <KeyboardKey>N</KeyboardKey> - open quick capture
+                  </Text>
                 </li>
                 <li>
-                  <KeyboardKey>Esc</KeyboardKey> - close capture
+                  <Text size="sm" tone="muted">
+                    <KeyboardKey>Esc</KeyboardKey> - close capture
+                  </Text>
                 </li>
                 <li>
-                  <KeyboardKey>Ctrl+Enter</KeyboardKey> - save ·{" "}
-                  <KeyboardKey>Ctrl+Shift+Enter</KeyboardKey> - save &amp; keep open
+                  <Text size="sm" tone="muted">
+                    <KeyboardKey>Ctrl+Enter</KeyboardKey> - save ·{" "}
+                    <KeyboardKey>Ctrl+Shift+Enter</KeyboardKey> - save &amp; keep open
+                  </Text>
                 </li>
-              </ul>
+              </Stack>
             </SettingsSection>
-          </div>
+          </SectionBlock>
         </div>
       </PageLayout.Middle>
     </PageLayout>
@@ -314,18 +332,18 @@ function SteamImportSection() {
 
   if (!isSupported) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <Text size="sm" tone="muted">
         Your browser does not support file access. Steam import requires Chrome or Edge.
-      </p>
+      </Text>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">
+    <Stack gap="3">
+      <MetaText>
         Connect a Steam screenshots folder once, then sync from it any time. Imported files are
         skipped automatically.
-      </p>
+      </MetaText>
 
       {!connected && (
         <BrassButton
@@ -340,33 +358,35 @@ function SteamImportSection() {
       )}
 
       {connected && (
-        <div className="settings-steam-actions-row">
-          <BrassButton
-            size="sm"
-            onClick={handleSync}
-            disabled={busy}
-            className="settings-steam-action"
-          >
-            <FolderSync className="icon-sm" />
-            Sync now
-          </BrassButton>
-          <Button variant="ghost" size="sm" onClick={handleDisconnect} disabled={busy}>
-            <Unlink className="icon-sm" />
-            Disconnect
-          </Button>
+        <Stack gap="1.5">
+          <div className="settings-steam-actions-row">
+            <BrassButton
+              size="sm"
+              onClick={handleSync}
+              disabled={busy}
+              className="settings-steam-action"
+            >
+              <FolderSync className="icon-sm" />
+              Sync now
+            </BrassButton>
+            <Button variant="ghost" size="sm" onClick={handleDisconnect} disabled={busy}>
+              <Unlink className="icon-sm" />
+              Disconnect
+            </Button>
+          </div>
           <span className="settings-steam-connected-label">
             Connected: {folderName ?? getActiveSteamFolderName() ?? "Unknown"}
           </span>
-        </div>
+        </Stack>
       )}
 
-      <p className="text-xs text-muted-foreground">
+      <MetaText>
         Last sync:{" "}
         {lastRefreshAt
           ? `${new Date(lastRefreshAt).toLocaleString()} · imported ${lastImported}, skipped ${lastSkipped}`
           : "Never"}
-      </p>
-    </div>
+      </MetaText>
+    </Stack>
   );
 }
 
@@ -489,57 +509,61 @@ function SyncFolderSection() {
 
   if (!isSupported) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <Text size="sm" tone="muted">
         Your browser does not support the File System Access API. Try Chrome or Edge.
-      </p>
+      </Text>
     );
   }
 
   if (syncFolderName) {
     return (
-      <div className="space-y-3">
+      <Stack gap="3">
         <div className="panel-row">
           <FolderSync className="h-4 w-4 shrink-0 text-green-500" />
           <span className="min-w-0 flex-1 truncate font-medium">{syncFolderName}</span>
-          <span className="shrink-0 text-xs text-muted-foreground">
-            {syncMode === "manual" ? "manual sync" : "auto-syncing"}
+          <span className="shrink-0">
+            <MetaText as="span">{syncMode === "manual" ? "manual sync" : "auto-syncing"}</MetaText>
           </span>
         </div>
-        <label className="flex items-center gap-2 text-sm">
+        <Inline as="label" gap="2" align="center">
           <input
             type="checkbox"
             checked={syncMode === "manual"}
             onChange={(e) => void handleModeChange(e.target.checked ? "manual" : "auto")}
             disabled={busy}
           />
-          Manual sync mode
-        </label>
+          <Text as="span" size="sm">
+            Manual sync mode
+          </Text>
+        </Inline>
         {syncMode === "manual" && (
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Inline as="label" gap="2" align="center">
             <input
               type="checkbox"
               checked={reminderEnabled}
               onChange={(e) => setReminderEnabled(e.target.checked)}
             />
-            Remind every 5 minutes when unsynced for a while
-          </label>
+            <MetaText as="span">Remind every 5 minutes when unsynced for a while</MetaText>
+          </Inline>
         )}
         {dirty && (
-          <p className="text-xs font-medium text-amber-600 dark:text-amber-400">Unsynced changes</p>
+          <Text size="xs" weight="medium" intent="warning">
+            Unsynced changes
+          </Text>
         )}
-        <p className="text-xs text-muted-foreground">
+        <MetaText>
           Sync writes manifest.json plus image files in images/. Place this folder inside Dropbox,
           OneDrive, or iCloud Drive to sync across devices.
-        </p>
-        <p className="text-xs text-muted-foreground">
+        </MetaText>
+        <MetaText>
           {lastSyncedAt
             ? `Last saved: ${new Date(lastSyncedAt).toLocaleString()}`
             : "Last saved: never"}
           {dirty && lastDirtyAt
             ? ` • Unsynced since ${new Date(lastDirtyAt).toLocaleTimeString()}`
             : ""}
-        </p>
-        <div className="flex flex-wrap gap-2">
+        </MetaText>
+        <Inline gap="2" wrap>
           {syncMode === "manual" ? (
             <BrassButton size="sm" onClick={handleSyncNow} disabled={busy || !dirty}>
               Save to disk now
@@ -552,39 +576,36 @@ function SyncFolderSection() {
           <Button variant="outline" size="sm" onClick={handleOpenSyncFolder} disabled={busy}>
             Open folder
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDisconnect}
-            className="text-destructive hover:text-destructive"
-          >
+          <Button variant="outline-destructive" size="sm" onClick={handleDisconnect}>
             <Unlink className="mr-1.5 h-3.5 w-3.5" />
             Disconnect
           </Button>
-        </div>
-      </div>
+        </Inline>
+      </Stack>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
+    <Stack gap="3">
+      <Text size="sm" tone="muted">
         Connect a local folder and the app will keep <code>manifest.json</code> and an{" "}
         <code>images/</code> folder up to date after every change.
-      </p>
-      <label className="flex items-center gap-2 text-sm">
+      </Text>
+      <Inline as="label" gap="2" align="center">
         <input
           type="checkbox"
           checked={syncMode === "manual"}
           onChange={(e) => void handleModeChange(e.target.checked ? "manual" : "auto")}
           disabled={busy}
         />
-        Use manual sync mode when connected
-      </label>
-      <BrassButton onClick={handleConnect} disabled={busy}>
+        <Text as="span" size="sm">
+          Use manual sync mode when connected
+        </Text>
+      </Inline>
+      <BrassButton size="sm" onClick={handleConnect} disabled={busy}>
         <FolderOpen className="mr-2 h-4 w-4" />
         Connect folder…
       </BrassButton>
-    </div>
+    </Stack>
   );
 }

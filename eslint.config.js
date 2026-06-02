@@ -32,11 +32,72 @@ export default tseslint.config(
           ],
         },
       ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "JSXAttribute[name.name='className'][value.type='Literal'][value.value='flex items-center gap-2']",
+          message: "Use `Inline` primitive instead of ad-hoc `flex items-center gap-2`.",
+        },
+        {
+          selector:
+            "JSXAttribute[name.name='className'][value.type='Literal'][value.value='flex flex-wrap justify-center gap-3']",
+          message: "Use `Inline` primitive with `wrap` and `justify` props.",
+        },
+        {
+          selector:
+            "JSXAttribute[name.name='className'][value.type='Literal'][value.value='w-full max-w-6xl space-y-8 text-center']",
+          message:
+            "Use `CenteredContent` primitive instead of ad-hoc container utility class chains.",
+        },
+        {
+          selector:
+            "JSXAttribute[name.name='className'][value.type='Literal'][value.value='border-t border-border/70 pt-6']",
+          message: "Use `SectionBlock` primitive for top-divider sections.",
+        },
+      ],
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true, allowExportNames: ["getRouter"] },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  {
+    files: ["src/components/**/*.tsx"],
+    ignores: ["src/components/common/Button.tsx"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXOpeningElement[name.name='button']",
+          message:
+            "Use shared Button primitives from `@/components/common/Button` instead of raw <button>.",
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/components/**/*.tsx"],
+    ignores: [
+      "src/components/common/Button.tsx",
+      "src/components/common/Typography.tsx",
+      "src/components/common/LayoutPrimitives.tsx",
+      "src/components/common/Dialog.tsx",
+      "src/components/common/Tabs.tsx",
+      "src/components/common/dropdown/**/*.tsx",
+      "src/components/common/input/**/*.tsx",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector:
+            "JSXOpeningElement[name.type='JSXIdentifier'][name.name=/^[a-z]/] > JSXAttribute[name.name='className']",
+          message:
+            "Avoid className on native elements in feature components. Use shared custom primitives and typed variants instead.",
+        },
+      ],
     },
   },
   eslintPluginPrettier,

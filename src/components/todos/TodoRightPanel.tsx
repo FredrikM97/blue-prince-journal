@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { SidePanel } from "@/components/common/SidePanel";
+import { MetaText } from "@/components/common/Typography";
 import type { Todo } from "@/lib/types";
 import { TodoPreviewDialog } from "./TodoPreviewDialog";
 
@@ -20,7 +21,7 @@ export function TodoRightPanel({ todo, onClose }: { todo: Todo; onClose: () => v
       {todo.notes ? (
         <MarkdownPreview>{todo.notes}</MarkdownPreview>
       ) : (
-        <p className="text-xs text-muted-foreground">No notes added.</p>
+        <MetaText>No notes added.</MetaText>
       )}
     </SidePanel.Right>
   );

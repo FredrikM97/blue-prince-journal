@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Note } from "@/lib/types";
-import { BrassButton, Button, GhostButton } from "@/components/common/Button";
+import { BrassButton, Button, GhostButton, IconButton } from "@/components/common/Button";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { StoredImageView } from "@/components/StoredImageView";
@@ -12,7 +12,9 @@ import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
 import { toast } from "sonner";
 import { usePasteImages } from "@/hooks/usePasteImages";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
+import { MetaText } from "@/components/common/Typography";
+import { Inline } from "@/components/common/LayoutPrimitives";
 
 type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";
 
@@ -161,7 +163,7 @@ export function NotesEditorPanel({
       <div className="note-editor-images-card">
         <div className="note-editor-images-header">
           <span className="note-editor-images-label">Attached images</span>
-          <div className="flex items-center gap-2">
+          <Inline gap="2">
             <Button
               type="button"
               variant="outline"
@@ -192,7 +194,7 @@ export function NotesEditorPanel({
                 }}
               />
             </label>
-          </div>
+          </Inline>
         </div>
 
         {draft.imageIds.length > 0 ? (
@@ -203,8 +205,7 @@ export function NotesEditorPanel({
                 <p className="note-attached-thumb-label" title={id}>
                   {getImageLabel(imageById.get(id) ?? { name: "Image" })}
                 </p>
-                <button
-                  type="button"
+                <IconButton
                   onClick={() =>
                     setDraft((prev) => ({
                       ...prev,
@@ -215,12 +216,12 @@ export function NotesEditorPanel({
                   aria-label="Remove image"
                 >
                   <X className="h-3 w-3" />
-                </button>
+                </IconButton>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">No images attached to this note.</p>
+          <MetaText>No images attached to this note.</MetaText>
         )}
       </div>
 
@@ -274,9 +275,9 @@ function SelectExistingImagesDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent variant="editor">
         <div className="note-dialog-header">
-          <div className="flex items-center justify-between gap-3">
+          <Inline gap="3" justify="between">
             <DialogTitle>Attach existing image</DialogTitle>
-            <div className="flex items-center gap-2">
+            <Inline gap="2">
               <DropdownSelect
                 value={imageSort}
                 onValueChange={(value) => setImageSort(value as ImageSort)}
@@ -292,11 +293,11 @@ function SelectExistingImagesDialog({
                 <X className="h-3.5 w-3.5" />
                 Close
               </Button>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">
+            </Inline>
+          </Inline>
+          <MetaText>
             Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
-          </p>
+          </MetaText>
         </div>
 
         {sortedImages.length > 0 ? (
@@ -304,9 +305,11 @@ function SelectExistingImagesDialog({
             {sortedImages.map((img) => {
               const selected = selectedSet.has(img.id);
               return (
-                <button
+                <Button
                   key={img.id}
                   type="button"
+                  variant="ghost"
+                  size="default"
                   className={`note-image-picker-card ${
                     selected ? "note-image-picker-card-selected" : ""
                   }`}
@@ -330,14 +333,16 @@ function SelectExistingImagesDialog({
                     </p>
                     {selected ? <span className="note-image-picker-badge">Selected</span> : null}
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>
         ) : (
-          <p className="px-6 py-8 text-sm text-muted-foreground">
-            No available images to attach. Upload or paste a new image first.
-          </p>
+          <div className="px-6 py-8">
+            <MetaText size="sm">
+              No available images to attach. Upload or paste a new image first.
+            </MetaText>
+          </div>
         )}
       </DialogContent>
     </Dialog>

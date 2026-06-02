@@ -32,7 +32,7 @@
 
   /* Trigger button: full-width, matches text input height */
   .room-dropdown-trigger {
-    @apply h-9 w-full justify-between bg-card/65 px-3 py-2 text-sm font-normal;
+    @apply h-9 w-full justify-between border-input bg-secondary/70 px-3 py-2 text-sm font-normal hover:bg-secondary;
   }
 
   /* Trigger label text — muted when no room selected */
@@ -42,7 +42,7 @@
 
   /* When the trigger has a selected value, show label in foreground colour */
   .room-dropdown-trigger[data-has-value="true"] .room-trigger-label {
-    @apply text-foreground;
+    @apply text-muted-foreground;
   }
 
   /* Search input inside the dropdown */

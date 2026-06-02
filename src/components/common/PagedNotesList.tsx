@@ -13,6 +13,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
+import { Heading, MetaText, Text } from "@/components/common/Typography";
+import { Stack } from "@/components/common/Stack";
 import type { Note } from "@/lib/types";
 
 export function PagedNotesList({
@@ -32,7 +34,9 @@ export function PagedNotesList({
   return (
     <div>
       <div className="section-header-row">
-        <h3 className="section-label">{title}</h3>
+        <Heading as="h3" size="base" variant="section-label">
+          {title}
+        </Heading>
         {total > 1 && (
           <div className="flex items-center gap-1">
             <Button
@@ -44,9 +48,9 @@ export function PagedNotesList({
             >
               <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
-            <span className="text-xs text-muted-foreground tabular-nums">
+            <MetaText as="span" tabular>
               {safeIndex + 1} / {total}
-            </span>
+            </MetaText>
             <Button
               variant="outline"
               size="icon"
@@ -61,23 +65,23 @@ export function PagedNotesList({
       </div>
 
       {note ? (
-        <div className="panel-card space-y-1.5 text-sm">
-          <p className="font-medium leading-snug">{note.title}</p>
-          {note.body.trim() && <MarkdownPreview>{note.body}</MarkdownPreview>}
-          <div className="flex flex-wrap gap-1">
-            <Chip variant="solid">{note.type}</Chip>
-            {note.imageIds.length > 0 && (
-              <Chip variant="solid">📎 {note.imageIds.length}</Chip>
-            )}
-            {note.tags.map((tag) => (
-              <Chip key={tag} variant="tag">
-                #{tag}
-              </Chip>
-            ))}
-          </div>
-        </div>
+        <Text as="div" size="sm" variant="panel-card">
+          <Stack gap="1.5">
+            <Text weight="medium">{note.title}</Text>
+            {note.body.trim() && <MarkdownPreview>{note.body}</MarkdownPreview>}
+            <div className="flex flex-wrap gap-1">
+              <Chip variant="solid">{note.type}</Chip>
+              {note.imageIds.length > 0 && <Chip variant="solid">📎 {note.imageIds.length}</Chip>}
+              {note.tags.map((tag) => (
+                <Chip key={tag} variant="tag">
+                  #{tag}
+                </Chip>
+              ))}
+            </div>
+          </Stack>
+        </Text>
       ) : (
-        <p className="text-xs text-muted-foreground">{emptyLabel}</p>
+        <MetaText>{emptyLabel}</MetaText>
       )}
     </div>
   );

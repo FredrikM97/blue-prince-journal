@@ -6,16 +6,18 @@ import {
   type ReactNode,
   type WheelEvent,
 } from "react";
-import { Button } from "@/components/common/Button";
-import { Chip } from "@/components/common/Chip";
+import { Button, FilterToggleButton } from "@/components/common/Button";
 import { Dialog, DialogContent } from "@/components/common/Dialog";
 import { EmptyState } from "@/components/common/EmptyState";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
 import { PageLayout } from "@/components/common/PageLayout";
-import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
+import { SidePanel } from "@/components/common/SidePanel";
+import { MetaText } from "@/components/common/Typography";
+import { Stack } from "@/components/common/Stack";
 import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
 import { useGraphStoreData } from "@/hooks/useGraphStoreData";
+import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
 import { getRoomCatalog, ROOM_GROUPS } from "@/data/rooms";
 import type { Note, Todo } from "@/lib/types";
 
@@ -243,7 +245,6 @@ export function GraphPage() {
     key: type,
     label: type,
     active: !hiddenTypes.has(type),
-    dotColor: TYPE_COLOR[type],
     onToggle: () =>
       setHiddenTypes((prev) => {
         const next = new Set(prev);
@@ -264,146 +265,138 @@ export function GraphPage() {
 
   return (
     <>
-      <PageLayout>
+      <PageLayout className="graph-page-layout" variant="panel">
         <PageLayout.Left>
-          <div className="page-layout-panel space-y-3">
-            <p className="text-xs text-muted-foreground">
-              {displayNodes.length} entries · {edges.length} links
-            </p>
+          <SidePanel.Left
+            title="Graph"
+            subtitle={`${displayNodes.length} entries · ${edges.length} links`}
+          >
+            <Stack gap="3">
+              <FilterSection title="Types" onReset={onResetTypes}>
+                <FilterToggleGrid items={typeFilterItems} size="compact" />
+              </FilterSection>
 
-            <FilterSection title="Types" onReset={onResetTypes}>
-              <FilterToggleGrid items={typeFilterItems} />
-            </FilterSection>
+              {allRooms.length > 1 && (
+                <FilterSection
+                  title="Rooms"
+                  collapsible
+                  defaultOpen={false}
+                  badge={roomBadge}
+                  onReset={onResetRooms}
+                >
+                  <Stack gap="2">
+                    {groupedRoomFilters.map((group) => {
+                      const hiddenInGroup = group.rooms.filter((room) =>
+                        hiddenRooms.has(room),
+                      ).length;
+                      let groupBadge: string | undefined = undefined;
+                      if (hiddenInGroup > 0) {
+                        groupBadge = `(${group.rooms.length - hiddenInGroup}/${group.rooms.length})`;
+                      }
 
-            {allRooms.length > 1 && (
-              <FilterSection
-                title="Rooms"
-                collapsible
-                defaultOpen={false}
-                badge={roomBadge}
-                onReset={onResetRooms}
-              >
-                <div className="space-y-2">
-                  {groupedRoomFilters.map((group) => {
-                    const hiddenInGroup = group.rooms.filter((room) =>
-                      hiddenRooms.has(room),
-                    ).length;
-                    let groupBadge: string | undefined = undefined;
-                    if (hiddenInGroup > 0) {
-                      groupBadge = `(${group.rooms.length - hiddenInGroup}/${group.rooms.length})`;
-                    }
+                      let onResetGroup: (() => void) | undefined = undefined;
+                      if (hiddenInGroup > 0) {
+                        onResetGroup = () => {
+                          setHiddenRooms((prev) => {
+                            const next = new Set(prev);
+                            for (const room of group.rooms) {
+                              next.delete(room);
+                            }
+                            return next;
+                          });
+                        };
+                      }
 
-                    let onResetGroup: (() => void) | undefined = undefined;
-                    if (hiddenInGroup > 0) {
-                      onResetGroup = () => {
-                        setHiddenRooms((prev) => {
-                          const next = new Set(prev);
-                          for (const room of group.rooms) {
-                            next.delete(room);
-                          }
-                          return next;
-                        });
-                      };
-                    }
+                      const groupItems = group.rooms.map((room) => ({
+                        key: room || "__ungrouped__",
+                        label: room || "Ungrouped",
+                        active: !hiddenRooms.has(room),
+                        onToggle: () =>
+                          setHiddenRooms((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(room)) next.delete(room);
+                            else next.add(room);
+                            return next;
+                          }),
+                      }));
 
-                    const groupItems = group.rooms.map((room) => ({
-                      key: room || "__ungrouped__",
-                      label: room || "Ungrouped",
-                      active: !hiddenRooms.has(room),
-                      onToggle: () =>
-                        setHiddenRooms((prev) => {
-                          const next = new Set(prev);
-                          if (next.has(room)) next.delete(room);
-                          else next.add(room);
-                          return next;
-                        }),
-                    }));
+                      return (
+                        <FilterSection
+                          key={group.name}
+                          title={group.name}
+                          collapsible
+                          defaultOpen={false}
+                          badge={groupBadge}
+                          onReset={onResetGroup}
+                        >
+                          <FilterToggleGrid items={groupItems} leftAligned size="compact" />
+                        </FilterSection>
+                      );
+                    })}
+                  </Stack>
+                </FilterSection>
+              )}
 
+              {isolatedCount > 0 && (
+                <FilterSection title="Visibility">
+                  {(() => {
+                    const dotBg = hideIsolated ? "currentColor" : "transparent";
                     return (
-                      <FilterSection
-                        key={group.name}
-                        title={group.name}
-                        collapsible
-                        defaultOpen={false}
-                        badge={groupBadge}
-                        onReset={onResetGroup}
+                      <FilterToggleButton
+                        type="button"
+                        active={hideIsolated}
+                        onClick={() => setHideIsolated((v) => !v)}
                       >
-                        <FilterToggleGrid items={groupItems} leftAligned />
-                      </FilterSection>
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full border border-current"
+                          style={{ background: dotBg }}
+                        />
+                        <span>Connected only</span>
+                        <span className="ml-auto text-[10px]">
+                          <MetaText as="span" tabular>
+                            {isolatedCount} hidden
+                          </MetaText>
+                        </span>
+                      </FilterToggleButton>
                     );
-                  })}
-                </div>
-              </FilterSection>
-            )}
-
-            {isolatedCount > 0 && (
-              <FilterSection title="Visibility">
-                {(() => {
-                  let toggleClass = "filter-toggle gap-1.5 filter-toggle-off";
-                  if (hideIsolated) toggleClass = "filter-toggle gap-1.5 filter-toggle-on";
-                  const dotBg = hideIsolated ? "currentColor" : "transparent";
-                  return (
-                    <button onClick={() => setHideIsolated((v) => !v)} className={toggleClass}>
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-full border border-current"
-                        style={{ background: dotBg }}
-                      />
-                      <span>Connected only</span>
-                      <span className="ml-auto text-[10px] tabular-nums text-muted-foreground">
-                        {isolatedCount} hidden
-                      </span>
-                    </button>
-                  );
-                })()}
-              </FilterSection>
-            )}
-
-            {selectedNode && (
-              <>
-                <div className="border-t border-border" />
-                <div className="space-y-2">
-                  <h3 className="font-serif text-base leading-snug">{selectedNode.note.title}</h3>
-                  <div className="flex flex-wrap gap-1">
-                    <Chip>{selectedNode.note.type}</Chip>
-                    {selectedNode.note.room && (
-                      <Chip variant="room">@{selectedNode.note.room}</Chip>
-                    )}
-                    {selectedNode.note.tags.map((tag) => (
-                      <Chip key={tag}>#{tag}</Chip>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    ↑ {outgoingCount} out · ↓ {incomingCount} in
-                  </p>
-                  {selectedNode.note.body.trim() && (
-                    <div className="panel-card text-sm">
-                      <MarkdownPreview>{selectedNode.note.body}</MarkdownPreview>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+                  })()}
+                </FilterSection>
+              )}
+            </Stack>
+          </SidePanel.Left>
         </PageLayout.Left>
         <PageLayout.Middle>
-          {nodes.length === 0 && (
-            <EmptyState>
-              No notes or todos yet. Add entries to build your connection graph.
-            </EmptyState>
-          )}
-          {nodes.length > 0 && (
-            <GraphCanvas
-              {...canvasProps}
-              svgClassName="h-[78vh] min-h-[460px]"
-              actions={
-                <Button variant="outline" size="sm" onClick={() => setFullscreenOpen(true)}>
-                  <Maximize2 size={13} />
-                  Expand
-                </Button>
-              }
-            />
-          )}
+          <div className="graph-page-middle">
+            {nodes.length === 0 && (
+              <EmptyState>
+                No notes or todos yet. Add entries to build your connection graph.
+              </EmptyState>
+            )}
+            {nodes.length > 0 && (
+              <GraphCanvas
+                {...canvasProps}
+                className="flex-1 min-h-0"
+                svgClassName="flex-1 min-h-0"
+                actions={
+                  <Button variant="outline" size="sm" onClick={() => setFullscreenOpen(true)}>
+                    <Maximize2 size={13} />
+                    Expand
+                  </Button>
+                }
+              />
+            )}
+          </div>
         </PageLayout.Middle>
+        <PageLayout.Right>
+          <GraphRightPanel
+            noteCount={displayNodes.length}
+            edgeCount={edges.length}
+            selectedNote={selectedNode?.note ?? null}
+            incomingCount={incomingCount}
+            outgoingCount={outgoingCount}
+            onClose={() => setSelectedNoteId(null)}
+          />
+        </PageLayout.Right>
       </PageLayout>
 
       <Dialog open={fullscreenOpen} onOpenChange={setFullscreenOpen}>
@@ -525,8 +518,8 @@ function GraphCanvas({
   let frameClass = plain ? "graph-canvas-frame-plain" : "graph-canvas-frame";
   if (className) frameClass = `${frameClass} ${className}`;
 
-  let svgClass = "w-full cursor-grab touch-none";
-  if (isDragging) svgClass = "w-full cursor-grabbing";
+  let svgClass = "h-full w-full cursor-grab touch-none";
+  if (isDragging) svgClass = "h-full w-full cursor-grabbing";
   if (svgClassName) svgClass = `${svgClass} ${svgClassName}`;
 
   return (

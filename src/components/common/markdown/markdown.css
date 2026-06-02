@@ -15,7 +15,7 @@
 
   /* Floating popover container */
   .md-shortcut-popover {
-    @apply w-72 rounded-md border border-border bg-popover p-3 shadow-lg text-[11px];
+    @apply w-80 rounded-md border border-border bg-popover p-3 shadow-lg text-[11px];
   }
 
   /* Section title inside the popover */
@@ -25,7 +25,11 @@
 
   /* Two-column grid: keys | descriptions */
   .md-shortcut-grid {
-    @apply grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-1.5;
+    @apply grid grid-cols-[max-content_1fr] items-center gap-x-2 gap-y-1.5;
+  }
+
+  .md-shortcut-desc {
+    @apply whitespace-nowrap;
   }
 
   /* Key badge (keyboard shortcut pill) */

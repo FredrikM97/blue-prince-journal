@@ -4,11 +4,10 @@ import {
   isValidElement,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactElement,
 } from "react";
-import type { ReactNode, WheelEvent } from "react";
+import type { ReactNode } from "react";
 import { GhostButton } from "@/components/common/Button";
 import { PanelLeft, PanelRight } from "lucide-react";
 import {
@@ -16,23 +15,19 @@ import {
   type MobileDrawerSide,
 } from "@/components/common/PageLayoutMobileDrawerContext";
 
-type MobilePanelLabelKey = "default" | "map" | "notes" | "images" | "todos";
-
-type MobilePanelA11yText = {
-  closeSidePanel: string;
-};
-
-function getMobilePanelA11yText(): MobilePanelA11yText {
-  return {
-    closeSidePanel: "Close side panel",
-  };
-}
+type MobilePanelLabelKey = "default" | "graph" | "map" | "notes" | "images" | "todos";
 
 function getMobilePanelLabels(key: MobilePanelLabelKey): {
   left?: string;
   right?: string;
 } {
   if (key === "map") {
+    return {
+      left: "Filters",
+      right: "Details",
+    };
+  }
+  if (key === "graph") {
     return {
       left: "Filters",
       right: "Details",
@@ -65,6 +60,8 @@ type PageLayoutSlotProps = {
   children: ReactNode;
 };
 
+type PageLayoutVariant = "default" | "panel";
+
 function PageLayoutLeft({ children }: PageLayoutSlotProps) {
   return <Fragment>{children}</Fragment>;
 }
@@ -84,8 +81,14 @@ function getColumnLayoutClass(hasLeft: boolean, hasRight: boolean): string {
   return "page-layout-single-column-scroll";
 }
 
+function getVariantClass(variant: PageLayoutVariant): string {
+  if (variant === "panel") return "page-layout-variant-panel";
+  return "";
+}
+
 function resolveMobileLabelKeyFromPathname(pathname: string): MobilePanelLabelKey {
   if (pathname.includes("/section/map")) return "map";
+  if (pathname.includes("/section/graph")) return "graph";
   if (pathname.includes("/section/notes")) return "notes";
   if (pathname.includes("/section/images")) return "images";
   if (pathname.includes("/section/todos")) return "todos";
@@ -195,7 +198,6 @@ function PageLayoutMobileDrawers({
   hasLeft,
   hasRight,
   labels,
-  a11yText,
   drawerState,
   resolvedPanels,
 }: {
@@ -205,7 +207,6 @@ function PageLayoutMobileDrawers({
     left: string;
     right: string;
   };
-  a11yText: MobilePanelA11yText;
   drawerState: ReturnType<typeof useMobilePageLayoutDrawersState>;
   resolvedPanels: {
     left: ReactNode;
@@ -216,7 +217,6 @@ function PageLayoutMobileDrawers({
   const rightLabel = labels.right;
   const mobileLeftOpen = drawerState.mobileLeftOpen;
   const mobileRightOpen = drawerState.mobileRightOpen;
-  const closeMobileDrawer = drawerState.closeMobileDrawer;
   const openMobileDrawer = drawerState.openMobileDrawer;
 
   return (
@@ -226,8 +226,9 @@ function PageLayoutMobileDrawers({
           {hasLeft && (
             <GhostButton
               size="sm"
+              surface="mobile-toggle"
+              active={mobileLeftOpen}
               onClick={() => openMobileDrawer("left")}
-              className="page-layout-mobile-toggle"
             >
               <PanelLeft className="icon-sm" />
               {leftLabel}
@@ -236,23 +237,15 @@ function PageLayoutMobileDrawers({
           {hasRight && (
             <GhostButton
               size="sm"
+              surface="mobile-toggle"
+              active={mobileRightOpen}
               onClick={() => openMobileDrawer("right")}
-              className="page-layout-mobile-toggle"
             >
               <PanelRight className="icon-sm" />
               {rightLabel}
             </GhostButton>
           )}
         </div>
-      )}
-
-      {(mobileLeftOpen || mobileRightOpen) && (
-        <button
-          type="button"
-          aria-label={a11yText.closeSidePanel}
-          className="page-layout-mobile-backdrop lg:hidden"
-          onClick={closeMobileDrawer}
-        />
       )}
 
       {mobileLeftOpen && hasLeft && (
@@ -281,25 +274,12 @@ function PageLayoutMobileDrawers({
 function PageLayoutComponent({
   children,
   className,
-  prioritizeMiddleScroll,
+  variant = "default",
 }: {
   children?: ReactNode;
   className?: string;
-  prioritizeMiddleScroll?: boolean;
+  variant?: PageLayoutVariant;
 }) {
-  const middleRef = useRef<HTMLElement | null>(null);
-
-  function forwardWheelToMiddle(event: WheelEvent<HTMLElement>) {
-    if (!prioritizeMiddleScroll) return;
-    if (event.deltaY === 0) return;
-    const middleEl = middleRef.current;
-    if (!middleEl) return;
-    if (event.cancelable) {
-      event.preventDefault();
-    }
-    middleEl.scrollTop += event.deltaY;
-  }
-
   const slots = extractSlotsFromChildren(children);
   const resolvedLeft = slots.left;
   const resolvedRight = slots.right;
@@ -323,7 +303,6 @@ function PageLayoutComponent({
   }
 
   const labels = getMobilePanelLabels(mobileLabelKey);
-  const a11yText = getMobilePanelA11yText();
   let leftLabel = "Left panel";
   let rightLabel = "Right panel";
   if (labels.left) leftLabel = labels.left;
@@ -338,8 +317,9 @@ function PageLayoutComponent({
   );
 
   let layoutClass = `page-layout ${columnClass}`;
-  if (prioritizeMiddleScroll) {
-    layoutClass = `${layoutClass} page-layout-middle-scroll-priority`;
+  const variantClass = getVariantClass(variant);
+  if (variantClass) {
+    layoutClass = `${layoutClass} ${variantClass}`;
   }
   if (className) {
     layoutClass = `${layoutClass} ${className}`;
@@ -355,7 +335,6 @@ function PageLayoutComponent({
             left: leftLabel,
             right: rightLabel,
           }}
-          a11yText={a11yText}
           drawerState={mobileDrawerState}
           resolvedPanels={{
             left: resolvedLeft,
@@ -364,21 +343,11 @@ function PageLayoutComponent({
         />
 
         {hasLeft && (
-          <aside
-            className="page-layout-sidebar page-layout-sidebar-desktop"
-            onWheel={forwardWheelToMiddle}
-          >
-            {resolvedLeft}
-          </aside>
+          <aside className="page-layout-sidebar page-layout-sidebar-desktop">{resolvedLeft}</aside>
         )}
-        <main ref={middleRef} className="page-layout-content">
-          {resolvedMiddle}
-        </main>
+        <main className="page-layout-content">{resolvedMiddle}</main>
         {hasRight && (
-          <aside
-            className="page-layout-rightbar page-layout-rightbar-desktop"
-            onWheel={forwardWheelToMiddle}
-          >
+          <aside className="page-layout-rightbar page-layout-rightbar-desktop">
             {resolvedRight}
           </aside>
         )}

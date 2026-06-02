@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SelectButton } from "@/components/common/Button";
+import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
 
 type FilterOption<T extends string> = {
   value: T;
@@ -17,26 +17,30 @@ export function FilterButtonGroup<T extends string>({
   onChange: (next: T | null) => void;
   allLabel?: ReactNode;
 }) {
+  const items = [
+    {
+      key: "__all__",
+      label: allLabel,
+      active: value === null,
+      onToggle: () => onChange(null),
+    },
+    ...options.map((option) => ({
+      key: option.value,
+      label: option.label,
+      active: value === option.value,
+      onToggle: () => {
+        if (value === option.value) {
+          onChange(null);
+          return;
+        }
+        onChange(option.value);
+      },
+    })),
+  ];
+
   return (
     <div className="filter-options">
-      <SelectButton active={value === null} onClick={() => onChange(null)}>
-        {allLabel}
-      </SelectButton>
-      {options.map((option) => (
-        <SelectButton
-          key={option.value}
-          active={value === option.value}
-          onClick={() => {
-            if (value === option.value) {
-              onChange(null);
-              return;
-            }
-            onChange(option.value);
-          }}
-        >
-          {option.label}
-        </SelectButton>
-      ))}
+      <FilterToggleGrid items={items} leftAligned size="compact" layout="wrap" width="fit" />
     </div>
   );
 }

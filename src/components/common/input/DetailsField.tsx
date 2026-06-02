@@ -9,6 +9,7 @@
 
 import { memo } from "react";
 import { MarkdownEditor } from "@/components/common/markdown/MarkdownEditor";
+import { MetaText } from "@/components/common/Typography";
 
 function DetailsFieldComponent({
   value,
@@ -32,7 +33,10 @@ function DetailsFieldComponent({
       <label className="capture-label">
         {label}
         {showOptionalHint && (
-          <span className="text-muted-foreground/70 normal-case"> (optional)</span>
+          <MetaText as="span" normalCase opacity="70">
+            {" "}
+            (optional)
+          </MetaText>
         )}
       </label>
       <MarkdownEditor

@@ -35,7 +35,7 @@ export function TodosPage() {
 
   return (
     <>
-      <PageLayout>
+      <PageLayout variant="panel">
         <PageLayout.Left>
           <TodoLeftPanel
             total={filtered.length}

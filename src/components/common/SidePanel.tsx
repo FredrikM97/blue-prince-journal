@@ -60,7 +60,7 @@ export function PanelHeader({
             </IconButton>
           )}
           {onClose && (
-            <IconButton onClick={onClose} title="Close">
+            <IconButton onClick={onClose} title="Close" aria-label="Close panel">
               <X className="icon-md" />
             </IconButton>
           )}
@@ -73,19 +73,10 @@ export function PanelHeader({
 /**
  * Standard right-side (or left-side) panel card.
  *
- * Wraps the repeated pattern of:
- *   <div className="page-layout-panel flex flex-col gap-3">
- *     <div className="panel-header">
- *       <h2>Title</h2>
- *       <IconButton>...</IconButton>
- *     </div>
- *     {children}
- *   </div>
- *
- * Usage:
- *   <SidePanel.Right title="Edit note" onClose={onClose} panelKey="note:123">
- *     {content}
- *   </SidePanel.Right>
+ * Contract:
+ * - This component owns the panel title bar (title/subtitle/close/expand).
+ * - Callers should pass header intent through props, not recreate header rows in children.
+ * - `panelKey` is only for intentional mobile auto-open behavior.
  */
 function SidePanelComponent({
   title,

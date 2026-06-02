@@ -4,7 +4,7 @@ import { PageLayout } from "@/components/common/PageLayout";
 import { StoredImageView } from "@/components/StoredImageView";
 import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
-import type { Note, StoredImage } from "@/lib/types";
+import type { StoredImage } from "@/lib/types";
 import { toast } from "sonner";
 import {
   connectSteamImportFolder,
@@ -91,7 +91,7 @@ export function ImagesPage() {
   }, [selected, selectByOffset]);
 
   return (
-    <PageLayout>
+    <PageLayout variant="panel">
       <PageLayout.Left>
         <ImagesLeftPanel total={filtered.length} steamSync={steamSync} />
       </PageLayout.Left>
@@ -125,6 +125,7 @@ export function ImagesPage() {
           setPreviewOpen={setPreviewOpen}
           onPrev={() => selectByOffset(-1)}
           onNext={() => selectByOffset(1)}
+          onClose={() => setSelectedId(null)}
           onDelete={async () => {
             if (!selected) return;
             await removeImage(selected.id);
@@ -242,7 +243,7 @@ function ImageThumb({
   let thumbClass = "group images-thumb";
   if (selected) thumbClass = "group images-thumb images-thumb-selected";
   return (
-    <button onClick={onClick} className={thumbClass}>
+    <button type="button" onClick={onClick} className={thumbClass}>
       <StoredImageView id={img.id} alt={img.name} className="images-thumb-image" />
       <div className="images-thumb-overlay">
         <div className="images-thumb-name">{getImageLabel(img)}</div>

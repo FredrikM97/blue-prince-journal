@@ -176,8 +176,8 @@ export function NotFoundView() {
   return (
     <div className="page-center">
       <div className="max-w-md text-center">
-        <h1 className="font-serif text-7xl text-brass">404</h1>
-        <h2 className="mt-4 font-serif text-xl">A door that doesn't open</h2>
+        <h1 className="text-7xl text-brass">404</h1>
+        <h2 className="mt-4 text-xl">A door that doesn't open</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           This room isn't on the map. Head back to the entrance hall.
         </p>
@@ -200,7 +200,7 @@ export function ErrorView({ error, reset }: { error: Error; reset: () => void })
   return (
     <div className="page-center">
       <div className="max-w-md text-center">
-        <h1 className="font-serif text-xl">Something went wrong</h1>
+        <h1 className="text-xl">Something went wrong</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <div className="mt-6 flex justify-center gap-2">
           <button

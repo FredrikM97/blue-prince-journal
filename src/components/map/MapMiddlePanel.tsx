@@ -1,5 +1,6 @@
 import { GRID_COLS, GRID_ROWS, cellId } from "@/data/rooms";
 import type { GridCell } from "@/lib/types";
+import { Button } from "@/components/common/Button";
 
 interface MapMiddlePanelProps {
   byId: Map<string, GridCell>;
@@ -22,8 +23,6 @@ export function MapMiddlePanel({
         className="map-grid"
         style={{
           gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))`,
-          width: "100%",
-          maxWidth: `min(100%, clamp(16rem, calc((100dvh - 9rem) * ${GRID_COLS} / ${GRID_ROWS}), 36rem))`,
         }}
       >
         {Array.from({ length: GRID_ROWS }).flatMap((_, row) =>
@@ -32,8 +31,11 @@ export function MapMiddlePanel({
             const status = cell?.status === "cleared" ? "cleared" : "unknown";
             const roomNoteCount = cell?.roomName ? (noteCountByRoom.get(cell.roomName) ?? 0) : 0;
             return (
-              <button
+              <Button
                 key={`${row},${col}`}
+                type="button"
+                variant="ghost"
+                size="default"
                 onClick={() => onOpenCell(row, col)}
                 className={`map-cell ${statusColor[status]}`}
               >
@@ -50,7 +52,7 @@ export function MapMiddlePanel({
                 ) : (
                   <span className="map-cell-coord">{coordLabel(row, col)}</span>
                 )}
-              </button>
+              </Button>
             );
           }),
         )}

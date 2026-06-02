@@ -4,14 +4,13 @@
  */
 
 import { memo } from "react";
-import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/common/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/common/dropdown/DropdownMenu";
+import { SelectTriggerButton } from "@/components/common/dropdown/SelectTriggerButton";
 
 export interface DropdownSelectOption {
   value: string;
@@ -30,21 +29,18 @@ export function DropdownSelectComponent({
   placeholder?: string;
 }) {
   const activeOption = options.find((option) => option.value === value);
-  const triggerTextClass = activeOption ? "text-foreground" : "text-muted-foreground";
+  const hasValue = activeOption !== undefined;
+  let activeLabel: string | undefined;
+  if (activeOption) activeLabel = activeOption.label;
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="h-9 w-full justify-between bg-card/65 px-3 py-2 text-sm font-normal"
-        >
-          <span className={triggerTextClass}>
-            {activeOption?.label ?? placeholder}
-          </span>
-          <ChevronDown className="icon-md opacity-50" />
-        </Button>
+        <SelectTriggerButton
+          valueLabel={activeLabel}
+          placeholder={placeholder}
+          hasValue={hasValue}
+        />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="dropdown-select-content">
@@ -66,4 +62,3 @@ export function DropdownSelectComponent({
 }
 
 export const DropdownSelect = memo(DropdownSelectComponent);
-
