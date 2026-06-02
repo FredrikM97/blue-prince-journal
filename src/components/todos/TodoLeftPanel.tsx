@@ -1,6 +1,7 @@
 import { TODO_SCOPE_OPTIONS } from "./Constants";
-import { SelectButton } from "@/components/common/Button";
 import { SidePanel } from "@/components/common/SidePanel";
+import { FilterSection } from "@/components/common/filter/FilterSection";
+import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
 
 interface TodoLeftPanelProps {
   total: number;
@@ -22,28 +23,28 @@ export function TodoLeftPanel({
   let itemLabel = "items";
   if (total === 1) itemLabel = "item";
 
+  const scopeOptions = TODO_SCOPE_OPTIONS.filter(
+    (option): option is { value: string; label: string } => option.value !== null,
+  );
+
   return (
-    <div className="todos-left-stack">
-      <SidePanel.Left title="Todo" subtitle={`${total} ${itemLabel}`}>
+    <SidePanel.Left title="Todo" subtitle={`${total} ${itemLabel}`}>
+      <div className="todos-left-stack">
         <div className="todos-left-stats">
           <p>Open: {openCount}</p>
           <p>In progress: {progressCount}</p>
           <p>Done: {doneCount}</p>
         </div>
-      </SidePanel.Left>
-      <SidePanel.Left title="Scope">
-        <div className="flex flex-wrap gap-1">
-          {TODO_SCOPE_OPTIONS.map((option) => (
-            <SelectButton
-              key={String(option.value)}
-              active={scopeFilter === option.value}
-              onClick={() => setScopeFilter(option.value)}
-            >
-              {option.label}
-            </SelectButton>
-          ))}
-        </div>
-      </SidePanel.Left>
-    </div>
+
+        <FilterSection title="Scope">
+          <FilterButtonGroup
+            value={scopeFilter}
+            options={scopeOptions}
+            onChange={setScopeFilter}
+            allLabel="All"
+          />
+        </FilterSection>
+      </div>
+    </SidePanel.Left>
   );
 }

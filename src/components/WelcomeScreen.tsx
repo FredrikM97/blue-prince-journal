@@ -8,6 +8,9 @@ import {
   getActiveSyncFolderName,
 } from "@/data/sync";
 import { useStore } from "@/data/store";
+import { Heading, Text } from "@/components/common/Typography";
+import { CenteredContent, Inline } from "@/components/common/LayoutPrimitives";
+import { Button } from "@/components/common/Button";
 import { toast } from "sonner";
 
 function WelcomeCard({
@@ -26,18 +29,24 @@ function WelcomeCard({
   className?: string;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="default"
       onClick={onClick}
       disabled={disabled}
       className={`welcome-card ${className ?? ""}`}
     >
       <Icon className="h-8 w-8 text-brass" />
-      <div>
-        <p className="font-serif text-base font-medium">{title}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+      <div className="welcome-card-body">
+        <Text size="base" weight="medium">
+          {title}
+        </Text>
+        <Text size="xs" tone="muted" marginTop="1">
+          {description}
+        </Text>
       </div>
-    </button>
+    </Button>
   );
 }
 
@@ -111,16 +120,22 @@ export function WelcomeScreen({
 
   return (
     <div className="welcome-shell">
-      <div className="w-full max-w-6xl space-y-8 text-center">
+      <CenteredContent max="6xl" align="center">
         <div>
           <div className="welcome-icon">
-            <span className="font-serif text-3xl font-bold">B</span>
+            <Text as="span" size="3xl" weight="semibold">
+              B
+            </Text>
           </div>
-          <h1 className="font-serif text-3xl">Welcome to Blue Prince Journal</h1>
-          <p className="mt-2 text-sm text-muted-foreground">How would you like to get started?</p>
+          <Heading as="h1" size="3xl">
+            Welcome to Blue Prince Journal
+          </Heading>
+          <Text size="sm" tone="muted" marginTop="2">
+            How would you like to get started?
+          </Text>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3">
+        <Inline gap="3" justify="center" wrap>
           {showContinueSuggestion && onContinue ? (
             <WelcomeCard
               icon={Waypoints}
@@ -149,13 +164,13 @@ export function WelcomeScreen({
             onClick={handleConnectFolder}
             disabled={connecting || resetting}
           />
-        </div>
+        </Inline>
 
-        <p className="text-xs text-muted-foreground">
+        <Text size="xs" tone="muted">
           You can always import, export, or configure a sync folder later in{" "}
           <strong>Settings</strong>.
-        </p>
-      </div>
+        </Text>
+      </CenteredContent>
 
       <input
         ref={fileRef}

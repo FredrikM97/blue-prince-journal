@@ -3,9 +3,12 @@ import { PageLayout } from "@/components/common/PageLayout";
 import { MapLeftPanel } from "./MapLeftPanel";
 import { MapMiddlePanel } from "./MapMiddlePanel";
 import { MapRightPanel } from "./MapRightPanel";
-import { GRID_COLS, GRID_ROWS, cellId } from "@/data/rooms";
+import { GRID_ROWS, cellId } from "@/data/rooms";
 import { useStore } from "@/data/store";
 import type { GridCell } from "@/lib/types";
+import { MetaText } from "@/components/common/Typography";
+import { SidePanel } from "@/components/common/SidePanel";
+import { Stack } from "@/components/common/Stack";
 
 const COL_LABELS = ["A", "B", "C", "D", "E"] as const;
 
@@ -60,9 +63,11 @@ export function MapPage() {
   }
 
   let rightSidebar = (
-    <div className="page-layout-panel text-muted-foreground">
-      Select a map cell to edit room details, notes, and todos.
-    </div>
+    <SidePanel.Right title="Preview" onClose={() => setActive(null)}>
+      <Stack gap="4">
+        <MetaText>Select a map cell to edit room details, notes, and todos.</MetaText>
+      </Stack>
+    </SidePanel.Right>
   );
   if (active) {
     rightSidebar = (
@@ -86,7 +91,7 @@ export function MapPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout variant="panel">
       <PageLayout.Left>
         <MapLeftPanel />
       </PageLayout.Left>

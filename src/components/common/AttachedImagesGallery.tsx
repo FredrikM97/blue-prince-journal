@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
-import { IconButton } from "@/components/common/Button";
+import { Button, IconButton } from "@/components/common/Button";
 import { StoredImageView } from "@/components/StoredImageView";
 import { useStore } from "@/data/store";
+import { MetaText } from "@/components/common/Typography";
+import { Inline } from "@/components/common/LayoutPrimitives";
 
 export function AttachedImagesGallery({
   imageIds,
@@ -43,38 +45,42 @@ export function AttachedImagesGallery({
 
   return (
     <section className={wrapperClass}>
-      <div className="mb-2 flex items-center gap-2">
-        <div className="note-details-images-label">
-          {title} ({imageIds.length})
-        </div>
-        {collapsible && (
-          <IconButton
-            aria-label={collapsed ? "Expand images" : "Collapse images"}
-            title={collapsed ? "Expand images" : "Collapse images"}
-            className="h-6 w-6 rounded border border-input"
-            onClick={() => setCollapsed((v) => !v)}
-          >
-            {collapsed && <ChevronDown />}
-            {!collapsed && <ChevronUp />}
-          </IconButton>
-        )}
+      <div className="mb-2">
+        <Inline gap="2">
+          <div className="note-details-images-label">
+            {title} ({imageIds.length})
+          </div>
+          {collapsible && (
+            <IconButton
+              aria-label={collapsed ? "Expand images" : "Collapse images"}
+              title={collapsed ? "Expand images" : "Collapse images"}
+              className="h-6 w-6 rounded border border-input"
+              onClick={() => setCollapsed((v) => !v)}
+            >
+              {collapsed && <ChevronDown />}
+              {!collapsed && <ChevronUp />}
+            </IconButton>
+          )}
+        </Inline>
       </div>
 
       {!collapsed && (
         <div className={gridClass}>
           {imageIds.map((id) => (
-            <button
+            <Button
               key={id}
               type="button"
+              variant="ghost"
+              size="default"
               className={btnClass}
               onClick={() => setZoomedImageId(id)}
               aria-label={`Open image preview: ${getImageLabel(id)}`}
             >
               <StoredImageView id={id} className={thumbClass} alt={getImageLabel(id)} />
-              <p className="mt-1 truncate px-1 text-xs text-muted-foreground">
-                {getImageLabel(id)}
-              </p>
-            </button>
+              <div className="mt-1 px-1">
+                <MetaText truncate>{getImageLabel(id)}</MetaText>
+              </div>
+            </Button>
           ))}
         </div>
       )}
@@ -87,7 +93,7 @@ export function AttachedImagesGallery({
       >
         <DialogContent variant="expand">
           <DialogHeader>
-            <DialogTitle className="font-serif">
+            <DialogTitle>
               {zoomedImageId ? getImageLabel(zoomedImageId) : "Image preview"}
             </DialogTitle>
           </DialogHeader>

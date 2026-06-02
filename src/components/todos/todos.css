@@ -16,7 +16,7 @@
   }
 
   .todos-page-title {
-    @apply font-serif text-2xl;
+    @apply text-2xl;
   }
 
   .todos-page-header-actions {
@@ -79,7 +79,7 @@
   }
 
   .todos-column-title {
-    @apply font-serif text-sm uppercase tracking-wider text-muted-foreground;
+    @apply text-sm uppercase tracking-wider text-muted-foreground;
   }
 
   .todos-column-count {

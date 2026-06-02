@@ -4,7 +4,29 @@ import { Button, GhostButton } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { PagedNotesList } from "@/components/common/PagedNotesList";
 import { StoredImageView } from "@/components/StoredImageView";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { Stack } from "@/components/common/Stack";
+import { SidePanel } from "@/components/common/SidePanel";
+import { Text } from "@/components/common/Typography";
+import { TextInput } from "@/components/common/input/TextInput";
 import type { Note, StoredImage } from "@/lib/types";
+
+// Primitive wrapper component for accessibility markup
+function VisuallyHidden({ children }: { children: React.ReactNode }) {
+  // eslint-disable-next-line no-restricted-syntax
+  return <span className="sr-only">{children}</span>;
+}
+
+// Image styling containers (requires wrapper for CSS styling)
+function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
+  // eslint-disable-next-line no-restricted-syntax
+  return <div className="images-detail-preview">{children}</div>;
+}
+
+function ImageZoomPreview({ children }: { children: React.ReactNode }) {
+  // eslint-disable-next-line no-restricted-syntax
+  return <div className="images-zoom-preview">{children}</div>;
+}
 
 function getImageLabel(img: StoredImage): string {
   return img.caption?.trim() || img.name;
@@ -20,6 +42,7 @@ export function ImagesRightPanel({
   setPreviewOpen,
   onPrev,
   onNext,
+  onClose,
   onDelete,
   onSaveLabel,
 }: {
@@ -29,14 +52,20 @@ export function ImagesRightPanel({
   setPreviewOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onPrev: () => void;
   onNext: () => void;
+  onClose: () => void;
   onDelete: () => void;
   onSaveLabel: (label: string) => Promise<void>;
 }) {
   if (!img) {
     return (
-      <div className="page-layout-panel images-right-panel text-muted-foreground">
-        Select an image to view details.
-      </div>
+      <SidePanel.Right title="Image" panelKey="image-empty">
+        {/* eslint-disable-next-line no-restricted-syntax */}
+        <div className="flex items-center justify-center py-8">
+          <Text tone="muted" size="sm">
+            Select an image from the library to view details
+          </Text>
+        </div>
+      </SidePanel.Right>
     );
   }
 
@@ -49,6 +78,7 @@ export function ImagesRightPanel({
       setPreviewOpen={setPreviewOpen}
       onPrev={onPrev}
       onNext={onNext}
+      onClose={onClose}
       onDelete={onDelete}
       onSaveLabel={onSaveLabel}
     />
@@ -62,6 +92,7 @@ function ImagesInspectorPanel({
   setPreviewOpen,
   onPrev,
   onNext,
+  onClose,
   onDelete,
   onSaveLabel,
 }: {
@@ -71,6 +102,7 @@ function ImagesInspectorPanel({
   setPreviewOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onPrev: () => void;
   onNext: () => void;
+  onClose: () => void;
   onDelete: () => void;
   onSaveLabel: (label: string) => Promise<void>;
 }) {
@@ -79,35 +111,38 @@ function ImagesInspectorPanel({
 
   return (
     <>
-      <div className="page-layout-panel images-right-panel">
-        <div className="images-inspector-preview">
-          <div className="images-right-header">
-            <div className="min-w-0">
-              <h2 className="images-detail-title truncate">{getImageLabel(img)}</h2>
-            </div>
-            <div className="images-nav-buttons">
-              <Button variant="outline" size="icon" onClick={onPrev} aria-label="Previous image">
-                <ChevronLeft />
-              </Button>
-              <Button variant="outline" size="icon" onClick={onNext} aria-label="Next image">
-                <ChevronRight />
-              </Button>
-            </div>
-          </div>
+      <SidePanel.Right
+        title={getImageLabel(img) || "Image"}
+        subtitle={`${relatedNotes.length} related note${relatedNotes.length === 1 ? "" : "s"}`}
+        onClose={onClose}
+        onExpand={() => setPreviewOpen(true)}
+        panelKey={`image:${img.id}`}
+      >
+        <Stack gap="2">
+          <Inline gap="2">
+            <Button variant="outline" size="icon" onClick={onPrev} aria-label="Previous image">
+              <ChevronLeft />
+            </Button>
+            <Button variant="outline" size="icon" onClick={onNext} aria-label="Next image">
+              <ChevronRight />
+            </Button>
+          </Inline>
 
-          <div className="images-detail-preview">
+          <ImagePreviewContainer>
             <StoredImageView id={img.id} alt={img.name} className="images-detail-preview-image" />
-          </div>
-        </div>
+          </ImagePreviewContainer>
+        </Stack>
 
-        <div className="images-inspector-meta">
-          <div className="space-y-2">
-            <label className="section-label">Label</label>
-            <div className="flex items-center gap-2">
-              <input
+        <Stack gap="3">
+          <Stack gap="1.5">
+            <Text as="label" size="xs" weight="medium" tone="muted">
+              Label
+            </Text>
+            <Inline gap="2">
+              <TextInput
                 value={labelInput}
-                onChange={(e) => setLabelInput(e.target.value)}
-                className="input-base h-8 flex-1"
+                onChange={setLabelInput}
+                className="h-8 flex-1"
                 placeholder={img.name}
               />
               <Button
@@ -125,8 +160,8 @@ function ImagesInspectorPanel({
               >
                 Save
               </Button>
-            </div>
-          </div>
+            </Inline>
+          </Stack>
 
           <PagedNotesList
             notes={relatedNotes}
@@ -134,28 +169,26 @@ function ImagesInspectorPanel({
             emptyLabel="No notes currently reference this image."
           />
 
-          <div className="images-detail-actions">
+          <Inline gap="2" justify="between" wrap align="center">
             <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
               <Expand /> Open preview
             </Button>
-            <div className="images-detail-actions-right">
-              <GhostButton className="text-destructive hover:text-destructive" onClick={onDelete}>
-                <span className="sr-only">Delete image</span>
-                <Trash2 />
-              </GhostButton>
-            </div>
-          </div>
-        </div>
-      </div>
+            <GhostButton tone="destructive" onClick={onDelete}>
+              <VisuallyHidden>Delete image</VisuallyHidden>
+              <Trash2 />
+            </GhostButton>
+          </Inline>
+        </Stack>
+      </SidePanel.Right>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent variant="expand">
           <DialogHeader>
             <DialogTitle>{img.name}</DialogTitle>
           </DialogHeader>
-          <div className="images-zoom-preview">
+          <ImageZoomPreview>
             <StoredImageView id={img.id} alt={img.name} className="images-zoom-image" />
-          </div>
+          </ImageZoomPreview>
         </DialogContent>
       </Dialog>
     </>

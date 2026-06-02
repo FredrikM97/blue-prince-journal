@@ -16,7 +16,7 @@
   }
 
   .app-brand-title {
-    @apply whitespace-nowrap font-serif text-base;
+    @apply whitespace-nowrap text-base;
   }
 
   .app-nav {
@@ -92,10 +92,6 @@
   }
 
   @media (max-width: 639px) {
-    .app-brand-title {
-      @apply hidden;
-    }
-
     .app-add-button {
       @apply h-8 w-8 justify-center p-0;
     }
@@ -103,6 +99,10 @@
     .app-add-button span,
     .app-add-shortcut {
       display: none;
+    }
+
+    .app-brand-title {
+      @apply max-w-40 truncate;
     }
   }
 

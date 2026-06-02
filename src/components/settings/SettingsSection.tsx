@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
+import { Heading } from "@/components/common/Typography";
 
 export function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="settings-section">
-      <h2 className="settings-section-title">
+      <Heading as="h2" size="xl" variant="settings-section-title">
         <span aria-hidden className="settings-section-rule" />
         {title}
-      </h2>
+      </Heading>
       {children}
     </section>
   );
@@ -15,7 +16,9 @@ export function SettingsSection({ title, children }: { title: string; children: 
 export function SettingsSubsection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="settings-subsection">
-      <h3 className="section-label">{title}</h3>
+      <Heading as="h3" size="base" variant="section-label">
+        {title}
+      </Heading>
       {children}
     </div>
   );

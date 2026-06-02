@@ -2,8 +2,10 @@ import { memo } from "react";
 import type { Note } from "@/lib/types";
 import { BrassButton } from "@/components/common/Button";
 import { IconButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import { NotesListItemSummary } from "./NotesListItemSummary";
 import { ChevronRight, Pencil, Trash2 } from "lucide-react";
+import { Text } from "@/components/common/Typography";
 
 export function NotesView({
   emptyHint,
@@ -24,9 +26,9 @@ export function NotesView({
     <section className="notes-view-section">
       {filtered.length === 0 ? (
         <div className="notes-view-empty">
-          <p className="text-sm text-muted-foreground">
+          <Text size="sm" tone="muted">
             {emptyHint ?? "No notes yet. Press N to add one."}
-          </p>
+          </Text>
           <BrassButton className="mt-4" onClick={openCapture}>
             Add your first note
           </BrassButton>
@@ -62,16 +64,18 @@ const NotesListRow = memo(function NotesListRow({
   return (
     <div className="note-row-item">
       <div className="note-row-inner group">
-        <button
+        <Button
           type="button"
-          className="note-row-preview-btn"
+          variant="transparent"
+          size="default"
+          className="note-row-preview-btn !h-auto !items-start !justify-start !gap-0 !px-0 !py-0 !hover:bg-transparent"
           onClick={(e) => {
             e.stopPropagation();
             onOpenPreview(note);
           }}
         >
           <NotesListItemSummary note={note} />
-        </button>
+        </Button>
         <IconButton
           onClick={(e) => {
             e.stopPropagation();

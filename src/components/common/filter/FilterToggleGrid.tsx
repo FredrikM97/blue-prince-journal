@@ -1,6 +1,9 @@
+import type { ReactNode } from "react";
+import { FilterToggleButton } from "@/components/common/Button";
+
 type FilterToggleItem = {
   key: string;
-  label: string;
+  label: ReactNode;
   active: boolean;
   onToggle: () => void;
   dotColor?: string;
@@ -9,33 +12,47 @@ type FilterToggleItem = {
 export function FilterToggleGrid({
   items,
   leftAligned = false,
+  size = "default",
+  layout = "grid",
+  width = "full",
 }: {
   items: FilterToggleItem[];
   leftAligned?: boolean;
+  size?: "default" | "compact";
+  layout?: "grid" | "wrap";
+  width?: "full" | "fit";
 }) {
+  let layoutClass = "filter-grid";
+  if (layout === "wrap") {
+    layoutClass = "filter-grid-wrap";
+  }
+
   return (
-    <div className="filter-grid">
+    <div className={layoutClass}>
       {items.map((item) => {
-        let buttonClass = "filter-toggle filter-toggle-off";
+        let align: "center" | "left" = "center";
         if (leftAligned) {
-          buttonClass = "filter-toggle gap-1.5 text-left filter-toggle-off";
-        } else if (item.dotColor) {
-          buttonClass = "filter-toggle gap-1.5 filter-toggle-off";
-        }
-        if (item.active) {
-          buttonClass = buttonClass.replace("filter-toggle-off", "filter-toggle-on");
+          align = "left";
         }
 
         return (
-          <button key={item.key} onClick={item.onToggle} className={buttonClass}>
+          <FilterToggleButton
+            key={item.key}
+            type="button"
+            active={item.active}
+            align={align}
+            density={size}
+            width={width}
+            onClick={item.onToggle}
+          >
             {item.dotColor && (
               <span
                 className="h-2 w-2 shrink-0 rounded-full"
                 style={{ background: item.dotColor }}
               />
             )}
-            <span className="truncate capitalize">{item.label}</span>
-          </button>
+            <span className="truncate">{item.label}</span>
+          </FilterToggleButton>
         );
       })}
     </div>

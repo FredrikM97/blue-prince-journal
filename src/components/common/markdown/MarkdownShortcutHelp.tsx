@@ -8,6 +8,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { HelpCircle } from "lucide-react";
 import { IconButton } from "@/components/common/Button";
+import { MetaText } from "@/components/common/Typography";
 
 const SHORTCUTS: { tokens: string[]; desc: string }[] = [
   { tokens: ["#tag"], desc: "add a tag" },
@@ -82,7 +83,11 @@ export function MarkdownShortcutHelp() {
                       </code>
                     ))}
                   </div>
-                  <span className="pt-0.5 leading-tight text-muted-foreground">{desc}</span>
+                  <span className="pt-0.5">
+                    <MetaText as="span" size="sm" leading="tight">
+                      <span className="md-shortcut-desc">{desc}</span>
+                    </MetaText>
+                  </span>
                 </Fragment>
               ))}
             </div>

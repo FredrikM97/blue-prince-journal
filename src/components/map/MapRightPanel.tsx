@@ -109,7 +109,7 @@ export function MapRightPanel({
 
         <div className="map-sheet-clear-row">
           <GhostButton
-            className="text-muted-foreground"
+            tone="muted"
             onClick={() => {
               setCommentDraft("");
               upsertCell({ row, col, comment: "" });
@@ -118,7 +118,7 @@ export function MapRightPanel({
             <Eraser /> Clear comment
           </GhostButton>
           <GhostButton
-            className="text-destructive hover:text-destructive"
+            tone="destructive"
             onClick={() => {
               clearCell(row, col);
               onClose();

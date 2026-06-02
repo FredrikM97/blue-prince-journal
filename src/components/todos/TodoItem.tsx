@@ -4,6 +4,7 @@ import { Chip } from "@/components/common/Chip";
 import { Maximize2, Trash2 } from "lucide-react";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { todoPriorityClass } from "./Constants";
+import { Button, IconButton } from "@/components/common/Button";
 
 const TODO_STATUS_OPTIONS = [
   { value: "open", label: "open" },
@@ -55,14 +56,17 @@ export function TodoItem({
             className="input-base h-7"
           />
         ) : (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="default"
             className={`text-left text-sm ${
               todo.status === "done" ? "text-muted-foreground line-through" : ""
             }`}
             onDoubleClick={() => setEditing(true)}
           >
             {todo.title}
-          </button>
+          </Button>
         )}
         <div className="mt-1 flex flex-wrap items-center gap-1">
           <span className={todoPriorityClass(todo.priority)}>{todo.priority}</span>
@@ -81,12 +85,12 @@ export function TodoItem({
           onValueChange={(value) => onToggle(value as TodoStatus)}
           options={TODO_STATUS_OPTIONS}
         />
-        <button onClick={onOpenPreview} className="todo-action-btn" aria-label="Preview todo">
+        <IconButton onClick={onOpenPreview} className="todo-action-btn" aria-label="Preview todo">
           <Maximize2 className="h-3.5 w-3.5" />
-        </button>
-        <button onClick={onDelete} className="todo-action-btn-danger" aria-label="Delete">
+        </IconButton>
+        <IconButton onClick={onDelete} className="todo-action-btn-danger" aria-label="Delete">
           <Trash2 className="h-3.5 w-3.5" />
-        </button>
+        </IconButton>
       </div>
     </li>
   );

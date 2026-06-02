@@ -4,6 +4,7 @@ import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { todoPriorityClass } from "./Constants";
 import { MetaRow, PreviewSection, PreviewTimestamps } from "@/components/common/PreviewContent";
 import { PreviewDialog } from "@/components/common/PreviewDialog";
+import { Inline } from "@/components/common/LayoutPrimitives";
 
 export function TodoPreviewContent({ todo }: { todo: Todo }) {
   return (
@@ -24,13 +25,13 @@ export function TodoPreviewContent({ todo }: { todo: Todo }) {
       )}
       {todo.tags.length > 0 && (
         <MetaRow label="Tags">
-          <span className="flex flex-wrap gap-1">
+          <Inline as="div" gap="1" wrap align="start">
             {todo.tags.map((tag) => (
               <Chip key={tag} variant="tag">
                 #{tag}
               </Chip>
             ))}
-          </span>
+          </Inline>
         </MetaRow>
       )}
 

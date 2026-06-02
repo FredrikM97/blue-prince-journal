@@ -4,6 +4,7 @@ import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
 import { MetaRow, PreviewSection, PreviewTimestamps } from "@/components/common/PreviewContent";
 import { PreviewDialog } from "@/components/common/PreviewDialog";
+import { Inline } from "@/components/common/LayoutPrimitives";
 
 export function NotePreviewContent({ note }: { note: Note }) {
   return (
@@ -21,13 +22,13 @@ export function NotePreviewContent({ note }: { note: Note }) {
       )}
       {note.tags.length > 0 && (
         <MetaRow label="Tags">
-          <span className="flex flex-wrap gap-1">
+          <Inline as="div" gap="1" wrap align="start">
             {note.tags.map((tag) => (
               <Chip key={tag} variant="tag">
                 #{tag}
               </Chip>
             ))}
-          </span>
+          </Inline>
         </MetaRow>
       )}
       {note.body && (

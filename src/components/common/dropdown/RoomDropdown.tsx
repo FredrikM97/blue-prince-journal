@@ -5,8 +5,7 @@
  */
 
 import { memo, useMemo, useRef, useState } from "react";
-import { ChevronDown, Plus } from "lucide-react";
-import { Button } from "@/components/common/Button";
+import { Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/common/dropdown/DropdownMenu";
 import { addCustomRoom, getAllRoomGroups, getGroupedRoomCatalog } from "@/data/rooms";
+import { MetaText } from "@/components/common/Typography";
+import { SelectTriggerButton } from "@/components/common/dropdown/SelectTriggerButton";
 
 function toTitleCase(s: string) {
   return s.toLowerCase().replace(/(?:^|\s)\S/g, (c) => c.toUpperCase());
@@ -102,15 +103,11 @@ function RoomDropdownComponent({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="room-dropdown-trigger"
-          data-has-value={!!activeRoom}
-        >
-          <span className="room-trigger-label">{activeRoom || placeholder}</span>
-          <ChevronDown className="icon-md opacity-50" />
-        </Button>
+        <SelectTriggerButton
+          valueLabel={activeRoom || undefined}
+          placeholder={placeholder}
+          hasValue={!!activeRoom}
+        />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="dropdown-select-content">
@@ -146,15 +143,19 @@ function RoomDropdownComponent({
                 >
                   <div className="flex min-w-0 flex-col">
                     <span>{room.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{room.category}</span>
+                    <MetaText as="span" truncate>
+                      {room.category}
+                    </MetaText>
                   </div>
                 </DropdownMenuItem>
               );
             })}
             {showAddOption && (
-              <DropdownMenuItem onSelect={handleAddCustomRoom} className="text-muted-foreground">
+              <DropdownMenuItem onSelect={handleAddCustomRoom}>
                 <Plus className="icon-md shrink-0" />
-                Add "{targetRoom}" to {targetGroup}
+                <MetaText as="span" size="sm">
+                  Add "{targetRoom}" to {targetGroup}
+                </MetaText>
               </DropdownMenuItem>
             )}
             {!showAddOption && searchResults.length === 0 && (
@@ -172,7 +173,9 @@ function RoomDropdownComponent({
                   <div className="flex min-w-0 flex-col">
                     <span>{group}</span>
                     {activeCategory === group && activeRoom && (
-                      <span className="truncate text-xs text-muted-foreground">{activeRoom}</span>
+                      <MetaText as="span" truncate>
+                        {activeRoom}
+                      </MetaText>
                     )}
                   </div>
                 </DropdownMenuSubTrigger>

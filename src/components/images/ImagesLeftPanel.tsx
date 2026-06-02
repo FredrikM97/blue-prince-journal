@@ -1,4 +1,8 @@
 import { Button } from "@/components/common/Button";
+import { Heading, Text } from "@/components/common/Typography";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { Stack } from "@/components/common/Stack";
+import { SidePanel } from "@/components/common/SidePanel";
 
 export type SteamSyncPanelModel = {
   supported: boolean;
@@ -37,42 +41,46 @@ export function ImagesLeftPanel({
   }
 
   return (
-    <div className="page-layout-panel">
-      <h1 className="font-serif text-2xl">Images</h1>
-      <p className="mt-1 text-xs text-muted-foreground">{total} stored images</p>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Click an image to open details in the right panel. Use the preview button there for full
-        size.
-      </p>
+    <SidePanel.Left title="Images" subtitle={`${total} stored`} panelKey="images-library">
+      <Stack gap="2">
+        <Text size="xs" tone="muted">
+          Click an image to open details in the right panel. Use the preview button there for full
+          size.
+        </Text>
 
-      {steamSync.supported && steamSync.connected && (
-        <div className="mt-2 space-y-1.5">
-          <h2 className="font-serif text-base">Steam Folder</h2>
+        {steamSync.supported && steamSync.connected && (
+          <Stack gap="1.5">
+            <Heading as="h2" size="base">
+              Steam Folder
+            </Heading>
 
-          <p className="text-xs text-muted-foreground">Connected: {steamSync.folderName}</p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void steamSync.syncNow()}
-              disabled={steamSync.busy}
-            >
-              Sync now
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => void steamSync.disconnect()}
-              disabled={steamSync.busy}
-            >
-              Disconnect
-            </Button>
-          </div>
-          <span className="text-xs text-muted-foreground" title={lastSyncTitle}>
-            Last sync: {refreshTime}
-          </span>
-        </div>
-      )}
-    </div>
+            <Text size="xs" tone="muted">
+              Connected: {steamSync.folderName}
+            </Text>
+            <Inline gap="2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void steamSync.syncNow()}
+                disabled={steamSync.busy}
+              >
+                Sync now
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void steamSync.disconnect()}
+                disabled={steamSync.busy}
+              >
+                Disconnect
+              </Button>
+            </Inline>
+            <Text as="span" size="xs" tone="muted" title={lastSyncTitle}>
+              Last sync: {refreshTime}
+            </Text>
+          </Stack>
+        )}
+      </Stack>
+    </SidePanel.Left>
   );
 }

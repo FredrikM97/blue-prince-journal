@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
+import { MetaText } from "@/components/common/Typography";
+import { Stack } from "@/components/common/Stack";
 
 export function PreviewDialog({
   open,
@@ -16,9 +18,9 @@ export function PreviewDialog({
   strikeTitle?: boolean;
   children: ReactNode;
 }) {
-  let titleClassName = "font-serif text-xl";
+  let titleClassName = "text-xl";
   if (strikeTitle) {
-    titleClassName = "font-serif text-xl text-muted-foreground line-through";
+    titleClassName = "text-xl text-muted-foreground line-through";
   }
 
   return (
@@ -27,10 +29,14 @@ export function PreviewDialog({
         <DialogHeader>
           <DialogTitle className={titleClassName}>{title}</DialogTitle>
           {subtitle && (
-            <p className="mt-0.5 text-xs text-muted-foreground capitalize">{subtitle}</p>
+            <MetaText marginTop="0.5" capitalize>
+              {subtitle}
+            </MetaText>
           )}
         </DialogHeader>
-        <div className="dialog-scroll-body space-y-2">{children}</div>
+        <Stack gap="2" variant="dialog-scroll-body">
+          {children}
+        </Stack>
       </DialogContent>
     </Dialog>
   );
