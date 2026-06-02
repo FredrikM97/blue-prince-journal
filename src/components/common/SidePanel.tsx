@@ -101,6 +101,15 @@ function SidePanelComponent({
   const mobileDrawerControls = usePageLayoutMobileDrawerControls();
   const lastOpenedKeyRef = useRef<string | null>(null);
 
+  function handleClose() {
+    if (mobileDrawerControls && mobileDrawerSide && typeof window !== "undefined") {
+      if (window.innerWidth < 1024) {
+        mobileDrawerControls.closeMobileDrawer();
+      }
+    }
+    onClose?.();
+  }
+
   useEffect(() => {
     if (!mobileDrawerControls || !mobileDrawerSide || !mobileDrawerKey) return;
     if (typeof window === "undefined") return;
@@ -118,7 +127,7 @@ function SidePanelComponent({
         subtitle={subtitle}
         done={done}
         onExpand={onExpand}
-        onClose={onClose}
+        onClose={handleClose}
       />
       {children}
       {expandDialog}

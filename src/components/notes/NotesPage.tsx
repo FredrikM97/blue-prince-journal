@@ -119,9 +119,7 @@ export function NotesPage({
             onDelete={deleteFromList}
           />
         </PageLayout.Middle>
-        <PageLayout.Right>
-          <div className="notes-right-panel-shell">{rightPanelContent}</div>
-        </PageLayout.Right>
+        <PageLayout.Right>{rightPanelContent}</PageLayout.Right>
       </PageLayout>
 
       <Dialog

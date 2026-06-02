@@ -10,7 +10,7 @@ import {
 } from "react";
 import type { ReactNode, WheelEvent } from "react";
 import { GhostButton } from "@/components/common/Button";
-import { PanelLeft, PanelRight, X } from "lucide-react";
+import { PanelLeft, PanelRight } from "lucide-react";
 import {
   PageLayoutMobileDrawerProvider,
   type MobileDrawerSide,
@@ -20,15 +20,11 @@ type MobilePanelLabelKey = "default" | "map" | "notes" | "images" | "todos";
 
 type MobilePanelA11yText = {
   closeSidePanel: string;
-  closeLeftPanel: string;
-  closeRightPanel: string;
 };
 
 function getMobilePanelA11yText(): MobilePanelA11yText {
   return {
     closeSidePanel: "Close side panel",
-    closeLeftPanel: "Close left panel",
-    closeRightPanel: "Close right panel",
   };
 }
 
@@ -261,33 +257,13 @@ function PageLayoutMobileDrawers({
 
       {mobileLeftOpen && hasLeft && (
         <aside className="page-layout-mobile-drawer page-layout-mobile-drawer-left lg:hidden">
-          <div className="page-layout-mobile-drawer-header">
-            <span className="section-label">{leftLabel}</span>
-            <GhostButton
-              size="icon"
-              onClick={closeMobileDrawer}
-              aria-label={a11yText.closeLeftPanel}
-            >
-              <X className="icon-sm" />
-            </GhostButton>
-          </div>
-          <div className="page-layout-mobile-drawer-body">{resolvedPanels.left}</div>
+          {resolvedPanels.left}
         </aside>
       )}
 
       {mobileRightOpen && hasRight && (
         <aside className="page-layout-mobile-drawer page-layout-mobile-drawer-right lg:hidden">
-          <div className="page-layout-mobile-drawer-header">
-            <span className="section-label">{rightLabel}</span>
-            <GhostButton
-              size="icon"
-              onClick={closeMobileDrawer}
-              aria-label={a11yText.closeRightPanel}
-            >
-              <X className="icon-sm" />
-            </GhostButton>
-          </div>
-          <div className="page-layout-mobile-drawer-body">{resolvedPanels.right}</div>
+          {resolvedPanels.right}
         </aside>
       )}
     </>

@@ -162,7 +162,7 @@ export function AppHeader() {
               Share a bug report, feature idea, or anything that would make the journal better.
             </DialogDescription>
             <p className="text-xs text-muted-foreground">
-              Build: {" "}
+              Build:{" "}
               <code className="rounded bg-muted px-1 py-0.5 text-[0.8em]">
                 {__APP_COMMIT_HASH__}
               </code>{" "}
