@@ -72,7 +72,7 @@
   }
 
   .images-detail-preview-image {
-    @apply mx-auto max-h-[68vh] w-full object-contain;
+    @apply mx-auto max-h-[68vh] w-auto max-w-full object-contain;
   }
 
   .images-size-info {
