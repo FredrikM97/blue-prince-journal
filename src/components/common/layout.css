@@ -43,7 +43,7 @@
 
   /* Standard panel container with vertical spacing used by sidebars */
   .side-panel-shell {
-    @apply rounded-lg border border-border bg-card/40 p-2.5 text-sm flex flex-col gap-3 sm:p-3;
+    @apply rounded-lg bg-card/40 p-2.5 text-sm flex flex-col gap-3 sm:p-3;
   }
 
   /* Scrollable body inside a flex-column dialog or panel */
@@ -171,9 +171,15 @@
   /* ─── Icon sizing ────────────────────────────────────────────────────────── */
   /* Use on lucide icon elements outside of Button (which auto-sizes via [&_svg]:size-4). */
 
-  .icon-xs { @apply h-3 w-3; }
-  .icon-sm { @apply h-3.5 w-3.5; }
-  .icon-md { @apply h-4 w-4; }
+  .icon-xs {
+    @apply h-3 w-3;
+  }
+  .icon-sm {
+    @apply h-3.5 w-3.5;
+  }
+  .icon-md {
+    @apply h-4 w-4;
+  }
 
   /* ─── Chip / tag pills ───────────────────────────────────────────────────── */
 
@@ -323,7 +329,7 @@
   }
 
   .page-layout-panel {
-    @apply rounded-lg border border-border bg-card/40 p-2.5 text-sm sm:p-3;
+    @apply rounded-lg bg-card/40 p-2.5 text-sm sm:p-3;
   }
 
   /* Right sticky sidebar column */
@@ -351,7 +357,7 @@
   .page-layout-mobile-drawer {
     --page-layout-mobile-drawer-width: min(92vw, 24rem);
     width: var(--page-layout-mobile-drawer-width);
-    @apply fixed top-0 z-50 h-dvh overflow-y-auto border-border bg-background p-3 shadow-xl;
+    @apply fixed inset-y-0 z-50 overflow-y-auto border-border bg-background p-3 shadow-xl;
   }
 
   .page-layout-mobile-drawer-left {
@@ -362,23 +368,9 @@
     @apply right-0 border-l;
   }
 
-  .page-layout-mobile-drawer-header {
-    @apply mb-2 flex items-center justify-between gap-2 border-b border-border pb-2;
-  }
-
-  .page-layout-mobile-drawer-body {
-    @apply min-h-0;
-  }
-
-  @media (max-width: 63.99rem) and (orientation: portrait) {
-    .page-layout-mobile-drawer {
-      --page-layout-mobile-drawer-width: min(92vw, 24rem);
-    }
-  }
-
-  @media (max-width: 63.99rem) and (orientation: landscape) {
-    .page-layout-mobile-drawer {
-      --page-layout-mobile-drawer-width: min(68vw, 21rem);
+  @media (max-width: 63.99rem) {
+    .page-layout-mobile-drawer .side-panel-shell {
+      @apply w-full rounded-none bg-background p-0;
     }
   }
 

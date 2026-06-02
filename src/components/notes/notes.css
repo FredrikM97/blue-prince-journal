@@ -8,19 +8,6 @@
     @apply space-y-2;
   }
 
-  .notes-right-panel-shell {
-    @apply rounded-lg;
-    max-height: calc(100dvh - 7rem);
-    overflow-y: auto;
-  }
-
-  @media (min-width: 64rem) {
-    .notes-right-panel-shell {
-      height: calc(100dvh - 7rem);
-      overflow-y: auto;
-    }
-  }
-
   /* Capture/notes panel */
   .capture-panel {
     @apply flex flex-col gap-2;

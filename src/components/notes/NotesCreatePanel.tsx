@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useStore } from "@/data/store";
-import { GhostButton, BrassButton, IconButton } from "@/components/common/Button";
+import { GhostButton, BrassButton } from "@/components/common/Button";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { Tabs, TabsList, TabsTrigger } from "@/components/common/Tabs";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
@@ -502,6 +502,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   const submit = form.mode === "todo" ? submitTodo : submitNote;
 
   const isEditing = Boolean(store.editNoteId ?? store.editTodoId);
+
   let panelTitle = "New note";
   if (form.mode === "todo") {
     panelTitle = "New todo";

@@ -45,47 +45,32 @@ export function ImagesLeftPanel({
         size.
       </p>
 
-      {steamSync.supported && (
+      {steamSync.supported && steamSync.connected && (
         <div className="mt-2 space-y-1.5">
           <h2 className="font-serif text-base">Steam Folder</h2>
 
-          {!steamSync.connected && (
+          <p className="text-xs text-muted-foreground">Connected: {steamSync.folderName}</p>
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => void steamSync.connect()}
+              onClick={() => void steamSync.syncNow()}
               disabled={steamSync.busy}
             >
-              Connect folder
+              Sync now
             </Button>
-          )}
-
-          {steamSync.connected && (
-            <>
-              <p className="text-xs text-muted-foreground">Connected: {steamSync.folderName}</p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => void steamSync.syncNow()}
-                  disabled={steamSync.busy}
-                >
-                  Sync now
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => void steamSync.disconnect()}
-                  disabled={steamSync.busy}
-                >
-                  Disconnect
-                </Button>
-              </div>
-              <span className="text-xs text-muted-foreground" title={lastSyncTitle}>
-                Last sync: {refreshTime}
-              </span>
-            </>
-          )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void steamSync.disconnect()}
+              disabled={steamSync.busy}
+            >
+              Disconnect
+            </Button>
+          </div>
+          <span className="text-xs text-muted-foreground" title={lastSyncTitle}>
+            Last sync: {refreshTime}
+          </span>
         </div>
       )}
     </div>

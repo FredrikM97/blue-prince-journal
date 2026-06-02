@@ -18,7 +18,9 @@ export function FilterToggleGrid({
       {items.map((item) => {
         let buttonClass = "filter-toggle filter-toggle-off";
         if (leftAligned) {
-          buttonClass = "filter-toggle text-left filter-toggle-off";
+          buttonClass = "filter-toggle gap-1.5 text-left filter-toggle-off";
+        } else if (item.dotColor) {
+          buttonClass = "filter-toggle gap-1.5 filter-toggle-off";
         }
         if (item.active) {
           buttonClass = buttonClass.replace("filter-toggle-off", "filter-toggle-on");
