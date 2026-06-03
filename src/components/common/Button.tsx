@@ -70,7 +70,7 @@ const GHOST_SURFACE_ACTIVE: Record<GhostSurface, string> = {
 
 const FILTER_TOGGLE_STATE: Record<FilterToggleStateStyle, { on: string; off: string }> = {
   filled: {
-    on: "ui-toggle-state-on opacity-100",
+    on: "ui-toggle-state-on-filled opacity-100",
     off: "ui-toggle-state-off",
   },
   outline: {
