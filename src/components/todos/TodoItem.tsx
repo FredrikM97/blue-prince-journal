@@ -68,9 +68,8 @@ export function TodoItem({
         ) : (
           <Button
             type="button"
-            variant="ghost"
-            size="default"
-            fullWidth
+            variant="transparent"
+            size="content"
             justify="start"
             textAlign="left"
             tone={todo.status === "done" ? "muted" : "default"}
@@ -86,7 +85,7 @@ export function TodoItem({
             </Text>
           </Button>
         )}
-        <Inline gap="1" align="center" wrap>
+        <Inline gap="1" align="center">
           <Chip variant={getPriorityVariant(todo.priority)}>{todo.priority}</Chip>
           <Chip variant="solid">{todo.scope}</Chip>
           {todo.room && <Chip variant="room">@{todo.room}</Chip>}
@@ -102,9 +101,10 @@ export function TodoItem({
           value={todo.status}
           onValueChange={(value) => onToggle(value as TodoStatus)}
           options={TODO_STATUS_OPTIONS}
+          triggerWidth="fit"
         />
         <Button
-          variant="ghost"
+          variant="transparent"
           size="icon"
           onClick={onOpenPreview}
           aria-label="Preview todo"
@@ -113,7 +113,7 @@ export function TodoItem({
           <Maximize2 />
         </Button>
         <Button
-          variant="ghost"
+          variant="transparent"
           size="icon"
           onClick={onDelete}
           aria-label="Delete"

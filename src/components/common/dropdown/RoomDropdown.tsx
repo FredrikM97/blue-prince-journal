@@ -28,11 +28,13 @@ function RoomDropdownComponent({
   onValueChange,
   placeholder = "Pick a room...",
   clearLabel = "No room",
+  triggerWidth = "full",
 }: {
   value?: string;
   onValueChange: (next: string) => void;
   placeholder?: string;
   clearLabel?: string;
+  triggerWidth?: "full" | "fit";
 }) {
   const [query, setQuery] = useState("");
   const [catalogVersion, setCatalogVersion] = useState(0);
@@ -108,6 +110,7 @@ function RoomDropdownComponent({
           placeholder={placeholder}
           hasValue={!!activeRoom}
           variant="room"
+          triggerWidth={triggerWidth}
         />
       </DropdownMenuTrigger>
 

@@ -35,6 +35,10 @@
     @apply h-9 w-full justify-between border-input bg-secondary/70 px-3 py-2 text-sm font-normal hover:bg-secondary;
   }
 
+  .dropdown-trigger-fit {
+    @apply w-auto min-w-40;
+  }
+
   .dropdown-trigger-room {
     @apply bg-secondary/70;
   }

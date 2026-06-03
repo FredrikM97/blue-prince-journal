@@ -296,7 +296,7 @@ export function GraphPage() {
                   size="compact"
                   layout="wrap"
                   width="fit"
-                  activeStyle="outline"
+                  activeStyle="filled"
                 />
               </FilterSection>
 
@@ -363,7 +363,7 @@ export function GraphPage() {
                             size="compact"
                             layout="wrap"
                             width="fit"
-                            activeStyle="outline"
+                            activeStyle="filled"
                           />
                         </FilterSection>
                       );
@@ -386,7 +386,7 @@ export function GraphPage() {
                     size="compact"
                     layout="wrap"
                     width="fit"
-                    activeStyle="outline"
+                    activeStyle="filled"
                   />
                 </FilterSection>
               )}

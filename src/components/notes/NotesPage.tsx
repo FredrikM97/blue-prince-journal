@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "@/data/store";
 import type { Note, NoteType } from "@/lib/types";
 import { PageLayout } from "@/components/common/PageLayout";
@@ -20,6 +20,7 @@ import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
 import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
 
 export function NotesPage({
   filterType,
@@ -118,6 +119,7 @@ export function NotesPage({
           </SidePanel.Left>
         </PageLayout.Left>
         <PageLayout.Middle>
+          <NotesCaptureMobileDrawerSync captureOpen={captureOpen} />
           <NotesView
             emptyHint={emptyHint}
             filtered={filtered}
@@ -160,6 +162,18 @@ export function NotesPage({
       </Dialog>
     </>
   );
+}
+
+function NotesCaptureMobileDrawerSync({ captureOpen }: { captureOpen: boolean }) {
+  const drawerControls = usePageLayoutMobileDrawerControls();
+
+  useEffect(() => {
+    if (!captureOpen) return;
+    if (!drawerControls?.isPageLayoutMobile) return;
+    drawerControls.openMobileDrawer("right");
+  }, [captureOpen, drawerControls]);
+
+  return null;
 }
 
 function NotesRightPanel({

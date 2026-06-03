@@ -1,3 +1,28 @@
+- [x] Move edit-note Use existing button to footer action row with attach/cancel/save
+- [x] Move edit-note Attach image button to footer near cancel/save like create note
+- [x] Make edit-note Cancel fully close mobile right drawer
+- [x] Reorder edit-note fields so Tags sits with Date and Type is in top row
+- [x] Force compact tags/date input width to fixed 10rem so they stop wrapping to full row
+- [x] Make note Tags/Date inputs compact (smaller width/height) for mobile row fit
+- [x] Normalize edit-note Type/Status row placement and stacked field wrappers
+- [x] Apply compact fit width to tags/date inputs so they can align side by side on mobile
+- [x] Make note dropdown labels block-level so labels stay above controls in create/edit panels
+- [x] Right-size welcome icons and keep icon above text on welcome cards
+- [x] Reduce fit dropdown min width so Type/Room stay side by side on mobile
+- [x] Stop todo title button from covering full mobile row width
+- [x] Revert PageLayout mobileAutoOpenRightKey prop and use Notes hook-based mobile drawer open
+- [x] Double welcome action icons, use horizontal card layout, and remove custom icon class usage
+- [x] Increase add-note shortcut key contrast over brass button
+- [x] Keep todo tags horizontal and remove hover popup-like action reveal/background
+- [x] Auto-open Notes mobile right drawer when Add Note capture opens
+- [x] Add fit-width dropdown triggers so create/edit note meta fields align side by side
+- [x] Set new note meta rows to Type/Priority+Room then Tags+Date
+- [x] Reflow new note meta inputs so Room/Tags share rows with other fields
+- [x] Keep tags field grouped with meta controls instead of standalone row
+- [x] Make Graph filter toggles use filled active style
+- [x] Stop tags input from stretching full width in new/edit note panels
+- [x] Increase Welcome menu button icon size
+- [x] Adjust Welcome action card sizing to try 3-4 cards in one row on wider screens
 - [x] Move global stylesheet into initial HTML load path
 - [x] Remove duplicate stylesheet injection from router head
 - [x] Remove borders from sidebar detail panels
@@ -155,3 +180,4 @@
 - [x] Align Graph visibility filter with shared FilterSection/FilterToggleGrid styles
 - [x] Remove graph-specific legacy filter-toggle css override
 - [x] Migrate PageLayout primitives and container classes to ui-layout aliases
+- [x] Make filter-toggle active style explicit (filled vs outline) and document usage for Graph multi-select filters

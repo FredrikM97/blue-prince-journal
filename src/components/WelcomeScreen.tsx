@@ -32,14 +32,16 @@ function WelcomeCard({
       type="button"
       variant="ghost"
       size="content"
+      iconSize="2xl"
       onClick={onClick}
       disabled={disabled}
       className="welcome-card"
       fullWidth
       direction="column"
       justify="start"
+      textAlign="center"
     >
-      <Icon className="h-8 w-8 text-brass" />
+      <Icon className="text-brass" />
       <Stack gap="1" variant="default">
         <Text size="base" weight="medium">
           {title}
@@ -137,7 +139,7 @@ export function WelcomeScreen({
           </Text>
         </Stack>
 
-        <Inline gap="3" justify="center" wrap>
+        <Inline gap="2" justify="center" wrap>
           {showContinueSuggestion && onContinue ? (
             <WelcomeCard
               icon={Waypoints}

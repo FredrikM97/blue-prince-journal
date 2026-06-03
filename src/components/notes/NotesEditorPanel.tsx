@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
 import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
+import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
 
 type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";
 
@@ -56,6 +57,8 @@ export function NotesEditorPanel({
   onSave: () => Promise<void>;
   onCancel: () => void;
 }) {
+  const mobileDrawerControls = usePageLayoutMobileDrawerControls();
+  const isMobileDrawer = mobileDrawerControls?.isPageLayoutMobile === true;
   const addImage = useStore((s) => s.addImage);
   const images = useStore((s) => s.images);
   const [tagsInputDraft, setTagsInputDraft] = useState(draft.tags.join(", "));
@@ -64,6 +67,21 @@ export function NotesEditorPanel({
   const attachRef = useRef<HTMLInputElement>(null);
   const imageById = useMemo(() => new Map(images.map((img) => [img.id, img])), [images]);
   const tagsInput = isTagsFocused ? tagsInputDraft : draft.tags.join(", ");
+  let existingLabel = "Use existing";
+  let attachLabel = "Attach image";
+  let footerGap: "1" | "2" = "2";
+  if (isMobileDrawer) {
+    existingLabel = "Existing";
+    attachLabel = "Attach";
+    footerGap = "1";
+  }
+
+  function handleCancel() {
+    if (mobileDrawerControls?.isPageLayoutMobile) {
+      mobileDrawerControls.closeMobileDrawer();
+    }
+    onCancel();
+  }
 
   usePasteImages({
     onImages: (files) => {
@@ -107,61 +125,70 @@ export function NotesEditorPanel({
         />
       </SuggestionsDropdown>
 
-      <Inline gap="3" wrap align="start">
-        <div>
-          <MetaText as="label" size="xs" weight="medium" normalCase>
-            Room
-          </MetaText>
-          <RoomDropdown
-            value={draft.room ?? ""}
-            onValueChange={(next) => setDraft({ ...draft, room: next || undefined })}
-            clearLabel="No room"
-          />
-        </div>
-        <InputField
-          label="Tags"
-          value={tagsInput}
-          onFocus={() => {
-            setTagsInputDraft(draft.tags.join(", "));
-            setIsTagsFocused(true);
-          }}
-          onBlur={() => setIsTagsFocused(false)}
-          onChange={(next) => {
-            setTagsInputDraft(next);
-            setDraft({ ...draft, tags: parseTagsInput(next) });
-          }}
-          placeholder="safe, gem, puzzle"
-        />
-      </Inline>
-
-      <Inline gap="3" wrap align="start">
-        <div>
-          <InputField
-            label="Date"
-            value={draft.date ?? ""}
-            onChange={(e) => setDraft({ ...draft, date: e })}
-          />
-        </div>
-        <div>
-          <MetaText as="label" size="xs" weight="medium" normalCase>
+      <Inline gap="2" wrap align="start">
+        <Stack as="div" gap="1">
+          <MetaText as="p" size="xs" weight="medium" normalCase>
             Type
           </MetaText>
           <DropdownSelect
             value={draft.type}
             onValueChange={(value) => setDraft({ ...draft, type: value as Note["type"] })}
             options={NOTE_TYPE_OPTIONS}
+            triggerWidth="fit"
           />
-        </div>
-        <div>
-          <MetaText as="label" size="xs" weight="medium" normalCase>
+        </Stack>
+        <Stack as="div" gap="1">
+          <MetaText as="p" size="xs" weight="medium" normalCase>
+            Room
+          </MetaText>
+          <RoomDropdown
+            value={draft.room ?? ""}
+            onValueChange={(next) => setDraft({ ...draft, room: next || undefined })}
+            clearLabel="No room"
+            triggerWidth="fit"
+          />
+        </Stack>
+        <Stack as="div" gap="1">
+          <MetaText as="p" size="xs" weight="medium" normalCase>
             Status
           </MetaText>
           <DropdownSelect
             value={draft.status}
             onValueChange={(value) => setDraft({ ...draft, status: value as Note["status"] })}
             options={NOTE_STATUS_OPTIONS}
+            triggerWidth="fit"
           />
-        </div>
+        </Stack>
+      </Inline>
+
+      <Inline gap="2" wrap align="start">
+        <Stack as="div" gap="1">
+          <InputField
+            label="Tags"
+            value={tagsInput}
+            onFocus={() => {
+              setTagsInputDraft(draft.tags.join(", "));
+              setIsTagsFocused(true);
+            }}
+            onBlur={() => setIsTagsFocused(false)}
+            onChange={(next) => {
+              setTagsInputDraft(next);
+              setDraft({ ...draft, tags: parseTagsInput(next) });
+            }}
+            placeholder="safe, gem, puzzle"
+            size="sm"
+            width="compact"
+          />
+        </Stack>
+        <Stack as="div" gap="1">
+          <InputField
+            label="Date"
+            value={draft.date ?? ""}
+            onChange={(e) => setDraft({ ...draft, date: e })}
+            size="sm"
+            width="compact"
+          />
+        </Stack>
       </Inline>
 
       <Stack gap="2" variant="panel-card">
@@ -169,42 +196,6 @@ export function NotesEditorPanel({
           <Text as="span" size="sm" weight="medium">
             Attached images
           </Text>
-          <Inline gap="2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setImagePickerOpen(true)}
-            >
-              Use existing
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => attachRef.current?.click()}
-            >
-              <ImagePlus className="h-3.5 w-3.5" /> Attach image
-            </Button>
-            <input
-              ref={attachRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={async (e) => {
-                const files = Array.from(e.target.files ?? []);
-                if (!files.length) return;
-                const created = await Promise.all(files.map((f) => addImage(f, f.name)));
-                const newIds = created.map((img) => img.id);
-                setDraft((prev) => ({
-                  ...prev,
-                  imageIds: Array.from(new Set([...prev.imageIds, ...newIds])),
-                }));
-                e.target.value = "";
-              }}
-            />
-          </Inline>
         </Inline>
 
         {draft.imageIds.length > 0 ? (
@@ -244,13 +235,52 @@ export function NotesEditorPanel({
         setDraft={setDraft}
       />
 
-      <Inline gap="2" justify="end" wrap>
-        <Button variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button variant="brass" size="sm" onClick={onSave}>
-          Save
-        </Button>
+      <input
+        ref={attachRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={async (e) => {
+          const files = Array.from(e.target.files ?? []);
+          if (!files.length) return;
+          const created = await Promise.all(files.map((f) => addImage(f, f.name)));
+          const newIds = created.map((img) => img.id);
+          setDraft((prev) => ({
+            ...prev,
+            imageIds: Array.from(new Set([...prev.imageIds, ...newIds])),
+          }));
+          e.target.value = "";
+        }}
+      />
+
+      <Inline gap={footerGap} justify="between" wrap align="center">
+        <Inline gap={footerGap} align="center" wrap={!isMobileDrawer}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setImagePickerOpen(true)}
+          >
+            {existingLabel}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => attachRef.current?.click()}
+          >
+            <ImagePlus className="h-3.5 w-3.5" /> {attachLabel}
+          </Button>
+        </Inline>
+        <Inline gap={footerGap} justify="end" align="center" wrap={!isMobileDrawer}>
+          <Button variant="ghost" size="sm" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button variant="brass" size="sm" onClick={onSave}>
+            Save
+          </Button>
+        </Inline>
       </Inline>
     </Stack>
   );
