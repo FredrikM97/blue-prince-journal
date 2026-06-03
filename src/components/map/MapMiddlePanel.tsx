@@ -35,7 +35,8 @@ export function MapMiddlePanel({
                 key={`${row},${col}`}
                 type="button"
                 variant="ghost"
-                size="default"
+                size="content"
+                direction="column"
                 onClick={() => onOpenCell(row, col)}
                 className={`map-cell ${statusColor[status]}`}
               >

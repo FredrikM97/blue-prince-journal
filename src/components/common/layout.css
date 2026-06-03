@@ -32,16 +32,19 @@
   }
 
   /* Panel header divider row (title + close/action on the right) */
+  .ui-header-panel,
   .panel-header {
     @apply flex items-start justify-between gap-2 border-b border-border pb-3;
   }
 
   /* Wraps panel title + subtitle stack in panel headers */
+  .ui-header-title-wrap,
   .panel-header-title-wrap {
     @apply min-w-0;
   }
 
   /* Standard panel container with vertical spacing used by sidebars */
+  .ui-shell-panel,
   .side-panel-shell {
     @apply rounded-lg border border-border/70 bg-card/40 p-2.5 text-sm flex flex-col gap-3 sm:p-3;
   }
@@ -148,6 +151,7 @@
   }
 
   /* Flex row for icons/buttons on the right of a panel header */
+  .ui-header-actions,
   .preview-header-actions {
     @apply flex shrink-0 items-start gap-1;
   }
@@ -320,102 +324,144 @@
 
   /* ─── Filter sections ────────────────────────────────────────────────────── */
 
-  /* Outer wrapper — adds consistent vertical rhythm between title and body */
-  .filter-section {
+  /* Generic compact stack rhythm */
+  .ui-block-tight {
     @apply space-y-1.5;
   }
 
-  /* Non-collapsible header: label on the left, optional reset on the right */
-  .filter-section-header {
-    @apply flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground;
-  }
-
-  /* Collapsible toggle: same label-row layout + pointer cursor */
-  .filter-section-toggle {
-    @apply flex cursor-pointer select-none items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground;
-  }
-
-  /* Inline count badge shown in a collapsed header, e.g. "(3/8)" */
-  .filter-section-badge {
-    @apply ml-1 normal-case text-[10px] text-amber-500;
-  }
-
-  /* Content area below the header (no intrinsic layout — children own it) */
-  .filter-section-body {
+  /* Generic compact body rhythm */
+  .ui-body-tight {
     @apply space-y-0.5;
   }
 
-  /* "All" / "Show all" reset link inside filter headers and bodies */
-  .filter-clear-btn {
-    @apply normal-case text-[10px] text-amber-500 hover:underline;
+  /* Generic header row layout */
+  .ui-header-row {
+    @apply flex items-center justify-between;
   }
 
-  /* ─── Filter toggle buttons ──────────────────────────────────────────────── */
-  /* Multi-select visibility toggle (dimmed when inactive) */
-
-  .filter-toggle {
-    @apply flex cursor-pointer items-center rounded-md border border-border/70 bg-card/50 px-2 py-1 text-xs text-foreground transition-colors hover:border-brass/45 hover:bg-brass/10;
+  .ui-header-text-default {
+    @apply text-[10px] font-medium uppercase tracking-wide text-muted-foreground;
   }
 
-  .filter-toggle-full {
-    @apply w-full;
+  .ui-header-text-compact {
+    @apply text-[8px];
   }
 
-  .filter-toggle-fit {
+  /* Generic control row behavior */
+  .ui-control-row {
+    @apply flex cursor-pointer select-none items-center justify-between gap-1 hover:text-foreground;
+  }
+
+  .ui-width-fill {
+    @apply min-w-0 flex-1;
+  }
+
+  .ui-width-fit {
     @apply w-auto;
   }
 
-  .filter-toggle-on {
-    @apply border-brass bg-brass text-brass-foreground opacity-100;
+  .ui-control-size-default {
+    @apply min-h-6 px-1 py-0.5 text-[8px] font-medium uppercase tracking-wide text-muted-foreground;
   }
 
-  .filter-toggle-off {
+  .ui-control-size-compact {
+    @apply min-h-4.5 px-0.5 text-[7px];
+  }
+
+  /* Generic link-like action text */
+  .ui-action-link {
+    @apply px-1 py-0.5 normal-case text-amber-500 hover:underline;
+  }
+
+  .ui-action-link-size-default {
+    @apply text-[8px];
+  }
+
+  .ui-action-link-size-compact {
+    @apply text-[7px];
+  }
+
+  /* Generic selectable chip/toggle base */
+  .ui-toggle-chip {
+    @apply flex cursor-pointer items-center rounded-md transition-colors;
+  }
+
+  .ui-toggle-chip-surface {
+    @apply border border-border/70 bg-card/50 text-foreground hover:border-brass/45 hover:bg-brass/10;
+  }
+
+  .ui-toggle-width-full {
+    @apply w-full;
+  }
+
+  .ui-toggle-width-fit {
+    @apply w-auto;
+  }
+
+  .ui-align-center {
+    @apply justify-center text-center;
+  }
+
+  .ui-align-left {
+    @apply justify-start text-left;
+  }
+
+  .ui-toggle-size-default {
+    @apply px-2 py-1 text-[11px];
+  }
+
+  .ui-toggle-state-on {
+    @apply border-brass bg-brass text-brass-foreground;
+  }
+
+  .ui-toggle-state-off {
     @apply opacity-75;
   }
 
-  .filter-toggle-compact {
-    @apply h-6 px-1.5 py-0.5 text-[10px];
+  .ui-toggle-size-compact {
+    @apply h-5.5 px-1.5 py-0.5 text-[8px];
   }
 
-  /* Responsive grid for toggle rows (not fixed to one vertical column) */
-  .filter-grid {
+  /* Generic responsive control grid */
+  .ui-grid-auto-fit {
     @apply grid w-full gap-x-2 gap-y-0.5;
     grid-template-columns: repeat(auto-fit, minmax(min(6.75rem, 100%), 1fr));
   }
 
-  .filter-grid-wrap {
+  /* Generic wrapped controls row */
+  .ui-wrap-controls {
     @apply flex w-full flex-wrap gap-1.5;
-  }
-
-  /* Flex-wrap row for radio-style filter chips (e.g. SelectButton groups) */
-  .filter-options {
-    @apply flex flex-wrap gap-1.5;
   }
 
   /* ─── Page layout ───────────────────────────────────────────────────────── */
 
   /* Outer wrapper — centers content, limits max width */
+  .ui-layout-frame,
   .page-layout {
     @apply mx-auto h-full min-h-0 w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-6;
   }
 
   /* Layout variants */
+  .ui-layout-cols-3,
   .page-layout-three-column {
     @apply grid items-start gap-3 sm:gap-6 grid-cols-[240px_minmax(0,1fr)_420px];
     min-height: 100%;
   }
 
+  .ui-layout-cols-2-left,
   .page-layout-two-column-left {
     @apply grid items-start gap-3 sm:gap-6 grid-cols-[240px_minmax(0,1fr)];
     min-height: 100%;
   }
 
+  .ui-layout-cols-2-right,
   .page-layout-two-column-right {
     @apply grid items-start gap-3 sm:gap-6 grid-cols-[minmax(0,1fr)_420px];
     min-height: 100%;
   }
 
   /* Left sticky sidebar column */
+  .ui-layout-sidebar-left,
   .page-layout-sidebar {
     @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-r border-border/50 bg-transparent;
     overscroll-behavior: contain;
@@ -425,6 +471,7 @@
   }
 
   /* Main content area ("middle") */
+  .ui-layout-content,
   .page-layout-content {
     min-width: 0;
     min-height: 0;
@@ -433,22 +480,26 @@
     overscroll-behavior: contain;
   }
 
+  .ui-layout-mobile-drawer,
   .page-layout-mobile-drawer {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
+  .ui-layout-mobile-drawer::-webkit-scrollbar,
   .page-layout-mobile-drawer::-webkit-scrollbar {
     width: 0;
     height: 0;
     display: none;
   }
 
+  .ui-surface-panel,
   .page-layout-panel {
     @apply rounded-lg bg-card/40 p-2.5 text-sm sm:p-3;
   }
 
   /* Right sticky sidebar column */
+  .ui-layout-sidebar-right,
   .page-layout-rightbar {
     @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-l border-border/50 bg-transparent;
     overscroll-behavior: contain;
@@ -457,6 +508,7 @@
     top: 0;
   }
 
+  .ui-layout-mobile-controls,
   .page-layout-mobile-controls {
     @apply fixed inset-x-0 bottom-2 z-30 mx-auto flex w-fit items-center gap-2 rounded-full bg-background/95 px-2 py-1.5 shadow-lg backdrop-blur;
   }
@@ -469,6 +521,7 @@
     @apply bg-brass text-brass-foreground;
   }
 
+  .ui-layout-mobile-drawer,
   .page-layout-mobile-drawer {
     width: min(94vw, 24rem);
     max-width: min(94vw, 24rem);
@@ -477,16 +530,22 @@
     @apply fixed bottom-0 top-0 z-50 overflow-y-auto rounded-none border border-border bg-background px-3 pb-3 shadow-xl;
   }
 
+  .ui-layout-mobile-drawer-left,
   .page-layout-mobile-drawer-left {
     @apply left-0 border-r;
     margin-left: 0;
   }
 
+  .ui-layout-mobile-drawer-right,
   .page-layout-mobile-drawer-right {
     @apply right-0 border-l;
     margin-right: 0;
   }
 
+  .ui-layout-variant-panel .ui-layout-content,
+  .ui-layout-variant-panel .ui-layout-sidebar-left,
+  .ui-layout-variant-panel .ui-layout-sidebar-right,
+  .ui-layout-variant-panel .ui-layout-mobile-drawer,
   .page-layout-variant-panel .page-layout-content,
   .page-layout-variant-panel .page-layout-sidebar,
   .page-layout-variant-panel .page-layout-rightbar,
@@ -495,6 +554,10 @@
     scrollbar-width: none;
   }
 
+  .ui-layout-variant-panel .ui-layout-content::-webkit-scrollbar,
+  .ui-layout-variant-panel .ui-layout-sidebar-left::-webkit-scrollbar,
+  .ui-layout-variant-panel .ui-layout-sidebar-right::-webkit-scrollbar,
+  .ui-layout-variant-panel .ui-layout-mobile-drawer::-webkit-scrollbar,
   .page-layout-variant-panel .page-layout-content::-webkit-scrollbar,
   .page-layout-variant-panel .page-layout-sidebar::-webkit-scrollbar,
   .page-layout-variant-panel .page-layout-rightbar::-webkit-scrollbar,
@@ -504,6 +567,11 @@
     display: none;
   }
 
+  .ui-layout-variant-panel .ui-layout-sidebar-left,
+  .ui-layout-variant-panel .ui-layout-sidebar-right,
+  .ui-layout-variant-panel .ui-layout-mobile-drawer,
+  .ui-layout-variant-panel .ui-layout-mobile-drawer-left,
+  .ui-layout-variant-panel .ui-layout-mobile-drawer-right,
   .page-layout-variant-panel .page-layout-sidebar,
   .page-layout-variant-panel .page-layout-rightbar,
   .page-layout-variant-panel .page-layout-mobile-drawer,
@@ -512,11 +580,17 @@
     @apply border-0;
   }
 
-  .page-layout-mobile-drawer .side-panel-shell {
+  .ui-layout-mobile-drawer .side-panel-shell,
+  .ui-layout-mobile-drawer .ui-shell-panel,
+  .page-layout-mobile-drawer .side-panel-shell,
+  .page-layout-mobile-drawer .ui-shell-panel {
     @apply w-full rounded-none border-0 bg-background p-0;
   }
 
-  .page-layout-mobile-drawer .panel-header {
+  .ui-layout-mobile-drawer .panel-header,
+  .ui-layout-mobile-drawer .ui-header-panel,
+  .page-layout-mobile-drawer .panel-header,
+  .page-layout-mobile-drawer .ui-header-panel {
     @apply sticky top-0 z-10 bg-background pt-3;
   }
 
@@ -531,14 +605,21 @@
     }
   }
 
+  .ui-layout-single-scroll,
   .page-layout-single-column-scroll {
     @apply flex flex-col;
   }
 
+  .ui-layout-single-scroll .ui-layout-content,
+  .ui-layout-single-scroll .page-layout-content,
+  .page-layout-single-column-scroll .ui-layout-content,
   .page-layout-single-column-scroll .page-layout-content {
     flex: 1 1 auto;
   }
 
+  .ui-layout-mode-desktop .ui-layout-sidebar-right,
+  .ui-layout-mode-desktop .page-layout-rightbar,
+  .page-layout-mode-desktop .ui-layout-sidebar-right,
   .page-layout-mode-desktop .page-layout-rightbar {
     margin-right: -1rem;
     border-right: 0;
@@ -546,6 +627,9 @@
     border-bottom-right-radius: 0;
   }
 
+  .ui-layout-mode-mobile .ui-layout-content,
+  .ui-layout-mode-mobile .page-layout-content,
+  .page-layout-mode-mobile .ui-layout-content,
   .page-layout-mode-mobile .page-layout-content {
     height: auto;
     overflow-y: visible;

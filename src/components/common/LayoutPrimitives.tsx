@@ -75,7 +75,7 @@ export function PageLayoutFrame({
 }
 
 export function PageLayoutMobileControls({ children }: { children: ReactNode }) {
-  return <div className="page-layout-mobile-controls">{children}</div>;
+  return <div className="ui-layout-mobile-controls">{children}</div>;
 }
 
 export function PageLayoutMobileDrawer({
@@ -85,9 +85,9 @@ export function PageLayoutMobileDrawer({
   side: PageLayoutMobileDrawerSide;
   children: ReactNode;
 }) {
-  let className = "page-layout-mobile-drawer page-layout-mobile-drawer-left";
+  let className = "ui-layout-mobile-drawer ui-layout-mobile-drawer-left";
   if (side === "right") {
-    className = "page-layout-mobile-drawer page-layout-mobile-drawer-right";
+    className = "ui-layout-mobile-drawer ui-layout-mobile-drawer-right";
   }
   return <aside className={className}>{children}</aside>;
 }
@@ -99,15 +99,15 @@ export function PageLayoutSidebar({
   side: PageLayoutSidebarSide;
   children: ReactNode;
 }) {
-  let className = "page-layout-sidebar";
+  let className = "ui-layout-sidebar-left";
   if (side === "right") {
-    className = "page-layout-rightbar";
+    className = "ui-layout-sidebar-right";
   }
   return <aside className={className}>{children}</aside>;
 }
 
 export function PageLayoutContent({ children }: { children: ReactNode }) {
-  return <main className="page-layout-content">{children}</main>;
+  return <main className="ui-layout-content">{children}</main>;
 }
 
 export function CenteredContent({

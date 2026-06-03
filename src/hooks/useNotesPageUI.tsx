@@ -59,6 +59,22 @@ export function useNotesPageUI({
     return index;
   }, [todos]);
 
+  const resolveTodoForListItem = useCallback(
+    (note: Note) => {
+      const directMatch = todoByVirtualId.get(note.id);
+      if (directMatch) return directMatch;
+
+      if (!note.id.startsWith("todo:")) return null;
+      const todoId = note.id.slice(5);
+      if (!todoId) return null;
+
+      const fallbackMatch = todos.find((todo) => todo.id === todoId);
+      if (!fallbackMatch) return null;
+      return fallbackMatch;
+    },
+    [todoByVirtualId, todos],
+  );
+
   const { filtered, rooms, tags } = useNotesPageData({
     notes,
     todos,
@@ -95,7 +111,7 @@ export function useNotesPageUI({
 
   const openEditFromList = useCallback(
     (note: Note) => {
-      const todo = todoByVirtualId.get(note.id);
+      const todo = resolveTodoForListItem(note);
       if (todo) {
         uiActions.clearSelection();
         setPreviewTodo(null);
@@ -106,12 +122,12 @@ export function useNotesPageUI({
       closeCapture();
       uiActions.openEdit(note);
     },
-    [closeCapture, openCapture, todoByVirtualId, uiActions],
+    [closeCapture, openCapture, resolveTodoForListItem, uiActions],
   );
 
   const openPreviewFromList = useCallback(
     (note: Note) => {
-      const todo = todoByVirtualId.get(note.id);
+      const todo = resolveTodoForListItem(note);
       if (todo) {
         uiActions.clearSelection();
         closeCapture();
@@ -122,19 +138,19 @@ export function useNotesPageUI({
       closeCapture();
       uiActions.openPreview(note);
     },
-    [closeCapture, todoByVirtualId, uiActions],
+    [closeCapture, resolveTodoForListItem, uiActions],
   );
 
   const deleteFromList = useCallback(
     (note: Note) => {
-      const todo = todoByVirtualId.get(note.id);
+      const todo = resolveTodoForListItem(note);
       if (todo) {
         void removeTodo(todo.id);
         return;
       }
       uiActions.setPendingDelete(note);
     },
-    [removeTodo, todoByVirtualId, uiActions],
+    [removeTodo, resolveTodoForListItem, uiActions],
   );
 
   const filterState: NotesFilterState = {

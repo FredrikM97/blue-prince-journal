@@ -4,6 +4,7 @@ import { Button } from "@/components/common/Button";
 import { NotesListItemSummary } from "./NotesListItemSummary";
 import { ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Text } from "@/components/common/Typography";
+import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
 import { Stack } from "@/components/common/Stack";
 
 export function NotesView({
@@ -21,6 +22,13 @@ export function NotesView({
   onOpenPreview: (note: Note) => void;
   onDelete: (note: Note) => void;
 }) {
+  const mobileDrawerControls = usePageLayoutMobileDrawerControls();
+
+  function openRightDrawerIfMobile() {
+    if (!mobileDrawerControls?.isPageLayoutMobile) return;
+    mobileDrawerControls.openMobileDrawer("right");
+  }
+
   return (
     <Stack as="section" variant="notes-view-section" gap="2">
       {filtered.length === 0 ? (
@@ -38,8 +46,14 @@ export function NotesView({
             <NotesListRow
               key={n.id}
               note={n}
-              onOpenEdit={onOpenEdit}
-              onOpenPreview={onOpenPreview}
+              onOpenEdit={(note) => {
+                onOpenEdit(note);
+                openRightDrawerIfMobile();
+              }}
+              onOpenPreview={(note) => {
+                onOpenPreview(note);
+                openRightDrawerIfMobile();
+              }}
               onDelete={onDelete}
             />
           ))}
