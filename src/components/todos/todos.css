@@ -95,11 +95,7 @@
 
   /* Right-side action icons — hidden until row is hovered */
   .todo-row-actions {
-    @apply flex shrink-0 items-center gap-0.5 opacity-0;
-  }
-
-  .todo-row-item:hover .todo-row-actions {
-    @apply opacity-100;
+    @apply flex shrink-0 items-center gap-0.5 opacity-100;
   }
 
   /* Inline status dropdown inside a todo row */

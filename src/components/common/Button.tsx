@@ -23,9 +23,10 @@ type ButtonWidth = "auto" | "full";
 type ButtonJustify = "center" | "start" | "between";
 type ButtonTextAlign = "center" | "left";
 type ButtonDirection = "row" | "column";
+type ButtonIconSize = "sm" | "md" | "lg" | "xl" | "2xl" | "hero";
 
 const BASE =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0";
 
 const VARIANT: Record<Variant, string> = {
   default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
@@ -115,6 +116,15 @@ const BUTTON_DIRECTION: Record<ButtonDirection, string> = {
   column: "flex-col",
 };
 
+const BUTTON_ICON_SIZE: Record<ButtonIconSize, string> = {
+  sm: "[&_svg]:size-3.5",
+  md: "[&_svg]:size-4",
+  lg: "[&_svg]:size-5",
+  xl: "[&_svg]:size-6",
+  "2xl": "[&_svg]:size-8",
+  hero: "[&_svg]:size-20",
+};
+
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
@@ -129,6 +139,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   justify?: ButtonJustify;
   textAlign?: ButtonTextAlign;
   direction?: ButtonDirection;
+  iconSize?: ButtonIconSize;
 }
 
 /** General-purpose button. Prefer the pre-styled variants below for common use cases. */
@@ -147,6 +158,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     justify = "center",
     textAlign = "center",
     direction = "row",
+    iconSize = "md",
     className = "",
     ...props
   },
@@ -178,6 +190,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     BUTTON_JUSTIFY[justify],
     BUTTON_TEXT_ALIGN[textAlign],
     BUTTON_DIRECTION[direction],
+    BUTTON_ICON_SIZE[iconSize],
   ]
     .join(" ")
     .trim();

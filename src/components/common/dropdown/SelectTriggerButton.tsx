@@ -4,17 +4,26 @@ import { Button } from "@/components/common/Button";
 import { MetaText, Text } from "@/components/common/Typography";
 
 type DropdownTriggerVariant = "default" | "room";
+type DropdownTriggerWidth = "full" | "fit";
 
 type DropdownTriggerButtonProps = Omit<ComponentProps<typeof Button>, "children" | "variant"> & {
   valueLabel?: string;
   placeholder: string;
   hasValue: boolean;
   variant?: DropdownTriggerVariant;
+  triggerWidth?: DropdownTriggerWidth;
 };
 
 export const DropdownTriggerButton = forwardRef<HTMLButtonElement, DropdownTriggerButtonProps>(
   function DropdownTriggerButton(
-    { valueLabel, placeholder, hasValue, variant = "default", ...buttonProps },
+    {
+      valueLabel,
+      placeholder,
+      hasValue,
+      variant = "default",
+      triggerWidth = "full",
+      ...buttonProps
+    },
     ref,
   ) {
     let triggerText = (
@@ -33,6 +42,9 @@ export const DropdownTriggerButton = forwardRef<HTMLButtonElement, DropdownTrigg
     let triggerClass = "dropdown-trigger";
     if (variant === "room") {
       triggerClass = "dropdown-trigger dropdown-trigger-room";
+    }
+    if (triggerWidth === "fit") {
+      triggerClass = `${triggerClass} dropdown-trigger-fit`;
     }
 
     return (

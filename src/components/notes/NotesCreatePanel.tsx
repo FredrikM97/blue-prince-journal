@@ -17,6 +17,7 @@ import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
+import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
 
 const NOTE_PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
@@ -134,12 +135,56 @@ function NotesRoomField({
   setRoom: React.Dispatch<React.SetStateAction<string>>;
 }) {
   return (
-    <div>
-      <MetaText as="label" size="xs" weight="medium" normalCase>
+    <Stack as="div" gap="1">
+      <MetaText as="p" size="xs" weight="medium" normalCase>
         Room
       </MetaText>
-      <RoomDropdown value={room} onValueChange={setRoom} />
-    </div>
+      <RoomDropdown value={room} onValueChange={setRoom} triggerWidth="fit" />
+    </Stack>
+  );
+}
+
+function NotesTypeField({
+  type,
+  setType,
+}: {
+  type: NoteType;
+  setType: React.Dispatch<React.SetStateAction<NoteType>>;
+}) {
+  return (
+    <Stack as="div" gap="1">
+      <MetaText as="p" size="xs" weight="medium" normalCase>
+        Type / category
+      </MetaText>
+      <DropdownSelect
+        value={type}
+        onValueChange={(v) => setType(v as NoteType)}
+        options={NOTE_TYPES}
+        triggerWidth="fit"
+      />
+    </Stack>
+  );
+}
+
+function NotesPriorityField({
+  priority,
+  setPriority,
+}: {
+  priority: Priority;
+  setPriority: React.Dispatch<React.SetStateAction<Priority>>;
+}) {
+  return (
+    <Stack as="div" gap="1">
+      <MetaText as="p" size="xs" weight="medium" normalCase>
+        Priority
+      </MetaText>
+      <DropdownSelect
+        value={priority}
+        onValueChange={(v) => setPriority(v as Priority)}
+        options={NOTE_PRIORITY_OPTIONS}
+        triggerWidth="fit"
+      />
+    </Stack>
   );
 }
 
@@ -172,6 +217,8 @@ function NotesMetaFields({
   setPriority,
   room,
   setRoom,
+  tagsInput,
+  setTagsInput,
   dateInput,
   setDateInput,
 }: {
@@ -182,48 +229,45 @@ function NotesMetaFields({
   setPriority: React.Dispatch<React.SetStateAction<Priority>>;
   room: string;
   setRoom: React.Dispatch<React.SetStateAction<string>>;
+  tagsInput: string;
+  setTagsInput: React.Dispatch<React.SetStateAction<string>>;
   dateInput: string;
   setDateInput: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  return (
-    <>
-      <Inline gap="2" wrap align="start">
-        {mode === "note" ? (
-          <div>
-            <MetaText as="label" size="xs" weight="medium" normalCase>
-              Type / category
-            </MetaText>
-            <DropdownSelect
-              value={type}
-              onValueChange={(v) => setType(v as NoteType)}
-              options={NOTE_TYPES}
+  if (mode === "note") {
+    return (
+      <Stack gap="2">
+        <Inline gap="2" wrap align="start">
+          <NotesTypeField type={type} setType={setType} />
+          <NotesRoomField room={room} setRoom={setRoom} />
+        </Inline>
+        <Inline gap="2" wrap align="start">
+          <NotesTagsField tagsInput={tagsInput} setTagsInput={setTagsInput} />
+          <Stack as="div" gap="1">
+            <InputField
+              label="Date"
+              value={dateInput}
+              onChange={setDateInput}
+              placeholder="Spring 1, Day 3"
+              size="sm"
+              width="compact"
             />
-          </div>
-        ) : (
-          <div>
-            <MetaText as="label" size="xs" weight="medium" normalCase>
-              Priority
-            </MetaText>
-            <DropdownSelect
-              value={priority}
-              onValueChange={(v) => setPriority(v as Priority)}
-              options={NOTE_PRIORITY_OPTIONS}
-            />
-          </div>
-        )}
+          </Stack>
+        </Inline>
+      </Stack>
+    );
+  }
 
+  return (
+    <Stack gap="2">
+      <Inline gap="2" wrap align="start">
+        <NotesPriorityField priority={priority} setPriority={setPriority} />
         <NotesRoomField room={room} setRoom={setRoom} />
       </Inline>
-
-      {mode === "note" && (
-        <InputField
-          label="Date"
-          value={dateInput}
-          onChange={setDateInput}
-          placeholder="Spring 1, Day 3"
-        />
-      )}
-    </>
+      <Inline gap="2" wrap align="start">
+        <NotesTagsField tagsInput={tagsInput} setTagsInput={setTagsInput} />
+      </Inline>
+    </Stack>
   );
 }
 
@@ -235,12 +279,16 @@ function NotesTagsField({
   setTagsInput: React.Dispatch<React.SetStateAction<string>>;
 }) {
   return (
-    <InputField
-      label="Tags"
-      value={tagsInput}
-      onChange={setTagsInput}
-      placeholder="safe, gem, puzzle"
-    />
+    <Stack as="div" gap="1">
+      <InputField
+        label="Tags"
+        value={tagsInput}
+        onChange={setTagsInput}
+        placeholder="safe, gem, puzzle"
+        size="sm"
+        width="compact"
+      />
+    </Stack>
   );
 }
 
@@ -457,6 +505,7 @@ function useNoteSubmit({
 
 export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteType }) {
   const navigate = useNavigate();
+  const mobileDrawerControls = usePageLayoutMobileDrawerControls();
   const store = useNotesStoreSlice();
   const form = useNotesFormState({
     kind: store.kind,
@@ -480,6 +529,13 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     if (target) {
       await navigate({ to: target as "/" });
     }
+  };
+
+  const closeCapturePanel = () => {
+    if (mobileDrawerControls?.isPageLayoutMobile) {
+      mobileDrawerControls.closeMobileDrawer();
+    }
+    void closeWithReturn();
   };
 
   const submitTodo = useTodoSubmit({
@@ -573,11 +629,11 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
           setPriority={form.setPriority}
           room={form.room}
           setRoom={form.setRoom}
+          tagsInput={form.tagsInput}
+          setTagsInput={form.setTagsInput}
           dateInput={form.dateInput}
           setDateInput={form.setDateInput}
         />
-
-        <NotesTagsField tagsInput={form.tagsInput} setTagsInput={form.setTagsInput} />
 
         <PendingImageList
           images={form.pendingImages}
@@ -587,9 +643,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
 
       <NotesFooterActions
         submit={submit}
-        close={() => {
-          void closeWithReturn();
-        }}
+        close={closeCapturePanel}
         setPendingImages={form.setPendingImages}
       />
     </>
@@ -606,13 +660,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   }
 
   return (
-    <SidePanel.Right
-      title={panelTitle}
-      onClose={() => {
-        void closeWithReturn();
-      }}
-      panelKey={panelKey}
-    >
+    <SidePanel.Right title={panelTitle} onClose={closeCapturePanel} panelKey={panelKey}>
       {content}
     </SidePanel.Right>
   );

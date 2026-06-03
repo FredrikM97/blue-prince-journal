@@ -12,9 +12,20 @@ import { MarkdownEditor } from "@/components/common/markdown/MarkdownEditor";
 import { MetaText } from "@/components/common/Typography";
 
 type InputFieldSize = "default" | "sm" | "lg";
+type InputFieldWidth = "full" | "fit" | "compact";
 
-function getInputClass({ size, grow }: { size: InputFieldSize; grow: boolean }) {
+function getInputClass({
+  size,
+  grow,
+  width,
+}: {
+  size: InputFieldSize;
+  grow: boolean;
+  width: InputFieldWidth;
+}) {
   let className = "input-base";
+  if (width === "fit") className = `${className} input-width-fit`;
+  if (width === "compact") className = `${className} input-width-compact`;
   if (size === "sm") className = `${className} h-8`;
   if (size === "lg") className = `${className} h-10`;
   if (grow) className = `${className} flex-1`;
@@ -38,6 +49,7 @@ export function InputField({
   hideLabel = false,
   size = "default",
   grow = false,
+  width = "full",
 }: {
   label?: string;
   value: string;
@@ -54,6 +66,7 @@ export function InputField({
   hideLabel?: boolean;
   size?: InputFieldSize;
   grow?: boolean;
+  width?: InputFieldWidth;
 }) {
   const inputId = useId();
 
@@ -68,7 +81,7 @@ export function InputField({
       ref={inputRef as RefObject<HTMLInputElement | null>}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className={getInputClass({ size, grow })}
+      className={getInputClass({ size, grow, width })}
     />
   );
 
