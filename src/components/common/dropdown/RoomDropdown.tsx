@@ -17,7 +17,7 @@ import {
 } from "@/components/common/dropdown/DropdownMenu";
 import { addCustomRoom, getAllRoomGroups, getGroupedRoomCatalog } from "@/data/rooms";
 import { MetaText } from "@/components/common/Typography";
-import { SelectTriggerButton } from "@/components/common/dropdown/SelectTriggerButton";
+import { DropdownTriggerButton } from "@/components/common/dropdown/SelectTriggerButton";
 
 function toTitleCase(s: string) {
   return s.toLowerCase().replace(/(?:^|\s)\S/g, (c) => c.toUpperCase());
@@ -103,14 +103,15 @@ function RoomDropdownComponent({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <SelectTriggerButton
+        <DropdownTriggerButton
           valueLabel={activeRoom || undefined}
           placeholder={placeholder}
           hasValue={!!activeRoom}
+          variant="room"
         />
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="dropdown-select-content">
+      <DropdownMenuContent align="start" variant="select">
         <div className="px-1 pb-1">
           <input
             ref={searchRef}
@@ -123,9 +124,10 @@ function RoomDropdownComponent({
         </div>
 
         {(() => {
-          const clearClass = !activeRoom ? "menu-item-active" : "";
+          let clearTone: "default" | "active" = "default";
+          if (!activeRoom) clearTone = "active";
           return (
-            <DropdownMenuItem className={clearClass} onSelect={() => onValueChange("")}>
+            <DropdownMenuItem tone={clearTone} onSelect={() => onValueChange("")}>
               {clearLabel}
             </DropdownMenuItem>
           );
@@ -134,11 +136,12 @@ function RoomDropdownComponent({
         {normalizedQuery && (
           <>
             {searchResults.map((room) => {
-              const itemClass = room.name === activeRoom ? "menu-item-active" : "";
+              let itemTone: "default" | "active" = "default";
+              if (room.name === activeRoom) itemTone = "active";
               return (
                 <DropdownMenuItem
                   key={`${room.category}-${room.name}`}
-                  className={itemClass}
+                  tone={itemTone}
                   onSelect={() => onValueChange(room.name)}
                 >
                   <div className="flex min-w-0 flex-col">
@@ -182,11 +185,12 @@ function RoomDropdownComponent({
 
                 <DropdownMenuSubContent className="room-submenu-content">
                   {groupedRooms[group]?.map((room) => {
-                    const itemClass = room.name === activeRoom ? "menu-item-active" : "";
+                    let itemTone: "default" | "active" = "default";
+                    if (room.name === activeRoom) itemTone = "active";
                     return (
                       <DropdownMenuItem
                         key={room.name}
-                        className={itemClass}
+                        tone={itemTone}
                         onSelect={() => onValueChange(room.name)}
                       >
                         {room.name}

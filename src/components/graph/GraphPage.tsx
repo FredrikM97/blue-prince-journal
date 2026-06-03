@@ -6,7 +6,7 @@ import {
   type ReactNode,
   type WheelEvent,
 } from "react";
-import { Button, FilterToggleButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent } from "@/components/common/Dialog";
 import { EmptyState } from "@/components/common/EmptyState";
 import { FilterSection } from "@/components/common/filter/FilterSection";
@@ -273,7 +273,12 @@ export function GraphPage() {
           >
             <Stack gap="3">
               <FilterSection title="Types" onReset={onResetTypes}>
-                <FilterToggleGrid items={typeFilterItems} size="compact" />
+                <FilterToggleGrid
+                  items={typeFilterItems}
+                  size="compact"
+                  layout="wrap"
+                  width="fit"
+                />
               </FilterSection>
 
               {allRooms.length > 1 && (
@@ -329,7 +334,13 @@ export function GraphPage() {
                           badge={groupBadge}
                           onReset={onResetGroup}
                         >
-                          <FilterToggleGrid items={groupItems} leftAligned size="compact" />
+                          <FilterToggleGrid
+                            items={groupItems}
+                            leftAligned
+                            size="compact"
+                            layout="wrap"
+                            width="fit"
+                          />
                         </FilterSection>
                       );
                     })}
@@ -342,22 +353,33 @@ export function GraphPage() {
                   {(() => {
                     const dotBg = hideIsolated ? "currentColor" : "transparent";
                     return (
-                      <FilterToggleButton
+                      <Button
                         type="button"
+                        variant="filter-toggle"
+                        size="sm"
                         active={hideIsolated}
+                        align="left"
+                        density="compact"
+                        width="fit"
                         onClick={() => setHideIsolated((v) => !v)}
                       >
                         <span
-                          className="h-2 w-2 shrink-0 rounded-full border border-current"
-                          style={{ background: dotBg }}
+                          style={{
+                            width: "0.5rem",
+                            height: "0.5rem",
+                            flexShrink: 0,
+                            borderRadius: "9999px",
+                            border: "1px solid currentColor",
+                            background: dotBg,
+                          }}
                         />
                         <span>Connected only</span>
-                        <span className="ml-auto text-[10px]">
-                          <MetaText as="span" tabular>
+                        <MetaText as="span" size="xs" tabular>
+                          <span style={{ marginLeft: "auto", display: "inline-block" }}>
                             {isolatedCount} hidden
-                          </MetaText>
-                        </span>
-                      </FilterToggleButton>
+                          </span>
+                        </MetaText>
+                      </Button>
                     );
                   })()}
                 </FilterSection>
@@ -366,7 +388,7 @@ export function GraphPage() {
           </SidePanel.Left>
         </PageLayout.Left>
         <PageLayout.Middle>
-          <div className="graph-page-middle">
+          <Stack variant="graph-page-middle" gap="0">
             {nodes.length === 0 && (
               <EmptyState>
                 No notes or todos yet. Add entries to build your connection graph.
@@ -375,8 +397,6 @@ export function GraphPage() {
             {nodes.length > 0 && (
               <GraphCanvas
                 {...canvasProps}
-                className="flex-1 min-h-0"
-                svgClassName="flex-1 min-h-0"
                 actions={
                   <Button variant="outline" size="sm" onClick={() => setFullscreenOpen(true)}>
                     <Maximize2 size={13} />
@@ -385,7 +405,7 @@ export function GraphPage() {
                 }
               />
             )}
-          </div>
+          </Stack>
         </PageLayout.Middle>
         <PageLayout.Right>
           <GraphRightPanel
@@ -401,12 +421,7 @@ export function GraphPage() {
 
       <Dialog open={fullscreenOpen} onOpenChange={setFullscreenOpen}>
         <DialogContent variant="fullscreen">
-          <GraphCanvas
-            {...canvasProps}
-            plain
-            className="flex-1 min-h-0"
-            svgClassName="flex-1 min-h-0"
-          />
+          <GraphCanvas {...canvasProps} plain />
         </DialogContent>
       </Dialog>
     </>
@@ -420,8 +435,6 @@ function GraphCanvas({
   selectedNoteId,
   dataVersion,
   onSelectNote,
-  className,
-  svgClassName,
   actions,
   plain,
 }: {
@@ -431,8 +444,6 @@ function GraphCanvas({
   selectedNoteId: string | null;
   dataVersion: number;
   onSelectNote: (id: string) => void;
-  className?: string;
-  svgClassName?: string;
   actions?: ReactNode;
   plain?: boolean;
 }) {
@@ -515,20 +526,21 @@ function GraphCanvas({
     });
   }
 
-  let frameClass = plain ? "graph-canvas-frame-plain" : "graph-canvas-frame";
-  if (className) frameClass = `${frameClass} ${className}`;
+  let frameVariant: "graph-canvas-frame" | "graph-canvas-frame-plain" = "graph-canvas-frame";
+  if (plain) frameVariant = "graph-canvas-frame-plain";
 
-  let svgClass = "h-full w-full cursor-grab touch-none";
-  if (isDragging) svgClass = "h-full w-full cursor-grabbing";
-  if (svgClassName) svgClass = `${svgClass} ${svgClassName}`;
+  let svgCursor = "grab";
+  if (isDragging) svgCursor = "grabbing";
 
   return (
-    <div className={frameClass}>
-      <div className="graph-toolbar">
-        <p className="graph-toolbar-hint">Drag to pan · scroll to zoom.</p>
-        <div className="graph-toolbar-controls">
+    <Stack variant={frameVariant} gap="0">
+      <Stack variant="graph-toolbar" gap="0">
+        <MetaText as="p" size="xs" variant="graph-toolbar-hint">
+          Drag to pan · scroll to zoom.
+        </MetaText>
+        <Stack variant="graph-toolbar-controls" gap="0">
           {actions}
-          <div className="flex items-center">
+          <Stack variant="graph-zoom-controls" gap="0">
             <Button
               variant="outline"
               size="sm"
@@ -561,17 +573,19 @@ function GraphCanvas({
             >
               +
             </Button>
-          </div>
+          </Stack>
           <Button variant="outline" size="sm" onClick={resetView}>
             Reset view
           </Button>
-        </div>
-      </div>
+        </Stack>
+      </Stack>
 
       <svg
         key={`graph-${dataVersion}`}
         viewBox={GRAPH_VIEWBOX}
-        className={svgClass}
+        width="100%"
+        height="100%"
+        style={{ cursor: svgCursor, touchAction: "none", minHeight: 0, flex: 1 }}
         onPointerDown={startDrag}
         onPointerMove={updateDrag}
         onPointerUp={stopDrag}
@@ -635,21 +649,31 @@ function GraphCanvas({
         </g>
       </svg>
 
-      <div className="graph-legend-row">
-        <span className="graph-legend-label">Links:</span>
+      <Stack variant="graph-legend-row" gap="0">
+        <MetaText as="span" variant="graph-legend-label">
+          Links:
+        </MetaText>
         {[
           { color: "rgba(224,150,40,0.85)", label: "room" },
           { color: "rgba(70,150,210,0.85)", label: "tag" },
           { color: "rgba(140,100,210,0.85)", label: "room + tag" },
           { color: "rgba(50,190,100,0.85)", label: "note" },
         ].map(({ color, label }) => (
-          <span key={label} className="graph-legend-item">
-            <span style={{ background: color }} className="inline-block h-0.5 w-6 rounded-full" />
+          <Stack key={label} as="span" variant="graph-legend-item" gap="0">
+            <span
+              style={{
+                background: color,
+                display: "inline-block",
+                width: "1.5rem",
+                height: "2px",
+                borderRadius: "9999px",
+              }}
+            />
             {label}
-          </span>
+          </Stack>
         ))}
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 }
 
@@ -675,7 +699,7 @@ function renderNode(
       key={node.id}
       role="button"
       tabIndex={0}
-      className="cursor-pointer"
+      style={{ cursor: "pointer" }}
       onMouseDown={(event) => event.preventDefault()}
       onClick={onSelect}
       onKeyDown={(event) => {

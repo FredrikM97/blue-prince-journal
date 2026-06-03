@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/common/dropdown/DropdownMenu";
-import { SelectTriggerButton } from "@/components/common/dropdown/SelectTriggerButton";
+import { DropdownTriggerButton } from "@/components/common/dropdown/SelectTriggerButton";
 
 export interface DropdownSelectOption {
   value: string;
@@ -36,20 +36,21 @@ export function DropdownSelectComponent({
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <SelectTriggerButton
+        <DropdownTriggerButton
           valueLabel={activeLabel}
           placeholder={placeholder}
           hasValue={hasValue}
         />
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="dropdown-select-content">
+      <DropdownMenuContent align="start" variant="select">
         {options.map((option) => {
-          const activeClass = option.value === value ? "menu-item-active" : "";
+          let itemTone: "default" | "active" = "default";
+          if (option.value === value) itemTone = "active";
           return (
             <DropdownMenuItem
               key={option.value}
-              className={activeClass}
+              tone={itemTone}
               onSelect={() => onValueChange(option.value)}
             >
               {option.label}

@@ -10,11 +10,11 @@ import {
   MessageSquareText,
   Send,
 } from "lucide-react";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useStore } from "@/data/store";
 import { exportAll, importAll } from "@/data/io";
 import { submitFeedback } from "@/data/feedback";
-import { Button, IconButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/common/dropdown/DropdownMenu";
+import { Stack } from "@/components/common/Stack";
+import { KeyboardKey } from "@/components/common/KeyboardKey";
+import { MetaText, Text } from "@/components/common/Typography";
 
 export function AppHeader() {
   const buyMeACoffeeUrl = "https://buymeacoffee.com/fredrikm97";
@@ -152,6 +155,11 @@ export function AppHeader() {
     }
   }
 
+  let feedbackButtonLabel = "Send";
+  if (feedbackSubmitting) {
+    feedbackButtonLabel = "Sending…";
+  }
+
   return (
     <>
       <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
@@ -161,64 +169,68 @@ export function AppHeader() {
             <DialogDescription>
               Share a bug report, feature idea, or anything that would make the journal better.
             </DialogDescription>
-            <p className="text-xs text-muted-foreground">
+            <MetaText as="p" size="xs">
               Build:{" "}
-              <code className="rounded bg-muted px-1 py-0.5 text-[0.8em]">
+              <Text as="code" variant="feedback-build-code" size="xs" tone="default">
                 {__APP_COMMIT_HASH__}
-              </code>{" "}
-            </p>
+              </Text>{" "}
+            </MetaText>
           </DialogHeader>
 
           <form
-            className="flex flex-col gap-3"
-            onSubmit={(event) => {
+            onSubmit={(event: FormEvent<HTMLFormElement>) => {
               event.preventDefault();
               void sendFeedback();
             }}
           >
-            <label className="flex flex-col gap-1.5 text-sm font-medium" htmlFor="feedback-message">
-              Message
-              <textarea
-                id="feedback-message"
+            <Stack variant="feedback-form" gap="0">
+              <InputField
+                label="Message"
                 autoFocus
+                multiline
+                rows={6}
+                resizable
                 value={feedbackMessage}
-                onChange={(event) => setFeedbackMessage(event.target.value)}
-                placeholder="Tell me what happened or what you’d like to see…"
-                className="textarea-base min-h-32 resize-y"
+                onChange={setFeedbackMessage}
+                placeholder="Tell me what happened or what you'd like to see..."
               />
-            </label>
 
-            <InputField
-              label="Contact"
-              value={feedbackContact}
-              onChange={setFeedbackContact}
-              placeholder="Email or handle, optional"
-            />
+              <InputField
+                label="Contact"
+                value={feedbackContact}
+                onChange={setFeedbackContact}
+                placeholder="Email or handle, optional"
+              />
 
-            <div className="dialog-footer pt-1">
-              <Button type="button" variant="outline" onClick={() => setFeedbackOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={feedbackSubmitting || feedbackMessage.trim().length === 0}
-              >
-                <Send className="app-menu-icon" />
-                {feedbackSubmitting ? "Sending…" : "Send"}
-              </Button>
-            </div>
+              <Stack variant="dialog-footer-pt1" gap="0">
+                <Button type="button" variant="outline" onClick={() => setFeedbackOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={feedbackSubmitting || feedbackMessage.trim().length === 0}
+                >
+                  <Send className="app-menu-icon" />
+                  {feedbackButtonLabel}
+                </Button>
+              </Stack>
+            </Stack>
           </form>
         </DialogContent>
       </Dialog>
 
-      <header className="app-header">
-        <div className="app-header-inner">
+      <Stack as="header" variant="app-header" gap="0">
+        <Stack variant="app-header-inner" gap="0">
           <Link to="/" className="app-brand-link" onClick={openWelcomeScreen}>
-            <span className="app-brand-badge">B</span>
-            <span className="app-brand-title">Blue Prince Journal</span>
+            <Text as="span" variant="app-brand-badge" size="xs" tone="default">
+              B
+            </Text>
+            <Text as="span" variant="app-brand-title" size="base" tone="default">
+              Blue Prince Journal
+            </Text>
           </Link>
 
-          <nav className="app-nav">
+          <Stack as="nav" variant="app-nav" gap="0">
             {sections
               .filter((s) => !s.hidden && (Boolean(s.builtin) || s.id === "books"))
               .map((s) => {
@@ -234,9 +246,9 @@ export function AppHeader() {
                   </Link>
                 );
               })}
-          </nav>
+          </Stack>
 
-          <div className="app-header-controls">
+          <Stack variant="app-header-controls" gap="0">
             {syncFolderName && (
               <Link
                 to="/settings"
@@ -244,27 +256,29 @@ export function AppHeader() {
                 className="header-sync-status"
               >
                 <FolderSync className="h-3.5 w-3.5" />
-                <span className="max-w-[10rem] truncate">{syncFolderName}</span>
+                <Text as="span" variant="sync-folder-name" size="xs" tone="default" truncate>
+                  {syncFolderName}
+                </Text>
               </Link>
             )}
             <ThemeToggle />
-            <div className="app-search-wrap">
+            <Stack variant="app-search-wrap" gap="0">
               <Search className="app-search-icon" />
-              <input
-                ref={searchInputRef}
+              <InputField
+                inputRef={searchInputRef}
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") {
+                onChange={setSearchInput}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
                     setSearchInput("");
                     searchInputRef.current?.blur();
                   }
                 }}
-                placeholder=""
-                aria-label="Search notes"
-                className="input-base app-search-input"
+                placeholder=" "
+                ariaLabel="Search notes"
+                size="sm"
               />
-            </div>
+            </Stack>
             <Button
               size="sm"
               onClick={() => {
@@ -281,13 +295,18 @@ export function AppHeader() {
             >
               <Plus className="app-add-icon" />
               <span>Add note</span>
-              <kbd className="app-add-shortcut">N</kbd>
+              <KeyboardKey className="app-add-shortcut">N</KeyboardKey>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <IconButton className="app-icon-button" aria-label="Settings">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="app-icon-button"
+                  aria-label="Settings"
+                >
                   <SettingsIcon className="app-icon-sm" />
-                </IconButton>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
@@ -318,7 +337,7 @@ export function AppHeader() {
               ref={fileRef}
               type="file"
               accept=".zip,application/zip,application/json,.json"
-              className="app-hidden-file-input"
+              hidden
               onChange={async (e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;
@@ -332,9 +351,9 @@ export function AppHeader() {
                 e.target.value = "";
               }}
             />
-          </div>
-        </div>
-      </header>
+          </Stack>
+        </Stack>
+      </Stack>
     </>
   );
 }

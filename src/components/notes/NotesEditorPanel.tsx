@@ -1,20 +1,21 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Note } from "@/lib/types";
-import { BrassButton, Button, GhostButton, IconButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
+import { Chip } from "@/components/common/Chip";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { StoredImageView } from "@/components/StoredImageView";
 import { useStore } from "@/data/store";
 import { ImagePlus, X } from "lucide-react";
 import { TYPE_LABEL } from "@/lib/noteMetadata";
-import { DetailsField } from "@/components/common/input/DetailsField";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
 import { toast } from "sonner";
 import { usePasteImages } from "@/hooks/usePasteImages";
 import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
-import { MetaText } from "@/components/common/Typography";
+import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { Stack } from "@/components/common/Stack";
 
 type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";
 
@@ -60,6 +61,7 @@ export function NotesEditorPanel({
   const [tagsInputDraft, setTagsInputDraft] = useState(draft.tags.join(", "));
   const [isTagsFocused, setIsTagsFocused] = useState(false);
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  const attachRef = useRef<HTMLInputElement>(null);
   const imageById = useMemo(() => new Map(images.map((img) => [img.id, img])), [images]);
   const tagsInput = isTagsFocused ? tagsInputDraft : draft.tags.join(", ");
 
@@ -82,7 +84,7 @@ export function NotesEditorPanel({
   });
 
   return (
-    <div className="note-editor-wrap">
+    <Stack gap="3">
       <SuggestionsDropdown
         onSubmitShortcut={() => {
           void onSave();
@@ -97,53 +99,53 @@ export function NotesEditorPanel({
       </SuggestionsDropdown>
 
       <SuggestionsDropdown>
-        <DetailsField
+        <InputField
           value={draft.body}
           onChange={(value) => setDraft({ ...draft, body: value })}
+          markdown
           placeholder="Details (markdown supported)…"
         />
       </SuggestionsDropdown>
 
-      <div className="note-editor-grid-2">
+      <Inline gap="3" wrap align="start">
         <div>
-          <label className="capture-label">Room</label>
+          <MetaText as="label" size="xs" weight="medium" normalCase>
+            Room
+          </MetaText>
           <RoomDropdown
             value={draft.room ?? ""}
             onValueChange={(next) => setDraft({ ...draft, room: next || undefined })}
             clearLabel="No room"
           />
         </div>
-        <div>
-          <label className="capture-label">Tags</label>
-          <input
-            value={tagsInput}
-            onFocus={() => {
-              setTagsInputDraft(draft.tags.join(", "));
-              setIsTagsFocused(true);
-            }}
-            onBlur={() => setIsTagsFocused(false)}
-            onChange={(e) => {
-              const next = e.target.value;
-              setTagsInputDraft(next);
-              setDraft({ ...draft, tags: parseTagsInput(next) });
-            }}
-            placeholder="safe, gem, puzzle"
-            className="input-base"
-          />
-        </div>
-      </div>
+        <InputField
+          label="Tags"
+          value={tagsInput}
+          onFocus={() => {
+            setTagsInputDraft(draft.tags.join(", "));
+            setIsTagsFocused(true);
+          }}
+          onBlur={() => setIsTagsFocused(false)}
+          onChange={(next) => {
+            setTagsInputDraft(next);
+            setDraft({ ...draft, tags: parseTagsInput(next) });
+          }}
+          placeholder="safe, gem, puzzle"
+        />
+      </Inline>
 
-      <div className="note-editor-grid-3">
+      <Inline gap="3" wrap align="start">
         <div>
-          <label className="capture-label">Date</label>
           <InputField
+            label="Date"
             value={draft.date ?? ""}
             onChange={(e) => setDraft({ ...draft, date: e })}
-            label={""}
           />
         </div>
         <div>
-          <label className="capture-label">Type</label>
+          <MetaText as="label" size="xs" weight="medium" normalCase>
+            Type
+          </MetaText>
           <DropdownSelect
             value={draft.type}
             onValueChange={(value) => setDraft({ ...draft, type: value as Note["type"] })}
@@ -151,18 +153,22 @@ export function NotesEditorPanel({
           />
         </div>
         <div>
-          <label className="capture-label">Status</label>
+          <MetaText as="label" size="xs" weight="medium" normalCase>
+            Status
+          </MetaText>
           <DropdownSelect
             value={draft.status}
             onValueChange={(value) => setDraft({ ...draft, status: value as Note["status"] })}
             options={NOTE_STATUS_OPTIONS}
           />
         </div>
-      </div>
+      </Inline>
 
-      <div className="note-editor-images-card">
-        <div className="note-editor-images-header">
-          <span className="note-editor-images-label">Attached images</span>
+      <Stack gap="2" variant="panel-card">
+        <Inline gap="2" justify="between" wrap align="center">
+          <Text as="span" size="sm" weight="medium">
+            Attached images
+          </Text>
           <Inline gap="2">
             <Button
               type="button"
@@ -172,58 +178,63 @@ export function NotesEditorPanel({
             >
               Use existing
             </Button>
-            <label className="note-editor-attach-label">
-              <span className="inline-flex items-center gap-1">
-                <ImagePlus className="h-3.5 w-3.5" /> Attach image
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={async (e) => {
-                  const files = Array.from(e.target.files ?? []);
-                  if (!files.length) return;
-                  const created = await Promise.all(files.map((f) => addImage(f, f.name)));
-                  const newIds = created.map((img) => img.id);
-                  setDraft((prev) => ({
-                    ...prev,
-                    imageIds: Array.from(new Set([...prev.imageIds, ...newIds])),
-                  }));
-                  e.target.value = "";
-                }}
-              />
-            </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => attachRef.current?.click()}
+            >
+              <ImagePlus className="h-3.5 w-3.5" /> Attach image
+            </Button>
+            <input
+              ref={attachRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={async (e) => {
+                const files = Array.from(e.target.files ?? []);
+                if (!files.length) return;
+                const created = await Promise.all(files.map((f) => addImage(f, f.name)));
+                const newIds = created.map((img) => img.id);
+                setDraft((prev) => ({
+                  ...prev,
+                  imageIds: Array.from(new Set([...prev.imageIds, ...newIds])),
+                }));
+                e.target.value = "";
+              }}
+            />
           </Inline>
-        </div>
+        </Inline>
 
         {draft.imageIds.length > 0 ? (
-          <div className="note-editor-images-grid">
+          <Inline gap="2" wrap>
             {draft.imageIds.map((id) => (
-              <div key={id} className="note-editor-image-wrap">
+              <Stack key={id} gap="1">
                 <StoredImageView id={id} className="note-attached-thumb" />
-                <p className="note-attached-thumb-label" title={id}>
+                <MetaText as="p" size="xs" truncate title={id}>
                   {getImageLabel(imageById.get(id) ?? { name: "Image" })}
-                </p>
-                <IconButton
+                </MetaText>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() =>
                     setDraft((prev) => ({
                       ...prev,
                       imageIds: prev.imageIds.filter((x) => x !== id),
                     }))
                   }
-                  className="note-editor-image-remove"
                   aria-label="Remove image"
                 >
                   <X className="h-3 w-3" />
-                </IconButton>
-              </div>
+                </Button>
+              </Stack>
             ))}
-          </div>
+          </Inline>
         ) : (
           <MetaText>No images attached to this note.</MetaText>
         )}
-      </div>
+      </Stack>
 
       <SelectExistingImagesDialog
         open={imagePickerOpen}
@@ -233,13 +244,15 @@ export function NotesEditorPanel({
         setDraft={setDraft}
       />
 
-      <div className="note-editor-footer">
-        <GhostButton onClick={onCancel}>Cancel</GhostButton>
-        <BrassButton size="sm" onClick={onSave}>
+      <Inline gap="2" justify="end" wrap>
+        <Button variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button variant="brass" size="sm" onClick={onSave}>
           Save
-        </BrassButton>
-      </div>
-    </div>
+        </Button>
+      </Inline>
+    </Stack>
   );
 }
 
@@ -274,7 +287,7 @@ function SelectExistingImagesDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent variant="editor">
-        <div className="note-dialog-header">
+        <Stack gap="2">
           <Inline gap="3" justify="between">
             <DialogTitle>Attach existing image</DialogTitle>
             <Inline gap="2">
@@ -298,10 +311,10 @@ function SelectExistingImagesDialog({
           <MetaText>
             Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
           </MetaText>
-        </div>
+        </Stack>
 
         {sortedImages.length > 0 ? (
-          <div className="note-image-picker-grid">
+          <Inline gap="3" wrap>
             {sortedImages.map((img) => {
               const selected = selectedSet.has(img.id);
               return (
@@ -324,25 +337,27 @@ function SelectExistingImagesDialog({
                   }}
                 >
                   <StoredImageView id={img.id} alt={img.name} className="note-image-picker-thumb" />
-                  <div className="note-image-picker-caption">
-                    <p
-                      className="note-image-picker-name"
+                  <Inline gap="2" align="center" justify="between">
+                    <MetaText
+                      as="span"
+                      size="xs"
+                      truncate
                       title={`${getImageLabel(img)} (${img.name})`}
                     >
                       {getImageLabel(img)}
-                    </p>
-                    {selected ? <span className="note-image-picker-badge">Selected</span> : null}
-                  </div>
+                    </MetaText>
+                    {selected ? <Chip variant="solid">Selected</Chip> : null}
+                  </Inline>
                 </Button>
               );
             })}
-          </div>
+          </Inline>
         ) : (
-          <div className="px-6 py-8">
+          <Stack gap="2">
             <MetaText size="sm">
               No available images to attach. Upload or paste a new image first.
             </MetaText>
-          </div>
+          </Stack>
         )}
       </DialogContent>
     </Dialog>

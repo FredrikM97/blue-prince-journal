@@ -19,6 +19,14 @@
     @apply whitespace-nowrap text-base;
   }
 
+  .sync-folder-name {
+    @apply max-w-[10rem] truncate;
+  }
+
+  .feedback-build-code {
+    @apply rounded bg-muted px-1 py-0.5 text-[0.8em];
+  }
+
   .app-nav {
     @apply order-3 flex basis-full min-w-0 flex-nowrap items-center gap-1 overflow-x-auto pb-0.5;
     scrollbar-width: none;
@@ -66,16 +74,16 @@
     @apply pointer-events-none absolute left-2.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground;
   }
 
-  .app-search-input {
+  .app-search-wrap .input-base {
     @apply h-8 w-44 pl-8 transition-[padding];
   }
 
   /* When the user has typed something, pull text left and hide the icon */
-  .app-search-input:not(:placeholder-shown) {
+  .app-search-wrap .input-base:not(:placeholder-shown) {
     padding-left: 0.75rem;
   }
 
-  .app-search-wrap:has(.app-search-input:not(:placeholder-shown)) .app-search-icon {
+  .app-search-wrap:has(.input-base:not(:placeholder-shown)) .app-search-icon {
     display: none;
   }
 
@@ -108,10 +116,6 @@
 
   .app-menu-icon {
     @apply mr-1 h-4 w-4;
-  }
-
-  .app-hidden-file-input {
-    @apply hidden;
   }
 
   /* Sync folder indicator shown in the header (desktop only) */

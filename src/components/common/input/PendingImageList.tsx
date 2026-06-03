@@ -5,6 +5,7 @@
 
 import { memo, useEffect, useMemo } from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/common/Button";
 
 const PendingImageItem = memo(function PendingImageItem({
   blob,
@@ -24,13 +25,15 @@ const PendingImageItem = memo(function PendingImageItem({
   return (
     <div className="relative h-14 w-14 overflow-hidden rounded border border-border">
       {url && <img src={url} alt="" className="h-full w-full object-cover" />}
-      <button
+      <Button
         onClick={() => onRemove(index)}
+        variant="ghost"
+        size="icon"
         className="absolute right-0 top-0 rounded-bl bg-black/60 p-0.5 text-white"
         aria-label="Remove"
       >
         <X className="h-3 w-3" />
-      </button>
+      </Button>
     </div>
   );
 });

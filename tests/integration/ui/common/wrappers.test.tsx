@@ -136,9 +136,7 @@ describe("DropdownMenu wrappers", () => {
   it("renders sub trigger with arrow icon", () => {
     render(
       <div>
-        <DropdownMenuSubTrigger>
-          Sub item
-        </DropdownMenuSubTrigger>
+        <DropdownMenuSubTrigger>Sub item</DropdownMenuSubTrigger>
         <DropdownMenuSubContent>Sub content</DropdownMenuSubContent>
       </div>,
     );

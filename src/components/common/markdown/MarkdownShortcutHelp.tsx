@@ -7,7 +7,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { HelpCircle } from "lucide-react";
-import { IconButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import { MetaText } from "@/components/common/Typography";
 
 const SHORTCUTS: { tokens: string[]; desc: string }[] = [
@@ -54,38 +54,79 @@ export function MarkdownShortcutHelp() {
   }
 
   return (
-    <div ref={wrapperRef} className="relative">
-      <IconButton
+    <div ref={wrapperRef} style={{ position: "relative" }}>
+      <Button
+        variant="ghost"
+        size="icon"
         aria-label="Toggle shortcut help"
         title="Shortcuts"
         className="h-7 w-7"
         onClick={handleToggle}
       >
         <HelpCircle className="h-3.5 w-3.5" />
-      </IconButton>
+      </Button>
 
       {open &&
         popupPos &&
         createPortal(
           <div
             ref={popupRef}
-            style={{ position: "fixed", top: popupPos.top, right: popupPos.right, zIndex: 9999 }}
-            className="md-shortcut-popover"
+            style={{
+              position: "fixed",
+              top: popupPos.top,
+              right: popupPos.right,
+              zIndex: 9999,
+              width: "20rem",
+              borderRadius: "0.375rem",
+              border: "1px solid hsl(var(--border))",
+              background: "hsl(var(--popover))",
+              padding: "0.75rem",
+              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+              fontSize: "11px",
+            }}
           >
-            <p className="md-shortcut-title">Token shortcuts</p>
-            <div className="md-shortcut-grid">
+            <p
+              style={{
+                marginBottom: "0.5rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                fontSize: "10px",
+                fontWeight: 600,
+                color: "hsl(var(--muted-foreground))",
+              }}
+            >
+              Token shortcuts
+            </p>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "max-content 1fr",
+                alignItems: "center",
+                columnGap: "0.5rem",
+                rowGap: "0.375rem",
+              }}
+            >
               {SHORTCUTS.map(({ tokens, desc }) => (
                 <Fragment key={desc}>
-                  <div className="flex flex-wrap gap-1">
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
                     {tokens.map((t) => (
-                      <code key={t} className="md-shortcut-key">
+                      <kbd
+                        key={t}
+                        style={{
+                          borderRadius: "0.25rem",
+                          background: "hsl(var(--accent))",
+                          padding: "0.125rem 0.25rem",
+                          fontFamily: "var(--font-mono)",
+                          color: "hsl(var(--foreground))",
+                        }}
+                      >
                         {t}
-                      </code>
+                      </kbd>
                     ))}
                   </div>
-                  <span className="pt-0.5">
+                  <span style={{ paddingTop: "0.125rem", whiteSpace: "nowrap" }}>
                     <MetaText as="span" size="sm" leading="tight">
-                      <span className="md-shortcut-desc">{desc}</span>
+                      {desc}
                     </MetaText>
                   </span>
                 </Fragment>

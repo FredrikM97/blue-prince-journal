@@ -12,6 +12,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
+import { Inline, SectionHeader, SectionHeaderActions } from "@/components/common/LayoutPrimitives";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
@@ -33,12 +34,12 @@ export function PagedNotesList({
 
   return (
     <div>
-      <div className="section-header-row">
+      <SectionHeader>
         <Heading as="h3" size="base" variant="section-label">
           {title}
         </Heading>
         {total > 1 && (
-          <div className="flex items-center gap-1">
+          <SectionHeaderActions>
             <Button
               variant="outline"
               size="icon"
@@ -60,16 +61,16 @@ export function PagedNotesList({
             >
               <ChevronRight className="h-3.5 w-3.5" />
             </Button>
-          </div>
+          </SectionHeaderActions>
         )}
-      </div>
+      </SectionHeader>
 
       {note ? (
         <Text as="div" size="sm" variant="panel-card">
           <Stack gap="1.5">
             <Text weight="medium">{note.title}</Text>
             {note.body.trim() && <MarkdownPreview>{note.body}</MarkdownPreview>}
-            <div className="flex flex-wrap gap-1">
+            <Inline gap="1" wrap>
               <Chip variant="solid">{note.type}</Chip>
               {note.imageIds.length > 0 && <Chip variant="solid">📎 {note.imageIds.length}</Chip>}
               {note.tags.map((tag) => (
@@ -77,7 +78,7 @@ export function PagedNotesList({
                   #{tag}
                 </Chip>
               ))}
-            </div>
+            </Inline>
           </Stack>
         </Text>
       ) : (

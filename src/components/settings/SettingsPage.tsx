@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FolderOpen, FolderSync, Unlink } from "lucide-react";
 import { useStore } from "@/data/store";
-import { Button, BrassButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import { KeyboardKey } from "@/components/common/KeyboardKey";
 import { PageLayout } from "@/components/common/PageLayout";
-import { TextInput } from "@/components/common/input/TextInput";
+import { InputField } from "@/components/common/input/InputField";
 import {
   addCustomRoom,
   getAllRoomGroups,
@@ -44,7 +44,7 @@ import { toast } from "sonner";
 import { SettingsSection, SettingsSubsection } from "./SettingsSection";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
-import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
+import { CenteredContent, Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
 
 export function SettingsPage() {
   const load = useStore((s) => s.load);
@@ -88,7 +88,7 @@ export function SettingsPage() {
   return (
     <PageLayout>
       <PageLayout.Middle>
-        <div className="settings-content">
+        <CenteredContent max="2xl" align="left">
           <header>
             <Heading as="h1" size="3xl">
               Settings
@@ -100,12 +100,13 @@ export function SettingsPage() {
 
           <SettingsSection title="Data">
             <Inline gap="2" wrap>
-              <BrassButton
+              <Button
+                variant="brass"
                 size="sm"
                 onClick={() => exportAll().then(() => toast.success("Exported"))}
               >
                 Export ZIP
-              </BrassButton>
+              </Button>
               <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
                 Import (merge)...
               </Button>
@@ -126,7 +127,7 @@ export function SettingsPage() {
               ref={fileRef}
               type="file"
               accept=".zip,application/zip,application/json,.json"
-              className="hidden"
+              hidden
               onChange={async (e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;
@@ -176,11 +177,12 @@ export function SettingsPage() {
                 dropdowns.
               </MetaText>
 
-              <div className="settings-input-grid">
-                <TextInput
+              <Inline gap="2" wrap align="end">
+                <InputField
                   value={newRoomName}
                   onChange={setNewRoomName}
                   placeholder="New room name"
+                  grow
                 />
 
                 <DropdownSelect
@@ -192,7 +194,7 @@ export function SettingsPage() {
                 <Button size="sm" variant="outline" onClick={addRoom}>
                   Add room
                 </Button>
-              </div>
+              </Inline>
 
               <Stack gap="3" variant="panel-card">
                 {[...customRoomsByCategory.entries()].map(([group, rooms]) => {
@@ -248,7 +250,7 @@ export function SettingsPage() {
               </Stack>
             </SettingsSection>
           </SectionBlock>
-        </div>
+        </CenteredContent>
       </PageLayout.Middle>
     </PageLayout>
   );
@@ -346,7 +348,8 @@ function SteamImportSection() {
       </MetaText>
 
       {!connected && (
-        <BrassButton
+        <Button
+          variant="brass"
           size="sm"
           onClick={handleConnect}
           disabled={busy}
@@ -354,13 +357,14 @@ function SteamImportSection() {
         >
           <FolderOpen className="icon-sm" />
           Connect folder…
-        </BrassButton>
+        </Button>
       )}
 
       {connected && (
         <Stack gap="1.5">
-          <div className="settings-steam-actions-row">
-            <BrassButton
+          <Inline gap="2" wrap align="center">
+            <Button
+              variant="brass"
               size="sm"
               onClick={handleSync}
               disabled={busy}
@@ -368,15 +372,15 @@ function SteamImportSection() {
             >
               <FolderSync className="icon-sm" />
               Sync now
-            </BrassButton>
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleDisconnect} disabled={busy}>
               <Unlink className="icon-sm" />
               Disconnect
             </Button>
-          </div>
-          <span className="settings-steam-connected-label">
+          </Inline>
+          <MetaText as="span" size="xs">
             Connected: {folderName ?? getActiveSteamFolderName() ?? "Unknown"}
-          </span>
+          </MetaText>
         </Stack>
       )}
 
@@ -518,13 +522,17 @@ function SyncFolderSection() {
   if (syncFolderName) {
     return (
       <Stack gap="3">
-        <div className="panel-row">
-          <FolderSync className="h-4 w-4 shrink-0 text-green-500" />
-          <span className="min-w-0 flex-1 truncate font-medium">{syncFolderName}</span>
-          <span className="shrink-0">
+        <Text as="div" size="sm" variant="panel-row">
+          <Inline gap="2" justify="between" align="center">
+            <Inline gap="2" align="center">
+              <FolderSync className="h-4 w-4 shrink-0 text-green-500" />
+              <Text as="span" size="sm" weight="medium" minWidthZero truncate>
+                {syncFolderName}
+              </Text>
+            </Inline>
             <MetaText as="span">{syncMode === "manual" ? "manual sync" : "auto-syncing"}</MetaText>
-          </span>
-        </div>
+          </Inline>
+        </Text>
         <Inline as="label" gap="2" align="center">
           <input
             type="checkbox"
@@ -565,9 +573,9 @@ function SyncFolderSection() {
         </MetaText>
         <Inline gap="2" wrap>
           {syncMode === "manual" ? (
-            <BrassButton size="sm" onClick={handleSyncNow} disabled={busy || !dirty}>
+            <Button variant="brass" size="sm" onClick={handleSyncNow} disabled={busy || !dirty}>
               Save to disk now
-            </BrassButton>
+            </Button>
           ) : (
             <Button variant="outline" size="sm" onClick={handleSyncNow} disabled={busy}>
               Sync now
@@ -602,10 +610,10 @@ function SyncFolderSection() {
           Use manual sync mode when connected
         </Text>
       </Inline>
-      <BrassButton size="sm" onClick={handleConnect} disabled={busy}>
+      <Button variant="brass" size="sm" onClick={handleConnect} disabled={busy}>
         <FolderOpen className="mr-2 h-4 w-4" />
         Connect folder…
-      </BrassButton>
+      </Button>
     </Stack>
   );
 }

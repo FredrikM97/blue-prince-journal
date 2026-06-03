@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { FilterToggleButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
+import { Stack } from "@/components/common/Stack";
 
 type FilterToggleItem = {
   key: string;
@@ -22,13 +23,13 @@ export function FilterToggleGrid({
   layout?: "grid" | "wrap";
   width?: "full" | "fit";
 }) {
-  let layoutClass = "filter-grid";
+  let layoutVariant: "filter-grid" | "filter-grid-wrap" = "filter-grid";
   if (layout === "wrap") {
-    layoutClass = "filter-grid-wrap";
+    layoutVariant = "filter-grid-wrap";
   }
 
   return (
-    <div className={layoutClass}>
+    <Stack variant={layoutVariant} gap="0">
       {items.map((item) => {
         let align: "center" | "left" = "center";
         if (leftAligned) {
@@ -36,9 +37,11 @@ export function FilterToggleGrid({
         }
 
         return (
-          <FilterToggleButton
+          <Button
             key={item.key}
             type="button"
+            variant="filter-toggle"
+            size="sm"
             active={item.active}
             align={align}
             density={size}
@@ -47,14 +50,21 @@ export function FilterToggleGrid({
           >
             {item.dotColor && (
               <span
-                className="h-2 w-2 shrink-0 rounded-full"
-                style={{ background: item.dotColor }}
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  flexShrink: 0,
+                  borderRadius: "9999px",
+                  background: item.dotColor,
+                }}
               />
             )}
-            <span className="truncate">{item.label}</span>
-          </FilterToggleButton>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {item.label}
+            </span>
+          </Button>
         );
       })}
-    </div>
+    </Stack>
   );
 }

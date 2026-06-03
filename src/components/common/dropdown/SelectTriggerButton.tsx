@@ -3,14 +3,20 @@ import { forwardRef, type ComponentProps } from "react";
 import { Button } from "@/components/common/Button";
 import { MetaText, Text } from "@/components/common/Typography";
 
-type SelectTriggerButtonProps = Omit<ComponentProps<typeof Button>, "children"> & {
+type DropdownTriggerVariant = "default" | "room";
+
+type DropdownTriggerButtonProps = Omit<ComponentProps<typeof Button>, "children" | "variant"> & {
   valueLabel?: string;
   placeholder: string;
   hasValue: boolean;
+  variant?: DropdownTriggerVariant;
 };
 
-export const SelectTriggerButton = forwardRef<HTMLButtonElement, SelectTriggerButtonProps>(
-  function SelectTriggerButton({ valueLabel, placeholder, hasValue, ...buttonProps }, ref) {
+export const DropdownTriggerButton = forwardRef<HTMLButtonElement, DropdownTriggerButtonProps>(
+  function DropdownTriggerButton(
+    { valueLabel, placeholder, hasValue, variant = "default", ...buttonProps },
+    ref,
+  ) {
     let triggerText = (
       <MetaText as="span" size="sm">
         {placeholder}
@@ -24,18 +30,25 @@ export const SelectTriggerButton = forwardRef<HTMLButtonElement, SelectTriggerBu
       );
     }
 
+    let triggerClass = "dropdown-trigger";
+    if (variant === "room") {
+      triggerClass = "dropdown-trigger dropdown-trigger-room";
+    }
+
     return (
       <Button
         ref={ref}
         type="button"
         variant="outline"
-        className="room-dropdown-trigger"
+        className={triggerClass}
         data-has-value={hasValue}
         {...buttonProps}
       >
-        <span className="room-trigger-label">{triggerText}</span>
+        <span className="dropdown-trigger-label">{triggerText}</span>
         <ChevronDown className="icon-md opacity-50" />
       </Button>
     );
   },
 );
+
+export const SelectTriggerButton = DropdownTriggerButton;

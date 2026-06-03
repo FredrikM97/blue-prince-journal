@@ -1,11 +1,6 @@
 @layer components {
   /* ─── Page layout ───────────────────────────────────────────────────────── */
 
-  /* Max-width centered content column */
-  .settings-content {
-    @apply mx-auto w-full max-w-2xl space-y-12 px-3 py-3 pb-6 sm:px-4 sm:py-6 sm:pb-8;
-  }
-
   .settings-section {
     @apply space-y-5;
   }
@@ -23,25 +18,12 @@
     @apply space-y-3 border-t border-border/70 pt-4;
   }
 
-  /* 3-column input row: [name input] [category dropdown] [add button] */
-  .settings-input-grid {
-    @apply grid gap-2 sm:grid-cols-[minmax(0,1fr)_14rem_auto];
-  }
-
   /* Room chip / removable tag in the rooms list */
   .settings-room-chip {
     @apply rounded border border-border bg-secondary px-2 py-1 text-xs text-foreground hover:border-destructive hover:text-destructive;
   }
 
-  .settings-steam-actions-row {
-    @apply flex flex-wrap items-center gap-2;
-  }
-
   .settings-steam-action {
     @apply inline-flex items-center gap-1.5;
-  }
-
-  .settings-steam-connected-label {
-    @apply text-xs text-muted-foreground;
   }
 }

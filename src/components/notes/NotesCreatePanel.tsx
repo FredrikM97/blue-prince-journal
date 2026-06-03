@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useStore } from "@/data/store";
-import { GhostButton, BrassButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { Tabs, TabsList, TabsTrigger } from "@/components/common/Tabs";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
@@ -11,10 +11,12 @@ import { ImagePlus } from "lucide-react";
 import type { NoteType, Priority } from "@/lib/types";
 import { NOTE_TYPES } from "@/lib/noteMetadata";
 import { PendingImageList } from "@/components/common/input/PendingImageList";
-import { DetailsField } from "@/components/common/input/DetailsField";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
 import { SidePanel } from "@/components/common/SidePanel";
+import { MetaText, Text } from "@/components/common/Typography";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { Stack } from "@/components/common/Stack";
 
 const NOTE_PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
@@ -133,7 +135,9 @@ function NotesRoomField({
 }) {
   return (
     <div>
-      <label className="capture-label">Room</label>
+      <MetaText as="label" size="xs" weight="medium" normalCase>
+        Room
+      </MetaText>
       <RoomDropdown value={room} onValueChange={setRoom} />
     </div>
   );
@@ -183,10 +187,12 @@ function NotesMetaFields({
 }) {
   return (
     <>
-      <div className="capture-two-col">
+      <Inline gap="2" wrap align="start">
         {mode === "note" ? (
           <div>
-            <label className="capture-label">Type / category</label>
+            <MetaText as="label" size="xs" weight="medium" normalCase>
+              Type / category
+            </MetaText>
             <DropdownSelect
               value={type}
               onValueChange={(v) => setType(v as NoteType)}
@@ -195,7 +201,9 @@ function NotesMetaFields({
           </div>
         ) : (
           <div>
-            <label className="capture-label">Priority</label>
+            <MetaText as="label" size="xs" weight="medium" normalCase>
+              Priority
+            </MetaText>
             <DropdownSelect
               value={priority}
               onValueChange={(v) => setPriority(v as Priority)}
@@ -205,7 +213,7 @@ function NotesMetaFields({
         )}
 
         <NotesRoomField room={room} setRoom={setRoom} />
-      </div>
+      </Inline>
 
       {mode === "note" && (
         <InputField
@@ -227,15 +235,12 @@ function NotesTagsField({
   setTagsInput: React.Dispatch<React.SetStateAction<string>>;
 }) {
   return (
-    <div>
-      <label className="capture-label">Tags</label>
-      <input
-        value={tagsInput}
-        onChange={(e) => setTagsInput(e.target.value)}
-        placeholder="safe, gem, puzzle"
-        className="input-base"
-      />
-    </div>
+    <InputField
+      label="Tags"
+      value={tagsInput}
+      onChange={setTagsInput}
+      placeholder="safe, gem, puzzle"
+    />
   );
 }
 
@@ -248,36 +253,44 @@ function NotesFooterActions({
   close: () => void;
   setPendingImages: React.Dispatch<React.SetStateAction<Blob[]>>;
 }) {
+  const attachRef = useRef<HTMLInputElement>(null);
+
   return (
-    <div className="capture-footer">
-      <label className="capture-attach-label">
-        <span className="inline-flex items-center gap-1">
+    <Inline gap="2" justify="between" align="center" wrap>
+      <>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => attachRef.current?.click()}
+        >
           <ImagePlus className="h-3.5 w-3.5" /> Attach
-        </span>
+        </Button>
         <input
+          ref={attachRef}
           type="file"
           accept="image/*"
           multiple
-          className="hidden"
+          hidden
           onChange={(e) => {
             const files = Array.from(e.target.files ?? []);
             setPendingImages((pending) => [...pending, ...files]);
             e.target.value = "";
           }}
         />
-      </label>
-      <div className="capture-footer-actions">
-        <GhostButton size="sm" onClick={close}>
+      </>
+      <Inline gap="2" wrap>
+        <Button variant="ghost" size="sm" onClick={close}>
           Cancel
-        </GhostButton>
-        <GhostButton size="sm" onClick={() => submit(true)}>
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => submit(true)}>
           Save + next
-        </GhostButton>
-        <BrassButton size="sm" onClick={() => submit(false)}>
+        </Button>
+        <Button variant="brass" size="sm" onClick={() => submit(false)}>
           Save
-        </BrassButton>
-      </div>
-    </div>
+        </Button>
+      </Inline>
+    </Inline>
   );
 }
 
@@ -529,22 +542,23 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     <>
       {!isEditing && <NotesModeTabs mode={form.mode} setMode={form.setMode} />}
 
-      <div className="capture-form-stack">
+      <Stack gap="3">
         <SuggestionsDropdown onSubmitShortcut={submit}>
           <InputField
             label="Title"
             value={form.title}
             onChange={form.setTitle}
             placeholder={form.mode === "todo" ? "Check Den bookshelf" : "Parlor safe = 4271"}
-            inputClassName="input-base h-10"
+            size="lg"
             autoFocus
           />
         </SuggestionsDropdown>
 
         <SuggestionsDropdown>
-          <DetailsField
+          <InputField
             value={form.body}
             onChange={form.setBody}
+            markdown
             placeholder={
               form.mode === "todo" ? "Details about this todo…" : "Longer note, paste evidence…"
             }
@@ -569,7 +583,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
           images={form.pendingImages}
           onRemove={(index) => form.setPendingImages((p) => p.filter((_, j) => j !== index))}
         />
-      </div>
+      </Stack>
 
       <NotesFooterActions
         submit={submit}
@@ -583,9 +597,11 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
 
   if (!store.open) {
     return (
-      <div className="page-layout-panel text-muted-foreground">
-        Press N or use the add button to create a note.
-      </div>
+      <Stack variant="page-layout-panel" gap="2">
+        <Text size="sm" tone="muted">
+          Press N or use the add button to create a note.
+        </Text>
+      </Stack>
     );
   }
 
@@ -597,7 +613,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
       }}
       panelKey={panelKey}
     >
-      <div className="capture-panel">{content}</div>
+      {content}
     </SidePanel.Right>
   );
 }

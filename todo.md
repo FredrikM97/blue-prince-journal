@@ -99,3 +99,40 @@
 * Add to instructions to avoid chaning the layout.css it breaks to much when you change global settings
 * Placement of the title in sidepanels is really high now on mobile almost difficult to see it.
 * add to instructions to never use // eslint-disable-next-line no-restricted-syntax that is a cursee we might be able to extend to allow <div className instead
+
+- [x] Unify dropdown trigger/menu variants to reduce one-off dropdown components
+- [x] Consolidate text input components into a typed field API and migrate call sites
+- [x] Merge mobile drawer context into PageLayout and update SidePanel hook imports
+- [x] Add reusable section header primitives and migrate PagedNotesList wrappers
+- [x] Run lint/typecheck on touched files and close refactor checklist
+
+- [x] Rework Dialog API with clearer typed variant options
+- [x] Consolidate custom button wrappers toward a single Button prop API
+- [x] Make Graph sidebar visibility filters compact and notes-like
+- [x] Improve default UI font readability
+- [x] Hide default sidepanel close button on desktop widths
+- [x] Replace InputField markdown variant with optional markdown flag and remove textarea mode
+
+- [x] Collapse to unified InputField API and remove legacy DetailsField/TextInput wrappers
+- [x] Remove freeform InputField class overrides and replace with typed sizing/grow options
+- [x] Migrate key NotesCreatePanel/NotesEditorPanel/SettingsPage form inputs to shared primitives
+- [x] Wrap mobile page-layout controls in a dedicated component instead of raw wrapper markup
+- [x] Prune now-unused settings input-grid CSS after component migration
+- [x] Migrate Notes create/editor footer+grid wrappers to shared Stack/Inline/Text primitives
+- [x] Remove hidden className usage on file inputs in Notes and Settings flows
+- [x] Prune now-unused Notes capture/editor selectors after primitive migration
+- [x] Move PageLayout native wrappers to shared typed layout primitives
+- [x] Migrate all Ghost/Brass/Icon/FilterToggle wrapper usage to Button-only API
+- [x] Remove legacy wrapper exports from Button component module
+- [x] Migrate NotesView and NotesPage wrapper div/section usage to shared Stack/Inline primitives
+- [x] Migrate AppHeader native wrapper/input markup to shared Stack/Text/InputField primitives
+- [x] Add global declaration for __APP_COMMIT_HASH__ and clear AppHeader symbol errors
+- [x] Clear final Button formatting diagnostic and re-validate touched files
+- [x] Migrate GraphPage native wrapper className usage to shared primitives and typed text variants
+- [x] Migrate SidePanel native wrapper className usage to shared Stack/Typography primitives
+- [x] Replace remaining PagedNotesList native wrapper class usage with Inline primitive
+- [x] Migrate AttachedImagesGallery native wrapper className usage to shared Stack variants
+- [x] Remove MarkdownShortcutHelp native wrapper className usage
+- [x] Remove MarkdownPreview and MarkdownTokenPreview native wrapper className usage
+- [x] Migrate FilterSection and FilterToggleGrid native wrapper className usage to shared primitives
+- [x] Replace FilterButtonGroup native wrapper className with Stack variant

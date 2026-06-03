@@ -49,6 +49,67 @@ export function SectionBlock({ children }: { children: ReactNode }) {
   return <section className="section-block">{children}</section>;
 }
 
+export function SectionHeader({ children }: { children: ReactNode }) {
+  return <header className="section-header-row">{children}</header>;
+}
+
+export function SectionHeaderActions({ children }: { children: ReactNode }) {
+  return (
+    <Inline as="div" gap="1" align="center">
+      {children}
+    </Inline>
+  );
+}
+
+type PageLayoutMobileDrawerSide = "left" | "right";
+type PageLayoutSidebarSide = "left" | "right";
+
+export function PageLayoutFrame({
+  className,
+  children,
+}: {
+  className: string;
+  children: ReactNode;
+}) {
+  return <div className={className}>{children}</div>;
+}
+
+export function PageLayoutMobileControls({ children }: { children: ReactNode }) {
+  return <div className="page-layout-mobile-controls lg:hidden">{children}</div>;
+}
+
+export function PageLayoutMobileDrawer({
+  side,
+  children,
+}: {
+  side: PageLayoutMobileDrawerSide;
+  children: ReactNode;
+}) {
+  let className = "page-layout-mobile-drawer page-layout-mobile-drawer-left lg:hidden";
+  if (side === "right") {
+    className = "page-layout-mobile-drawer page-layout-mobile-drawer-right lg:hidden";
+  }
+  return <aside className={className}>{children}</aside>;
+}
+
+export function PageLayoutSidebar({
+  side,
+  children,
+}: {
+  side: PageLayoutSidebarSide;
+  children: ReactNode;
+}) {
+  let className = "page-layout-sidebar page-layout-sidebar-desktop";
+  if (side === "right") {
+    className = "page-layout-rightbar page-layout-rightbar-desktop";
+  }
+  return <aside className={className}>{children}</aside>;
+}
+
+export function PageLayoutContent({ children }: { children: ReactNode }) {
+  return <main className="page-layout-content">{children}</main>;
+}
+
 export function CenteredContent({
   max = "6xl",
   align = "center",

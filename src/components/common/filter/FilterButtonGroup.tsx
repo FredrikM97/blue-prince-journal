@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
+import { Stack } from "@/components/common/Stack";
 
 type FilterOption<T extends string> = {
   value: T;
@@ -39,8 +40,8 @@ export function FilterButtonGroup<T extends string>({
   ];
 
   return (
-    <div className="filter-options">
+    <Stack variant="filter-options" gap="0">
       <FilterToggleGrid items={items} leftAligned size="compact" layout="wrap" width="fit" />
-    </div>
+    </Stack>
   );
 }

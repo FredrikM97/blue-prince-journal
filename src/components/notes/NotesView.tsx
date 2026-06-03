@@ -1,11 +1,10 @@
 import { memo } from "react";
 import type { Note } from "@/lib/types";
-import { BrassButton } from "@/components/common/Button";
-import { IconButton } from "@/components/common/Button";
 import { Button } from "@/components/common/Button";
 import { NotesListItemSummary } from "./NotesListItemSummary";
 import { ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Text } from "@/components/common/Typography";
+import { Stack } from "@/components/common/Stack";
 
 export function NotesView({
   emptyHint,
@@ -23,18 +22,18 @@ export function NotesView({
   onDelete: (note: Note) => void;
 }) {
   return (
-    <section className="notes-view-section">
+    <Stack as="section" variant="notes-view-section" gap="2">
       {filtered.length === 0 ? (
-        <div className="notes-view-empty">
+        <Stack variant="notes-view-empty" gap="2">
           <Text size="sm" tone="muted">
             {emptyHint ?? "No notes yet. Press N to add one."}
           </Text>
-          <BrassButton className="mt-4" onClick={openCapture}>
+          <Button variant="brass" className="mt-4" onClick={openCapture}>
             Add your first note
-          </BrassButton>
-        </div>
+          </Button>
+        </Stack>
       ) : (
-        <div className="notes-view-list">
+        <Stack variant="notes-view-list" gap="2">
           {filtered.map((n) => (
             <NotesListRow
               key={n.id}
@@ -44,9 +43,9 @@ export function NotesView({
               onDelete={onDelete}
             />
           ))}
-        </div>
+        </Stack>
       )}
-    </section>
+    </Stack>
   );
 }
 
@@ -62,8 +61,8 @@ const NotesListRow = memo(function NotesListRow({
   onDelete: (note: Note) => void;
 }) {
   return (
-    <div className="note-row-item">
-      <div className="note-row-inner group">
+    <Stack variant="note-row-item" gap="1">
+      <Stack variant="note-row-inner" gap="1">
         <Button
           type="button"
           variant="transparent"
@@ -76,7 +75,9 @@ const NotesListRow = memo(function NotesListRow({
         >
           <NotesListItemSummary note={note} />
         </Button>
-        <IconButton
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={(e) => {
             e.stopPropagation();
             onOpenEdit(note);
@@ -84,8 +85,10 @@ const NotesListRow = memo(function NotesListRow({
           aria-label="Edit note"
         >
           <Pencil className="h-4 w-4" />
-        </IconButton>
-        <IconButton
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
           className="text-destructive hover:text-destructive"
           onClick={(e) => {
             e.stopPropagation();
@@ -94,8 +97,10 @@ const NotesListRow = memo(function NotesListRow({
           aria-label="Delete note"
         >
           <Trash2 className="h-4 w-4" />
-        </IconButton>
-        <IconButton
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={(e) => {
             e.stopPropagation();
             onOpenPreview(note);
@@ -103,8 +108,8 @@ const NotesListRow = memo(function NotesListRow({
           aria-label="Preview note"
         >
           <ChevronRight className="h-4 w-4" />
-        </IconButton>
-      </div>
-    </div>
+        </Button>
+      </Stack>
+    </Stack>
   );
 });
