@@ -37,6 +37,7 @@ export function PanelHeader({
   onClose,
   onExpand,
   showCloseOnDesktop = false,
+  forceShowClose = false,
 }: {
   title: string;
   subtitle?: string;
@@ -44,6 +45,7 @@ export function PanelHeader({
   onClose?: () => void;
   onExpand?: () => void;
   showCloseOnDesktop?: boolean;
+  forceShowClose?: boolean;
 }) {
   let titleMuted = false;
   if (done) {
@@ -53,6 +55,11 @@ export function PanelHeader({
   let titleDecoration: "none" | "line-through" = "none";
   if (done) {
     titleDecoration = "line-through";
+  }
+
+  let closeButtonClassName = "lg:hidden";
+  if (showCloseOnDesktop || forceShowClose) {
+    closeButtonClassName = "";
   }
 
   return (
@@ -78,7 +85,7 @@ export function PanelHeader({
             <Button
               variant="ghost"
               size="icon"
-              className={showCloseOnDesktop ? "" : "lg:hidden"}
+              className={closeButtonClassName}
               onClick={onClose}
               title="Close"
               aria-label="Close panel"
@@ -113,6 +120,7 @@ function SidePanelComponent({
 }: SidePanelInternalProps) {
   const mobileDrawerControls = usePageLayoutMobileDrawerControls();
   const lastOpenedKeyRef = useRef<string | null>(null);
+  const forceShowClose = mobileDrawerControls?.isPageLayoutMobile ?? false;
 
   function handleClose() {
     if (mobileDrawerControls?.isPageLayoutMobile && mobileDrawerSide) {
@@ -139,6 +147,7 @@ function SidePanelComponent({
         onExpand={onExpand}
         onClose={handleClose}
         showCloseOnDesktop={false}
+        forceShowClose={forceShowClose}
       />
       {children}
       {expandDialog}
