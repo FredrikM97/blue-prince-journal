@@ -52,6 +52,12 @@ applyTo: "src/**/*.{ts,tsx,css},tests/**/*.{ts,tsx},.github/instructions/*.md"
 - Always pass header intent via props (`title`, `subtitle`, `onClose`, `onExpand`) instead of custom header markup.
 - Use `panelKey` only when intentional mobile auto-open is required; omit it for passive panels that should stay closed by default.
 
+# Mobile Behavior Contract
+
+- Prefer `PageLayout` mobile drawer hooks/context (`usePageLayoutMobileDrawerControls`) for mobile panel behavior.
+- Avoid feature-level `@media` behavior toggles (for example switching row structure or drawer interaction logic) when hook/context-based mobile behavior already exists.
+- Use CSS breakpoints for visual polish only, not as the source of truth for panel open/close or mobile interaction state.
+
 # Notes Row Stability
 
 - Treat `src/components/notes/NotesView.tsx` + `src/components/notes/notes.css` note-row structure as layout-sensitive.

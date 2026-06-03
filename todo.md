@@ -1,3 +1,5 @@
+- [x] Add instruction to avoid feature-level mobile behavior media queries when PageLayout mobile hook exists
+- [x] Remove todo-row mobile media-query stacking override in favor of hook-driven mobile behavior contract
 - [x] Move edit-note Use existing button to footer action row with attach/cancel/save
 - [x] Move edit-note Attach image button to footer near cancel/save like create note
 - [x] Make edit-note Cancel fully close mobile right drawer

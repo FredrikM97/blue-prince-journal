@@ -23,12 +23,14 @@ export function DropdownSelectComponent({
   options,
   placeholder = "Select...",
   triggerWidth = "full",
+  triggerVariant = "default",
 }: {
   value: string;
   onValueChange: (next: string) => void;
   options: DropdownSelectOption[];
   placeholder?: string;
   triggerWidth?: "full" | "fit";
+  triggerVariant?: "default" | "room" | "flat";
 }) {
   const activeOption = options.find((option) => option.value === value);
   const hasValue = activeOption !== undefined;
@@ -43,6 +45,7 @@ export function DropdownSelectComponent({
           placeholder={placeholder}
           hasValue={hasValue}
           triggerWidth={triggerWidth}
+          variant={triggerVariant}
         />
       </DropdownMenuTrigger>
 

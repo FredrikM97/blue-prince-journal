@@ -3,7 +3,7 @@ import { forwardRef, type ComponentProps } from "react";
 import { Button } from "@/components/common/Button";
 import { MetaText, Text } from "@/components/common/Typography";
 
-type DropdownTriggerVariant = "default" | "room";
+type DropdownTriggerVariant = "default" | "room" | "flat";
 type DropdownTriggerWidth = "full" | "fit";
 
 type DropdownTriggerButtonProps = Omit<ComponentProps<typeof Button>, "children" | "variant"> & {
@@ -43,15 +43,23 @@ export const DropdownTriggerButton = forwardRef<HTMLButtonElement, DropdownTrigg
     if (variant === "room") {
       triggerClass = "dropdown-trigger dropdown-trigger-room";
     }
+    if (variant === "flat") {
+      triggerClass = "dropdown-trigger dropdown-trigger-flat";
+    }
     if (triggerWidth === "fit") {
       triggerClass = `${triggerClass} dropdown-trigger-fit`;
+    }
+
+    let buttonVariant: "outline" | "transparent" = "outline";
+    if (variant === "flat") {
+      buttonVariant = "transparent";
     }
 
     return (
       <Button
         ref={ref}
         type="button"
-        variant="outline"
+        variant={buttonVariant}
         className={triggerClass}
         data-has-value={hasValue}
         {...buttonProps}

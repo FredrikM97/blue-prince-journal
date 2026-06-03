@@ -38,12 +38,6 @@ export function TodoItem({
 
   return (
     <li className="todo-row-item">
-      <input
-        type="checkbox"
-        className="mt-1"
-        checked={todo.status === "done"}
-        onChange={(e) => onToggle(e.target.checked ? "done" : "open")}
-      />
       <div className="min-w-0 flex-1">
         {editing ? (
           <InputField
@@ -102,6 +96,7 @@ export function TodoItem({
           onValueChange={(value) => onToggle(value as TodoStatus)}
           options={TODO_STATUS_OPTIONS}
           triggerWidth="fit"
+          triggerVariant="flat"
         />
         <Button
           variant="transparent"

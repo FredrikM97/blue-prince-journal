@@ -43,6 +43,10 @@
     @apply bg-secondary/70;
   }
 
+  .dropdown-trigger-flat {
+    @apply border-transparent bg-transparent shadow-none hover:bg-transparent;
+  }
+
   /* Trigger label text — muted when no room selected */
   .dropdown-trigger-label {
     @apply text-muted-foreground;
