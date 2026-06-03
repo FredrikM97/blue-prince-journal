@@ -4,7 +4,7 @@ import { Chip } from "@/components/common/Chip";
 import { Maximize2, Trash2 } from "lucide-react";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { todoPriorityClass } from "./Constants";
-import { Button, IconButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 
 const TODO_STATUS_OPTIONS = [
   { value: "open", label: "open" },
@@ -85,12 +85,24 @@ export function TodoItem({
           onValueChange={(value) => onToggle(value as TodoStatus)}
           options={TODO_STATUS_OPTIONS}
         />
-        <IconButton onClick={onOpenPreview} className="todo-action-btn" aria-label="Preview todo">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onOpenPreview}
+          className="todo-action-btn"
+          aria-label="Preview todo"
+        >
           <Maximize2 className="h-3.5 w-3.5" />
-        </IconButton>
-        <IconButton onClick={onDelete} className="todo-action-btn-danger" aria-label="Delete">
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onDelete}
+          className="todo-action-btn-danger"
+          aria-label="Delete"
+        >
           <Trash2 className="h-3.5 w-3.5" />
-        </IconButton>
+        </Button>
       </div>
     </li>
   );

@@ -1,7 +1,8 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 type Variant =
   | "default"
+  | "brass"
   | "ghost"
   | "transparent"
   | "outline"
@@ -23,6 +24,7 @@ const BASE =
 
 const VARIANT: Record<Variant, string> = {
   default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+  brass: "bg-brass text-brass-foreground shadow hover:bg-brass/90",
   destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
   outline:
     "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
@@ -85,11 +87,27 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
   active?: boolean;
+  tone?: GhostTone;
+  surface?: GhostSurface;
+  align?: FilterToggleAlign;
+  density?: FilterToggleDensity;
+  width?: FilterToggleWidth;
 }
 
 /** General-purpose button. Prefer the pre-styled variants below for common use cases. */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "default", size = "default", active = false, className = "", ...props },
+  {
+    variant = "default",
+    size = "default",
+    active = false,
+    tone = "default",
+    surface = "default",
+    align = "center",
+    density = "default",
+    width = "full",
+    className = "",
+    ...props
+  },
   ref,
 ) {
   let variantClass = VARIANT[variant];
@@ -102,91 +120,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     sizeClass = "";
   }
 
+  let variantExtras = "";
+  if (variant === "ghost") {
+    const activeClass = active ? GHOST_SURFACE_ACTIVE[surface] : "";
+    variantExtras = `${GHOST_TONE[tone]} ${GHOST_SURFACE[surface]} ${activeClass}`.trim();
+  }
+  if (variant === "filter-toggle") {
+    const stateClass = active ? FILTER_TOGGLE_STATE.on : FILTER_TOGGLE_STATE.off;
+    variantExtras =
+      `${stateClass} ${FILTER_TOGGLE_ALIGN[align]} ${FILTER_TOGGLE_DENSITY[density]} ${FILTER_TOGGLE_WIDTH[width]}`.trim();
+  }
   return (
     <button
       ref={ref}
       {...props}
-      className={`${BASE} ${variantClass} ${sizeClass} ${className}`.trim()}
+      className={`${BASE} ${variantClass} ${sizeClass} ${variantExtras} ${className}`.trim()}
     />
   );
 });
-
-/** Ghost icon button — used for toolbars and row actions.
- *  Always square, non-shrinking. `type="button"` is set by default. */
-export function IconButton({
-  className = "",
-  type = "button",
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      type={type}
-      {...props}
-      className={`${BASE} ${VARIANT.ghost} ${SIZE.icon} shrink-0 ${className}`.trim()}
-    />
-  );
-}
-
-/** Primary action button styled with the brass accent. */
-export function BrassButton({ size = "default", className = "", ...props }: ButtonProps) {
-  return (
-    <button
-      {...props}
-      className={`${BASE} ${VARIANT.default} ${SIZE[size]} bg-brass text-brass-foreground hover:bg-brass/90 ${className}`.trim()}
-    />
-  );
-}
-
-/** Small ghost button for secondary row/panel actions. */
-export function GhostButton({
-  size = "sm",
-  tone = "default",
-  surface = "default",
-  active = false,
-  ...props
-}: Omit<ButtonProps, "className"> & {
-  tone?: GhostTone;
-  surface?: GhostSurface;
-  active?: boolean;
-}) {
-  let activeClass = "";
-  if (active) activeClass = GHOST_SURFACE_ACTIVE[surface];
-
-  return (
-    <button
-      {...props}
-      className={`${BASE} ${VARIANT.ghost} ${SIZE[size]} ${GHOST_TONE[tone]} ${GHOST_SURFACE[surface]} ${activeClass}`.trim()}
-    />
-  );
-}
-
-/** Filter toggle button with typed visual states (active, alignment, density). */
-export function FilterToggleButton({
-  active = false,
-  align = "center",
-  density = "default",
-  width = "full",
-  type = "button",
-  children,
-  ...props
-}: Omit<ButtonProps, "variant" | "size" | "className" | "active"> & {
-  active?: boolean;
-  align?: FilterToggleAlign;
-  density?: FilterToggleDensity;
-  width?: FilterToggleWidth;
-  children: ReactNode;
-}) {
-  const stateClass = active ? FILTER_TOGGLE_STATE.on : FILTER_TOGGLE_STATE.off;
-
-  return (
-    <Button
-      {...props}
-      type={type}
-      variant="filter-toggle"
-      size="sm"
-      className={`${stateClass} ${FILTER_TOGGLE_ALIGN[align]} ${FILTER_TOGGLE_DENSITY[density]} ${FILTER_TOGGLE_WIDTH[width]}`.trim()}
-    >
-      {children}
-    </Button>
-  );
-}

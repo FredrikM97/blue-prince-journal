@@ -1,13 +1,24 @@
 import { createElement, type ReactNode } from "react";
 
-type TextElement = "p" | "span" | "div" | "label" | "ul";
+type TextElement = "p" | "span" | "div" | "label" | "ul" | "code";
 type TextSize = "xs" | "sm" | "base" | "3xl";
 type TextTone = "default" | "muted";
 type TextWeight = "normal" | "medium" | "semibold";
 type TextMarginTop = "0" | "0.5" | "1" | "2";
 type TextLeading = "normal" | "tight" | "relaxed";
 type TextIntent = "default" | "warning";
-type TextVariant = "default" | "panel-card" | "preview-field-label" | "preview-field-value";
+type TextVariant =
+  | "default"
+  | "panel-card"
+  | "panel-row"
+  | "preview-field-label"
+  | "preview-field-value"
+  | "app-brand-badge"
+  | "app-brand-title"
+  | "sync-folder-name"
+  | "feedback-build-code"
+  | "graph-toolbar-hint"
+  | "graph-legend-label";
 
 const TEXT_SIZE_CLASS: Record<TextSize, string> = {
   xs: "text-xs",
@@ -48,8 +59,15 @@ const TEXT_INTENT_CLASS: Record<TextIntent, string> = {
 const TEXT_VARIANT_CLASS: Record<TextVariant, string> = {
   default: "",
   "panel-card": "panel-card",
+  "panel-row": "panel-row",
   "preview-field-label": "preview-field-label",
   "preview-field-value": "preview-field-value",
+  "app-brand-badge": "app-brand-badge",
+  "app-brand-title": "app-brand-title",
+  "sync-folder-name": "sync-folder-name",
+  "feedback-build-code": "feedback-build-code",
+  "graph-toolbar-hint": "graph-toolbar-hint",
+  "graph-legend-label": "graph-legend-label",
 };
 
 type HeadingElement = "h1" | "h2" | "h3";

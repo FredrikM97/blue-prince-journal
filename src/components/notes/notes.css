@@ -9,16 +9,8 @@
   }
 
   /* Capture/notes panel */
-  .capture-panel {
-    @apply flex flex-col gap-2;
-  }
-
   .capture-header {
     @apply shrink-0 space-y-0.5;
-  }
-
-  .capture-form-stack {
-    @apply space-y-2.5;
   }
 
   .capture-label {
@@ -45,21 +37,6 @@
     @apply rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground;
   }
 
-  .capture-two-col {
-    @apply grid grid-cols-2 gap-3;
-  }
-
-  .capture-attach-label {
-    @apply cursor-pointer rounded-md border border-input bg-secondary px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground;
-  }
-
-  .capture-footer {
-    @apply mt-3 flex items-center gap-2;
-  }
-
-  .capture-footer-actions {
-    @apply ml-auto flex flex-wrap items-center gap-2;
-  }
 
   /* Preview panel inside notes view */
   /* Shared markdown surface styles with stronger table readability */
@@ -208,60 +185,9 @@
   }
 
   /* Note editor (inline edit form) */
-  .note-editor-wrap {
-    @apply space-y-3;
-  }
-
-  .note-editor-grid-2 {
-    @apply grid grid-cols-2 gap-2;
-  }
-
-  .note-editor-grid-3 {
-    @apply grid grid-cols-3 gap-2;
-  }
-
-  .note-editor-footer {
-    @apply mt-3 flex justify-end gap-2 border-t border-border pt-2;
-  }
-
-  .note-editor-images-card {
-    @apply space-y-2 rounded-md border border-border bg-card/30 p-2;
-  }
-
-  .note-editor-images-header {
-    @apply flex items-center justify-between;
-  }
-
-  .note-editor-images-label {
-    @apply text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
-  }
-
-  .note-editor-attach-label {
-    @apply cursor-pointer rounded-md border border-input bg-secondary px-2 py-1 text-xs text-muted-foreground hover:text-foreground;
-  }
-
-  .note-editor-images-grid {
-    @apply flex flex-wrap gap-2;
-  }
-
   /* Attached image thumbnail in the editor (small, fixed size) */
   .note-attached-thumb {
     @apply h-16 w-16 rounded border border-border object-cover;
-  }
-
-  /* Label under an attached thumbnail */
-  .note-attached-thumb-label {
-    @apply mt-1 max-w-16 truncate text-[10px] text-muted-foreground;
-  }
-
-  /* Dialog header bar for the image picker */
-  .note-dialog-header {
-    @apply border-b border-border px-6 py-4;
-  }
-
-  /* Scrollable image grid inside the image picker dialog */
-  .note-image-picker-grid {
-    @apply grid max-h-[60vh] grid-cols-2 gap-3 overflow-y-auto p-4 sm:grid-cols-3;
   }
 
   /* Image card inside the picker (button) */
@@ -276,29 +202,6 @@
   /* Thumbnail image inside the picker */
   .note-image-picker-thumb {
     @apply h-20 w-full rounded border border-border object-cover;
-  }
-
-  /* Caption row under a picker thumbnail */
-  .note-image-picker-caption {
-    @apply mt-2 flex items-center justify-between gap-2;
-  }
-
-  /* Filename label in the picker caption */
-  .note-image-picker-name {
-    @apply min-w-0 flex-1 truncate text-xs text-muted-foreground;
-  }
-
-  /* "Selected" badge in the picker */
-  .note-image-picker-badge {
-    @apply rounded bg-brass px-1.5 py-0.5 text-[10px] font-medium text-brass-foreground;
-  }
-
-  .note-editor-image-wrap {
-    @apply relative;
-  }
-
-  .note-editor-image-remove {
-    @apply absolute right-0 top-0 rounded-bl bg-black/60 p-0.5 text-white;
   }
 
   /* Note body snippet card — use .panel-card in layout.css */

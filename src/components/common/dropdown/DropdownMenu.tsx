@@ -22,6 +22,9 @@
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { ChevronRight } from "lucide-react";
 
+type DropdownMenuContentVariant = "default" | "select";
+type DropdownMenuItemTone = "default" | "active";
+
 /** Root controller — manages open/close state. Pass modal={false} for inline panels. */
 export const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -34,14 +37,20 @@ export const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 /** Renders menu content in a Portal above the page. Accepts an optional extra CSS class. */
 export function DropdownMenuContent({
   sideOffset = 4,
+  variant = "default",
   className = "",
   ...props
-}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>) {
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & {
+  variant?: DropdownMenuContentVariant;
+}) {
+  let variantClass = "";
+  if (variant === "select") variantClass = "dropdown-select-content";
+
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
-        className={`dropdown-content ${className}`.trim()}
+        className={`dropdown-content ${variantClass} ${className}`.trim()}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -76,12 +85,18 @@ export function DropdownMenuSubContent({
 
 /** A single clickable menu row. Use onSelect for actions; use asChild to render a link. */
 export function DropdownMenuItem({
+  tone = "default",
   className = "",
   ...props
-}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item>) {
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
+  tone?: DropdownMenuItemTone;
+}) {
+  let toneClass = "";
+  if (tone === "active") toneClass = "menu-item-active";
+
   return (
     <DropdownMenuPrimitive.Item
-      className={`dropdown-item ${className}`.trim()}
+      className={`dropdown-item ${toneClass} ${className}`.trim()}
       {...props}
     />
   );
@@ -93,4 +108,3 @@ export function DropdownMenuSeparator(
 ) {
   return <DropdownMenuPrimitive.Separator className="dropdown-separator" {...props} />;
 }
-

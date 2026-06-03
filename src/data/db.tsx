@@ -62,10 +62,6 @@ export async function deleteNote(id: string) {
   const db = await getDB();
   await db.delete("notes", id);
 }
-async function getNote(id: string) {
-  const db = await getDB();
-  return db.get("notes", id);
-}
 
 // Todos
 export async function listTodos(): Promise<Todo[]> {

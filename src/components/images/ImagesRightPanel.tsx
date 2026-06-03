@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Expand, Trash2 } from "lucide-react";
-import { Button, GhostButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { PagedNotesList } from "@/components/common/PagedNotesList";
 import { StoredImageView } from "@/components/StoredImageView";
@@ -8,7 +8,7 @@ import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { SidePanel } from "@/components/common/SidePanel";
 import { Text } from "@/components/common/Typography";
-import { TextInput } from "@/components/common/input/TextInput";
+import { InputField } from "@/components/common/input/InputField";
 import type { Note, StoredImage } from "@/lib/types";
 
 // Primitive wrapper component for accessibility markup
@@ -139,11 +139,12 @@ function ImagesInspectorPanel({
               Label
             </Text>
             <Inline gap="2">
-              <TextInput
+              <InputField
                 value={labelInput}
                 onChange={setLabelInput}
-                className="h-8 flex-1"
                 placeholder={img.name}
+                size="sm"
+                grow
               />
               <Button
                 variant="outline"
@@ -173,10 +174,10 @@ function ImagesInspectorPanel({
             <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
               <Expand /> Open preview
             </Button>
-            <GhostButton tone="destructive" onClick={onDelete}>
+            <Button variant="ghost" tone="destructive" onClick={onDelete}>
               <VisuallyHidden>Delete image</VisuallyHidden>
               <Trash2 />
-            </GhostButton>
+            </Button>
           </Inline>
         </Stack>
       </SidePanel.Right>

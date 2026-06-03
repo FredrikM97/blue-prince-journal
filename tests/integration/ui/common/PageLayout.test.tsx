@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { PageLayout } from "@/components/common/PageLayout";
-import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayoutMobileDrawerContext";
+import { PageLayout, usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
 
 function MobileDrawerTrigger() {
   const controls = usePageLayoutMobileDrawerControls();
@@ -32,9 +31,9 @@ describe("PageLayout", () => {
     expect(asFragment()).toMatchSnapshot();
   });
 
-  it("matches snapshot for single-column middle-scroll mode", () => {
+  it("matches snapshot for single-column layout", () => {
     const { asFragment } = render(
-      <PageLayout prioritizeMiddleScroll>
+      <PageLayout>
         <PageLayout.Middle>
           <div>settings-like-content</div>
         </PageLayout.Middle>
@@ -44,50 +43,7 @@ describe("PageLayout", () => {
     expect(asFragment()).toMatchSnapshot();
   });
 
-  it("forwards wheel delta to middle content when prioritized", () => {
-    const { container } = render(
-      <PageLayout prioritizeMiddleScroll>
-        <PageLayout.Left>
-          <div>left</div>
-        </PageLayout.Left>
-        <PageLayout.Middle>
-          <div>middle</div>
-        </PageLayout.Middle>
-        <PageLayout.Right>
-          <div>right</div>
-        </PageLayout.Right>
-      </PageLayout>,
-    );
-
-    const middle = container.querySelector("main") as HTMLElement;
-    const sidebar = container.querySelector("aside") as HTMLElement;
-    middle.scrollTop = 10;
-
-    fireEvent.wheel(sidebar, { deltaY: 25 });
-    expect(middle.scrollTop).toBe(35);
-  });
-
-  it("does not move middle scroll when wheel delta is zero", () => {
-    const { container } = render(
-      <PageLayout prioritizeMiddleScroll>
-        <PageLayout.Left>
-          <div>left</div>
-        </PageLayout.Left>
-        <PageLayout.Middle>
-          <div>middle</div>
-        </PageLayout.Middle>
-      </PageLayout>,
-    );
-
-    const middle = container.querySelector("main") as HTMLElement;
-    const sidebar = container.querySelector("aside") as HTMLElement;
-    middle.scrollTop = 40;
-
-    fireEvent.wheel(sidebar, { deltaY: 0 });
-    expect(middle.scrollTop).toBe(40);
-  });
-
-  it("does not forward wheel when prioritize mode is off", () => {
+  it("keeps middle scroll position when wheeling sidebars", () => {
     const { container } = render(
       <PageLayout>
         <PageLayout.Left>

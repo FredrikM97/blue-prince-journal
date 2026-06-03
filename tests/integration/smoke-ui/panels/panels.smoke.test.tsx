@@ -96,6 +96,7 @@ describe("smoke panels", () => {
         selectedNote={baseNote}
         incomingCount={1}
         outgoingCount={0}
+        onClose={vi.fn()}
       />,
     );
 

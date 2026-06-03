@@ -1,8 +1,8 @@
-import { BrassButton, Button, GhostButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import { useNavigate } from "@tanstack/react-router";
 import { PagedNotesList } from "@/components/common/PagedNotesList";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
-import { DetailsField } from "@/components/common/input/DetailsField";
+import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
 import { Eraser, Trash2 } from "lucide-react";
 import type { GridCell, Note, Todo } from "@/lib/types";
@@ -68,13 +68,14 @@ export function MapRightPanel({
 
         <div>
           <SuggestionsDropdown>
-            <DetailsField
+            <InputField
               value={commentDraft}
               onChange={setCommentDraft}
               onBlur={() => upsertCell({ row, col, comment: commentDraft })}
               label="Cell details"
               showOptionalHint={false}
               rows={6}
+              markdown
               placeholder="Quick note about this cell - door direction, gem cost, danger..."
             />
           </SuggestionsDropdown>
@@ -85,7 +86,8 @@ export function MapRightPanel({
 
         {activeRoom && (
           <div className="map-sheet-action-row">
-            <BrassButton
+            <Button
+              variant="brass"
               size="sm"
               className="flex-1"
               onClick={() => {
@@ -93,7 +95,7 @@ export function MapRightPanel({
               }}
             >
               + Note (image)
-            </BrassButton>
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -108,7 +110,8 @@ export function MapRightPanel({
         )}
 
         <div className="map-sheet-clear-row">
-          <GhostButton
+          <Button
+            variant="ghost"
             tone="muted"
             onClick={() => {
               setCommentDraft("");
@@ -116,8 +119,9 @@ export function MapRightPanel({
             }}
           >
             <Eraser /> Clear comment
-          </GhostButton>
-          <GhostButton
+          </Button>
+          <Button
+            variant="ghost"
             tone="destructive"
             onClick={() => {
               clearCell(row, col);
@@ -125,7 +129,7 @@ export function MapRightPanel({
             }}
           >
             <Trash2 /> Clear cell
-          </GhostButton>
+          </Button>
         </div>
 
         {activeNotes.length > 0 && (

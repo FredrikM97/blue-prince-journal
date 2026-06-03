@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useStore } from "@/data/store";
 import type { Note, NoteType } from "@/lib/types";
 import { PageLayout } from "@/components/common/PageLayout";
-import { Button, GhostButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import { TodoRightPanel } from "@/components/todos/TodoRightPanel";
 import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
 import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
+import { Inline } from "@/components/common/LayoutPrimitives";
 
 export function NotesPage({
   filterType,
@@ -138,8 +139,10 @@ export function NotesPage({
             <DialogTitle>Delete note</DialogTitle>
             <DialogDescription>{deleteDescription}</DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <GhostButton onClick={() => uiActions.setPendingDelete(null)}>Cancel</GhostButton>
+          <Inline gap="2" justify="end">
+            <Button variant="ghost" onClick={() => uiActions.setPendingDelete(null)}>
+              Cancel
+            </Button>
             <Button
               variant="destructive"
               onClick={async () => {
@@ -152,7 +155,7 @@ export function NotesPage({
             >
               Delete
             </Button>
-          </div>
+          </Inline>
         </DialogContent>
       </Dialog>
     </>

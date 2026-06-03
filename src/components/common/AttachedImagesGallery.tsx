@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
-import { Button, IconButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
 import { StoredImageView } from "@/components/StoredImageView";
 import { useStore } from "@/data/store";
 import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { Stack } from "@/components/common/Stack";
 
 export function AttachedImagesGallery({
   imageIds,
@@ -36,22 +37,27 @@ export function AttachedImagesGallery({
     return img.caption?.trim() || img.name;
   };
 
-  const wrapperClass = compact ? "note-details-images-compact" : "note-details-images";
-  const gridClass = compact ? "note-details-images-grid-compact" : "note-details-images-grid";
   const btnClass = compact
     ? "note-details-image-btn-compact text-left"
     : "note-details-image-btn text-left";
   const thumbClass = compact ? "h-20 w-full rounded object-cover" : "h-28 w-full object-cover";
+  let wrapperVariant: "note-details-images" | "note-details-images-compact" = "note-details-images";
+  if (compact) wrapperVariant = "note-details-images-compact";
+  let gridVariant: "note-details-images-grid" | "note-details-images-grid-compact" =
+    "note-details-images-grid";
+  if (compact) gridVariant = "note-details-images-grid-compact";
 
   return (
-    <section className={wrapperClass}>
-      <div className="mb-2">
+    <Stack as="section" variant={wrapperVariant} gap="0">
+      <Stack variant="note-details-images-header" gap="0">
         <Inline gap="2">
-          <div className="note-details-images-label">
+          <Stack variant="note-details-images-label" gap="0">
             {title} ({imageIds.length})
-          </div>
+          </Stack>
           {collapsible && (
-            <IconButton
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label={collapsed ? "Expand images" : "Collapse images"}
               title={collapsed ? "Expand images" : "Collapse images"}
               className="h-6 w-6 rounded border border-input"
@@ -59,13 +65,13 @@ export function AttachedImagesGallery({
             >
               {collapsed && <ChevronDown />}
               {!collapsed && <ChevronUp />}
-            </IconButton>
+            </Button>
           )}
         </Inline>
-      </div>
+      </Stack>
 
       {!collapsed && (
-        <div className={gridClass}>
+        <Stack variant={gridVariant} gap="0">
           {imageIds.map((id) => (
             <Button
               key={id}
@@ -77,12 +83,12 @@ export function AttachedImagesGallery({
               aria-label={`Open image preview: ${getImageLabel(id)}`}
             >
               <StoredImageView id={id} className={thumbClass} alt={getImageLabel(id)} />
-              <div className="mt-1 px-1">
+              <Stack variant="note-details-image-caption-wrap" gap="0">
                 <MetaText truncate>{getImageLabel(id)}</MetaText>
-              </div>
+              </Stack>
             </Button>
           ))}
-        </div>
+        </Stack>
       )}
 
       <Dialog
@@ -97,7 +103,7 @@ export function AttachedImagesGallery({
               {zoomedImageId ? getImageLabel(zoomedImageId) : "Image preview"}
             </DialogTitle>
           </DialogHeader>
-          <div className="note-details-zoom-preview">
+          <Stack variant="note-details-zoom-preview" gap="0">
             {zoomedImageId && (
               <StoredImageView
                 id={zoomedImageId}
@@ -105,9 +111,9 @@ export function AttachedImagesGallery({
                 alt="Enlarged note image"
               />
             )}
-          </div>
+          </Stack>
         </DialogContent>
       </Dialog>
-    </section>
+    </Stack>
   );
 }

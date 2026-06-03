@@ -1,5 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { Button } from "@/components/common/Button";
+import { Stack } from "@/components/common/Stack";
+import { MetaText } from "@/components/common/Typography";
 
 export function FilterSection({
   title,
@@ -24,29 +27,49 @@ export function FilterSection({
   }
 
   return (
-    <div className="filter-section">
+    <Stack variant="filter-section" gap="0">
       {collapsible && (
-        <button type="button" className="filter-section-toggle" onClick={() => setOpen((v) => !v)}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="filter-section-toggle"
+          onClick={() => setOpen((v) => !v)}
+        >
           <span>
             {title}
-            {!open && badge && <span className="filter-section-badge">{badge}</span>}
+            {!open && badge && (
+              <MetaText as="span" size="xs" marginTop="0" normalCase>
+                <span style={{ marginLeft: "0.25rem", color: "#f59e0b" }}>{badge}</span>
+              </MetaText>
+            )}
           </span>
           {collapseIcon}
-        </button>
+        </Button>
       )}
 
       {!collapsible && (
-        <div className="filter-section-header">
+        <Stack variant="filter-section-header" gap="0">
           <span>{title}</span>
           {onReset && (
-            <button type="button" className="filter-clear-btn" onClick={onReset}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="filter-clear-btn"
+              onClick={onReset}
+            >
               All
-            </button>
+            </Button>
           )}
-        </div>
+        </Stack>
       )}
 
-      {(!collapsible || open) && <div className="filter-section-body">{children}</div>}
-    </div>
+      {(!collapsible || open) && (
+        <Stack variant="filter-section-body" gap="0">
+          {children}
+        </Stack>
+      )}
+    </Stack>
   );
 }

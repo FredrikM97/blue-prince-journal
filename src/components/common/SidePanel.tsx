@@ -1,10 +1,12 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Maximize2, X } from "lucide-react";
-import { IconButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
+import { Heading, MetaText } from "@/components/common/Typography";
+import { Stack } from "@/components/common/Stack";
 import {
   usePageLayoutMobileDrawerControls,
   type MobileDrawerSide,
-} from "@/components/common/PageLayoutMobileDrawerContext";
+} from "@/components/common/PageLayout";
 
 type SidePanelBaseProps = {
   title: string;
@@ -34,39 +36,59 @@ export function PanelHeader({
   done = false,
   onClose,
   onExpand,
+  showCloseOnDesktop = false,
 }: {
   title: string;
   subtitle?: string;
   done?: boolean;
   onClose?: () => void;
   onExpand?: () => void;
+  showCloseOnDesktop?: boolean;
 }) {
-  let titleClass = "panel-title";
+  let titleMuted = false;
   if (done) {
-    titleClass = "panel-title panel-title-done";
+    titleMuted = true;
+  }
+
+  let titleDecoration: "none" | "line-through" = "none";
+  if (done) {
+    titleDecoration = "line-through";
   }
 
   return (
-    <div className="panel-header">
-      <div className="panel-header-title-wrap">
-        <h2 className={titleClass}>{title}</h2>
-        {subtitle && <p className="preview-subtitle">{subtitle}</p>}
-      </div>
+    <Stack variant="panel-header" gap="0">
+      <Stack variant="panel-header-title-wrap" gap="0">
+        <Heading as="h2" size="lg" leading="snug" muted={titleMuted}>
+          <span style={{ textDecoration: titleDecoration }}>{title}</span>
+        </Heading>
+        {subtitle && (
+          <MetaText as="p" size="xs" capitalize>
+            {subtitle}
+          </MetaText>
+        )}
+      </Stack>
       {(onExpand || onClose) && (
-        <div className="preview-header-actions">
+        <Stack variant="preview-header-actions" gap="0">
           {onExpand && (
-            <IconButton onClick={onExpand} title="Expand preview">
+            <Button variant="ghost" size="icon" onClick={onExpand} title="Expand preview">
               <Maximize2 className="icon-md" />
-            </IconButton>
+            </Button>
           )}
           {onClose && (
-            <IconButton onClick={onClose} title="Close" aria-label="Close panel">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={showCloseOnDesktop ? "" : "lg:hidden"}
+              onClick={onClose}
+              title="Close"
+              aria-label="Close panel"
+            >
               <X className="icon-md" />
-            </IconButton>
+            </Button>
           )}
-        </div>
+        </Stack>
       )}
-    </div>
+    </Stack>
   );
 }
 
@@ -112,17 +134,18 @@ function SidePanelComponent({
   }, [mobileDrawerControls, mobileDrawerKey, mobileDrawerSide]);
 
   return (
-    <div className="side-panel-shell">
+    <Stack variant="side-panel-shell" gap="0">
       <PanelHeader
         title={title}
         subtitle={subtitle}
         done={done}
         onExpand={onExpand}
         onClose={handleClose}
+        showCloseOnDesktop={false}
       />
       {children}
       {expandDialog}
-    </div>
+    </Stack>
   );
 }
 

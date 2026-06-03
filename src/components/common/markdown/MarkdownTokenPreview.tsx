@@ -2,11 +2,11 @@ import type ReactMarkdown from "react-markdown";
 
 // Colors match graph edge colors: amber=room, blue=tag, green=note, teal=date, violet=type
 const TOKEN_CLASS: Record<string, string> = {
-  "@": "text-amber-600 dark:text-amber-400",
-  "#": "text-blue-600 dark:text-blue-400",
-  "^": "text-emerald-600 dark:text-emerald-400",
-  ">": "text-teal-600 dark:text-teal-400",
-  "!": "text-violet-600 dark:text-violet-400",
+  "@": "#d97706",
+  "#": "#2563eb",
+  "^": "#059669",
+  ">": "#0d9488",
+  "!": "#7c3aed",
 };
 
 // (?<!\w) prevents matching tokens embedded in words (e.g. x^2 or user@host)
@@ -19,10 +19,19 @@ function highlightTokensInText(text: string): React.ReactNode {
   for (const match of text.matchAll(TOKEN_PATTERN)) {
     const i = match.index!;
     if (i > last) parts.push(text.slice(last, i));
-    const cls = TOKEN_CLASS[match[0][0]];
-    if (cls) {
+    const tokenColor = TOKEN_CLASS[match[0][0]];
+    if (tokenColor) {
       parts.push(
-        <code key={key++} className={`${cls} bg-transparent font-mono text-[0.83em] font-semibold`}>
+        <code
+          key={key++}
+          style={{
+            color: tokenColor,
+            background: "transparent",
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.83em",
+            fontWeight: 600,
+          }}
+        >
           {match[0]}
         </code>,
       );

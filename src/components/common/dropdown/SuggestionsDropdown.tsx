@@ -2,7 +2,7 @@
  * SuggestionsDropdown — self-contained token suggestion system.
  *
  * Default export: SuggestionsDropdown wrapper component.
- * Wraps any <InputField> or <DetailsField> and overlays a dismissible suggestion list.
+ * Wraps any <InputField> (text or markdown mode) and overlays a dismissible suggestion list.
  * Reads the field value + cursor atomically from the child's onChange event (React's
  * onChange on inputs bubbles), so no value/onChange props are needed on this wrapper.
  * Writes suggestions back via the native DOM setter trick so controlled inputs update normally.
@@ -22,6 +22,7 @@
 
 import { useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useSuggestionSources } from "@/hooks/useSuggestionSources";
+import { Button } from "@/components/common/Button";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -371,11 +372,14 @@ function SuggestionItems({
     >
       {suggestions.map((suggestion, index) => {
         let itemClass = "capture-suggestion-item";
-        if (index === activeIndex) itemClass = "capture-suggestion-item capture-suggestion-item-active";
+        if (index === activeIndex) {
+          itemClass = "capture-suggestion-item capture-suggestion-item-active";
+        }
         return (
-          <button
+          <Button
             key={suggestion.value}
             type="button"
+            variant="ghost"
             className={itemClass}
             aria-selected={index === activeIndex}
             onMouseEnter={() => onHover(index)}
@@ -386,7 +390,7 @@ function SuggestionItems({
           >
             <span>{suggestion.value}</span>
             <span className="capture-suggestion-hint">{suggestion.hint}</span>
-          </button>
+          </Button>
         );
       })}
     </div>

@@ -13,6 +13,8 @@ export type DialogVariant =
   | "fullscreen"
   | "editor";
 
+export type DialogOverlayVariant = "default" | "subtle";
+
 function getDialogContentClass(variant: DialogVariant): string {
   if (variant === "compact") return "dialog-content-compact";
   if (variant === "preview") return "dialog-content-preview";
@@ -28,12 +30,21 @@ function getDefaultShowClose(variant: DialogVariant): boolean {
   return true;
 }
 
+function getDialogOverlayClass(variant: DialogOverlayVariant): string {
+  if (variant === "subtle") return "dialog-overlay dialog-overlay-subtle";
+  return "dialog-overlay";
+}
+
 export const Dialog = DialogPrimitive.Root;
 
 const DialogOverlay = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->((props, ref) => <DialogPrimitive.Overlay ref={ref} className="dialog-overlay" {...props} />);
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> & {
+    variant?: DialogOverlayVariant;
+  }
+>(({ variant = "default", ...props }, ref) => (
+  <DialogPrimitive.Overlay ref={ref} className={getDialogOverlayClass(variant)} {...props} />
+));
 
 export const DialogContent = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
@@ -45,14 +56,16 @@ export const DialogContent = React.forwardRef<
      * Defaults to false for the "editor" variant where the caller owns the header.
      */
     showClose?: boolean;
+    /** Backdrop intensity preset — defaults to "default". */
+    overlayVariant?: DialogOverlayVariant;
   }
->(({ children, variant = "default", showClose, ...props }, ref) => {
+>(({ children, variant = "default", showClose, overlayVariant = "default", ...props }, ref) => {
   let shouldShowClose = getDefaultShowClose(variant);
   if (showClose !== undefined) shouldShowClose = showClose;
 
   return (
     <DialogPrimitive.Portal>
-      <DialogOverlay />
+      <DialogOverlay variant={overlayVariant} />
       <DialogPrimitive.Content ref={ref} className={getDialogContentClass(variant)} {...props}>
         {children}
         {shouldShowClose && (

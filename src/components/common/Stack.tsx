@@ -1,11 +1,64 @@
 import { createElement, type ReactNode } from "react";
 
-type StackElement = "div" | "section" | "header" | "footer" | "aside" | "ul";
-type StackGap = "1" | "1.5" | "2" | "3" | "4" | "5";
-type StackVariant = "default" | "page-layout-panel" | "panel-card" | "dialog-scroll-body";
+type StackElement =
+  | "div"
+  | "section"
+  | "header"
+  | "footer"
+  | "aside"
+  | "ul"
+  | "nav"
+  | "form"
+  | "span";
+type StackGap = "0" | "1" | "1.5" | "2" | "3" | "4" | "5";
+type StackVariant =
+  | "default"
+  | "page-layout-panel"
+  | "panel-card"
+  | "dialog-scroll-body"
+  | "notes-view-section"
+  | "notes-view-empty"
+  | "notes-view-list"
+  | "note-row-item"
+  | "note-row-inner"
+  | "app-header"
+  | "app-header-inner"
+  | "app-nav"
+  | "app-header-controls"
+  | "app-search-wrap"
+  | "feedback-form"
+  | "dialog-footer-pt1"
+  | "graph-page-middle"
+  | "graph-canvas-frame"
+  | "graph-canvas-frame-plain"
+  | "graph-toolbar"
+  | "graph-toolbar-controls"
+  | "graph-zoom-controls"
+  | "graph-legend-row"
+  | "graph-legend-item"
+  | "panel-header"
+  | "panel-header-title-wrap"
+  | "preview-header-actions"
+  | "side-panel-shell"
+  | "note-details-images"
+  | "note-details-images-compact"
+  | "note-details-images-header"
+  | "note-details-images-label"
+  | "note-details-images-grid"
+  | "note-details-images-grid-compact"
+  | "note-details-image-caption-wrap"
+  | "note-details-zoom-preview"
+  | "markdown-preview-surface"
+  | "filter-section"
+  | "filter-section-header"
+  | "filter-section-body"
+  | "filter-grid"
+  | "filter-grid-wrap"
+  | "filter-options";
 type StackMarginTop = "0" | "2";
 
 const STACK_GAP_CLASS: Record<StackGap, string> = {
+  "0": "",
   "1": "space-y-1",
   "1.5": "space-y-1.5",
   "2": "space-y-2",
@@ -19,6 +72,46 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "page-layout-panel": "page-layout-panel",
   "panel-card": "panel-card",
   "dialog-scroll-body": "dialog-scroll-body",
+  "notes-view-section": "notes-view-section",
+  "notes-view-empty": "notes-view-empty",
+  "notes-view-list": "notes-view-list",
+  "note-row-item": "note-row-item",
+  "note-row-inner": "note-row-inner group",
+  "app-header": "app-header",
+  "app-header-inner": "app-header-inner",
+  "app-nav": "app-nav",
+  "app-header-controls": "app-header-controls",
+  "app-search-wrap": "app-search-wrap",
+  "feedback-form": "flex flex-col gap-3",
+  "dialog-footer-pt1": "dialog-footer pt-1",
+  "graph-page-middle": "graph-page-middle",
+  "graph-canvas-frame": "graph-canvas-frame",
+  "graph-canvas-frame-plain": "graph-canvas-frame-plain",
+  "graph-toolbar": "graph-toolbar",
+  "graph-toolbar-controls": "graph-toolbar-controls",
+  "graph-zoom-controls": "flex items-center",
+  "graph-legend-row": "graph-legend-row",
+  "graph-legend-item": "graph-legend-item",
+  "panel-header": "panel-header",
+  "panel-header-title-wrap": "panel-header-title-wrap",
+  "preview-header-actions": "preview-header-actions",
+  "side-panel-shell": "side-panel-shell",
+  "note-details-images": "note-details-images",
+  "note-details-images-compact": "note-details-images-compact",
+  "note-details-images-header": "mb-2",
+  "note-details-images-label": "note-details-images-label",
+  "note-details-images-grid": "note-details-images-grid",
+  "note-details-images-grid-compact": "note-details-images-grid-compact",
+  "note-details-image-caption-wrap": "mt-1 px-1",
+  "note-details-zoom-preview": "note-details-zoom-preview",
+  "markdown-preview-surface":
+    "markdown-preview-surface prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed",
+  "filter-section": "filter-section",
+  "filter-section-header": "filter-section-header",
+  "filter-section-body": "filter-section-body",
+  "filter-grid": "filter-grid",
+  "filter-grid-wrap": "filter-grid-wrap",
+  "filter-options": "filter-options",
 };
 
 const STACK_MARGIN_TOP_CLASS: Record<StackMarginTop, string> = {

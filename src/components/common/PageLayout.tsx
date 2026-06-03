@@ -1,19 +1,52 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   Children,
   Fragment,
+  createContext,
   isValidElement,
+  useContext,
   useEffect,
   useMemo,
   useState,
   type ReactElement,
 } from "react";
 import type { ReactNode } from "react";
-import { GhostButton } from "@/components/common/Button";
-import { PanelLeft, PanelRight } from "lucide-react";
+import { Button } from "@/components/common/Button";
 import {
-  PageLayoutMobileDrawerProvider,
-  type MobileDrawerSide,
-} from "@/components/common/PageLayoutMobileDrawerContext";
+  PageLayoutContent,
+  PageLayoutFrame,
+  PageLayoutMobileControls,
+  PageLayoutMobileDrawer,
+  PageLayoutSidebar,
+} from "@/components/common/LayoutPrimitives";
+import { PanelLeft, PanelRight } from "lucide-react";
+
+export type MobileDrawerSide = "left" | "right";
+
+export type MobileDrawerControls = {
+  openMobileDrawer: (side: MobileDrawerSide) => void;
+  closeMobileDrawer: () => void;
+};
+
+const PageLayoutMobileDrawerContext = createContext<MobileDrawerControls | null>(null);
+
+function PageLayoutMobileDrawerProvider({
+  value,
+  children,
+}: {
+  value: MobileDrawerControls;
+  children: ReactNode;
+}) {
+  return (
+    <PageLayoutMobileDrawerContext.Provider value={value}>
+      {children}
+    </PageLayoutMobileDrawerContext.Provider>
+  );
+}
+
+export function usePageLayoutMobileDrawerControls() {
+  return useContext(PageLayoutMobileDrawerContext);
+}
 
 type MobilePanelLabelKey = "default" | "graph" | "map" | "notes" | "images" | "todos";
 
@@ -222,9 +255,10 @@ function PageLayoutMobileDrawers({
   return (
     <>
       {(hasLeft || hasRight) && (
-        <div className="page-layout-mobile-controls lg:hidden">
+        <PageLayoutMobileControls>
           {hasLeft && (
-            <GhostButton
+            <Button
+              variant="ghost"
               size="sm"
               surface="mobile-toggle"
               active={mobileLeftOpen}
@@ -232,10 +266,11 @@ function PageLayoutMobileDrawers({
             >
               <PanelLeft className="icon-sm" />
               {leftLabel}
-            </GhostButton>
+            </Button>
           )}
           {hasRight && (
-            <GhostButton
+            <Button
+              variant="ghost"
               size="sm"
               surface="mobile-toggle"
               active={mobileRightOpen}
@@ -243,21 +278,17 @@ function PageLayoutMobileDrawers({
             >
               <PanelRight className="icon-sm" />
               {rightLabel}
-            </GhostButton>
+            </Button>
           )}
-        </div>
+        </PageLayoutMobileControls>
       )}
 
       {mobileLeftOpen && hasLeft && (
-        <aside className="page-layout-mobile-drawer page-layout-mobile-drawer-left lg:hidden">
-          {resolvedPanels.left}
-        </aside>
+        <PageLayoutMobileDrawer side="left">{resolvedPanels.left}</PageLayoutMobileDrawer>
       )}
 
       {mobileRightOpen && hasRight && (
-        <aside className="page-layout-mobile-drawer page-layout-mobile-drawer-right lg:hidden">
-          {resolvedPanels.right}
-        </aside>
+        <PageLayoutMobileDrawer side="right">{resolvedPanels.right}</PageLayoutMobileDrawer>
       )}
     </>
   );
@@ -327,7 +358,7 @@ function PageLayoutComponent({
 
   return (
     <PageLayoutMobileDrawerProvider value={mobileDrawerControls}>
-      <div className={layoutClass}>
+      <PageLayoutFrame className={layoutClass}>
         <PageLayoutMobileDrawers
           hasLeft={hasLeft}
           hasRight={hasRight}
@@ -342,16 +373,10 @@ function PageLayoutComponent({
           }}
         />
 
-        {hasLeft && (
-          <aside className="page-layout-sidebar page-layout-sidebar-desktop">{resolvedLeft}</aside>
-        )}
-        <main className="page-layout-content">{resolvedMiddle}</main>
-        {hasRight && (
-          <aside className="page-layout-rightbar page-layout-rightbar-desktop">
-            {resolvedRight}
-          </aside>
-        )}
-      </div>
+        {hasLeft && <PageLayoutSidebar side="left">{resolvedLeft}</PageLayoutSidebar>}
+        <PageLayoutContent>{resolvedMiddle}</PageLayoutContent>
+        {hasRight && <PageLayoutSidebar side="right">{resolvedRight}</PageLayoutSidebar>}
+      </PageLayoutFrame>
     </PageLayoutMobileDrawerProvider>
   );
 }

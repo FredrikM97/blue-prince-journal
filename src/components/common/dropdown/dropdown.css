@@ -31,17 +31,21 @@
   /* ─── RoomDropdown ───────────────────────────────────────────────────────── */
 
   /* Trigger button: full-width, matches text input height */
-  .room-dropdown-trigger {
+  .dropdown-trigger {
     @apply h-9 w-full justify-between border-input bg-secondary/70 px-3 py-2 text-sm font-normal hover:bg-secondary;
   }
 
+  .dropdown-trigger-room {
+    @apply bg-secondary/70;
+  }
+
   /* Trigger label text — muted when no room selected */
-  .room-trigger-label {
+  .dropdown-trigger-label {
     @apply text-muted-foreground;
   }
 
   /* When the trigger has a selected value, show label in foreground colour */
-  .room-dropdown-trigger[data-has-value="true"] .room-trigger-label {
+  .dropdown-trigger[data-has-value="true"] .dropdown-trigger-label {
     @apply text-muted-foreground;
   }
 
