@@ -414,6 +414,10 @@
     @apply border-brass bg-brass text-brass-foreground;
   }
 
+  .ui-toggle-state-on-outline {
+    @apply border-brass bg-card/50 text-foreground;
+  }
+
   .ui-toggle-state-off {
     @apply opacity-75;
   }

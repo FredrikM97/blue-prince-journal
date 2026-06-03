@@ -18,6 +18,7 @@ type GhostSurface = "default" | "mobile-toggle";
 type FilterToggleAlign = "center" | "left";
 type FilterToggleDensity = "default" | "compact";
 type FilterToggleWidth = "full" | "fit";
+type FilterToggleStateStyle = "filled" | "outline";
 type ButtonWidth = "auto" | "full";
 type ButtonJustify = "center" | "start" | "between";
 type ButtonTextAlign = "center" | "left";
@@ -67,9 +68,15 @@ const GHOST_SURFACE_ACTIVE: Record<GhostSurface, string> = {
   "mobile-toggle": "bg-brass text-brass-foreground",
 };
 
-const FILTER_TOGGLE_STATE = {
-  on: "ui-toggle-state-on opacity-100",
-  off: "ui-toggle-state-off",
+const FILTER_TOGGLE_STATE: Record<FilterToggleStateStyle, { on: string; off: string }> = {
+  filled: {
+    on: "ui-toggle-state-on opacity-100",
+    off: "ui-toggle-state-off",
+  },
+  outline: {
+    on: "ui-toggle-state-on-outline opacity-100",
+    off: "ui-toggle-state-off",
+  },
 };
 
 const FILTER_TOGGLE_ALIGN: Record<FilterToggleAlign, string> = {
@@ -117,6 +124,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   align?: FilterToggleAlign;
   density?: FilterToggleDensity;
   width?: FilterToggleWidth;
+  toggleStateStyle?: FilterToggleStateStyle;
   fullWidth?: boolean;
   justify?: ButtonJustify;
   textAlign?: ButtonTextAlign;
@@ -134,6 +142,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     align = "center",
     density = "default",
     width = "full",
+    toggleStateStyle = "filled",
     fullWidth = false,
     justify = "center",
     textAlign = "center",
@@ -159,7 +168,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     variantExtras = `${GHOST_TONE[tone]} ${GHOST_SURFACE[surface]} ${activeClass}`.trim();
   }
   if (variant === "filter-toggle") {
-    const stateClass = active ? FILTER_TOGGLE_STATE.on : FILTER_TOGGLE_STATE.off;
+    const stateByStyle = FILTER_TOGGLE_STATE[toggleStateStyle];
+    const stateClass = active ? stateByStyle.on : stateByStyle.off;
     variantExtras =
       `${stateClass} ${FILTER_TOGGLE_ALIGN[align]} ${FILTER_TOGGLE_DENSITY[density]} ${FILTER_TOGGLE_WIDTH[width]}`.trim();
   }

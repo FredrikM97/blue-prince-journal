@@ -16,12 +16,14 @@ export function FilterToggleGrid({
   size = "default",
   layout = "grid",
   width = "full",
+  activeStyle = "filled",
 }: {
   items: FilterToggleItem[];
   leftAligned?: boolean;
   size?: "default" | "compact";
   layout?: "grid" | "wrap";
   width?: "full" | "fit";
+  activeStyle?: "filled" | "outline";
 }) {
   let layoutVariant: "filter-grid" | "filter-grid-wrap" = "filter-grid";
   if (layout === "wrap") {
@@ -46,6 +48,7 @@ export function FilterToggleGrid({
             align={align}
             density={size}
             width={width}
+            toggleStateStyle={activeStyle}
             onClick={item.onToggle}
           >
             {item.dotColor && (
