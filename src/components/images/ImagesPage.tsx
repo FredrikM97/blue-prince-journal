@@ -4,6 +4,8 @@ import { PageLayout } from "@/components/common/PageLayout";
 import { StoredImageView } from "@/components/StoredImageView";
 import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Text } from "@/components/common/Typography";
 import type { StoredImage } from "@/lib/types";
 import { toast } from "sonner";
 import {
@@ -83,12 +85,13 @@ export function ImagesPage() {
         setPreviewOpen(true);
       } else if (e.key === "Escape") {
         setPreviewOpen(false);
+        setSelectedId(null);
       }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selected, selectByOffset]);
+  }, [selectByOffset]);
 
   return (
     <PageLayout variant="panel">
@@ -98,9 +101,9 @@ export function ImagesPage() {
 
       <PageLayout.Middle>
         {filtered.length === 0 && (
-          <div className="empty-state">
-            No images yet. Add one from note capture or from a note&apos;s editor.
-          </div>
+          <EmptyState>
+            <Text>No images yet. Add one from note capture or from a note editor.</Text>
+          </EmptyState>
         )}
 
         {filtered.length > 0 && (
@@ -246,7 +249,9 @@ function ImageThumb({
     <button type="button" onClick={onClick} className={thumbClass}>
       <StoredImageView id={img.id} alt={img.name} className="images-thumb-image" />
       <div className="images-thumb-overlay">
-        <div className="images-thumb-name">{getImageLabel(img)}</div>
+        <Text as="div" size="xs" tone="default" variant="default" truncate>
+          {getImageLabel(img)}
+        </Text>
       </div>
     </button>
   );

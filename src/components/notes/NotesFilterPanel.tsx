@@ -46,11 +46,11 @@ export function NotesFilterPanel({
   return (
     <>
       {!filterType && (
-        <FilterSection title="Type" collapsible defaultOpen>
+        <FilterSection title="Type" collapsible defaultOpen fullWidth={false}>
           <FilterButtonGroup value={typeFilter} options={typeOptions} onChange={setTypeFilter} />
         </FilterSection>
       )}
-      <FilterSection title="Status" collapsible defaultOpen>
+      <FilterSection title="Status" collapsible defaultOpen fullWidth={false}>
         <FilterButtonGroup
           value={statusFilter}
           options={statusOptions}
@@ -64,12 +64,12 @@ export function NotesFilterPanel({
         />
       </FilterSection>
       {rooms.length > 0 && (
-        <FilterSection title="Room" collapsible defaultOpen={rooms.length <= 4}>
+        <FilterSection title="Room" collapsible defaultOpen={rooms.length <= 4} fullWidth={false}>
           <FilterButtonGroup value={roomFilter} options={roomOptions} onChange={setRoomFilter} />
         </FilterSection>
       )}
       {tags.length > 0 && (
-        <FilterSection title="Tag" collapsible defaultOpen={tags.length <= 4}>
+        <FilterSection title="Tag" collapsible defaultOpen={tags.length <= 4} fullWidth={false}>
           <FilterButtonGroup value={tagFilter} options={tagOptions} onChange={setTagFilter} />
         </FilterSection>
       )}

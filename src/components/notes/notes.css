@@ -71,12 +71,12 @@
   }
 
   .note-row-preview-btn {
-    @apply flex w-full min-w-0 flex-1 h-auto items-start justify-start gap-0 rounded-sm p-0 text-left hover:bg-transparent focus-visible:ring-0;
+    @apply flex min-w-0 flex-1 items-start gap-0 rounded-sm hover:bg-transparent focus-visible:ring-0;
   }
 
   /* Note summary (row body) */
   .note-summary-wrap {
-    @apply flex items-start gap-3;
+    @apply flex w-full min-w-0 items-start gap-3;
   }
 
   .note-summary-icon {
@@ -116,7 +116,7 @@
   }
 
   .note-summary-title {
-    @apply min-w-0 truncate text-base font-medium leading-tight;
+    @apply m-0 min-w-0 truncate text-base font-medium leading-tight;
   }
 
   .note-summary-time {
@@ -124,11 +124,11 @@
   }
 
   .note-summary-pills {
-    @apply flex min-w-0 flex-1 flex-wrap items-center gap-1.5;
+    @apply flex w-full min-w-0 flex-wrap items-center gap-1.5;
   }
 
   .note-summary-meta {
-    @apply mt-0.5 flex min-w-0 items-center gap-2;
+    @apply mt-0.5 flex min-w-0 flex-col items-start gap-1;
   }
 
   .note-summary-image-count {

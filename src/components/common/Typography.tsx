@@ -1,14 +1,16 @@
 import { createElement, type ReactNode } from "react";
 
-type TextElement = "p" | "span" | "div" | "label" | "ul" | "code";
+type TextElement = "p" | "span" | "div" | "label" | "ul" | "li" | "code";
 type TextSize = "xs" | "sm" | "base" | "3xl";
 type TextTone = "default" | "muted";
 type TextWeight = "normal" | "medium" | "semibold";
 type TextMarginTop = "0" | "0.5" | "1" | "2";
 type TextLeading = "normal" | "tight" | "relaxed";
 type TextIntent = "default" | "warning";
+type TextDecoration = "none" | "line-through";
 type TextVariant =
   | "default"
+  | "sr-only"
   | "panel-card"
   | "panel-row"
   | "preview-field-label"
@@ -58,6 +60,7 @@ const TEXT_INTENT_CLASS: Record<TextIntent, string> = {
 
 const TEXT_VARIANT_CLASS: Record<TextVariant, string> = {
   default: "",
+  "sr-only": "sr-only",
   "panel-card": "panel-card",
   "panel-row": "panel-row",
   "preview-field-label": "preview-field-label",
@@ -102,6 +105,7 @@ export function Text({
   marginTop = "0",
   leading = "normal",
   intent = "default",
+  decoration = "none",
   variant = "default",
   truncate = false,
   tabular = false,
@@ -117,6 +121,7 @@ export function Text({
   marginTop?: TextMarginTop;
   leading?: TextLeading;
   intent?: TextIntent;
+  decoration?: TextDecoration;
   variant?: TextVariant;
   truncate?: boolean;
   tabular?: boolean;
@@ -126,6 +131,7 @@ export function Text({
   children: ReactNode;
 }) {
   let baseClass = `${TEXT_SIZE_CLASS[size]} ${TEXT_TONE_CLASS[tone]} ${TEXT_WEIGHT_CLASS[weight]} ${TEXT_MARGIN_TOP_CLASS[marginTop]} ${TEXT_LEADING_CLASS[leading]} ${TEXT_INTENT_CLASS[intent]} ${TEXT_VARIANT_CLASS[variant]}`;
+  if (decoration === "line-through") baseClass = `${baseClass} line-through`;
   if (truncate) baseClass = `${baseClass} truncate`;
   if (tabular) baseClass = `${baseClass} tabular-nums`;
   if (minWidthZero) baseClass = `${baseClass} min-w-0`;

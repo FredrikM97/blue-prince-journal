@@ -26,8 +26,8 @@ type StackVariant =
   | "app-nav"
   | "app-header-controls"
   | "app-search-wrap"
-  | "feedback-form"
-  | "dialog-footer-pt1"
+  | "welcome-shell"
+  | "welcome-icon"
   | "graph-page-middle"
   | "graph-canvas-frame"
   | "graph-canvas-frame-plain"
@@ -82,8 +82,8 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "app-nav": "app-nav",
   "app-header-controls": "app-header-controls",
   "app-search-wrap": "app-search-wrap",
-  "feedback-form": "flex flex-col gap-3",
-  "dialog-footer-pt1": "dialog-footer pt-1",
+  "welcome-shell": "welcome-shell",
+  "welcome-icon": "welcome-icon",
   "graph-page-middle": "graph-page-middle",
   "graph-canvas-frame": "graph-canvas-frame",
   "graph-canvas-frame-plain": "graph-canvas-frame-plain",

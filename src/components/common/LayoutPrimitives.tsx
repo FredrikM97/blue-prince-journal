@@ -75,7 +75,7 @@ export function PageLayoutFrame({
 }
 
 export function PageLayoutMobileControls({ children }: { children: ReactNode }) {
-  return <div className="page-layout-mobile-controls lg:hidden">{children}</div>;
+  return <div className="page-layout-mobile-controls">{children}</div>;
 }
 
 export function PageLayoutMobileDrawer({
@@ -85,9 +85,9 @@ export function PageLayoutMobileDrawer({
   side: PageLayoutMobileDrawerSide;
   children: ReactNode;
 }) {
-  let className = "page-layout-mobile-drawer page-layout-mobile-drawer-left lg:hidden";
+  let className = "page-layout-mobile-drawer page-layout-mobile-drawer-left";
   if (side === "right") {
-    className = "page-layout-mobile-drawer page-layout-mobile-drawer-right lg:hidden";
+    className = "page-layout-mobile-drawer page-layout-mobile-drawer-right";
   }
   return <aside className={className}>{children}</aside>;
 }
@@ -99,9 +99,9 @@ export function PageLayoutSidebar({
   side: PageLayoutSidebarSide;
   children: ReactNode;
 }) {
-  let className = "page-layout-sidebar page-layout-sidebar-desktop";
+  let className = "page-layout-sidebar";
   if (side === "right") {
-    className = "page-layout-rightbar page-layout-rightbar-desktop";
+    className = "page-layout-rightbar";
   }
   return <aside className={className}>{children}</aside>;
 }

@@ -2,6 +2,7 @@
 import {
   Children,
   Fragment,
+  useCallback,
   createContext,
   isValidElement,
   useContext,
@@ -11,6 +12,7 @@ import {
   type ReactElement,
 } from "react";
 import type { ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/common/Button";
 import {
   PageLayoutContent,
@@ -19,11 +21,16 @@ import {
   PageLayoutMobileDrawer,
   PageLayoutSidebar,
 } from "@/components/common/LayoutPrimitives";
+import {
+  useIsPageLayoutMobile,
+  useOnPageLayoutMobileChange,
+} from "@/components/common/usePageLayoutMobile";
 import { PanelLeft, PanelRight } from "lucide-react";
 
 export type MobileDrawerSide = "left" | "right";
 
 export type MobileDrawerControls = {
+  isPageLayoutMobile: boolean;
   openMobileDrawer: (side: MobileDrawerSide) => void;
   closeMobileDrawer: () => void;
 };
@@ -107,7 +114,12 @@ function PageLayoutRight({ children }: PageLayoutSlotProps) {
   return <Fragment>{children}</Fragment>;
 }
 
-function getColumnLayoutClass(hasLeft: boolean, hasRight: boolean): string {
+function getColumnLayoutClass(
+  hasLeft: boolean,
+  hasRight: boolean,
+  isPageLayoutMobile: boolean,
+): string {
+  if (isPageLayoutMobile) return "page-layout-single-column-scroll";
   if (hasLeft && hasRight) return "page-layout-three-column";
   if (hasLeft) return "page-layout-two-column-left";
   if (hasRight) return "page-layout-two-column-right";
@@ -190,15 +202,18 @@ function useMobilePageLayoutDrawersState({
   const mobileLeftOpen = mobileOpen === "left";
   const mobileRightOpen = mobileOpen === "right";
 
-  function closeMobileDrawer() {
+  const closeMobileDrawer = useCallback(() => {
     setMobileOpen(null);
-  }
+  }, []);
 
-  function openMobileDrawer(side: MobileDrawerSide) {
-    if (side === "left" && !hasLeft) return;
-    if (side === "right" && !hasRight) return;
-    setMobileOpen(side);
-  }
+  const openMobileDrawer = useCallback(
+    (side: MobileDrawerSide) => {
+      if (side === "left" && !hasLeft) return;
+      if (side === "right" && !hasRight) return;
+      setMobileOpen(side);
+    },
+    [hasLeft, hasRight],
+  );
 
   useEffect(() => {
     if (!mobileLeftOpen && !mobileRightOpen) return;
@@ -209,15 +224,10 @@ function useMobilePageLayoutDrawersState({
     };
   }, [mobileLeftOpen, mobileRightOpen]);
 
-  useEffect(() => {
-    function onResize() {
-      if (window.innerWidth < 1024) return;
-      closeMobileDrawer();
-    }
-
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+  useOnPageLayoutMobileChange((nextIsMobile) => {
+    if (nextIsMobile) return;
+    closeMobileDrawer();
+  });
 
   return {
     mobileLeftOpen,
@@ -228,12 +238,14 @@ function useMobilePageLayoutDrawersState({
 }
 
 function PageLayoutMobileDrawers({
+  isPageLayoutMobile,
   hasLeft,
   hasRight,
   labels,
   drawerState,
   resolvedPanels,
 }: {
+  isPageLayoutMobile: boolean;
   hasLeft: boolean;
   hasRight: boolean;
   labels: {
@@ -246,6 +258,8 @@ function PageLayoutMobileDrawers({
     right: ReactNode;
   };
 }) {
+  if (!isPageLayoutMobile) return null;
+
   const leftLabel = labels.left;
   const rightLabel = labels.right;
   const mobileLeftOpen = drawerState.mobileLeftOpen;
@@ -311,6 +325,8 @@ function PageLayoutComponent({
   className?: string;
   variant?: PageLayoutVariant;
 }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isPageLayoutMobile = useIsPageLayoutMobile();
   const slots = extractSlotsFromChildren(children);
   const resolvedLeft = slots.left;
   const resolvedRight = slots.right;
@@ -326,12 +342,9 @@ function PageLayoutComponent({
 
   const hasLeft = resolvedLeft !== undefined && resolvedLeft !== null;
   const hasRight = resolvedRight !== undefined && resolvedRight !== null;
-  const columnClass = getColumnLayoutClass(hasLeft, hasRight);
+  const columnClass = getColumnLayoutClass(hasLeft, hasRight, isPageLayoutMobile);
   const mobileDrawerState = useMobilePageLayoutDrawersState({ hasLeft, hasRight });
-  let mobileLabelKey: MobilePanelLabelKey = "default";
-  if (typeof window !== "undefined") {
-    mobileLabelKey = resolveMobileLabelKeyFromPathname(window.location.pathname);
-  }
+  const mobileLabelKey = resolveMobileLabelKeyFromPathname(pathname);
 
   const labels = getMobilePanelLabels(mobileLabelKey);
   let leftLabel = "Left panel";
@@ -341,10 +354,11 @@ function PageLayoutComponent({
 
   const mobileDrawerControls = useMemo(
     () => ({
+      isPageLayoutMobile,
       openMobileDrawer: mobileDrawerState.openMobileDrawer,
       closeMobileDrawer: mobileDrawerState.closeMobileDrawer,
     }),
-    [mobileDrawerState.closeMobileDrawer, mobileDrawerState.openMobileDrawer],
+    [isPageLayoutMobile, mobileDrawerState.closeMobileDrawer, mobileDrawerState.openMobileDrawer],
   );
 
   let layoutClass = `page-layout ${columnClass}`;
@@ -355,11 +369,13 @@ function PageLayoutComponent({
   if (className) {
     layoutClass = `${layoutClass} ${className}`;
   }
+  layoutClass = `${layoutClass} ${isPageLayoutMobile ? "page-layout-mode-mobile" : "page-layout-mode-desktop"}`;
 
   return (
     <PageLayoutMobileDrawerProvider value={mobileDrawerControls}>
       <PageLayoutFrame className={layoutClass}>
         <PageLayoutMobileDrawers
+          isPageLayoutMobile={isPageLayoutMobile}
           hasLeft={hasLeft}
           hasRight={hasRight}
           labels={{
@@ -373,9 +389,13 @@ function PageLayoutComponent({
           }}
         />
 
-        {hasLeft && <PageLayoutSidebar side="left">{resolvedLeft}</PageLayoutSidebar>}
+        {!isPageLayoutMobile && hasLeft && (
+          <PageLayoutSidebar side="left">{resolvedLeft}</PageLayoutSidebar>
+        )}
         <PageLayoutContent>{resolvedMiddle}</PageLayoutContent>
-        {hasRight && <PageLayoutSidebar side="right">{resolvedRight}</PageLayoutSidebar>}
+        {!isPageLayoutMobile && hasRight && (
+          <PageLayoutSidebar side="right">{resolvedRight}</PageLayoutSidebar>
+        )}
       </PageLayoutFrame>
     </PageLayoutMobileDrawerProvider>
   );

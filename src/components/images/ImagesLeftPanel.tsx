@@ -44,8 +44,7 @@ export function ImagesLeftPanel({
     <SidePanel.Left title="Images" subtitle={`${total} stored`} panelKey="images-library">
       <Stack gap="2">
         <Text size="xs" tone="muted">
-          Click an image to open details in the right panel. Use the preview button there for full
-          size.
+          Click an image to open details in the right panel.
         </Text>
 
         {steamSync.supported && steamSync.connected && (

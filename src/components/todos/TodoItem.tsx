@@ -3,14 +3,22 @@ import type { Todo, TodoStatus } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
 import { Maximize2, Trash2 } from "lucide-react";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
-import { todoPriorityClass } from "./Constants";
 import { Button } from "@/components/common/Button";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { InputField } from "@/components/common/input/InputField";
+import { Text } from "@/components/common/Typography";
 
 const TODO_STATUS_OPTIONS = [
   { value: "open", label: "open" },
   { value: "in-progress", label: "in progress" },
   { value: "done", label: "done" },
 ];
+
+function getPriorityVariant(priority: Todo["priority"]) {
+  if (priority === "high") return "priority-high";
+  if (priority === "low") return "priority-low";
+  return "priority-normal";
+}
 
 export function TodoItem({
   todo,
@@ -38,10 +46,11 @@ export function TodoItem({
       />
       <div className="min-w-0 flex-1">
         {editing ? (
-          <input
-            autoFocus
+          <InputField
+            label="Todo title"
+            hideLabel
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={setTitle}
             onBlur={() => {
               setEditing(false);
               if (title.trim() && title !== todo.title) onEdit({ ...todo, title: title.trim() });
@@ -53,23 +62,32 @@ export function TodoItem({
                 setEditing(false);
               }
             }}
-            className="input-base h-7"
+            autoFocus
+            size="sm"
           />
         ) : (
           <Button
             type="button"
             variant="ghost"
             size="default"
-            className={`text-left text-sm ${
-              todo.status === "done" ? "text-muted-foreground line-through" : ""
-            }`}
+            fullWidth
+            justify="start"
+            textAlign="left"
+            tone={todo.status === "done" ? "muted" : "default"}
             onDoubleClick={() => setEditing(true)}
           >
-            {todo.title}
+            <Text
+              as="span"
+              size="sm"
+              tone={todo.status === "done" ? "muted" : "default"}
+              decoration={todo.status === "done" ? "line-through" : "none"}
+            >
+              {todo.title}
+            </Text>
           </Button>
         )}
-        <div className="mt-1 flex flex-wrap items-center gap-1">
-          <span className={todoPriorityClass(todo.priority)}>{todo.priority}</span>
+        <Inline gap="1" align="center" wrap>
+          <Chip variant={getPriorityVariant(todo.priority)}>{todo.priority}</Chip>
           <Chip variant="solid">{todo.scope}</Chip>
           {todo.room && <Chip variant="room">@{todo.room}</Chip>}
           {todo.tags.map((tag) => (
@@ -77,7 +95,7 @@ export function TodoItem({
               #{tag}
             </Chip>
           ))}
-        </div>
+        </Inline>
       </div>
       <div className="todo-row-actions">
         <DropdownSelect
@@ -89,19 +107,19 @@ export function TodoItem({
           variant="ghost"
           size="icon"
           onClick={onOpenPreview}
-          className="todo-action-btn"
           aria-label="Preview todo"
+          tone="muted"
         >
-          <Maximize2 className="h-3.5 w-3.5" />
+          <Maximize2 />
         </Button>
         <Button
           variant="ghost"
           size="icon"
           onClick={onDelete}
-          className="todo-action-btn-danger"
           aria-label="Delete"
+          tone="destructive"
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 />
         </Button>
       </div>
     </li>

@@ -136,3 +136,16 @@
 - [x] Remove MarkdownPreview and MarkdownTokenPreview native wrapper className usage
 - [x] Migrate FilterSection and FilterToggleGrid native wrapper className usage to shared primitives
 - [x] Replace FilterButtonGroup native wrapper className with Stack variant
+
+- [x] Generalize shared Button/InputField APIs to remove page-specific layout wrappers
+- [x] Migrate Welcome, AppHeader, Todo, and Images panels off leftover native wrapper/className usage
+- [x] Remove image right-panel preview controls and simplify feedback editor usage
+- [x] Fix todo chip row alignment and filter button alignment with shared primitives
+- [x] Prune page-specific CSS now covered by shared layout primitives and revalidate
+
+- [x] Restore welcome card spacing, note row title alignment, horizontal chip layout, and left-aligned collapsible filter headers
+
+- [x] Centralize page-layout mobile breakpoint logic behind a shared hook/helper
+- [x] Generalize shared media-query helpers and reuse them for theme and popup viewport logic
+
+- [x] Move page-layout mobile/desktop rendering decisions out of CSS and into shared hook-driven React layout

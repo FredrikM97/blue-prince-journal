@@ -44,40 +44,6 @@
     @apply text-[9px] opacity-50 sm:text-[10px];
   }
 
-  /* Map cell editor panel */
-  .map-sheet-body {
-    @apply space-y-4;
-  }
-
-  .map-field-label {
-    @apply mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
-  }
-
-  .map-comment-help {
-    @apply mt-1 text-[11px] text-muted-foreground;
-  }
-
-  .map-comment-preview-card {
-    @apply mt-2 rounded-md border border-border bg-card/60 p-3;
-  }
-
-  .map-comment-preview-title {
-    @apply mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
-  }
-
-  .map-sheet-action-row {
-    @apply flex gap-2;
-  }
-
-  .map-sheet-clear-row {
-    @apply flex gap-2 border-t border-border pt-3;
-  }
-
-  /* Map room notes/todos lists */
-  .map-list-title {
-    @apply mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
-  }
-
   .map-note-list {
     @apply space-y-2;
   }

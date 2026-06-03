@@ -32,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/common/dropdown/DropdownMenu";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { KeyboardKey } from "@/components/common/KeyboardKey";
 import { MetaText, Text } from "@/components/common/Typography";
@@ -183,13 +184,12 @@ export function AppHeader() {
               void sendFeedback();
             }}
           >
-            <Stack variant="feedback-form" gap="0">
+            <Stack gap="3">
               <InputField
                 label="Message"
                 autoFocus
-                multiline
+                markdown
                 rows={6}
-                resizable
                 value={feedbackMessage}
                 onChange={setFeedbackMessage}
                 placeholder="Tell me what happened or what you'd like to see..."
@@ -202,7 +202,7 @@ export function AppHeader() {
                 placeholder="Email or handle, optional"
               />
 
-              <Stack variant="dialog-footer-pt1" gap="0">
+              <Inline gap="2" justify="end">
                 <Button type="button" variant="outline" onClick={() => setFeedbackOpen(false)}>
                   Cancel
                 </Button>
@@ -213,7 +213,7 @@ export function AppHeader() {
                   <Send className="app-menu-icon" />
                   {feedbackButtonLabel}
                 </Button>
-              </Stack>
+              </Inline>
             </Stack>
           </form>
         </DialogContent>
@@ -265,6 +265,8 @@ export function AppHeader() {
             <Stack variant="app-search-wrap" gap="0">
               <Search className="app-search-icon" />
               <InputField
+                label="Search"
+                hideLabel
                 inputRef={searchInputRef}
                 value={searchInput}
                 onChange={setSearchInput}
@@ -275,7 +277,6 @@ export function AppHeader() {
                   }
                 }}
                 placeholder=" "
-                ariaLabel="Search notes"
                 size="sm"
               />
             </Stack>
@@ -295,7 +296,9 @@ export function AppHeader() {
             >
               <Plus className="app-add-icon" />
               <span>Add note</span>
-              <KeyboardKey className="app-add-shortcut">N</KeyboardKey>
+              <KeyboardKey variant="shortcut" className="app-add-shortcut">
+                N
+              </KeyboardKey>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -19,10 +19,6 @@
 
   /* Selectable option card */
   .welcome-card {
-    @apply !flex w-full max-w-sm !flex-col !items-center !justify-start !gap-3 !rounded-xl !border border-border !bg-card/60 !p-6 !text-center !whitespace-normal !shadow-sm transition-colors hover:!border-brass/60 hover:!bg-card disabled:pointer-events-none disabled:opacity-50 sm:h-[13.5rem] sm:w-[17rem];
-  }
-
-  .welcome-card-body {
-    @apply flex min-h-0 flex-1 flex-col items-center justify-center;
+    @apply !flex w-full max-w-sm !flex-col !items-center !justify-start !gap-2.5 !rounded-xl !border border-border !bg-card/60 !px-5 !py-4 !text-center !whitespace-normal !shadow-sm transition-colors hover:!border-brass/60 hover:!bg-card disabled:pointer-events-none disabled:opacity-50 sm:min-h-[7.5rem] sm:w-[17rem];
   }
 }

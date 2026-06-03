@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Expand, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { PagedNotesList } from "@/components/common/PagedNotesList";
@@ -11,12 +11,6 @@ import { Text } from "@/components/common/Typography";
 import { InputField } from "@/components/common/input/InputField";
 import type { Note, StoredImage } from "@/lib/types";
 
-// Primitive wrapper component for accessibility markup
-function VisuallyHidden({ children }: { children: React.ReactNode }) {
-  // eslint-disable-next-line no-restricted-syntax
-  return <span className="sr-only">{children}</span>;
-}
-
 // Image styling containers (requires wrapper for CSS styling)
 function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line no-restricted-syntax
@@ -25,7 +19,7 @@ function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
 
 function ImageZoomPreview({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line no-restricted-syntax
-  return <div className="images-zoom-preview">{children}</div>;
+  return <div className="images-detail-preview">{children}</div>;
 }
 
 function getImageLabel(img: StoredImage): string {
@@ -171,11 +165,10 @@ function ImagesInspectorPanel({
           />
 
           <Inline gap="2" justify="between" wrap align="center">
-            <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
-              <Expand /> Open preview
-            </Button>
             <Button variant="ghost" tone="destructive" onClick={onDelete}>
-              <VisuallyHidden>Delete image</VisuallyHidden>
+              <Text as="span" variant="sr-only">
+                Delete image
+              </Text>
               <Trash2 />
             </Button>
           </Inline>
@@ -185,10 +178,10 @@ function ImagesInspectorPanel({
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent variant="expand">
           <DialogHeader>
-            <DialogTitle>{img.name}</DialogTitle>
+            <DialogTitle>{getImageLabel(img)}</DialogTitle>
           </DialogHeader>
           <ImageZoomPreview>
-            <StoredImageView id={img.id} alt={img.name} className="images-zoom-image" />
+            <StoredImageView id={img.id} alt={img.name} className="images-detail-preview-image" />
           </ImageZoomPreview>
         </DialogContent>
       </Dialog>

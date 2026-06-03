@@ -1,6 +1,8 @@
 import { TODO_STATUS_COLUMNS } from "./Constants";
 import { TodoItem } from "./TodoItem";
 import type { Todo, TodoStatus } from "@/lib/types";
+import { Stack } from "@/components/common/Stack";
+import { Heading, MetaText } from "@/components/common/Typography";
 
 function TodoColumn({
   label,
@@ -20,11 +22,13 @@ function TodoColumn({
   onOpenPreview: (t: Todo) => void;
 }) {
   return (
-    <div className="todos-column">
-      <div className="todos-column-header">
-        <h2 className="todos-column-title">{label}</h2>
-        <span className="todos-column-count">{todos.length}</span>
-      </div>
+    <section className="todos-column">
+      <header className="todos-column-header">
+        <Heading as="h2" size="base" variant="section-label">
+          {label}
+        </Heading>
+        <MetaText as="span">{todos.length}</MetaText>
+      </header>
       <ul className="todos-column-list">
         {todos.length === 0 && (
           <li className="todos-column-empty">
@@ -42,7 +46,7 @@ function TodoColumn({
           />
         ))}
       </ul>
-    </div>
+    </section>
   );
 }
 
@@ -60,7 +64,7 @@ export function TodoMiddlePanel({
   onOpenPreview: (todo: Todo) => void;
 }) {
   return (
-    <>
+    <Stack as="section" gap="0">
       <div className="todos-columns-grid">
         {TODO_STATUS_COLUMNS.map((col) => (
           <TodoColumn
@@ -75,6 +79,6 @@ export function TodoMiddlePanel({
           />
         ))}
       </div>
-    </>
+    </Stack>
   );
 }

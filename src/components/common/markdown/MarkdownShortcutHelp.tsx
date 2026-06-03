@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 import { HelpCircle } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { MetaText } from "@/components/common/Typography";
+import { getViewportWidth } from "@/components/common/useMediaQuery";
 
 const SHORTCUTS: { tokens: string[]; desc: string }[] = [
   { tokens: ["#tag"], desc: "add a tag" },
@@ -47,7 +48,7 @@ export function MarkdownShortcutHelp() {
       const rect = wrapperRef.current.getBoundingClientRect();
       setPopupPos({
         top: rect.bottom + 6,
-        right: window.innerWidth - rect.right,
+        right: getViewportWidth() - rect.right,
       });
     }
     setOpen((v) => !v);

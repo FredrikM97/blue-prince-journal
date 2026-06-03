@@ -1,7 +1,9 @@
 import { TODO_SCOPE_OPTIONS } from "./Constants";
+import { Stack } from "@/components/common/Stack";
 import { SidePanel } from "@/components/common/SidePanel";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
+import { MetaText } from "@/components/common/Typography";
 
 interface TodoLeftPanelProps {
   total: number;
@@ -29,12 +31,12 @@ export function TodoLeftPanel({
 
   return (
     <SidePanel.Left title="Todo" subtitle={`${total} ${itemLabel}`}>
-      <div className="todos-left-stack">
-        <div className="todos-left-stats">
-          <p>Open: {openCount}</p>
-          <p>In progress: {progressCount}</p>
-          <p>Done: {doneCount}</p>
-        </div>
+      <Stack gap="4">
+        <Stack gap="1">
+          <MetaText>Open: {openCount}</MetaText>
+          <MetaText>In progress: {progressCount}</MetaText>
+          <MetaText>Done: {doneCount}</MetaText>
+        </Stack>
 
         <FilterSection title="Scope">
           <FilterButtonGroup
@@ -44,7 +46,7 @@ export function TodoLeftPanel({
             allLabel="All"
           />
         </FilterSection>
-      </div>
+      </Stack>
     </SidePanel.Left>
   );
 }
