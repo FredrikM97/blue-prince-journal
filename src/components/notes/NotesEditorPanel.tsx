@@ -254,7 +254,7 @@ export function NotesEditorPanel({
         }}
       />
 
-      <Inline gap={footerGap} justify="between" wrap align="center">
+      <Inline gap={footerGap} justify="between" wrap={!isMobileDrawer} align="center">
         <Inline gap={footerGap} align="center" wrap={!isMobileDrawer}>
           <Button
             type="button"

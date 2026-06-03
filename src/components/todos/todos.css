@@ -98,6 +98,18 @@
     @apply flex shrink-0 items-center gap-0.5 opacity-100;
   }
 
+  .todo-row-actions .dropdown-trigger-fit {
+    @apply min-w-20 px-2;
+  }
+
+  .todo-row-actions .dropdown-trigger {
+    @apply border-transparent bg-transparent shadow-none hover:bg-transparent;
+  }
+
+  .todo-row-actions .dropdown-trigger-label {
+    @apply truncate;
+  }
+
   /* Inline status dropdown inside a todo row */
   .todo-status-select {
     @apply h-6 w-auto rounded border border-input bg-background px-1 text-[11px];
