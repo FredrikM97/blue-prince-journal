@@ -69,7 +69,7 @@ const STACK_GAP_CLASS: Record<StackGap, string> = {
 
 const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   default: "",
-  "page-layout-panel": "page-layout-panel",
+  "page-layout-panel": "ui-surface-panel",
   "panel-card": "panel-card",
   "dialog-scroll-body": "dialog-scroll-body",
   "notes-view-section": "notes-view-section",
@@ -92,10 +92,10 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "graph-zoom-controls": "flex items-center",
   "graph-legend-row": "graph-legend-row",
   "graph-legend-item": "graph-legend-item",
-  "panel-header": "panel-header",
-  "panel-header-title-wrap": "panel-header-title-wrap",
-  "preview-header-actions": "preview-header-actions",
-  "side-panel-shell": "side-panel-shell",
+  "panel-header": "ui-header-panel",
+  "panel-header-title-wrap": "ui-header-title-wrap",
+  "preview-header-actions": "ui-header-actions",
+  "side-panel-shell": "ui-shell-panel",
   "note-details-images": "note-details-images",
   "note-details-images-compact": "note-details-images-compact",
   "note-details-images-header": "mb-2",
@@ -106,12 +106,12 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "note-details-zoom-preview": "note-details-zoom-preview",
   "markdown-preview-surface":
     "markdown-preview-surface prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed",
-  "filter-section": "filter-section",
-  "filter-section-header": "filter-section-header",
-  "filter-section-body": "filter-section-body",
-  "filter-grid": "filter-grid",
-  "filter-grid-wrap": "filter-grid-wrap",
-  "filter-options": "filter-options",
+  "filter-section": "ui-block-tight",
+  "filter-section-header": "ui-header-row",
+  "filter-section-body": "ui-body-tight",
+  "filter-grid": "ui-grid-auto-fit",
+  "filter-grid-wrap": "ui-wrap-controls",
+  "filter-options": "ui-wrap-controls",
 };
 
 const STACK_MARGIN_TOP_CLASS: Record<StackMarginTop, string> = {
@@ -124,14 +124,16 @@ export function Stack({
   gap = "3",
   variant = "default",
   marginTop = "0",
+  className = "",
   children,
 }: {
   as?: StackElement;
   gap?: StackGap;
   variant?: StackVariant;
   marginTop?: StackMarginTop;
+  className?: string;
   children: ReactNode;
 }) {
-  const className = `${STACK_GAP_CLASS[gap]} ${STACK_VARIANT_CLASS[variant]} ${STACK_MARGIN_TOP_CLASS[marginTop]}`;
-  return createElement(as, { className: className.trim() }, children);
+  const resolvedClassName = `${STACK_GAP_CLASS[gap]} ${STACK_VARIANT_CLASS[variant]} ${STACK_MARGIN_TOP_CLASS[marginTop]} ${className}`;
+  return createElement(as, { className: resolvedClassName.trim() }, children);
 }

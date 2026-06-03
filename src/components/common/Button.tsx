@@ -38,8 +38,7 @@ const VARIANT: Record<Variant, string> = {
   ghost: "hover:bg-accent hover:text-accent-foreground",
   transparent: "bg-transparent hover:opacity-75",
   select: "h-auto gap-1 rounded-md border px-3 py-1 text-xs font-medium shadow-sm",
-  "filter-toggle":
-    "filter-toggle gap-1.5 flex cursor-pointer items-center rounded-md border border-border/70 bg-card/50 px-2 py-1 text-xs text-foreground transition-colors hover:border-brass/45 hover:bg-brass/10",
+  "filter-toggle": "ui-toggle-chip ui-toggle-chip-surface gap-1.5",
   overlay:
     "fixed inset-x-0 bottom-0 top-14 z-40 rounded-none border-0 bg-black/45 p-0 hover:bg-black/45",
 };
@@ -69,23 +68,23 @@ const GHOST_SURFACE_ACTIVE: Record<GhostSurface, string> = {
 };
 
 const FILTER_TOGGLE_STATE = {
-  on: "filter-toggle-on border-brass bg-brass text-brass-foreground opacity-100",
-  off: "filter-toggle-off opacity-75",
+  on: "ui-toggle-state-on opacity-100",
+  off: "ui-toggle-state-off",
 };
 
 const FILTER_TOGGLE_ALIGN: Record<FilterToggleAlign, string> = {
-  center: "justify-center text-center",
-  left: "justify-start text-left",
+  center: "ui-align-center",
+  left: "ui-align-left",
 };
 
 const FILTER_TOGGLE_DENSITY: Record<FilterToggleDensity, string> = {
-  default: "",
-  compact: "filter-toggle-compact",
+  default: "ui-toggle-size-default",
+  compact: "ui-toggle-size-compact",
 };
 
 const FILTER_TOGGLE_WIDTH: Record<FilterToggleWidth, string> = {
-  full: "filter-toggle-full",
-  fit: "filter-toggle-fit",
+  full: "ui-toggle-width-full",
+  fit: "ui-toggle-width-fit",
 };
 
 const BUTTON_WIDTH: Record<ButtonWidth, string> = {

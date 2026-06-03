@@ -149,3 +149,9 @@
 - [x] Generalize shared media-query helpers and reuse them for theme and popup viewport logic
 
 - [x] Move page-layout mobile/desktop rendering decisions out of CSS and into shared hook-driven React layout
+
+- [x] Fix Notes list edit/preview reopening right panel on mobile repeated interactions
+- [x] Fix Notes list delete path robustness for virtual todo-backed rows
+- [x] Align Graph visibility filter with shared FilterSection/FilterToggleGrid styles
+- [x] Remove graph-specific legacy filter-toggle css override
+- [x] Migrate PageLayout primitives and container classes to ui-layout aliases

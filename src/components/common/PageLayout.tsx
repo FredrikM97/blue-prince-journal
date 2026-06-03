@@ -119,15 +119,15 @@ function getColumnLayoutClass(
   hasRight: boolean,
   isPageLayoutMobile: boolean,
 ): string {
-  if (isPageLayoutMobile) return "page-layout-single-column-scroll";
-  if (hasLeft && hasRight) return "page-layout-three-column";
-  if (hasLeft) return "page-layout-two-column-left";
-  if (hasRight) return "page-layout-two-column-right";
-  return "page-layout-single-column-scroll";
+  if (isPageLayoutMobile) return "ui-layout-single-scroll";
+  if (hasLeft && hasRight) return "ui-layout-cols-3";
+  if (hasLeft) return "ui-layout-cols-2-left";
+  if (hasRight) return "ui-layout-cols-2-right";
+  return "ui-layout-single-scroll";
 }
 
 function getVariantClass(variant: PageLayoutVariant): string {
-  if (variant === "panel") return "page-layout-variant-panel";
+  if (variant === "panel") return "ui-layout-variant-panel";
   return "";
 }
 
@@ -361,7 +361,7 @@ function PageLayoutComponent({
     [isPageLayoutMobile, mobileDrawerState.closeMobileDrawer, mobileDrawerState.openMobileDrawer],
   );
 
-  let layoutClass = `page-layout ${columnClass}`;
+  let layoutClass = `ui-layout-frame ${columnClass}`;
   const variantClass = getVariantClass(variant);
   if (variantClass) {
     layoutClass = `${layoutClass} ${variantClass}`;
@@ -369,7 +369,7 @@ function PageLayoutComponent({
   if (className) {
     layoutClass = `${layoutClass} ${className}`;
   }
-  layoutClass = `${layoutClass} ${isPageLayoutMobile ? "page-layout-mode-mobile" : "page-layout-mode-desktop"}`;
+  layoutClass = `${layoutClass} ${isPageLayoutMobile ? "ui-layout-mode-mobile" : "ui-layout-mode-desktop"}`;
 
   return (
     <PageLayoutMobileDrawerProvider value={mobileDrawerControls}>

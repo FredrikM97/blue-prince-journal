@@ -127,6 +127,10 @@
     @apply flex w-full min-w-0 flex-wrap items-center gap-1.5;
   }
 
+  .note-summary-tags-date {
+    @apply inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap;
+  }
+
   .note-summary-meta {
     @apply mt-0.5 flex min-w-0 flex-col items-start gap-1;
   }

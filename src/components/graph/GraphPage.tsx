@@ -255,6 +255,16 @@ export function GraphPage() {
       }),
   }));
 
+  const visibilityFilterItems = [
+    {
+      key: "connected-only",
+      label: `Connected only (${isolatedCount} hidden)`,
+      active: hideIsolated,
+      onToggle: () => setHideIsolated((value) => !value),
+      dotColor: hideIsolated ? "#f59e0b" : "#64748b",
+    },
+  ];
+
   const canvasProps = {
     nodes: displayNodes,
     clusters,
@@ -277,7 +287,8 @@ export function GraphPage() {
                 title="Types"
                 collapsible
                 defaultOpen
-                fullWidth={false}
+                width="fit"
+                variant="compact"
                 onReset={onResetTypes}
               >
                 <FilterToggleGrid
@@ -293,7 +304,8 @@ export function GraphPage() {
                   title="Rooms"
                   collapsible
                   defaultOpen={false}
-                  fullWidth={false}
+                  width="fit"
+                  variant="compact"
                   badge={roomBadge}
                   onReset={onResetRooms}
                 >
@@ -339,7 +351,8 @@ export function GraphPage() {
                           title={group.name}
                           collapsible
                           defaultOpen={false}
-                          fullWidth={false}
+                          width="fit"
+                          variant="compact"
                           badge={groupBadge}
                           onReset={onResetGroup}
                         >
@@ -358,39 +371,20 @@ export function GraphPage() {
               )}
 
               {isolatedCount > 0 && (
-                <FilterSection title="Visibility" collapsible defaultOpen fullWidth={false}>
-                  {(() => {
-                    const dotBg = hideIsolated ? "currentColor" : "transparent";
-                    return (
-                      <Button
-                        type="button"
-                        variant="filter-toggle"
-                        size="sm"
-                        active={hideIsolated}
-                        align="left"
-                        density="compact"
-                        width="fit"
-                        onClick={() => setHideIsolated((v) => !v)}
-                      >
-                        <span
-                          style={{
-                            width: "0.5rem",
-                            height: "0.5rem",
-                            flexShrink: 0,
-                            borderRadius: "9999px",
-                            border: "1px solid currentColor",
-                            background: dotBg,
-                          }}
-                        />
-                        <span>Connected only</span>
-                        <MetaText as="span" size="xs" tabular>
-                          <span style={{ marginLeft: "auto", display: "inline-block" }}>
-                            {isolatedCount} hidden
-                          </span>
-                        </MetaText>
-                      </Button>
-                    );
-                  })()}
+                <FilterSection
+                  title="Visibility"
+                  collapsible
+                  defaultOpen
+                  width="fit"
+                  variant="compact"
+                >
+                  <FilterToggleGrid
+                    items={visibilityFilterItems}
+                    leftAligned
+                    size="compact"
+                    layout="wrap"
+                    width="fit"
+                  />
                 </FilterSection>
               )}
             </Stack>
