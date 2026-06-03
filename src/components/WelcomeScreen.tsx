@@ -11,6 +11,7 @@ import { useStore } from "@/data/store";
 import { Heading, Text } from "@/components/common/Typography";
 import { CenteredContent, Inline } from "@/components/common/LayoutPrimitives";
 import { Button } from "@/components/common/Button";
+import { Stack } from "@/components/common/Stack";
 import { toast } from "sonner";
 
 function WelcomeCard({
@@ -19,33 +20,34 @@ function WelcomeCard({
   description,
   onClick,
   disabled,
-  className,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
   onClick: () => void;
   disabled?: boolean;
-  className?: string;
 }) {
   return (
     <Button
       type="button"
       variant="ghost"
-      size="default"
+      size="content"
       onClick={onClick}
       disabled={disabled}
-      className={`welcome-card ${className ?? ""}`}
+      className="welcome-card"
+      fullWidth
+      direction="column"
+      justify="start"
     >
       <Icon className="h-8 w-8 text-brass" />
-      <div className="welcome-card-body">
+      <Stack gap="1" variant="default">
         <Text size="base" weight="medium">
           {title}
         </Text>
         <Text size="xs" tone="muted" marginTop="1">
           {description}
         </Text>
-      </div>
+      </Stack>
     </Button>
   );
 }
@@ -119,21 +121,21 @@ export function WelcomeScreen({
   }
 
   return (
-    <div className="welcome-shell">
+    <Stack as="section" variant="welcome-shell" gap="0">
       <CenteredContent max="6xl" align="center">
-        <div>
-          <div className="welcome-icon">
+        <Stack gap="2">
+          <Stack as="div" variant="welcome-icon" gap="0">
             <Text as="span" size="3xl" weight="semibold">
               B
             </Text>
-          </div>
+          </Stack>
           <Heading as="h1" size="3xl">
             Welcome to Blue Prince Journal
           </Heading>
           <Text size="sm" tone="muted" marginTop="2">
             How would you like to get started?
           </Text>
-        </div>
+        </Stack>
 
         <Inline gap="3" justify="center" wrap>
           {showContinueSuggestion && onContinue ? (
@@ -176,7 +178,7 @@ export function WelcomeScreen({
         ref={fileRef}
         type="file"
         accept=".zip,application/zip,application/json,.json"
-        className="hidden"
+        hidden
         onChange={async (e) => {
           const f = e.target.files?.[0];
           if (!f) return;
@@ -184,6 +186,6 @@ export function WelcomeScreen({
           e.target.value = "";
         }}
       />
-    </div>
+    </Stack>
   );
 }

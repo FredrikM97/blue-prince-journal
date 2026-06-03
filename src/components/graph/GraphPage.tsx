@@ -245,6 +245,7 @@ export function GraphPage() {
     key: type,
     label: type,
     active: !hiddenTypes.has(type),
+    dotColor: TYPE_COLOR[type],
     onToggle: () =>
       setHiddenTypes((prev) => {
         const next = new Set(prev);
@@ -272,7 +273,13 @@ export function GraphPage() {
             subtitle={`${displayNodes.length} entries · ${edges.length} links`}
           >
             <Stack gap="3">
-              <FilterSection title="Types" onReset={onResetTypes}>
+              <FilterSection
+                title="Types"
+                collapsible
+                defaultOpen
+                fullWidth={false}
+                onReset={onResetTypes}
+              >
                 <FilterToggleGrid
                   items={typeFilterItems}
                   size="compact"
@@ -286,6 +293,7 @@ export function GraphPage() {
                   title="Rooms"
                   collapsible
                   defaultOpen={false}
+                  fullWidth={false}
                   badge={roomBadge}
                   onReset={onResetRooms}
                 >
@@ -331,6 +339,7 @@ export function GraphPage() {
                           title={group.name}
                           collapsible
                           defaultOpen={false}
+                          fullWidth={false}
                           badge={groupBadge}
                           onReset={onResetGroup}
                         >
@@ -349,7 +358,7 @@ export function GraphPage() {
               )}
 
               {isolatedCount > 0 && (
-                <FilterSection title="Visibility">
+                <FilterSection title="Visibility" collapsible defaultOpen fullWidth={false}>
                   {(() => {
                     const dotBg = hideIsolated ? "currentColor" : "transparent";
                     return (

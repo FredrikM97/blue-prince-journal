@@ -332,7 +332,7 @@
 
   /* Collapsible toggle: same label-row layout + pointer cursor */
   .filter-section-toggle {
-    @apply flex w-full cursor-pointer select-none items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground;
+    @apply flex cursor-pointer select-none items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground;
   }
 
   /* Inline count badge shown in a collapsed header, e.g. "(3/8)" */
@@ -401,31 +401,27 @@
 
   /* Layout variants */
   .page-layout-three-column {
-    @apply grid items-start gap-3 sm:gap-6 lg:grid-cols-[240px_minmax(0,1fr)_420px];
+    @apply grid items-start gap-3 sm:gap-6 grid-cols-[240px_minmax(0,1fr)_420px];
     min-height: 100%;
   }
 
   .page-layout-two-column-left {
-    @apply grid items-start gap-3 sm:gap-6 lg:grid-cols-[240px_minmax(0,1fr)];
+    @apply grid items-start gap-3 sm:gap-6 grid-cols-[240px_minmax(0,1fr)];
     min-height: 100%;
   }
 
   .page-layout-two-column-right {
-    @apply grid items-start gap-3 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_420px];
+    @apply grid items-start gap-3 sm:gap-6 grid-cols-[minmax(0,1fr)_420px];
     min-height: 100%;
   }
 
   /* Left sticky sidebar column */
   .page-layout-sidebar {
-    @apply min-h-0 overflow-y-auto rounded-l-lg border-r border-border/50 bg-transparent lg:sticky lg:self-start;
+    @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-r border-border/50 bg-transparent;
     overscroll-behavior: contain;
     height: calc(100dvh - 5.5rem);
     max-height: calc(100dvh - 5.5rem);
     top: 0;
-  }
-
-  .page-layout-sidebar-desktop {
-    display: none;
   }
 
   /* Main content area ("middle") */
@@ -454,15 +450,11 @@
 
   /* Right sticky sidebar column */
   .page-layout-rightbar {
-    @apply min-h-0 overflow-y-auto rounded-l-lg border-l border-border/50 bg-transparent lg:sticky lg:self-start;
+    @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-l border-border/50 bg-transparent;
     overscroll-behavior: contain;
     height: calc(100dvh - 5.5rem);
     max-height: calc(100dvh - 5.5rem);
     top: 0;
-  }
-
-  .page-layout-rightbar-desktop {
-    display: none;
   }
 
   .page-layout-mobile-controls {
@@ -520,14 +512,12 @@
     @apply border-0;
   }
 
-  @media (max-width: 63.99rem) {
-    .page-layout-mobile-drawer .side-panel-shell {
-      @apply w-full rounded-none border-0 bg-background p-0;
-    }
+  .page-layout-mobile-drawer .side-panel-shell {
+    @apply w-full rounded-none border-0 bg-background p-0;
+  }
 
-    .page-layout-mobile-drawer .panel-header {
-      @apply sticky top-0 z-10 bg-background pt-3;
-    }
+  .page-layout-mobile-drawer .panel-header {
+    @apply sticky top-0 z-10 bg-background pt-3;
   }
 
   /* SidebarPanel — fixed right overlay, slides in from the right edge */
@@ -549,36 +539,15 @@
     flex: 1 1 auto;
   }
 
-  @media (min-width: 64rem) {
-    .page-layout-sidebar,
-    .page-layout-rightbar {
-      height: calc(100dvh - 5.5rem);
-      max-height: calc(100dvh - 5.5rem);
-      overflow-y: auto;
-    }
-
-    .page-layout-rightbar {
-      margin-right: -1rem;
-      border-right: 0;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-
-    .page-layout-sidebar-desktop,
-    .page-layout-rightbar-desktop {
-      display: block;
-    }
-
-    .page-layout-mobile-controls,
-    .page-layout-mobile-drawer {
-      display: none;
-    }
+  .page-layout-mode-desktop .page-layout-rightbar {
+    margin-right: -1rem;
+    border-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
-  @media (max-width: 1023px) {
-    .page-layout-content {
-      height: auto;
-      overflow-y: visible;
-    }
+  .page-layout-mode-mobile .page-layout-content {
+    height: auto;
+    overflow-y: visible;
   }
 }

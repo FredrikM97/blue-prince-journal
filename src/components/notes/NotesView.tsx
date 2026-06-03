@@ -66,8 +66,11 @@ const NotesListRow = memo(function NotesListRow({
         <Button
           type="button"
           variant="transparent"
-          size="default"
-          className="note-row-preview-btn !h-auto !items-start !justify-start !gap-0 !px-0 !py-0 !hover:bg-transparent"
+          size="content"
+          fullWidth
+          justify="start"
+          textAlign="left"
+          className="note-row-preview-btn"
           onClick={(e) => {
             e.stopPropagation();
             onOpenPreview(note);

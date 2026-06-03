@@ -1,12 +1,4 @@
 @layer components {
-  .todos-left-stack {
-    @apply space-y-4;
-  }
-
-  .todos-left-stats {
-    @apply space-y-1 text-xs text-muted-foreground;
-  }
-
   .todos-sidebar-label {
     @apply mb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
   }
@@ -108,16 +100,6 @@
 
   .todo-row-item:hover .todo-row-actions {
     @apply opacity-100;
-  }
-
-  /* Generic small icon action button */
-  .todo-action-btn {
-    @apply rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground;
-  }
-
-  /* Destructive icon action button (delete) */
-  .todo-action-btn-danger {
-    @apply rounded p-1 text-muted-foreground hover:bg-destructive/20 hover:text-destructive;
   }
 
   /* Inline status dropdown inside a todo row */

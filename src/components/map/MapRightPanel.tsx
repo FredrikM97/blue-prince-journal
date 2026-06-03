@@ -6,7 +6,10 @@ import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
 import { Eraser, Trash2 } from "lucide-react";
 import type { GridCell, Note, Todo } from "@/lib/types";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import { SidePanel } from "@/components/common/SidePanel";
+import { Stack } from "@/components/common/Stack";
+import { MetaText, Text } from "@/components/common/Typography";
 
 export interface MapRightPanelProps {
   coordLabel: string;
@@ -55,18 +58,18 @@ export function MapRightPanel({
 
   return (
     <SidePanel.Right title={panelTitle} onClose={onClose} panelKey={`map:${coordLabel}`}>
-      <div className="map-sheet-body">
-        <div>
-          <label className="map-field-label">Room</label>
+      <Stack gap="4">
+        <Stack gap="1">
+          <MetaText>Room</MetaText>
           <RoomDropdown
             value={activeRoom}
             onValueChange={(roomName) => {
               void upsertCell({ row, col, roomName: roomName || undefined });
             }}
           />
-        </div>
+        </Stack>
 
-        <div>
+        <Stack gap="1">
           <SuggestionsDropdown>
             <InputField
               value={commentDraft}
@@ -79,17 +82,15 @@ export function MapRightPanel({
               placeholder="Quick note about this cell - door direction, gem cost, danger..."
             />
           </SuggestionsDropdown>
-          <p className="map-comment-help">
-            Markdown supported: headings, lists, checkboxes, bold, italic, code.
-          </p>
-        </div>
+          <MetaText>Markdown supported: headings, lists, checkboxes, bold, italic, code.</MetaText>
+        </Stack>
 
         {activeRoom && (
-          <div className="map-sheet-action-row">
+          <Inline gap="2" align="center">
             <Button
               variant="brass"
               size="sm"
-              className="flex-1"
+              fullWidth
               onClick={() => {
                 void openCaptureFromMap("note");
               }}
@@ -99,17 +100,17 @@ export function MapRightPanel({
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
+              fullWidth
               onClick={() => {
                 void openCaptureFromMap("todo");
               }}
             >
               + Todo
             </Button>
-          </div>
+          </Inline>
         )}
 
-        <div className="map-sheet-clear-row">
+        <Inline gap="2" align="center">
           <Button
             variant="ghost"
             tone="muted"
@@ -130,32 +131,36 @@ export function MapRightPanel({
           >
             <Trash2 /> Clear cell
           </Button>
-        </div>
+        </Inline>
 
         {activeNotes.length > 0 && (
           <PagedNotesList key={`${row}-${col}`} notes={activeNotes} title="Notes in this room" />
         )}
         {activeTodos.length > 0 && <MapRoomTodos todos={activeTodos} />}
-      </div>
+      </Stack>
     </SidePanel.Right>
   );
 }
 
 function MapRoomTodos({ todos }: { todos: Todo[] }) {
   return (
-    <div>
-      <div className="map-list-title">Todo items in this room</div>
-      <ul className="map-todo-list">
+    <Stack gap="2">
+      <MetaText>Todo items in this room</MetaText>
+      <Stack as="ul" gap="1">
         {todos.map((todo) => {
-          let liClass = "";
-          if (todo.status === "done") liClass = "map-todo-done";
           return (
-            <li key={todo.id} className={liClass}>
+            <Text
+              key={todo.id}
+              as="li"
+              size="sm"
+              tone={todo.status === "done" ? "muted" : "default"}
+              decoration={todo.status === "done" ? "line-through" : "none"}
+            >
               · {todo.title}
-            </li>
+            </Text>
           );
         })}
-      </ul>
-    </div>
+      </Stack>
+    </Stack>
   );
 }

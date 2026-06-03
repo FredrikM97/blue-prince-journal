@@ -11,28 +11,8 @@
     @apply text-xs text-muted-foreground;
   }
 
-  .images-right-header {
-    @apply flex items-start justify-between gap-2;
-  }
-
-  .images-nav-buttons {
-    @apply flex gap-2;
-  }
-
   .images-grid {
     @apply grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5;
-  }
-
-  .images-right-panel {
-    @apply space-y-3;
-  }
-
-  .images-inspector-preview {
-    @apply space-y-2;
-  }
-
-  .images-inspector-meta {
-    @apply space-y-3;
   }
 
   .images-thumb {
@@ -114,15 +94,4 @@
     @apply ml-auto flex items-center gap-2;
   }
 
-  .images-zoom-dialog {
-    @apply max-h-[96vh] w-[96vw] max-w-none;
-  }
-
-  .images-zoom-preview {
-    @apply flex max-h-[88vh] items-center justify-center overflow-auto rounded border border-border bg-black/60 p-2;
-  }
-
-  .images-zoom-image {
-    @apply max-h-[86vh] w-auto max-w-full object-contain;
-  }
 }

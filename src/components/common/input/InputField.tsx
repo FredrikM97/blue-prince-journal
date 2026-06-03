@@ -2,7 +2,7 @@
  * InputField — typed field primitive for single-line text and multiline details.
  *
  * No state, no logic. For token suggestions wrap it:
- *   <SuggestionsDropdown value={v} onChange={set} ariaLabel="...">
+ *   <SuggestionsDropdown value={v} onChange={set}>
  *     <InputField label="Title" value={v} onChange={set} />
  *   </SuggestionsDropdown>
  */
@@ -34,10 +34,8 @@ export function InputField({
   onFocus,
   onKeyDown,
   inputRef,
-  ariaLabel,
   showOptionalHint = false,
-  multiline = false,
-  resizable = false,
+  hideLabel = false,
   size = "default",
   grow = false,
 }: {
@@ -52,10 +50,8 @@ export function InputField({
   onFocus?: () => void;
   onKeyDown?: (event: ReactKeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   inputRef?: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
-  ariaLabel?: string;
   showOptionalHint?: boolean;
-  multiline?: boolean;
-  resizable?: boolean;
+  hideLabel?: boolean;
   size?: InputFieldSize;
   grow?: boolean;
 }) {
@@ -72,32 +68,9 @@ export function InputField({
       ref={inputRef as RefObject<HTMLInputElement | null>}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      aria-label={ariaLabel}
       className={getInputClass({ size, grow })}
     />
   );
-
-  if (multiline) {
-    let textareaClassName = "textarea-base";
-    if (resizable) textareaClassName = `${textareaClassName} resize-y`;
-
-    field = (
-      <textarea
-        id={inputId}
-        autoFocus={autoFocus}
-        value={value}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        onKeyDown={onKeyDown}
-        ref={inputRef as RefObject<HTMLTextAreaElement | null>}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        rows={rows}
-        aria-label={ariaLabel}
-        className={textareaClassName}
-      />
-    );
-  }
 
   if (markdown) {
     field = (
@@ -113,9 +86,12 @@ export function InputField({
 
   if (!label) return <>{field}</>;
 
+  let labelClassName = "capture-label";
+  if (hideLabel) labelClassName = `${labelClassName} sr-only`;
+
   return (
     <>
-      <label className="capture-label" htmlFor={inputId}>
+      <label className={labelClassName} htmlFor={inputId}>
         {label}
         {showOptionalHint && (
           <MetaText as="span" normalCase opacity="70">

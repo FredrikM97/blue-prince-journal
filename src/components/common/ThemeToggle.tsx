@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/common/Button";
+import { matchesMediaQuery } from "@/components/common/useMediaQuery";
 
 type Theme = "light" | "dark";
 
@@ -8,7 +9,7 @@ function resolveInitialTheme(): Theme {
   if (typeof window === "undefined") return "dark";
   const stored = window.localStorage.getItem("bp-theme");
   if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return matchesMediaQuery("(prefers-color-scheme: dark)") ? "dark" : "light";
 }
 
 function applyTheme(theme: Theme) {

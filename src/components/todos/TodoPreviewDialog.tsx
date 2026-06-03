@@ -1,10 +1,15 @@
 import type { Todo } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
-import { todoPriorityClass } from "./Constants";
 import { MetaRow, PreviewSection, PreviewTimestamps } from "@/components/common/PreviewContent";
 import { PreviewDialog } from "@/components/common/PreviewDialog";
 import { Inline } from "@/components/common/LayoutPrimitives";
+
+function getPriorityVariant(priority: Todo["priority"]) {
+  if (priority === "high") return "priority-high";
+  if (priority === "low") return "priority-low";
+  return "priority-normal";
+}
 
 export function TodoPreviewContent({ todo }: { todo: Todo }) {
   return (
@@ -13,7 +18,7 @@ export function TodoPreviewContent({ todo }: { todo: Todo }) {
         <Chip variant="solid">{todo.status}</Chip>
       </MetaRow>
       <MetaRow label="Priority">
-        <span className={todoPriorityClass(todo.priority)}>{todo.priority}</span>
+        <Chip variant={getPriorityVariant(todo.priority)}>{todo.priority}</Chip>
       </MetaRow>
       <MetaRow label="Scope">
         <Chip variant="solid">{todo.scope}</Chip>

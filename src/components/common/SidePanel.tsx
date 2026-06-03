@@ -115,18 +115,15 @@ function SidePanelComponent({
   const lastOpenedKeyRef = useRef<string | null>(null);
 
   function handleClose() {
-    if (mobileDrawerControls && mobileDrawerSide && typeof window !== "undefined") {
-      if (window.innerWidth < 1024) {
-        mobileDrawerControls.closeMobileDrawer();
-      }
+    if (mobileDrawerControls?.isPageLayoutMobile && mobileDrawerSide) {
+      mobileDrawerControls.closeMobileDrawer();
     }
     onClose?.();
   }
 
   useEffect(() => {
     if (!mobileDrawerControls || !mobileDrawerSide || !mobileDrawerKey) return;
-    if (typeof window === "undefined") return;
-    if (window.innerWidth >= 1024) return;
+    if (!mobileDrawerControls.isPageLayoutMobile) return;
     if (lastOpenedKeyRef.current === mobileDrawerKey) return;
 
     lastOpenedKeyRef.current = mobileDrawerKey;
