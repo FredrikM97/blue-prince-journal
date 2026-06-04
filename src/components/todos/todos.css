@@ -90,7 +90,23 @@
 
   /* List item row with hover state and grouped action reveal */
   .todo-row-item {
-    @apply flex items-start gap-2 px-3 py-2 hover:bg-muted/30;
+    @apply px-3 py-2 hover:bg-muted/30;
+  }
+
+  .todo-row-main {
+    @apply min-w-0 space-y-1.5;
+  }
+
+  .todo-row-title-line {
+    @apply min-w-0;
+  }
+
+  .todo-row-title-button {
+    @apply w-full;
+  }
+
+  .todo-row-actions-line {
+    @apply flex items-center;
   }
 
   /* Right-side action icons — hidden until row is hovered */
@@ -108,6 +124,10 @@
 
   .todo-row-actions .dropdown-trigger-label {
     @apply truncate;
+  }
+
+  .todo-row-chip-text {
+    @apply inline-block max-w-36 truncate align-bottom;
   }
 
   /* Inline status dropdown inside a todo row */

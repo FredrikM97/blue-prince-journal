@@ -183,3 +183,10 @@
 - [x] Remove graph-specific legacy filter-toggle css override
 - [x] Migrate PageLayout primitives and container classes to ui-layout aliases
 - [x] Make filter-toggle active style explicit (filled vs outline) and document usage for Graph multi-select filters
+
+## Current UI fixes
+
+- [x] Add dev seed data with generated test images attached to sample notes
+- [x] Make image right-panel preview square and constrained
+- [x] Make expanded image preview use full dialog width for readability
+- [x] Rework todo row layout into title/actions/tags lines and harden long-tag handling
