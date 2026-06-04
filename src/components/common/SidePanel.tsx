@@ -16,6 +16,7 @@ type SidePanelBaseProps = {
   done?: boolean;
   onClose?: () => void;
   onExpand?: () => void;
+  headerActions?: ReactNode;
   /** Dialog element rendered at the root (outside of the scrollable area). */
   expandDialog?: ReactNode;
   children?: ReactNode;
@@ -36,6 +37,7 @@ export function PanelHeader({
   done = false,
   onClose,
   onExpand,
+  headerActions,
   showCloseOnDesktop = false,
   forceShowClose = false,
 }: {
@@ -44,6 +46,7 @@ export function PanelHeader({
   done?: boolean;
   onClose?: () => void;
   onExpand?: () => void;
+  headerActions?: ReactNode;
   showCloseOnDesktop?: boolean;
   forceShowClose?: boolean;
 }) {
@@ -74,8 +77,9 @@ export function PanelHeader({
           </MetaText>
         )}
       </Stack>
-      {(onExpand || onClose) && (
+      {(headerActions || onExpand || onClose) && (
         <Stack variant="preview-header-actions" gap="0">
+          {headerActions}
           {onExpand && (
             <Button variant="ghost" size="icon" onClick={onExpand} title="Expand preview">
               <Maximize2 className="icon-md" />
@@ -113,6 +117,7 @@ function SidePanelComponent({
   done = false,
   onClose,
   onExpand,
+  headerActions,
   expandDialog,
   mobileDrawerSide,
   mobileDrawerKey,
@@ -144,6 +149,7 @@ function SidePanelComponent({
         title={title}
         subtitle={subtitle}
         done={done}
+        headerActions={headerActions}
         onExpand={onExpand}
         onClose={handleClose}
         showCloseOnDesktop={false}

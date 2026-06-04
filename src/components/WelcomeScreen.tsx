@@ -2,9 +2,9 @@ import { useRef, useState } from "react";
 import { FolderOpen, Sparkles, Upload, Waypoints } from "lucide-react";
 import { importAll } from "@/data/io";
 import {
-  pickSyncFolder,
-  readFromSyncFolder,
-  importSyncManifest,
+  connectSyncFolderWithConflictResolution,
+  confirmSyncFolderConflict,
+  countLocalSyncItems,
   getActiveSyncFolderName,
 } from "@/data/sync";
 import { useStore } from "@/data/store";
@@ -85,20 +85,32 @@ export function WelcomeScreen({
   async function handleConnectFolder() {
     setConnecting(true);
     try {
-      const handle = await pickSyncFolder();
-      if (!handle) {
-        setConnecting(false);
+      const storeState = useStore.getState();
+      const localItemsCount = countLocalSyncItems(storeState);
+
+      const connectResult = await connectSyncFolderWithConflictResolution(localItemsCount, () =>
+        confirmSyncFolderConflict((message) => window.confirm(message)),
+      );
+      if (!connectResult) {
         return;
       }
-      const existing = await readFromSyncFolder(handle);
-      if (existing) {
-        await importSyncManifest(existing);
+
+      if (connectResult.importedFolderData) {
         await load();
-        toast.success(`Loaded data from "${handle.name}"`);
-      } else {
-        toast.success(`Connected to "${handle.name}" — data will sync here automatically`);
       }
-      onDone(getActiveSyncFolderName() ?? handle.name);
+
+      if (connectResult.resolution === "connected-empty") {
+        toast.success(
+          `Connected to "${connectResult.handle.name}" — data will sync here automatically`,
+        );
+      }
+      if (connectResult.resolution === "use-folder-data") {
+        toast.success(`Using folder data from "${connectResult.handle.name}"`);
+      }
+      if (connectResult.resolution === "keep-local-data") {
+        toast.success(`Keeping local data and syncing to "${connectResult.handle.name}"`);
+      }
+      onDone(getActiveSyncFolderName() ?? connectResult.handle.name);
     } catch (err) {
       const message = err instanceof Error ? err.message.toLowerCase() : "";
       if (message.includes("system files") || message.includes("sensitive")) {

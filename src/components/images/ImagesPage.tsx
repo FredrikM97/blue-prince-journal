@@ -17,6 +17,8 @@ import {
   restoreSteamImportFolder,
   syncConnectedSteamFolder,
 } from "@/data/steamImport";
+import { getActiveSyncFolderName } from "@/data/sync";
+import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/browserStorage";
 
 function getImageLabel(img: StoredImage): string {
   return img.caption?.trim() || img.name;
@@ -45,9 +47,9 @@ export function ImagesPage() {
     [filtered, selectedId],
   );
   const selected = useMemo(() => {
-    if (selectedIndex >= 0) return filtered[selectedIndex];
-    return filtered[0] ?? null;
-  }, [filtered, selectedIndex]);
+    if (!selectedId) return null;
+    return filtered.find((img) => img.id === selectedId) ?? null;
+  }, [filtered, selectedId]);
 
   const relatedNotes = useMemo(
     () => (selected ? notes.filter((note) => note.imageIds.includes(selected.id)) : []),
@@ -66,6 +68,20 @@ export function ImagesPage() {
     },
     [filtered, selectedIndex],
   );
+
+  useEffect(() => {
+    const IMAGE_SYNC_ADVISORY_THRESHOLD = 150;
+    if (images.length < IMAGE_SYNC_ADVISORY_THRESHOLD) return;
+    if (getActiveSyncFolderName()) return;
+
+    const advisoryKey = "bp-images-sync-advisory-shown";
+    if (getLocalStorageFlag(advisoryKey)) return;
+    setLocalStorageFlag(advisoryKey);
+    toast("Large image library", {
+      description:
+        "You have many stored images. Connect a sync folder in Settings to reduce reload-loss risk.",
+    });
+  }, [images.length]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -91,7 +107,7 @@ export function ImagesPage() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selectByOffset]);
+  }, [selectByOffset, selected]);
 
   return (
     <PageLayout variant="panel">
@@ -132,11 +148,13 @@ export function ImagesPage() {
           onDelete={async () => {
             if (!selected) return;
             await removeImage(selected.id);
-            if (filtered.length <= 1) {
+            const remaining = filtered.filter((img) => img.id !== selected.id);
+            if (remaining.length === 0) {
               setSelectedId(null);
               return;
             }
-            selectByOffset(1);
+            const nextIndex = Math.min(selectedIndex, remaining.length - 1);
+            setSelectedId(remaining[nextIndex].id);
           }}
           onSaveLabel={async (label) => {
             if (!selected) return;

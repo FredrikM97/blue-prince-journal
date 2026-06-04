@@ -1,18 +1,21 @@
 import { useState } from "react";
 import type { Todo, TodoStatus } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
-import { Maximize2, Trash2 } from "lucide-react";
-import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
+import { CheckCircle2, Circle, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { InputField } from "@/components/common/input/InputField";
 import { Text } from "@/components/common/Typography";
-
-const TODO_STATUS_OPTIONS = [
-  { value: "open", label: "open" },
-  { value: "in-progress", label: "in progress" },
-  { value: "done", label: "done" },
-];
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/common/dropdown/DropdownMenu";
 
 function getPriorityVariant(priority: Todo["priority"]) {
   if (priority === "high") return "priority-high";
@@ -37,99 +40,133 @@ export function TodoItem({
   const [title, setTitle] = useState(todo.title);
   const titleTone = todo.status === "done" ? "muted" : "default";
   const titleDecoration = todo.status === "done" ? "line-through" : "none";
+  let titleEditor = (
+    <Button
+      type="button"
+      variant="transparent"
+      size="content"
+      justify="start"
+      textAlign="left"
+      tone={titleTone}
+      onDoubleClick={() => setEditing(true)}
+      className="todo-row-title-button"
+    >
+      <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
+        {todo.title}
+      </Text>
+    </Button>
+  );
+
+  if (editing) {
+    titleEditor = (
+      <InputField
+        label="Todo title"
+        hideLabel
+        value={title}
+        onChange={setTitle}
+        onBlur={() => {
+          setEditing(false);
+          if (title.trim() && title !== todo.title) onEdit({ ...todo, title: title.trim() });
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+          if (e.key === "Escape") {
+            setTitle(todo.title);
+            setEditing(false);
+          }
+        }}
+        autoFocus
+        size="sm"
+      />
+    );
+  }
 
   return (
     <li className="todo-row-item">
       <div className="todo-row-main">
-        {editing ? (
-          <div className="todo-row-title-line">
-            <InputField
-              label="Todo title"
-              hideLabel
-              value={title}
-              onChange={setTitle}
-              onBlur={() => {
-                setEditing(false);
-                if (title.trim() && title !== todo.title) onEdit({ ...todo, title: title.trim() });
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                if (e.key === "Escape") {
-                  setTitle(todo.title);
-                  setEditing(false);
-                }
-              }}
-              autoFocus
-              size="sm"
-            />
-          </div>
-        ) : (
-          <div className="todo-row-title-line">
-            <Button
-              type="button"
-              variant="transparent"
-              size="content"
-              justify="start"
-              textAlign="left"
-              tone={titleTone}
-              onDoubleClick={() => setEditing(true)}
-              className="todo-row-title-button"
-            >
-              <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
-                {todo.title}
-              </Text>
-            </Button>
-          </div>
-        )}
+        <div className="todo-row-title-line">
+          <div className="todo-row-title-wrap">{titleEditor}</div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                tone="muted"
+                aria-label="Todo actions"
+                className="todo-row-menu-button"
+              >
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" variant="select">
+              <DropdownMenuItem onSelect={() => onOpenPreview()}>
+                <Eye className="icon-sm" />
+                <Text as="span" size="sm">
+                  Preview
+                </Text>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
 
-        <div className="todo-row-actions-line">
-          <div className="todo-row-actions">
-            <DropdownSelect
-              value={todo.status}
-              onValueChange={(value) => onToggle(value as TodoStatus)}
-              options={TODO_STATUS_OPTIONS}
-              triggerWidth="fit"
-              triggerVariant="flat"
-            />
-            <Button
-              variant="transparent"
-              size="icon"
-              onClick={onOpenPreview}
-              aria-label="Preview todo"
-              tone="muted"
-            >
-              <Maximize2 />
-            </Button>
-            <Button
-              variant="transparent"
-              size="icon"
-              onClick={onDelete}
-              aria-label="Delete"
-              tone="destructive"
-            >
-              <Trash2 />
-            </Button>
-          </div>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Circle className="icon-sm" />
+                  <Text as="span" size="sm">
+                    Set status
+                  </Text>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onSelect={() => onToggle("open" as TodoStatus)}>
+                    <Circle className="icon-sm" />
+                    <Text as="span" size="sm">
+                      Open
+                    </Text>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => onToggle("in-progress" as TodoStatus)}>
+                    <Circle className="icon-sm" />
+                    <Text as="span" size="sm">
+                      In progress
+                    </Text>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => onToggle("done" as TodoStatus)}>
+                    <CheckCircle2 className="icon-sm" />
+                    <Text as="span" size="sm">
+                      Done
+                    </Text>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem tone="active" onSelect={() => onDelete()}>
+                <Trash2 className="icon-sm" />
+                <Text as="span" size="sm">
+                  Delete
+                </Text>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        <Inline as="div" gap="1" align="center" wrap>
-          <Chip variant={getPriorityVariant(todo.priority)}>
-            <span className="todo-row-chip-text">{todo.priority}</span>
-          </Chip>
-          <Chip variant="solid">
-            <span className="todo-row-chip-text">{todo.scope}</span>
-          </Chip>
-          {todo.room && (
-            <Chip variant="room">
-              <span className="todo-row-chip-text">@{todo.room}</span>
+        <div className="todo-row-tags-line">
+          <Inline as="div" gap="1" align="center" wrap>
+            <Chip variant={getPriorityVariant(todo.priority)}>
+              <span className="todo-row-chip-text">{todo.priority}</span>
             </Chip>
-          )}
-          {todo.tags.map((tag) => (
-            <Chip key={tag} variant="tag">
-              <span className="todo-row-chip-text">#{tag}</span>
+            <Chip variant="solid">
+              <span className="todo-row-chip-text">{todo.scope}</span>
             </Chip>
-          ))}
-        </Inline>
+            {todo.room && (
+              <Chip variant="room">
+                <span className="todo-row-chip-text">@{todo.room}</span>
+              </Chip>
+            )}
+            {todo.tags.map((tag) => (
+              <Chip key={tag} variant="tag">
+                <span className="todo-row-chip-text">#{tag}</span>
+              </Chip>
+            ))}
+          </Inline>
+        </div>
       </div>
     </li>
   );

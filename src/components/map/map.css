@@ -1,7 +1,7 @@
 @layer components {
   /* Keep map centered in the middle content region */
   .map-layout-main {
-    @apply flex flex-col items-center justify-start pt-1;
+    @apply flex flex-col items-center justify-start pt-0;
     height: 100%;
   }
 
@@ -14,7 +14,7 @@
      * Width-from-height = budget-height × 5/9.
      * Pick the smaller of full container width or the height-derived width.
      */
-    width: min(100%, calc((100dvh - 9rem) * 5 / 9));
+    width: min(100%, calc((100dvh - 7.5rem) * 5 / 9));
   }
 
   .map-cell {
@@ -74,23 +74,24 @@
 
   @media (max-width: 63.99rem) {
     .map-grid {
-      width: min(100%, 17.75rem);
+      width: min(100%, 19.25rem);
       gap: 0.5rem;
     }
   }
 
   @media (max-width: 40rem) {
     .map-grid {
-      width: min(100%, 16.5rem);
+      width: min(100%, 18rem);
       @apply gap-1.5;
     }
 
     .map-cell {
-      @apply p-1;
+      @apply p-1.5;
     }
 
     .map-cell-room-name {
       font-size: 10px;
+      line-height: 1.15;
     }
 
     .map-cell-meta,

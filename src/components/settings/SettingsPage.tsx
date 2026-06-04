@@ -21,11 +21,10 @@ import {
   buildSeedTestImageSpecs,
 } from "@/data/seedGraphTest";
 import {
-  pickSyncFolder,
+  connectSyncFolderWithConflictResolution,
+  confirmSyncFolderConflict,
+  countLocalSyncItems,
   disconnectSyncFolder,
-  readFromSyncFolder,
-  importSyncManifest,
-  writeToSyncFolder,
   saveSyncNow,
   loadSyncMode,
   setSyncMode,
@@ -44,11 +43,41 @@ import {
   restoreSteamImportFolder,
   syncConnectedSteamFolder,
 } from "@/data/steamImport";
+import { LOCAL_BACKUP_KEY, canUseLocalStorage, isIndexedDbAvailable } from "@/data/storageHealth";
+import { getLocalStorageValue } from "@/data/browserStorage";
 import { toast } from "sonner";
 import { SettingsSection, SettingsSubsection } from "./SettingsSection";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
 import { CenteredContent, Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
+
+type StorageHealthSnapshot = {
+  indexedDbAvailable: boolean;
+  localStorageAvailable: boolean;
+  backupPresent: boolean;
+  syncConnected: boolean;
+  steamConnected: boolean;
+};
+
+function readStorageHealthSnapshot(): StorageHealthSnapshot {
+  let backupPresent = false;
+  if (canUseLocalStorage()) {
+    backupPresent = Boolean(getLocalStorageValue(LOCAL_BACKUP_KEY));
+  }
+
+  return {
+    indexedDbAvailable: isIndexedDbAvailable(),
+    localStorageAvailable: canUseLocalStorage(),
+    backupPresent,
+    syncConnected: Boolean(getActiveSyncFolderName()),
+    steamConnected: Boolean(getActiveSteamFolderName()),
+  };
+}
+
+function healthLabel(isHealthy: boolean, healthyLabel: string, cautionLabel: string): string {
+  if (isHealthy) return healthyLabel;
+  return cautionLabel;
+}
 
 export function SettingsPage() {
   const load = useStore((s) => s.load);
@@ -58,6 +87,18 @@ export function SettingsPage() {
   const [customRooms, setCustomRooms] = useState(() => listCustomRooms());
   const [newRoomName, setNewRoomName] = useState("");
   const [newRoomCategory, setNewRoomCategory] = useState<RoomCategory>(ROOM_GROUPS[0]);
+  const [storageHealth, setStorageHealth] =
+    useState<StorageHealthSnapshot>(readStorageHealthSnapshot);
+
+  useEffect(() => {
+    function refreshStorageHealth() {
+      setStorageHealth(readStorageHealthSnapshot());
+    }
+
+    refreshStorageHealth();
+    const intervalId = window.setInterval(refreshStorageHealth, 15000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const customRoomsByCategory = useMemo(() => {
     const allGroups = getAllRoomGroups();
@@ -149,11 +190,78 @@ export function SettingsPage() {
               }}
             />
 
+            <SettingsSubsection title="Storage health">
+              <Stack gap="1.5" variant="panel-card">
+                <Inline gap="2" justify="between" align="center">
+                  <MetaText as="span">IndexedDB</MetaText>
+                  <Text
+                    as="span"
+                    size="xs"
+                    tone={storageHealth.indexedDbAvailable ? "default" : "muted"}
+                  >
+                    {healthLabel(
+                      storageHealth.indexedDbAvailable,
+                      "Primary storage active",
+                      "Primary storage unavailable",
+                    )}
+                  </Text>
+                </Inline>
+                <Inline gap="2" justify="between" align="center">
+                  <MetaText as="span">localStorage</MetaText>
+                  <Text
+                    as="span"
+                    size="xs"
+                    tone={storageHealth.localStorageAvailable ? "default" : "muted"}
+                  >
+                    {healthLabel(
+                      storageHealth.localStorageAvailable,
+                      "Backup channel ready",
+                      "Backup channel unavailable",
+                    )}
+                  </Text>
+                </Inline>
+                <Inline gap="2" justify="between" align="center">
+                  <MetaText as="span">Local backup snapshot</MetaText>
+                  <Text
+                    as="span"
+                    size="xs"
+                    tone={storageHealth.backupPresent ? "default" : "muted"}
+                  >
+                    {healthLabel(
+                      storageHealth.backupPresent,
+                      "Recovery snapshot saved",
+                      "No snapshot yet",
+                    )}
+                  </Text>
+                </Inline>
+                <Inline gap="2" justify="between" align="center">
+                  <MetaText as="span">Sync folder</MetaText>
+                  <Text
+                    as="span"
+                    size="xs"
+                    tone={storageHealth.syncConnected ? "default" : "muted"}
+                  >
+                    {storageHealth.syncConnected ? "Connected" : "Disconnected"}
+                  </Text>
+                </Inline>
+                <Inline gap="2" justify="between" align="center">
+                  <MetaText as="span">Screenshot folder</MetaText>
+                  <Text
+                    as="span"
+                    size="xs"
+                    tone={storageHealth.steamConnected ? "default" : "muted"}
+                  >
+                    {storageHealth.steamConnected ? "Connected" : "Disconnected"}
+                  </Text>
+                </Inline>
+              </Stack>
+            </SettingsSubsection>
+
             <SettingsSubsection title="Sync folder">
               <SyncFolderSection />
             </SettingsSubsection>
 
-            <SettingsSubsection title="Steam screenshots import (optional)">
+            <SettingsSubsection title="Steam screenshots import">
               <SteamImportSection />
             </SettingsSubsection>
 
@@ -360,6 +468,10 @@ function SteamImportSection() {
         Connect a Steam screenshots folder once, then sync from it any time. Imported files are
         skipped automatically.
       </MetaText>
+      <MetaText>
+        Browsers cannot reliably access protected Steam system folders. Set Steam screenshots to a
+        normal user folder (for example, Downloads/BluePrinceScreenshots), then connect it here.
+      </MetaText>
 
       {!connected && (
         <Button
@@ -468,22 +580,31 @@ function SyncFolderSection() {
   async function handleConnect() {
     setBusy(true);
     try {
-      const handle = await pickSyncFolder();
-      if (!handle) {
-        setBusy(false);
+      const storeState = useStore.getState();
+      const localItemsCount = countLocalSyncItems(storeState);
+
+      const connectResult = await connectSyncFolderWithConflictResolution(localItemsCount, () =>
+        confirmSyncFolderConflict((message) => window.confirm(message)),
+      );
+      if (!connectResult) {
         return;
       }
-      const existing = await readFromSyncFolder(handle);
-      if (existing) {
-        await importSyncManifest(existing);
+
+      if (connectResult.importedFolderData) {
         await load();
-        toast.success(`Loaded and syncing with "${handle.name}"`);
-      } else {
-        // Write current data into the new folder immediately
-        await writeToSyncFolder(handle);
-        toast.success(`Connected — data will sync to "${handle.name}"`);
       }
-      setSyncFolderName(getActiveSyncFolderName() ?? handle.name);
+
+      if (connectResult.resolution === "connected-empty") {
+        toast.success(`Connected — data will sync to "${connectResult.handle.name}"`);
+      }
+      if (connectResult.resolution === "use-folder-data") {
+        toast.success(`Using folder data from "${connectResult.handle.name}"`);
+      }
+      if (connectResult.resolution === "keep-local-data") {
+        toast.success(`Keeping local data and syncing to "${connectResult.handle.name}"`);
+      }
+
+      setSyncFolderName(getActiveSyncFolderName() ?? connectResult.handle.name);
     } catch (err) {
       const message = err instanceof Error ? err.message.toLowerCase() : "";
       if (message.includes("system files") || message.includes("sensitive")) {

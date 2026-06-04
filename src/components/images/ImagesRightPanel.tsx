@@ -114,20 +114,21 @@ function ImagesInspectorPanel({
       <SidePanel.Right
         title={getImageLabel(img) || "Image"}
         subtitle={`${relatedNotes.length} related note${relatedNotes.length === 1 ? "" : "s"}`}
+        headerActions={
+          <Inline gap="1" align="center">
+            <Button variant="ghost" size="icon" onClick={onPrev} aria-label="Previous image">
+              <ChevronLeft />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onNext} aria-label="Next image">
+              <ChevronRight />
+            </Button>
+          </Inline>
+        }
         onClose={onClose}
         onExpand={() => setPreviewOpen(true)}
         panelKey={`image:${img.id}`}
       >
         <Stack gap="2">
-          <Inline gap="2">
-            <Button variant="outline" size="icon" onClick={onPrev} aria-label="Previous image">
-              <ChevronLeft />
-            </Button>
-            <Button variant="outline" size="icon" onClick={onNext} aria-label="Next image">
-              <ChevronRight />
-            </Button>
-          </Inline>
-
           <ImagePreviewContainer>
             <StoredImageView id={img.id} alt={img.name} className="images-detail-preview-image" />
           </ImagePreviewContainer>
