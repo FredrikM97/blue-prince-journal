@@ -56,6 +56,7 @@ export async function createFromCapture(
       status: parsed.status === "solved" ? "done" : "open",
       priority: opts?.priority ?? parsed.priority ?? "med",
       scope: (parsed.scope === "this-run" ? "this-run" : "cross-run") as TodoScope,
+      body: opts?.body?.trim() || undefined,
       linkedNoteIds: [],
       createdAt: now,
       updatedAt: now,

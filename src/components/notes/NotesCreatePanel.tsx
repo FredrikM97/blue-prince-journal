@@ -405,7 +405,7 @@ function useTodoSubmit({
           room: room || undefined,
           tags,
           priority,
-          notes: body.trim() || undefined,
+          body: body.trim() || undefined,
         });
         toast.success("Todo updated");
         await closeWithReturn();

@@ -25,7 +25,7 @@ export type TodoScope = "this-run" | "cross-run" | "someday";
 export interface Todo {
   id: string;
   title: string;
-  notes?: string;
+  body?: string;
   room?: string;
   tags: string[];
   status: TodoStatus;

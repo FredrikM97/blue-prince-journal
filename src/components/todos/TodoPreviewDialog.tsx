@@ -12,6 +12,7 @@ function getPriorityVariant(priority: Todo["priority"]) {
 }
 
 export function TodoPreviewContent({ todo }: { todo: Todo }) {
+  const body = todo.body;
   return (
     <>
       <MetaRow label="Status">
@@ -40,9 +41,9 @@ export function TodoPreviewContent({ todo }: { todo: Todo }) {
         </MetaRow>
       )}
 
-      {todo.notes && (
+      {body && (
         <PreviewSection>
-          <MarkdownPreview>{todo.notes}</MarkdownPreview>
+          <MarkdownPreview>{body}</MarkdownPreview>
         </PreviewSection>
       )}
 

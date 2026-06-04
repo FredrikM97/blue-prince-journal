@@ -47,6 +47,30 @@ class JournalDb extends Dexie {
 
 export const db = new JournalDb();
 
+/**
+ * @deprecated Temporary compatibility shim for pre-body todo records.
+ * Remove after one stable release cycle once all active clients have migrated.
+ */
+async function migrateLegacyTodoBodyField(): Promise<void> {
+  const todos = await db.todos.toArray();
+  const updates: Todo[] = [];
+
+  for (const todo of todos) {
+    const legacy = todo as Todo & { notes?: string };
+    if (legacy.body !== undefined) continue;
+    if (legacy.notes === undefined) continue;
+
+    const { notes: _legacyNotes, ...rest } = legacy;
+    updates.push({
+      ...rest,
+      body: legacy.notes,
+    });
+  }
+
+  if (updates.length === 0) return;
+  await db.todos.bulkPut(updates);
+}
+
 // ---------------------------------------------------------------------------
 // Snapshot read / write
 // ---------------------------------------------------------------------------
@@ -143,6 +167,8 @@ const SEEDED_MAP_CELLS: Array<Pick<GridCell, "row" | "col" | "roomName" | "statu
 ];
 
 export async function ensureBootSeed(): Promise<void> {
+  await migrateLegacyTodoBodyField();
+
   const existing = await db.sections.toArray();
   const existingById = new Map(existing.map((s) => [s.id, s]));
 

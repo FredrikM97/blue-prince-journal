@@ -859,7 +859,7 @@ function toGraphEntries(notes: Note[], todos: Todo[]): Note[] {
     id: `todo:${todo.id}`,
     type: "task",
     title: todo.title,
-    body: todo.notes ?? "",
+    body: todo.body ?? "",
     room: todo.room,
     tags: todo.tags,
     date: undefined,

@@ -179,7 +179,7 @@ export function attachSeedImagesToNotes(notes: Note[], imageIds: string[]): Note
 
 const TODO_SEEDS: Array<{
   title: string;
-  notes?: string;
+  body?: string;
   room: string;
   priority: Priority;
   status: TodoStatus;
@@ -371,7 +371,7 @@ export function buildGraphTestTodos(notes: Note[]): Todo[] {
     return {
       id: nanoid(),
       title: seed.title,
-      notes: seed.notes,
+      body: seed.body,
       room: seed.room,
       tags: seed.tags,
       status: seed.status,

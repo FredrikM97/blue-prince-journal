@@ -85,7 +85,7 @@ export const useStore = create<UIState>((set) => ({
         captureDefault: "todo",
         capturePrefill: todo.title,
         capturePrefillRoom: todo.room,
-        capturePrefillBody: todo.notes ?? "",
+        capturePrefillBody: todo.body ?? "",
         capturePrefillTags: todo.tags.join(", "),
         capturePrefillType: undefined,
         capturePrefillPriority: todo.priority,
