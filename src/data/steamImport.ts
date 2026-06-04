@@ -1,8 +1,7 @@
-import { deleteMeta, getMeta, setMeta } from "./db";
+import { db, deleteMeta, getMeta, setMeta } from "./db";
 
 type AddImageFn = (blob: Blob, name?: string, caption?: string) => Promise<unknown>;
 
-const STEAM_IMPORT_SIGNATURES_META_KEY = "steam-import-signatures";
 const STEAM_IMPORT_LAST_STATUS_META_KEY = "steam-import-last-status";
 const STEAM_IMPORT_DIR_HANDLE_META_KEY = "steam-import-dir-handle";
 
@@ -118,32 +117,37 @@ async function collectImageFiles(
   }
 }
 
+function normalizeImageName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
 export async function syncConnectedSteamFolder(
   addImage: AddImageFn,
+  options?: { force?: boolean },
 ): Promise<{ imported: number; skipped: number } | null> {
   if (!activeSteamHandle) return null;
 
   const files: Array<{ path: string; file: File }> = [];
   await collectImageFiles(activeSteamHandle, "", files);
 
-  const previous = (await getMeta<string[]>(STEAM_IMPORT_SIGNATURES_META_KEY)) ?? [];
-  const signatures = new Set(previous);
+  const existingImageNames = new Set(
+    (await db.images.toArray()).map((image) => normalizeImageName(image.name)),
+  );
   let imported = 0;
   let skipped = 0;
 
   for (const entry of files) {
-    const { file, path } = entry;
-    const signature = `${path}|${file.size}|${file.lastModified}`;
-    if (signatures.has(signature)) {
+    const { file } = entry;
+    const fileNameKey = normalizeImageName(file.name);
+    if (!options?.force && existingImageNames.has(fileNameKey)) {
       skipped += 1;
       continue;
     }
     await addImage(file, file.name, file.name);
-    signatures.add(signature);
+    existingImageNames.add(fileNameKey);
     imported += 1;
   }
 
-  await setMeta(STEAM_IMPORT_SIGNATURES_META_KEY, Array.from(signatures));
   const status: SteamImportStatus = {
     lastRefreshAt: Date.now(),
     lastImported: imported,
@@ -183,8 +187,12 @@ function pickFolder(): Promise<File[] | null> {
         const ext = dot >= 0 ? f.name.slice(dot).toLowerCase() : "";
         if (!IMAGE_EXTENSIONS.has(ext)) return false;
         // Skip Steam's thumbnails subdirectory
-        const relPath: string = (f as File & { webkitRelativePath?: string }).webkitRelativePath ?? "";
-        return !relPath.split("/").slice(0, -1).some((seg) => seg.toLowerCase() === "thumbnails");
+        const relPath: string =
+          (f as File & { webkitRelativePath?: string }).webkitRelativePath ?? "";
+        return !relPath
+          .split("/")
+          .slice(0, -1)
+          .some((seg) => seg.toLowerCase() === "thumbnails");
       });
       resolve(files.length > 0 ? files : null);
     });
@@ -216,23 +224,23 @@ export async function pickAndImportSteamFiles(
   const files = await pickFolder();
   if (files === null) return null;
 
-  const previous = (await getMeta<string[]>(STEAM_IMPORT_SIGNATURES_META_KEY)) ?? [];
-  const signatures = new Set(previous);
+  const existingImageNames = new Set(
+    (await db.images.toArray()).map((image) => normalizeImageName(image.name)),
+  );
   let imported = 0;
   let skipped = 0;
 
   for (const file of files) {
-    const signature = `${file.name}|${file.size}|${file.lastModified}`;
-    if (signatures.has(signature)) {
+    const fileNameKey = normalizeImageName(file.name);
+    if (existingImageNames.has(fileNameKey)) {
       skipped += 1;
       continue;
     }
     await addImage(file, file.name, file.name);
-    signatures.add(signature);
+    existingImageNames.add(fileNameKey);
     imported += 1;
   }
 
-  await setMeta(STEAM_IMPORT_SIGNATURES_META_KEY, Array.from(signatures));
   const status: SteamImportStatus = {
     lastRefreshAt: Date.now(),
     lastImported: imported,

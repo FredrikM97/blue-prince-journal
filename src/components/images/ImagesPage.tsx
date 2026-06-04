@@ -205,12 +205,40 @@ function useSteamSyncPanel(
       setLastSyncAt(Date.now());
       if (result.imported > 0) {
         toast.success(`Imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`);
+        // Immediately flush to the sync folder so images are safe on disk right away.
+        void syncRuntime.saveNow();
       }
       if (result.imported === 0) {
         toast.success("No new Steam screenshots found in connected folder");
       }
     } catch {
       toast.error("Could not sync Steam screenshots");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function forceReimportAll() {
+    setBusy(true);
+    try {
+      const result = await syncConnectedSteamFolder(addImage, { force: true });
+      if (result === null) {
+        toast.error("No Steam folder connected");
+        return;
+      }
+      setLastSyncAt(Date.now());
+      if (result.imported > 0) {
+        toast.success(
+          `Force re-imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`,
+        );
+        // Immediately flush to the sync folder so images are safe on disk right away.
+        void syncRuntime.saveNow();
+      }
+      if (result.imported === 0) {
+        toast.success("No Steam screenshots found in connected folder");
+      }
+    } catch {
+      toast.error("Could not force re-import Steam screenshots");
     } finally {
       setBusy(false);
     }
@@ -238,6 +266,7 @@ function useSteamSyncPanel(
     busy,
     connect,
     syncNow,
+    forceReimportAll,
     disconnect,
   };
 

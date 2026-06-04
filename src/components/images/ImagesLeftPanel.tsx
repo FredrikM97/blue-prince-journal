@@ -12,6 +12,7 @@ export type SteamSyncPanelModel = {
   busy: boolean;
   connect: () => Promise<void>;
   syncNow: () => Promise<void>;
+  forceReimportAll: () => Promise<void>;
   disconnect: () => Promise<void>;
 };
 
@@ -64,6 +65,14 @@ export function ImagesLeftPanel({
                 disabled={steamSync.busy}
               >
                 Sync now
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void steamSync.forceReimportAll()}
+                disabled={steamSync.busy}
+              >
+                Force re-import all
               </Button>
               <Button
                 variant="ghost"
