@@ -4,7 +4,7 @@ import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
-import { StoredImageView } from "@/components/StoredImageView";
+import { StoredImageView } from "@/components/common/StoredImageView";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { addImage } from "@/data/mutations";
@@ -204,7 +204,7 @@ export function NotesEditorPanel({
           <Inline gap="2" wrap>
             {draft.imageIds.map((id) => (
               <Stack key={id} gap="1">
-                <StoredImageView id={id} className="note-attached-thumb" />
+                <StoredImageView id={id} className="note-attached-thumb" mode="thumb" />
                 <MetaText as="p" size="xs" truncate title={id}>
                   {getImageLabel(imageById.get(id) ?? { name: "Image" })}
                 </MetaText>
@@ -368,7 +368,12 @@ function SelectExistingImagesDialog({
                     toast.success(selected ? "Image detached" : "Image attached");
                   }}
                 >
-                  <StoredImageView id={img.id} alt={img.name} className="note-image-picker-thumb" />
+                  <StoredImageView
+                    id={img.id}
+                    alt={img.name}
+                    className="note-image-picker-thumb"
+                    mode="thumb"
+                  />
                   <Inline gap="2" align="center" justify="between">
                     <MetaText
                       as="span"

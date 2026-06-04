@@ -5,7 +5,7 @@ import { db } from "@/data/db";
 import { addImage, removeImage, updateImage } from "@/data/mutations";
 import type { StoredImage, Note } from "@/lib/types";
 import { PageLayout, usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
-import { StoredImageView } from "@/components/StoredImageView";
+import { StoredImageView } from "@/components/common/StoredImageView";
 import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -315,7 +315,7 @@ function ImageThumb({
   if (selected) thumbClass = "group images-thumb images-thumb-selected";
   return (
     <button type="button" onClick={onClick} className={thumbClass}>
-      <StoredImageView id={img.id} alt={img.name} className="images-thumb-image" />
+      <StoredImageView id={img.id} alt={img.name} className="images-thumb-image" mode="thumb" />
       <div className="images-thumb-overlay">
         <Text as="div" size="xs" tone="default" variant="default" truncate>
           {getImageLabel(img)}

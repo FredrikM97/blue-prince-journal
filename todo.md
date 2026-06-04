@@ -219,6 +219,12 @@
 
 ## Current sync and storage UX pass
 
+## Current image panel performance pass
+
+- [x] Render reduced-size thumbnails in image library grid to lower panel lag
+- [x] Keep right-panel and expanded previews on full-resolution source images
+- [x] Apply thumbnail mode to note attachment gallery and image picker thumbs
+
 - [x] Add sync-folder conflict prompt when both local and folder data exist
 - [x] Increase map mobile cell space for better text visibility
 - [x] Move image prev/next controls into right-panel title bar actions

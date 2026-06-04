@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { Button } from "@/components/common/Button";
-import { StoredImageView } from "@/components/StoredImageView";
+import { StoredImageView } from "@/components/common/StoredImageView";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import type { StoredImage } from "@/lib/types";
@@ -84,7 +84,12 @@ export function AttachedImagesGallery({
               onClick={() => setZoomedImageId(id)}
               aria-label={`Open image preview: ${getImageLabel(id)}`}
             >
-              <StoredImageView id={id} className={thumbClass} alt={getImageLabel(id)} />
+              <StoredImageView
+                id={id}
+                className={thumbClass}
+                alt={getImageLabel(id)}
+                mode="thumb"
+              />
               <Stack variant="note-details-image-caption-wrap" gap="0">
                 <MetaText truncate>{getImageLabel(id)}</MetaText>
               </Stack>

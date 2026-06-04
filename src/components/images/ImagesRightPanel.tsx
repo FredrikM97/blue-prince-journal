@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { PagedNotesList } from "@/components/common/PagedNotesList";
-import { StoredImageView } from "@/components/StoredImageView";
+import { StoredImageView } from "@/components/common/StoredImageView";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { SidePanel } from "@/components/common/SidePanel";
