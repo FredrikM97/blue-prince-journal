@@ -99,6 +99,7 @@ async function collectImageFiles(
   for await (const entry of handle.values()) {
     const nextPath = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.kind === "directory") {
+      if (entry.name.toLowerCase() === "thumbnails") continue;
       const directoryEntry = entry as unknown as SteamDirHandle;
       await collectImageFiles(directoryEntry, nextPath, files);
       continue;
@@ -180,7 +181,10 @@ function pickFolder(): Promise<File[] | null> {
       const files = Array.from(input.files ?? []).filter((f) => {
         const dot = f.name.lastIndexOf(".");
         const ext = dot >= 0 ? f.name.slice(dot).toLowerCase() : "";
-        return IMAGE_EXTENSIONS.has(ext);
+        if (!IMAGE_EXTENSIONS.has(ext)) return false;
+        // Skip Steam's thumbnails subdirectory
+        const relPath: string = (f as File & { webkitRelativePath?: string }).webkitRelativePath ?? "";
+        return !relPath.split("/").slice(0, -1).some((seg) => seg.toLowerCase() === "thumbnails");
       });
       resolve(files.length > 0 ? files : null);
     });
