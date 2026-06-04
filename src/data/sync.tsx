@@ -7,6 +7,7 @@
  * client syncs it automatically — zero extra infrastructure.
  */
 import {
+  clearAllData,
   getMeta,
   setMeta,
   deleteMeta,
@@ -78,6 +79,8 @@ const SYNC_DIR_HANDLE_META_KEY = "sync-dir-handle";
 const SYNC_MODE_META_KEY = "sync-mode";
 const SYNC_MANIFEST_FILE_NAME = "manifest.json";
 const SYNC_IMAGES_DIR_NAME = "images";
+const SYNC_FOLDER_CONFLICT_PROMPT =
+  "This folder already has data and this device also has data.\n\nPress OK to use folder data here (replace local data).\nPress Cancel to keep local data and overwrite the folder with it.";
 
 export interface SyncFolderPayload {
   manifest: SyncManifest;
@@ -86,11 +89,34 @@ export interface SyncFolderPayload {
 
 export type SyncMode = "auto" | "manual";
 
+export type SyncConnectResolution = "connected-empty" | "use-folder-data" | "keep-local-data";
+
+export interface SyncConnectResult {
+  handle: DirHandle;
+  resolution: SyncConnectResolution;
+  importedFolderData: boolean;
+}
+
 export interface SyncStatus {
   mode: SyncMode;
   dirty: boolean;
   lastDirtyAt: number | null;
   lastSyncedAt: number | null;
+}
+
+export interface LocalSyncItemSource {
+  notes: ArrayLike<unknown>;
+  todos: ArrayLike<unknown>;
+  images: ArrayLike<unknown>;
+  gridCells: ArrayLike<unknown>;
+}
+
+export function countLocalSyncItems(source: LocalSyncItemSource): number {
+  return source.notes.length + source.todos.length + source.images.length + source.gridCells.length;
+}
+
+export function confirmSyncFolderConflict(confirmPrompt: (message: string) => boolean): boolean {
+  return confirmPrompt(SYNC_FOLDER_CONFLICT_PROMPT);
 }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +172,15 @@ export function subscribeSyncStatus(listener: (status: SyncStatus) => void) {
   };
 }
 
+async function ensureSyncPermission(handle: DirHandle, request = true): Promise<boolean> {
+  const perm = await handle.queryPermission({ mode: "readwrite" });
+  if (perm === "granted") return true;
+  if (perm === "denied") return false;
+  if (!request) return false;
+  const requested = await handle.requestPermission({ mode: "readwrite" });
+  return requested === "granted";
+}
+
 export async function loadSyncMode(): Promise<SyncMode> {
   try {
     const stored = await getMeta<SyncMode>(SYNC_MODE_META_KEY);
@@ -186,12 +221,8 @@ export async function restoreSyncHandle(): Promise<DirHandle | null> {
   try {
     const handle = await getMeta<DirHandle>(SYNC_DIR_HANDLE_META_KEY);
     if (!handle) return null;
-    const perm = await handle.queryPermission({ mode: "readwrite" });
-    if (perm === "denied") return null;
-    if (perm !== "granted") {
-      const requested = await handle.requestPermission({ mode: "readwrite" });
-      if (requested !== "granted") return null;
-    }
+    const granted = await ensureSyncPermission(handle, false);
+    if (!granted) return null;
     _handle = handle;
     return handle;
   } catch {
@@ -203,6 +234,8 @@ export async function restoreSyncHandle(): Promise<DirHandle | null> {
 export async function pickSyncFolder(): Promise<DirHandle | null> {
   try {
     const handle = await window.showDirectoryPicker({ mode: "readwrite" });
+    const granted = await ensureSyncPermission(handle, true);
+    if (!granted) return null;
     await setMeta(SYNC_DIR_HANDLE_META_KEY, handle);
     _handle = handle;
     return handle;
@@ -212,6 +245,50 @@ export async function pickSyncFolder(): Promise<DirHandle | null> {
     }
     throw err;
   }
+}
+
+export async function connectSyncFolderWithConflictResolution(
+  localItemCount: number,
+  confirmUseFolderData: () => boolean,
+): Promise<SyncConnectResult | null> {
+  const handle = await pickSyncFolder();
+  if (!handle) return null;
+
+  const existing = await readFromSyncFolder(handle);
+  if (!existing) {
+    await writeToSyncFolder(handle);
+    return {
+      handle,
+      resolution: "connected-empty",
+      importedFolderData: false,
+    };
+  }
+
+  if (localItemCount === 0) {
+    await importSyncManifest(existing, "replace");
+    return {
+      handle,
+      resolution: "use-folder-data",
+      importedFolderData: true,
+    };
+  }
+
+  const useFolderData = confirmUseFolderData();
+  if (useFolderData) {
+    await importSyncManifest(existing, "replace");
+    return {
+      handle,
+      resolution: "use-folder-data",
+      importedFolderData: true,
+    };
+  }
+
+  await writeToSyncFolder(handle);
+  return {
+    handle,
+    resolution: "keep-local-data",
+    importedFolderData: false,
+  };
 }
 
 /** Forget the sync folder (keeps manifest/images on disk, just stops syncing). */
@@ -322,8 +399,15 @@ export async function writeToSyncFolder(handle: DirHandle): Promise<void> {
 }
 
 /** Import a sync payload into IndexedDB (merge — does not clear existing data). */
-export async function importSyncManifest(payload: SyncFolderPayload): Promise<void> {
+export async function importSyncManifest(
+  payload: SyncFolderPayload,
+  mode: "merge" | "replace" = "merge",
+): Promise<void> {
   const { manifest, images } = payload;
+  if (mode === "replace") {
+    await clearAllData();
+    replaceCustomRooms([]);
+  }
   for (const n of manifest.notes ?? []) await putNote(n);
   for (const t of manifest.todos ?? []) await putTodo(t);
   for (const i of images ?? []) await putImage(i);
@@ -366,6 +450,8 @@ async function flushSyncWrite(handle: DirHandle) {
 
 export async function saveSyncNow(): Promise<boolean> {
   if (!_handle) return false;
+  const granted = await ensureSyncPermission(_handle, true);
+  if (!granted) return false;
   clearPendingSyncCallbacks();
   await flushSyncWrite(_handle);
   return true;

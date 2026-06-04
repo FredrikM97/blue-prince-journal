@@ -39,6 +39,13 @@ import { cellId, clearCustomRooms } from "./rooms";
 import { parseCapture } from "./parse";
 import { disconnectSyncFolder, scheduleSyncWrite } from "./sync";
 import { buildUniqueFileName } from "./imageNames";
+import {
+  LOCAL_BACKUP_KEY,
+  isIndexedDbAvailable,
+  readLocalBackup,
+  writeLocalBackup,
+  type LocalBackupSnapshot,
+} from "./storageHealth";
 
 interface State {
   loaded: boolean;
@@ -126,6 +133,32 @@ const SEEDED_MAP_CELLS: Array<Pick<GridCell, "row" | "col" | "roomName" | "statu
   { row: 8, col: 2, roomName: "Entrance Hall", status: "unknown" },
 ];
 
+type BackupCapableState = Pick<State, "notes" | "todos" | "rooms" | "sections" | "gridCells">;
+
+function backupSnapshotFromState(state: BackupCapableState): LocalBackupSnapshot {
+  return {
+    version: 2,
+    savedAt: Date.now(),
+    notes: state.notes,
+    todos: state.todos,
+    rooms: state.rooms,
+    sections: state.sections,
+    gridCells: state.gridCells,
+  };
+}
+
+function syncLocalBackupFromState(state: BackupCapableState): void {
+  writeLocalBackup(LOCAL_BACKUP_KEY, backupSnapshotFromState(state));
+}
+
+async function safeDbWrite(operation: () => Promise<void>): Promise<void> {
+  try {
+    await operation();
+  } catch {
+    // Continue with in-memory updates + local backup to reduce data loss risk.
+  }
+}
+
 async function ensureSeed(existing: SectionDef[]) {
   const existingById = new Map(existing.map((s) => [s.id, s]));
 
@@ -201,29 +234,104 @@ export const useStore = create<State>((set, get) => ({
   captureReturnTo: undefined,
 
   async load() {
-    if (!isBrowser()) return;
-    const sections = await listSections();
-    await ensureSeed(sections);
-    const [notes, todos, images, rooms, sections2, gridCells] = await Promise.all([
-      listNotes(),
-      listTodos(),
-      listImages(),
-      listRoomStates(),
-      listSections(),
-      listGridCells(),
-    ]);
-    await ensureGridSeed(gridCells);
-    const seededGridCells = await listGridCells();
-    set({
-      notes,
-      todos,
-      images,
-      rooms,
-      sections: sections2.sort((a, b) => a.order - b.order),
-      gridCells: seededGridCells,
-      dataVersion: Date.now(),
-      loaded: true,
-    });
+    if (!isBrowser() || !isIndexedDbAvailable()) {
+      const backup = readLocalBackup(LOCAL_BACKUP_KEY);
+      set({
+        notes: backup?.notes ?? [],
+        todos: backup?.todos ?? [],
+        rooms: backup?.rooms ?? [],
+        sections: backup?.sections ?? [],
+        gridCells: backup?.gridCells ?? [],
+        images: [],
+        dataVersion: Date.now(),
+        loaded: true,
+      });
+      return;
+    }
+
+    try {
+      const sections = await listSections();
+      await ensureSeed(sections);
+      const [notes, todos, images, rooms, sections2, gridCells] = await Promise.all([
+        listNotes(),
+        listTodos(),
+        listImages(),
+        listRoomStates(),
+        listSections(),
+        listGridCells(),
+      ]);
+      await ensureGridSeed(gridCells);
+      const seededGridCells = await listGridCells();
+
+      let resolvedNotes = notes;
+      let resolvedTodos = todos;
+      let resolvedRooms = rooms;
+      let resolvedSections = sections2.sort((a, b) => a.order - b.order);
+      let resolvedGridCells = seededGridCells;
+
+      const hasDbData =
+        resolvedNotes.length > 0 ||
+        resolvedTodos.length > 0 ||
+        resolvedRooms.length > 0 ||
+        resolvedSections.length > 0 ||
+        resolvedGridCells.length > 0;
+
+      if (!hasDbData) {
+        const backup = readLocalBackup(LOCAL_BACKUP_KEY);
+        if (backup) {
+          resolvedNotes = backup.notes;
+          resolvedTodos = backup.todos;
+          resolvedRooms = backup.rooms;
+          resolvedSections = backup.sections;
+          resolvedGridCells = backup.gridCells;
+          for (const note of resolvedNotes) {
+            await putNote(note);
+          }
+          for (const todo of resolvedTodos) {
+            await putTodo(todo);
+          }
+          for (const room of resolvedRooms) {
+            await putRoomState(room);
+          }
+          for (const section of resolvedSections) {
+            await putSection(section);
+          }
+          for (const cell of resolvedGridCells) {
+            await putGridCell(cell);
+          }
+        }
+      }
+
+      set({
+        notes: resolvedNotes,
+        todos: resolvedTodos,
+        images,
+        rooms: resolvedRooms,
+        sections: resolvedSections,
+        gridCells: resolvedGridCells,
+        dataVersion: Date.now(),
+        loaded: true,
+      });
+      syncLocalBackupFromState({
+        notes: resolvedNotes,
+        todos: resolvedTodos,
+        rooms: resolvedRooms,
+        sections: resolvedSections,
+        gridCells: resolvedGridCells,
+      });
+    } catch {
+      const backup = readLocalBackup(LOCAL_BACKUP_KEY);
+      set({
+        notes: backup?.notes ?? [],
+        todos: backup?.todos ?? [],
+        rooms: backup?.rooms ?? [],
+        sections: backup?.sections ?? [],
+        gridCells: backup?.gridCells ?? [],
+        images: [],
+        dataVersion: Date.now(),
+        loaded: true,
+      });
+    }
   },
 
   setSyncFolderName: (name) => set({ syncFolderName: name }),
@@ -243,6 +351,10 @@ export const useStore = create<State>((set, get) => ({
     });
     await clearAllData();
     clearCustomRooms();
+    writeLocalBackup(
+      LOCAL_BACKUP_KEY,
+      backupSnapshotFromState({ notes: [], todos: [], rooms: [], sections: [], gridCells: [] }),
+    );
     await get().load();
   },
 
@@ -340,9 +452,10 @@ export const useStore = create<State>((set, get) => ({
         updatedAt: now,
         completedAt: parsed.status === "solved" ? now : undefined,
       };
-      await putTodo(todo);
+      await safeDbWrite(() => putTodo(todo));
       set((s) => ({ todos: [todo, ...s.todos], dataVersion: s.dataVersion + 1 }));
       scheduleSyncWrite();
+      syncLocalBackupFromState(get());
       return { todoId: todo.id };
     }
     const note: Note = {
@@ -359,33 +472,38 @@ export const useStore = create<State>((set, get) => ({
       createdAt: now,
       updatedAt: now,
     };
-    await putNote(note);
+    await safeDbWrite(() => putNote(note));
     set((s) => ({ notes: [note, ...s.notes], dataVersion: s.dataVersion + 1 }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
     return { noteId: note.id };
   },
 
   async saveNote(n) {
     const updated = { ...n, updatedAt: Date.now() };
-    await putNote(updated);
+    await safeDbWrite(() => putNote(updated));
     set((s) => ({ notes: [updated, ...s.notes.filter((x) => x.id !== n.id)] }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
   async saveTodo(t) {
     const updated = { ...t, updatedAt: Date.now() };
-    await putTodo(updated);
+    await safeDbWrite(() => putTodo(updated));
     set((s) => ({ todos: [updated, ...s.todos.filter((x) => x.id !== t.id)] }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
   async removeNote(id) {
-    await dbDeleteNote(id);
+    await safeDbWrite(() => dbDeleteNote(id));
     set((s) => ({ notes: s.notes.filter((n) => n.id !== id) }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
   async removeTodo(id) {
-    await dbDeleteTodo(id);
+    await safeDbWrite(() => dbDeleteTodo(id));
     set((s) => ({ todos: s.todos.filter((t) => t.id !== id) }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
   async toggleTodoStatus(id, status) {
     const t = get().todos.find((x) => x.id === id);
@@ -396,9 +514,10 @@ export const useStore = create<State>((set, get) => ({
       completedAt: status === "done" ? Date.now() : undefined,
       updatedAt: Date.now(),
     };
-    await putTodo(next);
+    await safeDbWrite(() => putTodo(next));
     set((s) => ({ todos: s.todos.map((x) => (x.id === id ? next : x)) }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
 
   async addImage(blob, name, caption) {
@@ -419,44 +538,50 @@ export const useStore = create<State>((set, get) => ({
       blob,
       createdAt: Date.now(),
     };
-    await putImage(img);
+    await safeDbWrite(() => putImage(img));
     set((s) => ({ images: [img, ...s.images] }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
     return img;
   },
   async updateImage(img) {
-    await putImage(img);
+    await safeDbWrite(() => putImage(img));
     set((s) => ({ images: s.images.map((x) => (x.id === img.id ? img : x)) }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
   async removeImage(id) {
-    await dbDeleteImage(id);
+    await safeDbWrite(() => dbDeleteImage(id));
     set((s) => ({ images: s.images.filter((i) => i.id !== id) }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
 
   async setRoomStatus(name, status) {
     const r: RoomState = { name, status, updatedAt: Date.now() };
-    await putRoomState(r);
+    await safeDbWrite(() => putRoomState(r));
     set((s) => ({
       rooms: s.rooms.some((x) => x.name === name)
         ? s.rooms.map((x) => (x.name === name ? r : x))
         : [...s.rooms, r],
     }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
 
   async addSection(label) {
     const sections = get().sections;
     const s: SectionDef = { id: nanoid(), label, order: sections.length };
-    await putSection(s);
+    await safeDbWrite(() => putSection(s));
     set((st) => ({ sections: [...st.sections, s].sort((a, b) => a.order - b.order) }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
   async removeSection(id) {
-    await dbDeleteSection(id);
+    await safeDbWrite(() => dbDeleteSection(id));
     set((s) => ({ sections: s.sections.filter((x) => x.id !== id) }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
 
   async upsertCell(patch) {
@@ -471,18 +596,20 @@ export const useStore = create<State>((set, get) => ({
       status: patch.status ?? existing?.status ?? "unknown",
       updatedAt: Date.now(),
     };
-    await putGridCell(next);
+    await safeDbWrite(() => putGridCell(next));
     set((s) => ({
       gridCells: s.gridCells.some((c) => c.id === id)
         ? s.gridCells.map((c) => (c.id === id ? next : c))
         : [...s.gridCells, next],
     }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
   async clearCell(row, col) {
     const id = cellId(row, col);
-    await deleteGridCell(id);
+    await safeDbWrite(() => deleteGridCell(id));
     set((s) => ({ gridCells: s.gridCells.filter((c) => c.id !== id) }));
     scheduleSyncWrite();
+    syncLocalBackupFromState(get());
   },
 }));

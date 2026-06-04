@@ -26,6 +26,7 @@ import {
   importSyncManifest,
   getActiveSyncFolderName,
 } from "@/data/sync";
+import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/browserStorage";
 
 type RouterContext = {
   queryClient: QueryClient;
@@ -47,33 +48,41 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function init() {
-      await load();
+      try {
+        await load();
 
-      const handle = await restoreSyncHandle();
-      if (handle) {
-        setSyncFolderName(getActiveSyncFolderName() ?? handle.name);
-        const state = useStore.getState();
-        if (state.notes.length === 0 && state.todos.length === 0) {
-          const manifest = await readFromSyncFolder(handle);
-          if (manifest) {
-            await importSyncManifest(manifest);
-            await load();
+        const handle = await restoreSyncHandle();
+        if (handle) {
+          setSyncFolderName(getActiveSyncFolderName() ?? handle.name);
+          const state = useStore.getState();
+          if (state.notes.length === 0 && state.todos.length === 0) {
+            const manifest = await readFromSyncFolder(handle);
+            if (manifest) {
+              await importSyncManifest(manifest);
+              await load();
+            }
           }
         }
-      }
 
-      const welcomed = localStorage.getItem("bp-welcomed") === "1";
-      const state = useStore.getState();
-      const hasData = state.notes.length > 0 || state.todos.length > 0;
-      const hasSyncFolder = Boolean(getActiveSyncFolderName());
+        const welcomed = getLocalStorageFlag("bp-welcomed");
+        const state = useStore.getState();
+        const hasData = state.notes.length > 0 || state.todos.length > 0;
+        const hasSyncFolder = Boolean(getActiveSyncFolderName());
 
-      if (!welcomed && !hasData && !hasSyncFolder) {
-        setWelcomeSource("auto");
-        setInitState("welcome");
-      } else {
-        localStorage.setItem("bp-welcomed", "1");
+        if (!welcomed && !hasData && !hasSyncFolder) {
+          setWelcomeSource("auto");
+          setInitState("welcome");
+          return;
+        }
+
+        setLocalStorageFlag("bp-welcomed");
         setWelcomeSource(null);
         setInitState("ready");
+      } catch {
+        setInitState("ready");
+        toast.error(
+          "Browser storage access is limited. Recent changes may not persist after refresh.",
+        );
       }
     }
 
@@ -111,7 +120,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!shouldAutoDismissWelcome) return;
-    localStorage.setItem("bp-welcomed", "1");
+    setLocalStorageFlag("bp-welcomed");
   }, [shouldAutoDismissWelcome]);
 
   const effectiveInitState = shouldAutoDismissWelcome ? "ready" : initState;
@@ -141,7 +150,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
             }}
             onDone={(folderName) => {
               if (folderName) setSyncFolderName(folderName);
-              localStorage.setItem("bp-welcomed", "1");
+              setLocalStorageFlag("bp-welcomed");
               setWelcomeSource(null);
               setInitState("ready");
             }}

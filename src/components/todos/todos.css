@@ -90,44 +90,35 @@
 
   /* List item row with hover state and grouped action reveal */
   .todo-row-item {
-    @apply px-3 py-2 hover:bg-muted/30;
+    @apply px-3 py-2 hover:bg-muted/20;
   }
 
   .todo-row-main {
-    @apply min-w-0 space-y-1.5;
+    @apply min-w-0 space-y-1;
   }
 
   .todo-row-title-line {
-    @apply min-w-0;
+    @apply flex min-w-0 items-center justify-between gap-2;
   }
 
   .todo-row-title-button {
-    @apply w-full;
+    @apply w-full py-0.5;
   }
 
-  .todo-row-actions-line {
-    @apply flex items-center;
+  .todo-row-title-wrap {
+    @apply min-w-0 flex-1;
   }
 
-  /* Right-side action icons — hidden until row is hovered */
-  .todo-row-actions {
-    @apply flex shrink-0 items-center gap-0.5 opacity-100;
-  }
-
-  .todo-row-actions .dropdown-trigger-fit {
-    @apply min-w-20 px-2;
-  }
-
-  .todo-row-actions .dropdown-trigger {
-    @apply border-transparent bg-transparent shadow-none hover:bg-transparent;
-  }
-
-  .todo-row-actions .dropdown-trigger-label {
-    @apply truncate;
+  .todo-row-menu-button {
+    @apply h-7 w-7 shrink-0 rounded border border-border/50 bg-card/70;
   }
 
   .todo-row-chip-text {
     @apply inline-block max-w-36 truncate align-bottom;
+  }
+
+  .todo-row-tags-line {
+    @apply border-t border-border/40 pt-1;
   }
 
   /* Inline status dropdown inside a todo row */

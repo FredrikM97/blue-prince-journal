@@ -57,11 +57,11 @@ export function MarkdownShortcutHelp() {
   return (
     <div ref={wrapperRef} style={{ position: "relative" }}>
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
         aria-label="Toggle shortcut help"
         title="Shortcuts"
-        className="h-7 w-7"
+        className="md-shortcut-trigger"
         onClick={handleToggle}
       >
         <HelpCircle className="h-3.5 w-3.5" />
@@ -72,60 +72,26 @@ export function MarkdownShortcutHelp() {
         createPortal(
           <div
             ref={popupRef}
+            className="md-shortcut-popover"
             style={{
               position: "fixed",
               top: popupPos.top,
               right: popupPos.right,
               zIndex: 9999,
-              width: "20rem",
-              borderRadius: "0.375rem",
-              border: "1px solid hsl(var(--border))",
-              background: "hsl(var(--popover))",
-              padding: "0.75rem",
-              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-              fontSize: "11px",
             }}
           >
-            <p
-              style={{
-                marginBottom: "0.5rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                fontSize: "10px",
-                fontWeight: 600,
-                color: "hsl(var(--muted-foreground))",
-              }}
-            >
-              Token shortcuts
-            </p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "max-content 1fr",
-                alignItems: "center",
-                columnGap: "0.5rem",
-                rowGap: "0.375rem",
-              }}
-            >
+            <p className="md-shortcut-title">Token shortcuts</p>
+            <div className="md-shortcut-grid">
               {SHORTCUTS.map(({ tokens, desc }) => (
                 <Fragment key={desc}>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
                     {tokens.map((t) => (
-                      <kbd
-                        key={t}
-                        style={{
-                          borderRadius: "0.25rem",
-                          background: "hsl(var(--accent))",
-                          padding: "0.125rem 0.25rem",
-                          fontFamily: "var(--font-mono)",
-                          color: "hsl(var(--foreground))",
-                        }}
-                      >
+                      <kbd key={t} className="md-shortcut-key">
                         {t}
                       </kbd>
                     ))}
                   </div>
-                  <span style={{ paddingTop: "0.125rem", whiteSpace: "nowrap" }}>
+                  <span className="md-shortcut-desc">
                     <MetaText as="span" size="sm" leading="tight">
                       {desc}
                     </MetaText>

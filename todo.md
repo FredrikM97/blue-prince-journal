@@ -190,3 +190,42 @@
 - [x] Make image right-panel preview square and constrained
 - [x] Make expanded image preview use full dialog width for readability
 - [x] Rework todo row layout into title/actions/tags lines and harden long-tag handling
+
+## Current bugfix pass
+
+- [x] Fix markdown shortcut surface readability (non-transparent background)
+- [x] Investigate and fix intermittent todo/data loss when local storage is unavailable
+- [x] Investigate/fix incorrect image warning and file-system access prompt behavior
+- [x] Improve todo row visual polish and interaction affordance
+
+## Current follow-up pass
+
+- [x] Fix mobile image tap opening details panel reliably
+- [x] Refactor store backup flow to reduce special-case note/todo logic
+- [x] Add storage health indicator in Settings
+- [x] Simplify todo row actions into cleaner overflow menu and remove chunky inner row treatment
+
+## Current sync and storage UX pass
+
+- [x] Add sync-folder conflict prompt when both local and folder data exist
+- [x] Increase map mobile cell space for better text visibility
+- [x] Move image prev/next controls into right-panel title bar actions
+- [x] Reorder and clarify storage-related settings copy/status labels
+- [x] Add non-invasive image volume advisory when no sync folder is connected
+
+## Current maintainability pass
+
+- [x] Extract browser localStorage safety helpers into shared data module
+- [x] Remove duplicated localStorage helper logic from root route bootstrap
+- [x] Add shared sync connect conflict-resolution helper in data sync module
+- [x] Migrate welcome sync connect flow to shared conflict-resolution helper
+- [x] Migrate settings sync connect flow to shared conflict-resolution helper
+- [x] Validate touched storage/sync files with typecheck and lint (warnings-only baseline)
+
+## Current UX + sync cleanup pass
+
+- [x] Update todo row overflow menu to use preview/delete icons and grouped status submenu
+- [x] Tighten todo row title/menu alignment spacing for cleaner button/title positioning
+- [x] Extract shared sync conflict-confirm helper to remove duplicated inline prompt strings
+- [x] Extract shared local sync item-count utility and reuse in Welcome + Settings
+- [x] Use shared browser storage access helper for Settings storage health backup check

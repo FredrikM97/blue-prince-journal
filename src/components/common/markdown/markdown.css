@@ -15,7 +15,11 @@
 
   /* Floating popover container */
   .md-shortcut-popover {
-    @apply w-80 rounded-md border border-border bg-popover p-3 shadow-lg text-[11px];
+    @apply w-80 rounded-md border border-border bg-card p-3 shadow-lg text-[11px];
+  }
+
+  .md-shortcut-trigger {
+    @apply h-7 w-7 border-border bg-card text-foreground hover:bg-card;
   }
 
   /* Section title inside the popover */
@@ -34,6 +38,6 @@
 
   /* Key badge (keyboard shortcut pill) */
   .md-shortcut-key {
-    @apply rounded bg-accent px-1 py-0.5 font-mono text-foreground;
+    @apply rounded border border-border bg-muted px-1 py-0.5 font-mono text-foreground;
   }
 }

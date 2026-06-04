@@ -46,10 +46,11 @@ export function getActiveSteamFolderName(): string | null {
   return activeSteamHandle?.name ?? null;
 }
 
-async function ensureReadPermission(handle: SteamDirHandle): Promise<boolean> {
+async function ensureReadPermission(handle: SteamDirHandle, request = true): Promise<boolean> {
   const current = await handle.queryPermission({ mode: "read" });
   if (current === "granted") return true;
   if (current === "denied") return false;
+  if (!request) return false;
   const requested = await handle.requestPermission({ mode: "read" });
   return requested === "granted";
 }
@@ -59,7 +60,7 @@ export async function restoreSteamImportFolder(): Promise<SteamDirHandle | null>
   try {
     const handle = await getMeta<SteamDirHandle>(STEAM_IMPORT_DIR_HANDLE_META_KEY);
     if (!handle) return null;
-    const granted = await ensureReadPermission(handle);
+    const granted = await ensureReadPermission(handle, false);
     if (!granted) return null;
     activeSteamHandle = handle;
     return handle;
