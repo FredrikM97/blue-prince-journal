@@ -5,7 +5,10 @@ import { Chip } from "@/components/common/Chip";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { StoredImageView } from "@/components/StoredImageView";
-import { useStore } from "@/data/store";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import { addImage } from "@/data/mutations";
+import type { StoredImage } from "@/lib/types";
 import { ImagePlus, X } from "lucide-react";
 import { TYPE_LABEL } from "@/lib/noteMetadata";
 import { InputField } from "@/components/common/input/InputField";
@@ -59,8 +62,7 @@ export function NotesEditorPanel({
 }) {
   const mobileDrawerControls = usePageLayoutMobileDrawerControls();
   const isMobileDrawer = mobileDrawerControls?.isPageLayoutMobile === true;
-  const addImage = useStore((s) => s.addImage);
-  const images = useStore((s) => s.images);
+  const images: StoredImage[] = useLiveQuery(() => db.images.toArray()) ?? [];
   const [tagsInputDraft, setTagsInputDraft] = useState(draft.tags.join(", "));
   const [isTagsFocused, setIsTagsFocused] = useState(false);
   const [imagePickerOpen, setImagePickerOpen] = useState(false);

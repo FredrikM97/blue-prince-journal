@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getImage } from "@/data/db";
+import { db } from "@/data/db";
 
 export function StoredImageView({
   id,
@@ -14,7 +14,7 @@ export function StoredImageView({
   useEffect(() => {
     let active = true;
     let u: string | undefined;
-    getImage(id).then((img) => {
+    db.images.get(id).then((img) => {
       if (!active || !img) return;
       u = URL.createObjectURL(img.blob);
       setUrl(u);

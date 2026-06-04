@@ -12,8 +12,11 @@ import {
 } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useStore } from "@/data/store";
-import { exportAll, importAll } from "@/data/io";
+import { exportAll, importAll } from "@/data/backup";
 import { submitFeedback } from "@/data/feedback";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import type { SectionDef } from "@/lib/types";
 import { Button } from "@/components/common/Button";
 import {
   Dialog,
@@ -39,7 +42,9 @@ import { MetaText, Text } from "@/components/common/Typography";
 
 export function AppHeader() {
   const buyMeACoffeeUrl = "https://buymeacoffee.com/fredrikm97";
-  const sections = useStore((s) => s.sections);
+  const sections: SectionDef[] =
+    useLiveQuery(() => db.sections.toArray().then((s) => s.sort((a, b) => a.order - b.order))) ??
+    [];
   const search = useStore((s) => s.search);
   const setSearch = useStore((s) => s.setSearch);
   const [searchInput, setSearchInput] = useState(search);
@@ -51,7 +56,6 @@ export function AppHeader() {
   const openCapture = useStore((s) => s.openCapture);
   const captureOpen = useStore((s) => s.captureOpen);
   const closeCapture = useStore((s) => s.closeCapture);
-  const load = useStore((s) => s.load);
   const syncFolderName = useStore((s) => s.syncFolderName);
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const navigate = useNavigate();
@@ -346,7 +350,6 @@ export function AppHeader() {
                 if (!f) return;
                 try {
                   await importAll(f, "merge");
-                  await load();
                   toast.success("Imported");
                 } catch (err) {
                   toast.error((err as Error).message);

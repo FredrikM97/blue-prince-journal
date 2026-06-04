@@ -1,18 +1,5 @@
 // ZIP-first export/import. Keeps images as binary files for better performance.
-import {
-  listNotes,
-  listTodos,
-  listImages,
-  listRoomStates,
-  listSections,
-  listGridCells,
-  putNote,
-  putTodo,
-  putImage,
-  putRoomState,
-  putSection,
-  putGridCell,
-} from "./db";
+import { db } from "./db";
 import type { Note, Todo, StoredImage, RoomState, SectionDef, GridCell } from "@/lib/types";
 import { listCustomRooms, replaceCustomRooms, type RoomCategory } from "./rooms";
 
@@ -64,12 +51,12 @@ async function dataUrlToBlob(url: string): Promise<Blob> {
 export async function exportAll(): Promise<void> {
   const JSZip = await getJSZipCtor();
   const [notes, todos, images, rooms, sections, gridCells] = await Promise.all([
-    listNotes(),
-    listTodos(),
-    listImages(),
-    listRoomStates(),
-    listSections(),
-    listGridCells(),
+    db.notes.orderBy("updatedAt").reverse().toArray(),
+    db.todos.orderBy("updatedAt").reverse().toArray(),
+    db.images.toArray(),
+    db.rooms.toArray(),
+    db.sections.toArray(),
+    db.grid.toArray(),
   ]);
   const customRooms = listCustomRooms().map((room) => ({
     name: room.name,
@@ -120,17 +107,7 @@ export async function exportAll(): Promise<void> {
 }
 
 async function clearForReplaceMode() {
-  const [oldNotes, oldTodos, oldImages] = await Promise.all([
-    listNotes(),
-    listTodos(),
-    listImages(),
-  ]);
-  const { deleteNote, deleteTodo, deleteImage } = await import("./db");
-  await Promise.all([
-    ...oldNotes.map((n) => deleteNote(n.id)),
-    ...oldTodos.map((t) => deleteTodo(t.id)),
-    ...oldImages.map((i) => deleteImage(i.id)),
-  ]);
+  await Promise.all([db.notes.clear(), db.todos.clear(), db.images.clear()]);
 }
 
 async function importFromLegacyJson(file: File, mode: "merge" | "replace") {
@@ -142,14 +119,14 @@ async function importFromLegacyJson(file: File, mode: "merge" | "replace") {
     await clearForReplaceMode();
   }
 
-  for (const n of data.notes ?? []) await putNote(n);
-  for (const t of data.todos ?? []) await putTodo(t);
-  for (const r of data.rooms ?? []) await putRoomState(r);
-  for (const s of data.sections ?? []) await putSection(s);
-  for (const c of data.gridCells ?? []) await putGridCell(c);
+  for (const n of data.notes ?? []) await db.notes.put(n);
+  for (const t of data.todos ?? []) await db.todos.put(t);
+  for (const r of data.rooms ?? []) await db.rooms.put(r);
+  for (const s of data.sections ?? []) await db.sections.put(s);
+  for (const c of data.gridCells ?? []) await db.grid.put(c);
   for (const img of data.images ?? []) {
     const blob = await dataUrlToBlob(img.dataUrl);
-    await putImage({
+    await db.images.put({
       id: img.id,
       name: img.name,
       caption: img.caption,
@@ -184,17 +161,17 @@ async function importFromZip(file: File, mode: "merge" | "replace") {
     }
   }
 
-  for (const n of data.notes ?? []) await putNote(n);
-  for (const t of data.todos ?? []) await putTodo(t);
-  for (const r of data.rooms ?? []) await putRoomState(r);
-  for (const s of data.sections ?? []) await putSection(s);
-  for (const c of data.gridCells ?? []) await putGridCell(c);
+  for (const n of data.notes ?? []) await db.notes.put(n);
+  for (const t of data.todos ?? []) await db.todos.put(t);
+  for (const r of data.rooms ?? []) await db.rooms.put(r);
+  for (const s of data.sections ?? []) await db.sections.put(s);
+  for (const c of data.gridCells ?? []) await db.grid.put(c);
 
   for (const img of data.images ?? []) {
     const imageFile = zip.file(img.file);
     if (!imageFile) continue;
     const blob = await imageFile.async("blob");
-    await putImage({
+    await db.images.put({
       id: img.id,
       name: img.name,
       caption: img.caption,

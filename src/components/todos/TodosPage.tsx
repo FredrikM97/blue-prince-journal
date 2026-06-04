@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
 import { useStore } from "@/data/store";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import { toggleTodoStatus, removeTodo, saveTodo } from "@/data/mutations";
+import type { Todo } from "@/lib/types";
 import { groupTodosByStatus } from "@/components/todos/Constants";
 import { PageLayout } from "@/components/common/PageLayout";
 import { TodoLeftPanel } from "./TodoLeftPanel";
@@ -16,11 +20,11 @@ import {
 import { Inline } from "@/components/common/LayoutPrimitives";
 
 export function TodosPage() {
-  const todos = useStore((s) => s.todos);
+  const todos: Todo[] = useLiveQuery(() => db.todos.orderBy("updatedAt").reverse().toArray()) ?? [];
   const search = useStore((s) => s.search);
-  const toggle = useStore((s) => s.toggleTodoStatus);
-  const remove = useStore((s) => s.removeTodo);
-  const save = useStore((s) => s.saveTodo);
+  const toggle = toggleTodoStatus;
+  const remove = removeTodo;
+  const save = saveTodo;
   const [scopeFilter, setScopeFilter] = useState<string | null>(null);
   const [previewTodoId, setPreviewTodoId] = useState<string | null>(null);
   const [pendingDeleteTodoId, setPendingDeleteTodoId] = useState<string | null>(null);

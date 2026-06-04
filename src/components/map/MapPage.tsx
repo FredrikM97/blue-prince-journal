@@ -5,7 +5,10 @@ import { MapMiddlePanel } from "./MapMiddlePanel";
 import { MapRightPanel } from "./MapRightPanel";
 import { GRID_ROWS, cellId } from "@/data/rooms";
 import { useStore } from "@/data/store";
-import type { GridCell } from "@/lib/types";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import { upsertCell, clearCell } from "@/data/mutations";
+import type { GridCell, Note, Todo } from "@/lib/types";
 import { MetaText } from "@/components/common/Typography";
 import { SidePanel } from "@/components/common/SidePanel";
 import { Stack } from "@/components/common/Stack";
@@ -26,11 +29,9 @@ const STATUS_COLOR: Record<GridCell["status"], string> = {
 type ActiveCellCoord = { row: number; col: number };
 
 export function MapPage() {
-  const gridCells = useStore((s) => s.gridCells);
-  const notes = useStore((s) => s.notes);
-  const todos = useStore((s) => s.todos);
-  const upsertCell = useStore((s) => s.upsertCell);
-  const clearCell = useStore((s) => s.clearCell);
+  const gridCells: GridCell[] = useLiveQuery(() => db.grid.toArray()) ?? [];
+  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
+  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
   const openCapture = useStore((s) => s.openCapture);
   const [active, setActive] = useState<ActiveCellCoord | null>(null);
 

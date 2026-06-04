@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import { FolderOpen, Sparkles, Upload, Waypoints } from "lucide-react";
-import { importAll } from "@/data/io";
+import { importAll } from "@/data/backup";
 import { connectSyncFolderWithConflictResolution, syncRuntime } from "@/data/sync";
-import { useStore } from "@/data/store";
+import { startFresh } from "@/data/mutations";
+import { db } from "@/data/db";
 import { Heading, Text } from "@/components/common/Typography";
 import { CenteredContent, Inline } from "@/components/common/LayoutPrimitives";
 import { Button } from "@/components/common/Button";
@@ -62,8 +63,6 @@ export function WelcomeScreen({
   onContinue?: () => void;
   showContinueSuggestion?: boolean;
 }) {
-  const load = useStore((s) => s.load);
-  const startFresh = useStore((s) => s.startFresh);
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   // Promise-based conflict dialog — set when the connect flow needs a choice.
@@ -98,10 +97,11 @@ export function WelcomeScreen({
   async function handleConnectFolder() {
     setBusy(true);
     try {
-      const storeState = useStore.getState();
+      const noteCount = await db.notes.count();
+      const todoCount = await db.todos.count();
+      const imageCount = await db.images.count();
       // Only count notes/todos/images — not seeded grid cells — as real local data.
-      const localItemsCount =
-        storeState.notes.length + storeState.todos.length + storeState.images.length;
+      const localItemsCount = noteCount + todoCount + imageCount;
 
       const connectResult = await connectSyncFolderWithConflictResolution(
         localItemsCount,
@@ -112,7 +112,7 @@ export function WelcomeScreen({
       }
 
       if (connectResult.importedFolderData) {
-        await load();
+        // useLiveQuery will update reactively
       }
 
       if (connectResult.resolution === "connected-empty") {
@@ -142,7 +142,7 @@ export function WelcomeScreen({
   async function handleImport(file: File) {
     try {
       await importAll(file, "replace");
-      await load();
+      // useLiveQuery will reactively update with new data
       toast.success("Data imported");
       onDone();
     } catch (err) {

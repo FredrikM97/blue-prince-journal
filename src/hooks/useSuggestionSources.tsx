@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { useStore } from "@/data/store";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
 import { getRoomCatalog } from "@/data/rooms";
-import type { Note, Todo } from "@/lib/types";
+import type { Note, Todo, GridCell } from "@/lib/types";
 
 export interface SuggestionSources {
   roomSuggestions: string[];
@@ -43,9 +44,9 @@ function buildSuggestionSources({
  * Memoized — only recomputes when underlying data changes.
  */
 export function useSuggestionSources(): SuggestionSources {
-  const notes = useStore((s) => s.notes);
-  const todos = useStore((s) => s.todos);
-  const gridCells = useStore((s) => s.gridCells);
+  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
+  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
+  const gridCells: GridCell[] = useLiveQuery(() => db.grid.toArray()) ?? [];
 
   return useMemo(
     () => ({
