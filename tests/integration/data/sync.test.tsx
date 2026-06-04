@@ -95,10 +95,10 @@ describe("sync boundaries", () => {
     db.getMeta.mockResolvedValueOnce("manual");
     const sync = await import("@/data/sync");
 
-    const mode = await sync.loadSyncMode();
+    const mode = await sync.syncRuntime.loadMode();
     expect(mode).toBe("manual");
 
-    await sync.setSyncMode("auto");
+    await sync.syncRuntime.setMode("auto");
     expect(db.setMeta).toHaveBeenCalledWith("sync-mode", "auto");
   });
 
@@ -110,7 +110,7 @@ describe("sync boundaries", () => {
       }),
     });
 
-    const handle = await sync.pickSyncFolder();
+    const handle = await sync.syncRuntime.pickFolder();
     expect(handle).toBeNull();
   });
 
@@ -123,7 +123,7 @@ describe("sync boundaries", () => {
     };
     db.getMeta.mockResolvedValueOnce(deniedHandle);
 
-    expect(await sync.restoreSyncHandle()).toBeNull();
+    expect(await sync.syncRuntime.restoreHandle()).toBeNull();
   });
 
   it("writes manifest when scheduled in auto mode", async () => {
@@ -131,14 +131,18 @@ describe("sync boundaries", () => {
     const { handle, files } = createMemoryDirHandle("SyncFolder");
     vi.stubGlobal("window", { showDirectoryPicker: vi.fn(async () => handle) });
 
-    await sync.pickSyncFolder();
-    await sync.setSyncMode("auto");
+    await sync.syncRuntime.pickFolder();
+    await sync.syncRuntime.setMode("auto");
 
-    sync.scheduleSyncWrite();
+    sync.syncRuntime.scheduleWrite();
     await vi.advanceTimersByTimeAsync(1500);
 
     expect(files.has("manifest.json")).toBe(true);
-    expect(sync.getSyncStatus().dirty).toBe(false);
+    let currentStatus!: import("@/data/sync").SyncStatus;
+    sync.syncRuntime.subscribeStatus((s) => {
+      currentStatus = s;
+    })();
+    expect(currentStatus.dirty).toBe(false);
   });
 
   it("does not auto-write in manual mode, but saveSyncNow works", async () => {
@@ -146,36 +150,30 @@ describe("sync boundaries", () => {
     const { handle, files } = createMemoryDirHandle("SyncFolder");
     vi.stubGlobal("window", { showDirectoryPicker: vi.fn(async () => handle) });
 
-    await sync.pickSyncFolder();
-    await sync.setSyncMode("manual");
+    await sync.syncRuntime.pickFolder();
+    await sync.syncRuntime.setMode("manual");
 
-    sync.scheduleSyncWrite();
+    sync.syncRuntime.scheduleWrite();
     vi.advanceTimersByTime(2000);
     await Promise.resolve();
 
     expect(files.has("manifest.json")).toBe(false);
 
-    const saved = await sync.saveSyncNow();
+    const saved = await sync.syncRuntime.saveNow();
     expect(saved).toBe(true);
     expect(files.has("manifest.json")).toBe(true);
   });
 
-  it("imports sync manifest boundary into db layer", async () => {
-    const sync = await import("@/data/sync");
-    await sync.importSyncManifest({
-      manifest: {
-        app: "blue-prince-notes",
-        syncVersion: 1,
-        syncedAt: Date.now(),
-        notes: [{ id: "n1" } as never],
-        todos: [{ id: "t1" } as never],
-        images: [],
-        rooms: [{ name: "Parlor", status: "unknown", updatedAt: 1 } as never],
-        sections: [{ id: "s1", label: "Notes", order: 0 } as never],
-        gridCells: [{ id: "0,0", row: 0, col: 0, status: "unknown", updatedAt: 1 } as never],
-        customRooms: [{ name: "Parlor", category: "Wing" as never }],
-      },
+  it("imports sync data boundary into db layer", async () => {
+    const { storageAdapter } = await import("@/data/storageAdapter");
+    await storageAdapter.write({
+      notes: [{ id: "n1" } as never],
+      todos: [{ id: "t1" } as never],
       images: [],
+      rooms: [{ name: "Parlor", status: "unknown", updatedAt: 1 } as never],
+      sections: [{ id: "s1", label: "Notes", order: 0 } as never],
+      gridCells: [{ id: "0,0", row: 0, col: 0, status: "unknown", updatedAt: 1 } as never],
+      customRooms: [{ name: "Parlor", category: "Wing" as never }],
     });
 
     expect(db.putNote).toHaveBeenCalled();

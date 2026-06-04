@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { SidePanel } from "@/components/common/SidePanel";
-import { MetaText } from "@/components/common/Typography";
 import type { Todo } from "@/lib/types";
-import { TodoPreviewDialog } from "./TodoPreviewDialog";
+import { TodoPreviewContent, TodoPreviewDialog } from "./TodoPreviewDialog";
 
 export function TodoRightPanel({ todo, onClose }: { todo: Todo; onClose: () => void }) {
   const [expanded, setExpanded] = useState(false);
@@ -18,11 +16,7 @@ export function TodoRightPanel({ todo, onClose }: { todo: Todo; onClose: () => v
       panelKey={`todo:${todo.id}`}
       expandDialog={<TodoPreviewDialog todo={todo} open={expanded} onOpenChange={setExpanded} />}
     >
-      {todo.notes ? (
-        <MarkdownPreview>{todo.notes}</MarkdownPreview>
-      ) : (
-        <MetaText>No notes added.</MetaText>
-      )}
+      <TodoPreviewContent todo={todo} />
     </SidePanel.Right>
   );
 }

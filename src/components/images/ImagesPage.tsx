@@ -1,11 +1,12 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useStore } from "@/data/store";
-import { PageLayout } from "@/components/common/PageLayout";
+import { PageLayout, usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
 import { StoredImageView } from "@/components/StoredImageView";
 import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Text } from "@/components/common/Typography";
+import { Stack } from "@/components/common/Stack";
 import type { StoredImage } from "@/lib/types";
 import { toast } from "sonner";
 import {
@@ -17,7 +18,7 @@ import {
   restoreSteamImportFolder,
   syncConnectedSteamFolder,
 } from "@/data/steamImport";
-import { getActiveSyncFolderName } from "@/data/sync";
+import { syncRuntime } from "@/data/sync";
 import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/browserStorage";
 
 function getImageLabel(img: StoredImage): string {
@@ -72,7 +73,7 @@ export function ImagesPage() {
   useEffect(() => {
     const IMAGE_SYNC_ADVISORY_THRESHOLD = 150;
     if (images.length < IMAGE_SYNC_ADVISORY_THRESHOLD) return;
-    if (getActiveSyncFolderName()) return;
+    if (syncRuntime.getActiveFolderName()) return;
 
     const advisoryKey = "bp-images-sync-advisory-shown";
     if (getLocalStorageFlag(advisoryKey)) return;
@@ -123,16 +124,7 @@ export function ImagesPage() {
         )}
 
         {filtered.length > 0 && (
-          <div className="images-grid">
-            {filtered.map((img) => (
-              <ImageThumb
-                key={img.id}
-                img={img}
-                selected={img.id === selectedId}
-                onClick={() => setSelectedId(img.id)}
-              />
-            ))}
-          </div>
+          <ImagesGrid filtered={filtered} selectedId={selectedId} setSelectedId={setSelectedId} />
         )}
       </PageLayout.Middle>
 
@@ -250,6 +242,35 @@ function useSteamSyncPanel(
   };
 
   return steamSync;
+}
+
+function ImagesGrid({
+  filtered,
+  selectedId,
+  setSelectedId,
+}: {
+  filtered: StoredImage[];
+  selectedId: string | null;
+  setSelectedId: (id: string | null) => void;
+}) {
+  const mobileDrawerControls = usePageLayoutMobileDrawerControls();
+  return (
+    <Stack as="div" variant="images-grid">
+      {filtered.map((img) => (
+        <ImageThumb
+          key={img.id}
+          img={img}
+          selected={img.id === selectedId}
+          onClick={() => {
+            setSelectedId(img.id);
+            if (mobileDrawerControls?.isPageLayoutMobile) {
+              mobileDrawerControls.openMobileDrawer("right");
+            }
+          }}
+        />
+      ))}
+    </Stack>
+  );
 }
 
 function ImageThumb({

@@ -35,8 +35,10 @@ vi.mock("@/data/parse", () => ({
   parseCapture: (...args: unknown[]) => mockCtx.parseCaptureMock(...args),
 }));
 vi.mock("@/data/sync", () => ({
-  disconnectSyncFolder: vi.fn(async () => {}),
-  scheduleSyncWrite: () => mockCtx.scheduleSyncWriteMock(),
+  syncRuntime: {
+    scheduleWrite: () => mockCtx.scheduleSyncWriteMock(),
+    disconnect: vi.fn(async () => {}),
+  },
 }));
 vi.mock("@/data/rooms", () => ({
   cellId: (row: number, col: number) => `${row},${col}`,

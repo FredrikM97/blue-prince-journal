@@ -118,8 +118,12 @@
     @apply mr-1 h-4 w-4;
   }
 
-  /* Sync folder indicator shown in the header (desktop only) */
+  /* Sync folder indicator shown in the header */
   .header-sync-status {
-    @apply hidden items-center gap-1.5 text-xs text-green-500 xl:flex;
+    @apply flex items-center gap-1.5 text-xs text-green-500;
+  }
+
+  .header-sync-status .sync-folder-name {
+    @apply hidden xl:block;
   }
 }

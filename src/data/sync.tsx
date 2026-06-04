@@ -1,95 +1,28 @@
 /**
- * File System Access API sync utilities.
+ * File System Access API sync runtime.
  *
- * Writes a sync snapshot folder to a user-chosen local directory after every
- * mutation. Data is stored in `manifest.json` and image blobs in `images/`.
- * If the directory is inside Dropbox / OneDrive / iCloud Drive, the OS cloud
- * client syncs it automatically — zero extra infrastructure.
+ * Manages the active folder handle, dirty/clean state, and scheduled writes.
+ * Folder I/O is in syncStorage/folderIo.ts; storage read/write goes through
+ * the storageAdapter facade.
  */
-import {
-  clearAllData,
-  getMeta,
-  setMeta,
-  deleteMeta,
-  listNotes,
-  listTodos,
-  listImages,
-  listRoomStates,
-  listSections,
-  listGridCells,
-  putNote,
-  putTodo,
-  putImage,
-  putRoomState,
-  putSection,
-  putGridCell,
-} from "./db";
-import type { Note, Todo, StoredImage, RoomState, SectionDef, GridCell } from "@/lib/types";
-import { listCustomRooms, replaceCustomRooms, type RoomCategory } from "./rooms";
-import { buildUniqueFileName } from "./imageNames";
+import { getMeta, setMeta, deleteMeta } from "./db";
+import { storageAdapter } from "./storageAdapter";
+import { type DirHandle, readFolder, writeFolder } from "./syncStorage/folderIo";
 
 // ---------------------------------------------------------------------------
-// Minimal local typings for File System Access API
-// (TS lib.dom may not have the permission methods in all versions)
+// Constants
 // ---------------------------------------------------------------------------
-
-interface DirHandle {
-  readonly name: string;
-  getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<DirHandle>;
-  getFileHandle(name: string, options?: { create?: boolean }): Promise<FileHandle>;
-  queryPermission(descriptor: { mode: "read" | "readwrite" }): Promise<PermissionState>;
-  requestPermission(descriptor: { mode: "read" | "readwrite" }): Promise<PermissionState>;
-}
-
-interface FileHandle {
-  getFile(): Promise<File>;
-  createWritable(): Promise<{
-    write(data: string | BufferSource | Blob): Promise<void>;
-    close(): Promise<void>;
-  }>;
-}
-
-declare global {
-  interface Window {
-    showDirectoryPicker(options?: {
-      mode?: "read" | "readwrite";
-      startIn?: DirHandle;
-    }): Promise<DirHandle>;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Data shape written to the sync manifest file
-// ---------------------------------------------------------------------------
-
-export interface SyncManifest {
-  app: "blue-prince-notes";
-  syncVersion: 1;
-  syncedAt: number;
-  notes: Note[];
-  todos: Todo[];
-  images?: Array<Omit<StoredImage, "blob"> & { fileName: string }>;
-  rooms: RoomState[];
-  sections: SectionDef[];
-  gridCells: GridCell[];
-  customRooms: Array<{ name: string; category: RoomCategory }>;
-}
 
 const SYNC_DIR_HANDLE_META_KEY = "sync-dir-handle";
 const SYNC_MODE_META_KEY = "sync-mode";
-const SYNC_MANIFEST_FILE_NAME = "manifest.json";
-const SYNC_IMAGES_DIR_NAME = "images";
-const SYNC_FOLDER_CONFLICT_PROMPT =
-  "This folder already has data and this device also has data.\n\nPress OK to use folder data here (replace local data).\nPress Cancel to keep local data and overwrite the folder with it.";
 
-export interface SyncFolderPayload {
-  manifest: SyncManifest;
-  images: StoredImage[];
-}
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 export type SyncMode = "auto" | "manual";
-
 export type SyncConnectResolution = "connected-empty" | "use-folder-data" | "keep-local-data";
+export type SyncConflictChoice = "overwrite" | "keep" | "cancel";
 
 export interface SyncConnectResult {
   handle: DirHandle;
@@ -111,379 +44,249 @@ export interface LocalSyncItemSource {
   gridCells: ArrayLike<unknown>;
 }
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 export function countLocalSyncItems(source: LocalSyncItemSource): number {
   return source.notes.length + source.todos.length + source.images.length + source.gridCells.length;
 }
 
-export function confirmSyncFolderConflict(confirmPrompt: (message: string) => boolean): boolean {
-  return confirmPrompt(SYNC_FOLDER_CONFLICT_PROMPT);
-}
-
 // ---------------------------------------------------------------------------
-// In-memory active handle (re-hydrated from IndexedDB on app start)
+// Runtime class — owns handle, mode, dirty state, and scheduling
 // ---------------------------------------------------------------------------
 
-let _handle: DirHandle | null = null;
-let _mode: SyncMode = "auto";
-let _dirty = false;
-let _lastDirtyAt: number | null = null;
-let _lastSyncedAt: number | null = null;
-const _statusListeners = new Set<(status: SyncStatus) => void>();
+class SyncRuntimeBase {
+  private handle: DirHandle | null = null;
+  private mode: SyncMode = "auto";
+  private dirty = false;
+  private lastDirtyAt: number | null = null;
+  private lastSyncedAt: number | null = null;
+  private syncTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly statusListeners = new Set<(status: SyncStatus) => void>();
 
-function getSyncSnapshot(): SyncStatus {
-  return {
-    mode: _mode,
-    dirty: _dirty,
-    lastDirtyAt: _lastDirtyAt,
-    lastSyncedAt: _lastSyncedAt,
-  };
-}
-
-function emitSyncStatus() {
-  const snapshot = getSyncSnapshot();
-  _statusListeners.forEach((listener) => listener(snapshot));
-}
-
-function markDirty() {
-  if (!_dirty) {
-    _dirty = true;
-    _lastDirtyAt = Date.now();
+  getActiveHandle(): DirHandle | null {
+    return this.handle;
   }
-  emitSyncStatus();
-}
 
-export function getActiveSyncHandle(): DirHandle | null {
-  return _handle;
-}
-
-export function getActiveSyncFolderName(): string | null {
-  return _handle?.name ?? null;
-}
-
-export function getSyncStatus(): SyncStatus {
-  return getSyncSnapshot();
-}
-
-export function subscribeSyncStatus(listener: (status: SyncStatus) => void) {
-  _statusListeners.add(listener);
-  listener(getSyncSnapshot());
-  return () => {
-    _statusListeners.delete(listener);
-  };
-}
-
-async function ensureSyncPermission(handle: DirHandle, request = true): Promise<boolean> {
-  const perm = await handle.queryPermission({ mode: "readwrite" });
-  if (perm === "granted") return true;
-  if (perm === "denied") return false;
-  if (!request) return false;
-  const requested = await handle.requestPermission({ mode: "readwrite" });
-  return requested === "granted";
-}
-
-export async function loadSyncMode(): Promise<SyncMode> {
-  try {
-    const stored = await getMeta<SyncMode>(SYNC_MODE_META_KEY);
-    _mode = stored === "manual" ? "manual" : "auto";
-  } catch {
-    _mode = "auto";
+  getActiveFolderName(): string | null {
+    return this.handle?.name ?? null;
   }
-  emitSyncStatus();
-  return _mode;
-}
 
-export async function setSyncMode(mode: SyncMode): Promise<void> {
-  _mode = mode;
-  await setMeta(SYNC_MODE_META_KEY, mode);
-  emitSyncStatus();
-}
+  getStatus(): SyncStatus {
+    return {
+      mode: this.mode,
+      dirty: this.dirty,
+      lastDirtyAt: this.lastDirtyAt,
+      lastSyncedAt: this.lastSyncedAt,
+    };
+  }
 
-export async function openSyncFolderInPicker(): Promise<boolean> {
-  if (!_handle) return false;
-  try {
-    await window.showDirectoryPicker({ mode: "readwrite", startIn: _handle });
-    return true;
-  } catch (err) {
-    if (err instanceof DOMException && err.name === "AbortError") {
-      return false;
+  subscribeStatus(listener: (status: SyncStatus) => void) {
+    this.statusListeners.add(listener);
+    listener(this.getStatus());
+    return () => {
+      this.statusListeners.delete(listener);
+    };
+  }
+
+  async loadMode(): Promise<SyncMode> {
+    try {
+      const stored = await getMeta<SyncMode>(SYNC_MODE_META_KEY);
+      this.mode = stored === "manual" ? "manual" : "auto";
+    } catch {
+      this.mode = "auto";
     }
-    throw err;
+    this.emitStatus();
+    return this.mode;
   }
-}
 
-// ---------------------------------------------------------------------------
-// Persistence
-// ---------------------------------------------------------------------------
-
-/** Load stored handle from IndexedDB and re-request permission. Returns the
- *  handle if permission was granted, null otherwise. */
-export async function restoreSyncHandle(): Promise<DirHandle | null> {
-  try {
-    const handle = await getMeta<DirHandle>(SYNC_DIR_HANDLE_META_KEY);
-    if (!handle) return null;
-    const granted = await ensureSyncPermission(handle, false);
-    if (!granted) return null;
-    _handle = handle;
-    return handle;
-  } catch {
-    return null;
+  async setMode(mode: SyncMode): Promise<void> {
+    this.mode = mode;
+    await setMeta(SYNC_MODE_META_KEY, mode);
+    this.emitStatus();
   }
-}
 
-/** Let the user pick a folder, persist it, and make it the active handle. */
-export async function pickSyncFolder(): Promise<DirHandle | null> {
-  try {
-    const handle = await window.showDirectoryPicker({ mode: "readwrite" });
-    const granted = await ensureSyncPermission(handle, true);
-    if (!granted) return null;
-    await setMeta(SYNC_DIR_HANDLE_META_KEY, handle);
-    _handle = handle;
-    return handle;
-  } catch (err) {
-    if (err instanceof DOMException && err.name === "AbortError") {
+  async openInPicker(): Promise<boolean> {
+    if (!this.handle) return false;
+    const picked = await this.openFolder(this.handle);
+    return Boolean(picked);
+  }
+
+  async restoreHandle(): Promise<DirHandle | null> {
+    try {
+      const handle = await getMeta<DirHandle>(SYNC_DIR_HANDLE_META_KEY);
+      if (!handle) return null;
+      const granted = await this.ensurePermission(handle, false);
+      if (!granted) return null;
+      this.handle = handle;
+      return handle;
+    } catch {
       return null;
     }
-    throw err;
+  }
+
+  /** Restores the persisted folder handle (without prompting), then — if
+   * `localIsEmpty` is true — reads folder data and merges it into local
+   * storage. Call this once on app start after the initial store `load()`.
+   * Returns the folder name (for storing in the UI) and whether data was
+   * imported from the folder (so the caller knows to reload the store). */
+  async boot(
+    localIsEmpty: boolean,
+  ): Promise<{ folderName: string | null; appliedFolderData: boolean }> {
+    const handle = await this.restoreHandle();
+    if (!handle) return { folderName: null, appliedFolderData: false };
+    const folderName = this.getActiveFolderName();
+    if (localIsEmpty) {
+      const data = await readFolder(handle);
+      if (data) {
+        await storageAdapter.write(data);
+        return { folderName, appliedFolderData: true };
+      }
+    }
+    return { folderName, appliedFolderData: false };
+  }
+
+  async pickFolder(): Promise<DirHandle | null> {
+    const handle = await this.openFolder();
+    if (!handle) return null;
+    // showDirectoryPicker with mode:"readwrite" already grants permission;
+    // we still verify to be safe.
+    const granted = await this.ensurePermission(handle, true);
+    if (!granted) return null;
+    await setMeta(SYNC_DIR_HANDLE_META_KEY, handle);
+    this.handle = handle;
+    this.emitStatus();
+    return handle;
+  }
+
+  async disconnect(): Promise<void> {
+    await deleteMeta(SYNC_DIR_HANDLE_META_KEY);
+    this.handle = null;
+    this.dirty = false;
+    this.lastDirtyAt = null;
+    this.clearTimers();
+    this.emitStatus();
+  }
+
+  markDirty() {
+    if (!this.dirty) {
+      this.dirty = true;
+      this.lastDirtyAt = Date.now();
+    }
+    this.emitStatus();
+  }
+
+  async saveNow(): Promise<boolean> {
+    if (!this.handle) return false;
+    const granted = await this.ensurePermission(this.handle, true);
+    if (!granted) return false;
+    this.clearTimers();
+    await this.flush(this.handle);
+    return true;
+  }
+
+  scheduleWrite(): void {
+    if (!this.handle) return;
+    this.markDirty();
+    if (this.mode === "manual") return;
+    this.clearTimers();
+    const handle = this.handle;
+    this.syncTimer = setTimeout(() => {
+      this.syncTimer = null;
+      void this.flush(handle);
+    }, 1400);
+  }
+
+  private emitStatus() {
+    const status = this.getStatus();
+    this.statusListeners.forEach((listener) => listener(status));
+  }
+
+  private clearTimers() {
+    if (this.syncTimer) {
+      clearTimeout(this.syncTimer);
+      this.syncTimer = null;
+    }
+  }
+
+  private async flush(handle: DirHandle) {
+    try {
+      const data = await storageAdapter.read();
+      await writeFolder(handle, data);
+      this.dirty = false;
+      this.lastDirtyAt = null;
+      this.lastSyncedAt = Date.now();
+      this.emitStatus();
+    } catch {
+      // Permission may have been revoked — fail silently.
+    }
+  }
+
+  private async ensurePermission(handle: DirHandle, request: boolean): Promise<boolean> {
+    const perm = await handle.queryPermission({ mode: "readwrite" });
+    if (perm === "granted") return true;
+    if (perm === "denied") return false;
+    if (!request) return false;
+    return (await handle.requestPermission({ mode: "readwrite" })) === "granted";
+  }
+
+  private async openFolder(startIn?: DirHandle): Promise<DirHandle | null> {
+    try {
+      return await window.showDirectoryPicker({ mode: "readwrite", ...(startIn && { startIn }) });
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return null;
+      throw err;
+    }
   }
 }
+
+const syncRuntime = new SyncRuntimeBase();
+export { syncRuntime };
+
+// ---------------------------------------------------------------------------
+// Orchestration — module-level functions with complex logic
+// ---------------------------------------------------------------------------
 
 export async function connectSyncFolderWithConflictResolution(
   localItemCount: number,
-  confirmUseFolderData: () => boolean,
+  resolveConflict: () => Promise<SyncConflictChoice>,
 ): Promise<SyncConnectResult | null> {
-  const handle = await pickSyncFolder();
+  const handle = await syncRuntime.pickFolder();
   if (!handle) return null;
 
-  const existing = await readFromSyncFolder(handle);
-  if (!existing) {
-    await writeToSyncFolder(handle);
-    return {
-      handle,
-      resolution: "connected-empty",
-      importedFolderData: false,
-    };
+  const folderData = await readFolder(handle);
+
+  if (!folderData) {
+    // Folder is empty — write local data into it.
+    const localData = await storageAdapter.read();
+    await writeFolder(handle, localData);
+    return { handle, resolution: "connected-empty", importedFolderData: false };
   }
 
   if (localItemCount === 0) {
-    await importSyncManifest(existing, "replace");
-    return {
-      handle,
-      resolution: "use-folder-data",
-      importedFolderData: true,
-    };
+    // No user content locally — always use folder data.
+    await storageAdapter.clear();
+    await storageAdapter.write(folderData);
+    return { handle, resolution: "use-folder-data", importedFolderData: true };
   }
 
-  const useFolderData = confirmUseFolderData();
-  if (useFolderData) {
-    await importSyncManifest(existing, "replace");
-    return {
-      handle,
-      resolution: "use-folder-data",
-      importedFolderData: true,
-    };
-  }
+  // Both sides have data — ask the user what to do.
+  const choice = await resolveConflict();
 
-  await writeToSyncFolder(handle);
-  return {
-    handle,
-    resolution: "keep-local-data",
-    importedFolderData: false,
-  };
-}
-
-/** Forget the sync folder (keeps manifest/images on disk, just stops syncing). */
-export async function disconnectSyncFolder(): Promise<void> {
-  await deleteMeta(SYNC_DIR_HANDLE_META_KEY);
-  _handle = null;
-  _dirty = false;
-  _lastDirtyAt = null;
-  emitSyncStatus();
-}
-
-// ---------------------------------------------------------------------------
-// Read / Write
-// ---------------------------------------------------------------------------
-
-export async function readFromSyncFolder(handle: DirHandle): Promise<SyncFolderPayload | null> {
-  try {
-    const fh = await handle.getFileHandle(SYNC_MANIFEST_FILE_NAME, { create: false });
-    const file = await fh.getFile();
-    const text = await file.text();
-    const manifest = JSON.parse(text) as SyncManifest;
-    if (manifest.app !== "blue-prince-notes") return null;
-
-    const images: StoredImage[] = [];
-    let imagesDir: DirHandle | null = null;
-    try {
-      imagesDir = await handle.getDirectoryHandle(SYNC_IMAGES_DIR_NAME, { create: false });
-    } catch {
-      imagesDir = null;
-    }
-
-    if (imagesDir) {
-      for (const img of manifest.images ?? []) {
-        try {
-          const imageFile = await imagesDir.getFileHandle(img.fileName, { create: false });
-          const blob = await (await imageFile.getFile()).arrayBuffer();
-          images.push({
-            id: img.id,
-            name: img.name,
-            caption: img.caption,
-            tags: img.tags ?? [],
-            mime: img.mime,
-            blob: new Blob([blob], { type: img.mime }),
-            createdAt: img.createdAt,
-          });
-        } catch {
-          // Skip missing/corrupt image files and continue importing the rest.
-        }
-      }
-    }
-
-    return { manifest, images };
-  } catch {
+  if (choice === "cancel") {
+    await syncRuntime.disconnect();
     return null;
   }
-}
 
-export async function writeToSyncFolder(handle: DirHandle): Promise<void> {
-  const [notes, todos, images, rooms, sections, gridCells] = await Promise.all([
-    listNotes(),
-    listTodos(),
-    listImages(),
-    listRoomStates(),
-    listSections(),
-    listGridCells(),
-  ]);
-  const customRooms = listCustomRooms().map((r) => ({ name: r.name, category: r.category }));
-  const imagesDir = await handle.getDirectoryHandle(SYNC_IMAGES_DIR_NAME, { create: true });
-  const imageManifest = [] as Array<Omit<StoredImage, "blob"> & { fileName: string }>;
-  const usedFileNames: string[] = [];
-
-  for (const image of images) {
-    const fileName = buildUniqueFileName(usedFileNames, image.name, image.id, "png");
-    usedFileNames.push(fileName);
-    const imageFile = await imagesDir.getFileHandle(fileName, { create: true });
-    const writable = await imageFile.createWritable();
-    await writable.write(image.blob);
-    await writable.close();
-
-    imageManifest.push({
-      id: image.id,
-      name: image.name,
-      caption: image.caption,
-      tags: image.tags,
-      mime: image.mime,
-      createdAt: image.createdAt,
-      fileName,
-    });
+  if (choice === "overwrite") {
+    await storageAdapter.clear();
+    await storageAdapter.write(folderData);
+    return { handle, resolution: "use-folder-data", importedFolderData: true };
   }
 
-  const manifest: SyncManifest = {
-    app: "blue-prince-notes",
-    syncVersion: 1,
-    syncedAt: Date.now(),
-    notes,
-    todos,
-    images: imageManifest,
-    rooms,
-    sections,
-    gridCells,
-    customRooms,
-  };
-
-  const fh = await handle.getFileHandle(SYNC_MANIFEST_FILE_NAME, { create: true });
-  const writable = await fh.createWritable();
-  await writable.write(JSON.stringify(manifest, null, 2));
-  await writable.close();
-}
-
-/** Import a sync payload into IndexedDB (merge — does not clear existing data). */
-export async function importSyncManifest(
-  payload: SyncFolderPayload,
-  mode: "merge" | "replace" = "merge",
-): Promise<void> {
-  const { manifest, images } = payload;
-  if (mode === "replace") {
-    await clearAllData();
-    replaceCustomRooms([]);
-  }
-  for (const n of manifest.notes ?? []) await putNote(n);
-  for (const t of manifest.todos ?? []) await putTodo(t);
-  for (const i of images ?? []) await putImage(i);
-  for (const r of manifest.rooms ?? []) await putRoomState(r);
-  for (const s of manifest.sections ?? []) await putSection(s);
-  for (const c of manifest.gridCells ?? []) await putGridCell(c);
-  if (manifest.customRooms) replaceCustomRooms(manifest.customRooms);
-}
-
-// ---------------------------------------------------------------------------
-// Debounced auto-write
-// ---------------------------------------------------------------------------
-
-let _syncTimer: ReturnType<typeof setTimeout> | null = null;
-let _syncIdleHandle: number | null = null;
-
-function clearPendingSyncCallbacks() {
-  if (_syncTimer) {
-    clearTimeout(_syncTimer);
-    _syncTimer = null;
-  }
-
-  if (_syncIdleHandle !== null && typeof window !== "undefined" && "cancelIdleCallback" in window) {
-    window.cancelIdleCallback(_syncIdleHandle);
-    _syncIdleHandle = null;
-  }
-}
-
-async function flushSyncWrite(handle: DirHandle) {
-  try {
-    await writeToSyncFolder(handle);
-    _dirty = false;
-    _lastDirtyAt = null;
-    _lastSyncedAt = Date.now();
-    emitSyncStatus();
-  } catch {
-    // Permission may have been revoked — fail silently.
-  }
-}
-
-export async function saveSyncNow(): Promise<boolean> {
-  if (!_handle) return false;
-  const granted = await ensureSyncPermission(_handle, true);
-  if (!granted) return false;
-  clearPendingSyncCallbacks();
-  await flushSyncWrite(_handle);
-  return true;
-}
-
-/** Schedule a sync write after the last mutation burst. No-op when no folder is
- *  connected. */
-export function scheduleSyncWrite(): void {
-  if (!_handle) return;
-  markDirty();
-
-  if (_mode === "manual") {
-    return;
-  }
-
-  clearPendingSyncCallbacks();
-  const handle = _handle;
-
-  _syncTimer = setTimeout(() => {
-    _syncTimer = null;
-
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      _syncIdleHandle = window.requestIdleCallback(
-        () => {
-          _syncIdleHandle = null;
-          void flushSyncWrite(handle);
-        },
-        { timeout: 2000 },
-      );
-      return;
-    }
-
-    void flushSyncWrite(handle);
-  }, 1400);
+  // "keep" — overwrite folder with local data.
+  const localData = await storageAdapter.read();
+  await writeFolder(handle, localData);
+  return { handle, resolution: "keep-local-data", importedFolderData: false };
 }

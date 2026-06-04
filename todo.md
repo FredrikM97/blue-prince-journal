@@ -1,3 +1,9 @@
+- [x] Prevent long todo titles from overflowing row borders
+- [x] Replace native todo delete confirm with in-app delete dialog
+- [x] Move todo delete action from dropdown into dedicated delete icon button
+- [x] Default Notes status filter to Open
+- [x] Make todo right-panel preview include full metadata/details like dialog preview
+
 - [x] Add instruction to avoid feature-level mobile behavior media queries when PageLayout mobile hook exists
 - [x] Remove todo-row mobile media-query stacking override in favor of hook-driven mobile behavior contract
 - [x] Move edit-note Use existing button to footer action row with attach/cancel/save
@@ -229,3 +235,24 @@
 - [x] Extract shared sync conflict-confirm helper to remove duplicated inline prompt strings
 - [x] Extract shared local sync item-count utility and reuse in Welcome + Settings
 - [x] Use shared browser storage access helper for Settings storage health backup check
+
+## Current storage-adapter pass
+
+- [x] Add pluggable sync storage adapter interface for snapshot read/import flows
+- [x] Implement IndexedDB-backed sync storage adapter as default behavior
+- [x] Implement local-backup sync storage adapter for swap-ready fallback behavior
+- [x] Route sync write/import through adapter instead of hard-coded db calls
+
+## Current adapter simplification pass
+
+- [x] Rename backend concepts to BrowserDb and LocalDb for clearer naming
+- [x] Split backend implementations into dedicated files under src/data/syncStorage
+- [x] Keep a single adapter surface with adapter.read and adapter.write
+- [x] Move shared merge logic into syncStorage/common helper module
+
+## Current sync runtime rewrite pass
+
+- [x] Rewrite sync runtime state into class-based controller for mode/dirty/last-sync/timers
+- [x] Centralize folder picker/open/permission helpers inside runtime class
+- [x] Convert LocalDb backend from backup reads to dedicated local-db snapshot key
+- [x] Persist and hydrate images in LocalDb backend (no empty image list)

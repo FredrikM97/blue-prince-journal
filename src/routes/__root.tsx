@@ -20,12 +20,7 @@ import { MapPage } from "@/components/map/MapPage";
 import { ImagesPage } from "@/components/images/ImagesPage";
 import { GraphPage } from "@/components/graph/GraphPage";
 import { useStore } from "@/data/store";
-import {
-  restoreSyncHandle,
-  readFromSyncFolder,
-  importSyncManifest,
-  getActiveSyncFolderName,
-} from "@/data/sync";
+import { syncRuntime } from "@/data/sync";
 import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/browserStorage";
 
 type RouterContext = {
@@ -51,23 +46,16 @@ function AppFrame({ children }: { children: React.ReactNode }) {
       try {
         await load();
 
-        const handle = await restoreSyncHandle();
-        if (handle) {
-          setSyncFolderName(getActiveSyncFolderName() ?? handle.name);
-          const state = useStore.getState();
-          if (state.notes.length === 0 && state.todos.length === 0) {
-            const manifest = await readFromSyncFolder(handle);
-            if (manifest) {
-              await importSyncManifest(manifest);
-              await load();
-            }
-          }
-        }
+        const state = useStore.getState();
+        const localIsEmpty = state.notes.length === 0 && state.todos.length === 0;
+        const { folderName, appliedFolderData } = await syncRuntime.boot(localIsEmpty);
+        if (folderName) setSyncFolderName(folderName);
+        if (appliedFolderData) await load();
 
         const welcomed = getLocalStorageFlag("bp-welcomed");
-        const state = useStore.getState();
-        const hasData = state.notes.length > 0 || state.todos.length > 0;
-        const hasSyncFolder = Boolean(getActiveSyncFolderName());
+        const afterState = useStore.getState();
+        const hasData = afterState.notes.length > 0 || afterState.todos.length > 0;
+        const hasSyncFolder = Boolean(syncRuntime.getActiveFolderName());
 
         if (!welcomed && !hasData && !hasSyncFolder) {
           setWelcomeSource("auto");
@@ -136,7 +124,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 
   if (effectiveInitState === "welcome") {
     const hasExistingConfiguration =
-      notes.length > 0 || todos.length > 0 || Boolean(getActiveSyncFolderName());
+      notes.length > 0 || todos.length > 0 || Boolean(syncRuntime.getActiveFolderName());
 
     return (
       <div className="app-shell">
