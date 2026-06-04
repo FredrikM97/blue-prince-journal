@@ -9,6 +9,7 @@ interface UIState {
   capturePrefill: string;
   capturePrefillRoom?: string;
   capturePrefillBody: string;
+  capturePrefillImageIds: string[];
   capturePrefillTags: string;
   capturePrefillType?: NoteType;
   capturePrefillPriority?: Priority;
@@ -46,6 +47,7 @@ export const useStore = create<UIState>((set) => ({
   capturePrefill: "",
   capturePrefillRoom: undefined,
   capturePrefillBody: "",
+  capturePrefillImageIds: [],
   capturePrefillTags: "",
   capturePrefillType: undefined,
   capturePrefillPriority: undefined,
@@ -69,6 +71,7 @@ export const useStore = create<UIState>((set) => ({
         capturePrefill: note.title,
         capturePrefillRoom: note.room,
         capturePrefillBody: note.body,
+        capturePrefillImageIds: note.imageIds,
         capturePrefillTags: note.tags.join(", "),
         capturePrefillType: note.type,
         capturePrefillPriority: undefined,
@@ -86,6 +89,7 @@ export const useStore = create<UIState>((set) => ({
         capturePrefill: todo.title,
         capturePrefillRoom: todo.room,
         capturePrefillBody: todo.body ?? "",
+        capturePrefillImageIds: todo.imageIds ?? [],
         capturePrefillTags: todo.tags.join(", "),
         capturePrefillType: undefined,
         capturePrefillPriority: todo.priority,
@@ -102,6 +106,7 @@ export const useStore = create<UIState>((set) => ({
       capturePrefill: opts?.prefill ?? "",
       capturePrefillRoom: opts?.room,
       capturePrefillBody: "",
+      capturePrefillImageIds: [],
       capturePrefillTags: "",
       capturePrefillType: opts?.noteType,
       capturePrefillPriority: undefined,
@@ -117,6 +122,7 @@ export const useStore = create<UIState>((set) => ({
       capturePrefill: "",
       capturePrefillRoom: undefined,
       capturePrefillBody: "",
+      capturePrefillImageIds: [],
       capturePrefillTags: "",
       capturePrefillType: undefined,
       capturePrefillPriority: undefined,

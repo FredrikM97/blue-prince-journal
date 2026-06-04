@@ -44,10 +44,9 @@ type StackVariant =
   | "note-details-images-compact"
   | "note-details-images-header"
   | "note-details-images-label"
-  | "note-details-images-grid"
-  | "note-details-images-grid-compact"
-  | "note-details-image-caption-wrap"
   | "note-details-zoom-preview"
+  | "image-card-strip"
+  | "note-image-picker-grid"
   | "images-grid"
   | "markdown-preview-surface"
   | "filter-section"
@@ -101,10 +100,9 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "note-details-images-compact": "note-details-images-compact",
   "note-details-images-header": "mb-2",
   "note-details-images-label": "note-details-images-label",
-  "note-details-images-grid": "note-details-images-grid",
-  "note-details-images-grid-compact": "note-details-images-grid-compact",
-  "note-details-image-caption-wrap": "mt-1 px-1",
   "note-details-zoom-preview": "note-details-zoom-preview",
+  "image-card-strip": "image-card-strip",
+  "note-image-picker-grid": "note-image-picker-grid",
   "images-grid": "images-grid",
   "markdown-preview-surface":
     "markdown-preview-surface prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed",

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useStore } from "@/data/store";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -11,9 +11,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/common/Tabs";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { toast } from "sonner";
 import { usePasteImages } from "@/hooks/usePasteImages";
-import { ImagePlus } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImagePlus, X } from "lucide-react";
 import type { NoteType, Priority } from "@/lib/types";
 import { NOTE_TYPES } from "@/lib/noteMetadata";
+import { ImageCard } from "@/components/common/ImageCard";
 import { PendingImageList } from "@/components/common/input/PendingImageList";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
@@ -22,12 +23,23 @@ import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
+import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
+import { Chip } from "@/components/common/Chip";
 
 const NOTE_PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
   { value: "med", label: "Medium" },
   { value: "low", label: "Low" },
 ];
+
+const IMAGE_SORT_OPTIONS = [
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" },
+  { value: "name-asc", label: "Name A-Z" },
+  { value: "name-desc", label: "Name Z-A" },
+];
+
+type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";
 
 type NotesStoreSlice = ReturnType<typeof useNotesStoreSlice>;
 type NotesFormState = ReturnType<typeof useNotesFormState>;
@@ -41,11 +53,13 @@ function useNotesStoreSlice() {
   const prefillType = useStore((s) => s.capturePrefillType);
   const prefillTags = useStore((s) => s.capturePrefillTags);
   const prefillBody = useStore((s) => s.capturePrefillBody);
+  const prefillImageIds = useStore((s) => s.capturePrefillImageIds);
   const prefillPriority = useStore((s) => s.capturePrefillPriority);
   const editNoteId = useStore((s) => s.captureEditNoteId);
   const editTodoId = useStore((s) => s.captureEditTodoId);
   const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
   const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
+  const images = useLiveQuery(() => db.images.toArray()) ?? [];
   const returnTo = useStore((s) => s.captureReturnTo);
 
   return {
@@ -57,6 +71,7 @@ function useNotesStoreSlice() {
     prefillType,
     prefillTags,
     prefillBody,
+    prefillImageIds,
     prefillPriority,
     editNoteId,
     editTodoId,
@@ -64,6 +79,7 @@ function useNotesStoreSlice() {
     saveTodo,
     notes,
     todos,
+    images,
     returnTo,
     create: createFromCapture,
   };
@@ -76,6 +92,7 @@ function useNotesFormState({
   prefillType,
   prefillTags,
   prefillBody,
+  prefillImageIds,
   prefillPriority,
   defaultNoteType,
 }: {
@@ -85,6 +102,7 @@ function useNotesFormState({
   prefillType?: NoteType;
   prefillTags?: string;
   prefillBody?: string;
+  prefillImageIds?: string[];
   prefillPriority?: Priority;
   defaultNoteType?: NoteType;
 }) {
@@ -96,12 +114,14 @@ function useNotesFormState({
   const [tagsInput, setTagsInput] = useState(prefillTags ?? "");
   const [priority, setPriority] = useState<Priority>(prefillPriority ?? "med");
   const [body, setBody] = useState(prefillBody ?? "");
+  const [selectedImageIds, setSelectedImageIds] = useState<string[]>(prefillImageIds ?? []);
   const [pendingImages, setPendingImages] = useState<Blob[]>([]);
 
   function resetAfterSubmit() {
     setTitle("");
     setBody("");
     setDateInput("");
+    setSelectedImageIds([]);
     setPendingImages([]);
   }
 
@@ -122,6 +142,8 @@ function useNotesFormState({
     setPriority,
     body,
     setBody,
+    selectedImageIds,
+    setSelectedImageIds,
     pendingImages,
     setPendingImages,
     resetAfterSubmit,
@@ -296,17 +318,19 @@ function NotesTagsField({
 function NotesFooterActions({
   submit,
   close,
+  openExistingPicker,
   setPendingImages,
 }: {
   submit: (keepOpen: boolean) => void | Promise<void>;
   close: () => void;
+  openExistingPicker: () => void;
   setPendingImages: React.Dispatch<React.SetStateAction<Blob[]>>;
 }) {
   const attachRef = useRef<HTMLInputElement>(null);
 
   return (
-    <Inline gap="2" justify="between" align="center" wrap>
-      <>
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-2">
         <Button
           type="button"
           variant="outline"
@@ -314,6 +338,9 @@ function NotesFooterActions({
           onClick={() => attachRef.current?.click()}
         >
           <ImagePlus className="h-3.5 w-3.5" /> Attach
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={openExistingPicker}>
+          Existing
         </Button>
         <input
           ref={attachRef}
@@ -327,8 +354,8 @@ function NotesFooterActions({
             e.target.value = "";
           }}
         />
-      </>
-      <Inline gap="2" wrap>
+      </div>
+      <div className="ml-auto flex items-center gap-2">
         <Button variant="ghost" size="sm" onClick={close}>
           Cancel
         </Button>
@@ -338,8 +365,8 @@ function NotesFooterActions({
         <Button variant="brass" size="sm" onClick={() => submit(false)}>
           Save
         </Button>
-      </Inline>
-    </Inline>
+      </div>
+    </div>
   );
 }
 
@@ -372,6 +399,7 @@ function useTodoSubmit({
   closeWithReturn,
   title,
   body,
+  selectedImageIds,
   room,
   tagsInput,
   priority,
@@ -384,6 +412,7 @@ function useTodoSubmit({
   closeWithReturn: () => Promise<void>;
   title: NotesFormState["title"];
   body: NotesFormState["body"];
+  selectedImageIds: NotesFormState["selectedImageIds"];
   room: NotesFormState["room"];
   tagsInput: NotesFormState["tagsInput"];
   priority: NotesFormState["priority"];
@@ -406,6 +435,7 @@ function useTodoSubmit({
           tags,
           priority,
           body: body.trim() || undefined,
+          imageIds: selectedImageIds,
         });
         toast.success("Todo updated");
         await closeWithReturn();
@@ -415,6 +445,7 @@ function useTodoSubmit({
 
     await create(title || "Untitled", {
       kind: "todo",
+      imageIds: selectedImageIds,
       body,
       room: room || undefined,
       tags,
@@ -438,6 +469,7 @@ function useNoteSubmit({
   closeWithReturn,
   title,
   pendingImages,
+  selectedImageIds,
   body,
   type,
   room,
@@ -452,6 +484,7 @@ function useNoteSubmit({
   closeWithReturn: () => Promise<void>;
   title: NotesFormState["title"];
   pendingImages: NotesFormState["pendingImages"];
+  selectedImageIds: NotesFormState["selectedImageIds"];
   body: NotesFormState["body"];
   type: NotesFormState["type"];
   room: NotesFormState["room"];
@@ -477,6 +510,7 @@ function useNoteSubmit({
           room: room || undefined,
           tags,
           date: dateInput || existing.date,
+          imageIds: selectedImageIds,
         });
         toast.success("Note updated");
         await closeWithReturn();
@@ -488,6 +522,7 @@ function useNoteSubmit({
     // but explicit fields override.
     await create(title || "Untitled", {
       kind: "note",
+      imageIds: selectedImageIds,
       imageBlobs: pendingImages,
       body,
       type,
@@ -515,9 +550,11 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     prefillType: store.prefillType,
     prefillTags: store.prefillTags,
     prefillBody: store.prefillBody,
+    prefillImageIds: store.prefillImageIds,
     prefillPriority: store.prefillPriority,
     defaultNoteType,
   });
+  const [imagePickerOpen, setImagePickerOpen] = useState(false);
 
   useNotesGlobalEffects({
     open: store.open,
@@ -547,6 +584,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     closeWithReturn,
     title: form.title,
     body: form.body,
+    selectedImageIds: form.selectedImageIds,
     room: form.room,
     tagsInput: form.tagsInput,
     priority: form.priority,
@@ -561,6 +599,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     closeWithReturn,
     title: form.title,
     pendingImages: form.pendingImages,
+    selectedImageIds: form.selectedImageIds,
     body: form.body,
     type: form.type,
     room: form.room,
@@ -640,11 +679,44 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
           images={form.pendingImages}
           onRemove={(index) => form.setPendingImages((p) => p.filter((_, j) => j !== index))}
         />
+
+        <Stack gap="1">
+          <MetaText>Selected existing images: {form.selectedImageIds.length}</MetaText>
+          {form.selectedImageIds.length > 0 && (
+            <Stack variant="image-card-strip" gap="0">
+              {form.selectedImageIds.map((id) => {
+                const img = store.images.find((item) => item.id === id);
+                if (!img) return null;
+                return (
+                  <ImageCard
+                    key={id}
+                    id={id}
+                    label={getImageLabel(img)}
+                    size="sm"
+                    onRemove={(e) => {
+                      e.stopPropagation();
+                      form.setSelectedImageIds((prev) => prev.filter((imageId) => imageId !== id));
+                    }}
+                  />
+                );
+              })}
+            </Stack>
+          )}
+        </Stack>
       </Stack>
+
+      <SelectExistingImagesDialog
+        open={imagePickerOpen}
+        onOpenChange={setImagePickerOpen}
+        images={store.images}
+        selectedImageIds={form.selectedImageIds}
+        setSelectedImageIds={form.setSelectedImageIds}
+      />
 
       <NotesFooterActions
         submit={submit}
         close={closeCapturePanel}
+        openExistingPicker={() => setImagePickerOpen(true)}
         setPendingImages={form.setPendingImages}
       />
     </>
@@ -664,5 +736,136 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     <SidePanel.Right title={panelTitle} onClose={closeCapturePanel} panelKey={panelKey}>
       {content}
     </SidePanel.Right>
+  );
+}
+
+function getImageLabel(img: { name: string; caption?: string }): string {
+  return img.caption?.trim() || img.name;
+}
+
+function SelectExistingImagesDialog({
+  open,
+  onOpenChange,
+  images,
+  selectedImageIds,
+  setSelectedImageIds,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  images: Array<{ id: string; name: string; caption?: string; createdAt: number }>;
+  selectedImageIds: string[];
+  setSelectedImageIds: React.Dispatch<React.SetStateAction<string[]>>;
+}) {
+  const [imageSort, setImageSort] = useState<ImageSort>("newest");
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 12;
+
+  const selectedSet = useMemo(() => new Set(selectedImageIds), [selectedImageIds]);
+  const sortedImages = useMemo(() => {
+    if (!open) return [];
+    const next = [...images];
+    next.sort((a, b) => {
+      if (imageSort === "newest") return b.createdAt - a.createdAt;
+      if (imageSort === "oldest") return a.createdAt - b.createdAt;
+      if (imageSort === "name-asc") return a.name.localeCompare(b.name);
+      return b.name.localeCompare(a.name);
+    });
+    return next;
+  }, [open, images, imageSort]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedImages.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const pageImages = sortedImages.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+
+  function handleSortChange(value: ImageSort) {
+    setImageSort(value);
+    setPage(0);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent variant="wide" showClose={false}>
+        <Inline gap="3" justify="between" align="center">
+          <DialogTitle>Attach existing image</DialogTitle>
+          <Inline gap="2" align="center">
+            <Inline gap="1" align="center">
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <MetaText size="xs">
+                {safePage + 1} / {totalPages}
+              </MetaText>
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={safePage === totalPages - 1}
+                aria-label="Next page"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Inline>
+            <DropdownSelect
+              value={imageSort}
+              onValueChange={(value) => handleSortChange(value as ImageSort)}
+              options={IMAGE_SORT_OPTIONS}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="shrink-0 border border-input"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="h-3.5 w-3.5" />
+              Close
+            </Button>
+          </Inline>
+        </Inline>
+        <MetaText>
+          Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
+        </MetaText>
+
+        <Stack variant="dialog-scroll-body" gap="0">
+          {sortedImages.length > 0 ? (
+            <Stack variant="note-image-picker-grid" gap="0">
+              {pageImages.map((img) => {
+                const selected = selectedSet.has(img.id);
+                return (
+                  <ImageCard
+                    key={img.id}
+                    id={img.id}
+                    label={getImageLabel(img)}
+                    selected={selected}
+                    badge={selected ? <Chip variant="solid">Selected</Chip> : null}
+                    onClick={() => {
+                      setSelectedImageIds((prev) => {
+                        if (selected) return prev.filter((id) => id !== img.id);
+                        return Array.from(new Set([...prev, img.id]));
+                      });
+                      toast.success(selected ? "Image detached" : "Image attached");
+                    }}
+                  />
+                );
+              })}
+            </Stack>
+          ) : (
+            <MetaText size="sm">
+              No available images to attach. Upload or paste a new image first.
+            </MetaText>
+          )}
+        </Stack>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -54,6 +54,53 @@
     @apply min-h-0 flex-1 overflow-y-auto;
   }
 
+  /* ─── Shared image card ───────────────────────────────────────────────────── */
+
+  /* Square card that fills its grid cell — used in galleries */
+  .image-card {
+    @apply relative aspect-square w-full overflow-hidden rounded-md border border-border bg-muted cursor-pointer transition-colors hover:border-brass/70;
+  }
+
+  /* Small fixed-size variant — used in the editor attached-images strip */
+  .image-card-sm {
+    @apply h-16 w-16 shrink-0;
+    aspect-ratio: unset;
+    width: 4rem;
+  }
+
+  /* Image fills the card */
+  .image-card-thumb {
+    @apply absolute inset-0 h-full w-full object-cover;
+  }
+
+  /* Label overlay pinned to the bottom */
+  .image-card-label {
+    @apply absolute bottom-0 left-0 right-0 flex items-center gap-1 bg-black/60 px-1.5 py-0.5;
+  }
+  .image-card-label-text {
+    @apply min-w-0 flex-1 truncate text-[10px] leading-tight text-white;
+  }
+
+  /* Selection state (for picker use) */
+  .image-card-selected {
+    @apply border-brass bg-brass/10 ring-1 ring-brass/40;
+  }
+
+  /* Remove button — top-right corner, visible on hover */
+  .image-card-remove {
+    @apply absolute right-1 top-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80;
+  }
+  .image-card:hover .image-card-remove,
+  .image-card-sm:hover .image-card-remove {
+    @apply opacity-100;
+  }
+
+  /* Horizontal scroll strip for attached images in editor/create panels */
+  .image-card-strip {
+    @apply flex gap-2 overflow-x-auto pb-1;
+    scrollbar-width: thin;
+  }
+
   /* ─── Dialog primitives ──────────────────────────────────────────────────── */
 
   /* Backdrop — shown behind every dialog */

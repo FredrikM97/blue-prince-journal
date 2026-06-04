@@ -225,6 +225,14 @@
 - [x] Keep right-panel and expanded previews on full-resolution source images
 - [x] Apply thumbnail mode to note attachment gallery and image picker thumbs
 
+## Current note/todo attachment pass
+
+- [x] Allow selecting existing images in Notes create/edit capture flow
+- [x] Persist selected images for both note and todo create/edit
+- [x] Show todo attached images in preview and derived note/graph projections
+- [x] Sort Images page by latest added first
+- [x] Show selected existing image thumbnails + labels in note/todo capture panel
+
 - [x] Add sync-folder conflict prompt when both local and folder data exist
 - [x] Increase map mobile cell space for better text visibility
 - [x] Move image prev/next controls into right-panel title bar actions

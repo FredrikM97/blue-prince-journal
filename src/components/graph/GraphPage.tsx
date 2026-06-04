@@ -865,7 +865,7 @@ function toGraphEntries(notes: Note[], todos: Todo[]): Note[] {
     date: undefined,
     status: todo.status === "done" ? "solved" : "open",
     scope: todo.scope === "someday" ? "cross-run" : todo.scope,
-    imageIds: [],
+    imageIds: todo.imageIds ?? [],
     createdAt: todo.createdAt,
     updatedAt: todo.updatedAt,
   }));

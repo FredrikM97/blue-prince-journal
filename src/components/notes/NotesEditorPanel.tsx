@@ -1,15 +1,13 @@
 import { useMemo, useRef, useState } from "react";
-import type { Note } from "@/lib/types";
+import type { Note, StoredImage } from "@/lib/types";
 import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
-import { StoredImageView } from "@/components/common/StoredImageView";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { addImage } from "@/data/mutations";
-import type { StoredImage } from "@/lib/types";
-import { ImagePlus, X } from "lucide-react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { ChevronLeft, ChevronRight, ImagePlus, X } from "lucide-react";
 import { TYPE_LABEL } from "@/lib/noteMetadata";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
@@ -20,6 +18,7 @@ import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
+import { ImageCard } from "@/components/common/ImageCard";
 
 type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";
 
@@ -62,19 +61,18 @@ export function NotesEditorPanel({
 }) {
   const mobileDrawerControls = usePageLayoutMobileDrawerControls();
   const isMobileDrawer = mobileDrawerControls?.isPageLayoutMobile === true;
-  const images: StoredImage[] = useLiveQuery(() => db.images.toArray()) ?? [];
+  const rawImages = useLiveQuery(() => db.images.toArray());
+  const images: StoredImage[] = useMemo(() => rawImages ?? [], [rawImages]);
   const [tagsInputDraft, setTagsInputDraft] = useState(draft.tags.join(", "));
   const [isTagsFocused, setIsTagsFocused] = useState(false);
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
   const attachRef = useRef<HTMLInputElement>(null);
   const imageById = useMemo(() => new Map(images.map((img) => [img.id, img])), [images]);
   const tagsInput = isTagsFocused ? tagsInputDraft : draft.tags.join(", ");
-  let existingLabel = "Use existing";
-  let attachLabel = "Attach image";
+  const existingLabel = "Existing";
+  const attachLabel = "Attach";
   let footerGap: "1" | "2" = "2";
   if (isMobileDrawer) {
-    existingLabel = "Existing";
-    attachLabel = "Attach";
     footerGap = "1";
   }
 
@@ -201,29 +199,23 @@ export function NotesEditorPanel({
         </Inline>
 
         {draft.imageIds.length > 0 ? (
-          <Inline gap="2" wrap>
+          <Stack variant="image-card-strip" gap="0">
             {draft.imageIds.map((id) => (
-              <Stack key={id} gap="1">
-                <StoredImageView id={id} className="note-attached-thumb" mode="thumb" />
-                <MetaText as="p" size="xs" truncate title={id}>
-                  {getImageLabel(imageById.get(id) ?? { name: "Image" })}
-                </MetaText>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      imageIds: prev.imageIds.filter((x) => x !== id),
-                    }))
-                  }
-                  aria-label="Remove image"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Stack>
+              <ImageCard
+                key={id}
+                id={id}
+                label={getImageLabel(imageById.get(id) ?? { name: "Image" })}
+                size="sm"
+                onRemove={(e) => {
+                  e.stopPropagation();
+                  setDraft((prev) => ({
+                    ...prev,
+                    imageIds: prev.imageIds.filter((x) => x !== id),
+                  }));
+                }}
+              />
             ))}
-          </Inline>
+          </Stack>
         ) : (
           <MetaText>No images attached to this note.</MetaText>
         )}
@@ -302,6 +294,8 @@ function SelectExistingImagesDialog({
   setDraft: React.Dispatch<React.SetStateAction<Note>>;
 }) {
   const [imageSort, setImageSort] = useState<ImageSort>("newest");
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 12;
 
   const selectedSet = useMemo(() => new Set(selectedImageIds), [selectedImageIds]);
   const sortedImages = useMemo(() => {
@@ -316,86 +310,100 @@ function SelectExistingImagesDialog({
     return next;
   }, [open, images, imageSort]);
 
+  const totalPages = Math.max(1, Math.ceil(sortedImages.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const pageImages = sortedImages.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+
+  function handleSortChange(value: ImageSort) {
+    setImageSort(value);
+    setPage(0);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant="editor">
-        <Stack gap="2">
-          <Inline gap="3" justify="between">
-            <DialogTitle>Attach existing image</DialogTitle>
-            <Inline gap="2">
-              <DropdownSelect
-                value={imageSort}
-                onValueChange={(value) => setImageSort(value as ImageSort)}
-                options={IMAGE_SORT_OPTIONS}
-              />
+      <DialogContent variant="wide" showClose={false}>
+        <Inline gap="3" justify="between" align="center">
+          <DialogTitle>Attach existing image</DialogTitle>
+          <Inline gap="2" align="center">
+            <Inline gap="1" align="center">
               <Button
                 type="button"
                 variant="secondary"
-                size="sm"
-                className="shrink-0 border border-input"
-                onClick={() => onOpenChange(false)}
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                aria-label="Previous page"
               >
-                <X className="h-3.5 w-3.5" />
-                Close
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <MetaText size="xs">
+                {safePage + 1} / {totalPages}
+              </MetaText>
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={safePage === totalPages - 1}
+                aria-label="Next page"
+              >
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </Inline>
+            <DropdownSelect
+              value={imageSort}
+              onValueChange={(value) => handleSortChange(value as ImageSort)}
+              options={IMAGE_SORT_OPTIONS}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="shrink-0 border border-input"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="h-3.5 w-3.5" />
+              Close
+            </Button>
           </Inline>
-          <MetaText>
-            Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
-          </MetaText>
-        </Stack>
+        </Inline>
+        <MetaText>
+          Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
+        </MetaText>
 
-        {sortedImages.length > 0 ? (
-          <Inline gap="3" wrap>
-            {sortedImages.map((img) => {
-              const selected = selectedSet.has(img.id);
-              return (
-                <Button
-                  key={img.id}
-                  type="button"
-                  variant="ghost"
-                  size="default"
-                  className={`note-image-picker-card ${
-                    selected ? "note-image-picker-card-selected" : ""
-                  }`}
-                  onClick={() => {
-                    setDraft((prev) => {
-                      const nextIds = selected
-                        ? prev.imageIds.filter((id) => id !== img.id)
-                        : Array.from(new Set([...prev.imageIds, img.id]));
-                      return { ...prev, imageIds: nextIds };
-                    });
-                    toast.success(selected ? "Image detached" : "Image attached");
-                  }}
-                >
-                  <StoredImageView
+        <Stack variant="dialog-scroll-body" gap="0">
+          {sortedImages.length > 0 ? (
+            <Stack variant="note-image-picker-grid" gap="0">
+              {pageImages.map((img) => {
+                const selected = selectedSet.has(img.id);
+                return (
+                  <ImageCard
+                    key={img.id}
                     id={img.id}
-                    alt={img.name}
-                    className="note-image-picker-thumb"
-                    mode="thumb"
+                    label={getImageLabel(img)}
+                    selected={selected}
+                    badge={selected ? <Chip variant="solid">Selected</Chip> : null}
+                    onClick={() => {
+                      setDraft((prev) => {
+                        const nextIds = selected
+                          ? prev.imageIds.filter((id) => id !== img.id)
+                          : Array.from(new Set([...prev.imageIds, img.id]));
+                        return { ...prev, imageIds: nextIds };
+                      });
+                      toast.success(selected ? "Image detached" : "Image attached");
+                    }}
                   />
-                  <Inline gap="2" align="center" justify="between">
-                    <MetaText
-                      as="span"
-                      size="xs"
-                      truncate
-                      title={`${getImageLabel(img)} (${img.name})`}
-                    >
-                      {getImageLabel(img)}
-                    </MetaText>
-                    {selected ? <Chip variant="solid">Selected</Chip> : null}
-                  </Inline>
-                </Button>
-              );
-            })}
-          </Inline>
-        ) : (
-          <Stack gap="2">
+                );
+              })}
+            </Stack>
+          ) : (
             <MetaText size="sm">
               No available images to attach. Upload or paste a new image first.
             </MetaText>
-          </Stack>
-        )}
+          )}
+        </Stack>
       </DialogContent>
     </Dialog>
   );

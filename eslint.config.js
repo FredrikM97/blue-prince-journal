@@ -82,6 +82,10 @@ export default tseslint.config(
     },
   },
   {
+    files: ["src/components/common/ImageCard.tsx"],
+    rules: { "no-restricted-syntax": "off" },
+  },
+  {
     files: ["src/components/**/*.tsx"],
     ignores: [
       "src/components/common/Button.tsx",
@@ -89,6 +93,7 @@ export default tseslint.config(
       "src/components/common/LayoutPrimitives.tsx",
       "src/components/common/Dialog.tsx",
       "src/components/common/Tabs.tsx",
+      "src/components/common/ImageCard.tsx",
       "src/components/common/dropdown/**/*.tsx",
       "src/components/common/input/**/*.tsx",
     ],

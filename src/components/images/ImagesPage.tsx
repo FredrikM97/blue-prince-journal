@@ -37,11 +37,16 @@ export function ImagesPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const steamSync = useSteamSyncPanel(addImage);
 
+  const sortedImages = useMemo(
+    () => [...images].sort((a, b) => b.createdAt - a.createdAt),
+    [images],
+  );
+
   const filtered = useMemo(() => {
     const q = deferredSearch.trim().toLowerCase();
-    if (!q) return images;
-    return images.filter((i) => `${i.name} ${getImageLabel(i)}`.toLowerCase().includes(q));
-  }, [images, deferredSearch]);
+    if (!q) return sortedImages;
+    return sortedImages.filter((i) => `${i.name} ${getImageLabel(i)}`.toLowerCase().includes(q));
+  }, [sortedImages, deferredSearch]);
 
   const selectedIndex = useMemo(
     () => filtered.findIndex((img) => img.id === selectedId),

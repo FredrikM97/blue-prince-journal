@@ -6,9 +6,9 @@ import { StoredImageView } from "@/components/common/StoredImageView";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import type { StoredImage } from "@/lib/types";
-import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
+import { ImageCard } from "@/components/common/ImageCard";
 
 export function AttachedImagesGallery({
   imageIds,
@@ -26,7 +26,8 @@ export function AttachedImagesGallery({
    */
   compact?: boolean;
 }) {
-  const images: StoredImage[] = useLiveQuery(() => db.images.toArray()) ?? [];
+  const rawImages = useLiveQuery(() => db.images.toArray());
+  const images: StoredImage[] = useMemo(() => rawImages ?? [], [rawImages]);
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const imageById = useMemo(() => new Map(images.map((img) => [img.id, img])), [images]);
@@ -39,15 +40,7 @@ export function AttachedImagesGallery({
     return img.caption?.trim() || img.name;
   };
 
-  const btnClass = compact
-    ? "note-details-image-btn-compact text-left"
-    : "note-details-image-btn text-left";
-  const thumbClass = compact ? "h-20 w-full rounded object-cover" : "h-28 w-full object-cover";
-  let wrapperVariant: "note-details-images" | "note-details-images-compact" = "note-details-images";
-  if (compact) wrapperVariant = "note-details-images-compact";
-  let gridVariant: "note-details-images-grid" | "note-details-images-grid-compact" =
-    "note-details-images-grid";
-  if (compact) gridVariant = "note-details-images-grid-compact";
+  const wrapperVariant = compact ? "note-details-images-compact" : "note-details-images";
 
   return (
     <Stack as="section" variant={wrapperVariant} gap="0">
@@ -73,27 +66,15 @@ export function AttachedImagesGallery({
       </Stack>
 
       {!collapsed && (
-        <Stack variant={gridVariant} gap="0">
+        <Stack variant="image-card-strip" gap="0">
           {imageIds.map((id) => (
-            <Button
+            <ImageCard
               key={id}
-              type="button"
-              variant="ghost"
-              size="default"
-              className={btnClass}
+              id={id}
+              label={getImageLabel(id)}
+              size="sm"
               onClick={() => setZoomedImageId(id)}
-              aria-label={`Open image preview: ${getImageLabel(id)}`}
-            >
-              <StoredImageView
-                id={id}
-                className={thumbClass}
-                alt={getImageLabel(id)}
-                mode="thumb"
-              />
-              <Stack variant="note-details-image-caption-wrap" gap="0">
-                <MetaText truncate>{getImageLabel(id)}</MetaText>
-              </Stack>
-            </Button>
+            />
           ))}
         </Stack>
       )}

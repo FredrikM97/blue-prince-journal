@@ -4,6 +4,7 @@ import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { MetaRow, PreviewSection, PreviewTimestamps } from "@/components/common/PreviewContent";
 import { PreviewDialog } from "@/components/common/PreviewDialog";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
 
 function getPriorityVariant(priority: Todo["priority"]) {
   if (priority === "high") return "priority-high";
@@ -44,6 +45,12 @@ export function TodoPreviewContent({ todo }: { todo: Todo }) {
       {body && (
         <PreviewSection>
           <MarkdownPreview>{body}</MarkdownPreview>
+        </PreviewSection>
+      )}
+
+      {todo.imageIds && todo.imageIds.length > 0 && (
+        <PreviewSection>
+          <AttachedImagesGallery imageIds={todo.imageIds} title="Attached images" collapsible />
         </PreviewSection>
       )}
 

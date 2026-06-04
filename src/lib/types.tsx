@@ -26,6 +26,7 @@ export interface Todo {
   id: string;
   title: string;
   body?: string;
+  imageIds?: string[];
   room?: string;
   tags: string[];
   status: TodoStatus;

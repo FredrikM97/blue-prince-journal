@@ -188,24 +188,29 @@
     @apply border-green-700/40 bg-green-700/30 text-green-200;
   }
 
-  /* Note editor (inline edit form) */
-  /* Attached image thumbnail in the editor (small, fixed size) */
-  .note-attached-thumb {
-    @apply h-16 w-16 rounded border border-border object-cover;
+  /* Image grid inside the picker */
+  .note-image-picker-grid {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
   }
 
   /* Image card inside the picker (button) */
   .note-image-picker-card {
-    @apply rounded-md border border-border p-2 text-left transition-colors hover:border-brass/60 hover:bg-muted/40;
+    @apply relative aspect-square w-full overflow-hidden rounded-md border border-input bg-card/70 text-left shadow-sm transition-colors hover:border-brass/70 hover:bg-muted/50;
   }
 
   .note-image-picker-card-selected {
-    @apply border-brass bg-brass/10;
+    @apply border-brass bg-brass/10 ring-1 ring-brass/40;
   }
 
-  /* Thumbnail image inside the picker */
+  /* Thumbnail image inside the picker — fills the card */
   .note-image-picker-thumb {
-    @apply h-20 w-full rounded border border-border object-cover;
+    @apply absolute inset-0 h-full w-full object-cover;
+  }
+
+  /* Label overlay at the bottom of the card */
+  .note-image-picker-label {
+    @apply absolute bottom-0 left-0 right-0 flex items-center justify-between gap-1 bg-black/60 px-2 py-1;
   }
 
   /* Note body snippet card — use .panel-card in layout.css */
@@ -217,29 +222,8 @@
     @apply text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
   }
 
-  .note-details-images-grid {
-    @apply grid grid-cols-2 gap-3 sm:grid-cols-3;
-  }
-
-  /* Compact variant — smaller thumbnails, 2 cols, no top margin (for sidebar panels) */
+  /* Compact variant — smaller spacing, no top margin (for sidebar panels) */
   .note-details-images-compact {
     @apply mt-3 space-y-2;
-  }
-
-  .note-details-images-grid-compact {
-    @apply grid grid-cols-2 gap-2;
-  }
-
-  .note-details-image-btn {
-    @apply overflow-hidden rounded border border-border transition-colors hover:border-brass;
-  }
-
-  /* Compact image button — lighter styling for sidebar panels */
-  .note-details-image-btn-compact {
-    @apply rounded p-1 transition-colors hover:bg-muted/40;
-  }
-
-  .note-details-zoom-preview {
-    @apply max-h-[75vh] overflow-hidden rounded border border-border bg-black/60 p-2;
   }
 }

@@ -23,6 +23,7 @@ export async function createFromCapture(
   raw: string,
   opts?: {
     kind?: "note" | "todo";
+    imageIds?: string[];
     imageBlobs?: Blob[];
     body?: string;
     type?: NoteType;
@@ -35,7 +36,7 @@ export async function createFromCapture(
   const parsed = parseCapture(raw);
   const kind = opts?.kind ?? (parsed.isTodo ? "todo" : "note");
   const now = Date.now();
-  const imageIds: string[] = [];
+  const imageIds: string[] = [...(opts?.imageIds ?? [])];
 
   if (opts?.imageBlobs?.length) {
     for (const b of opts.imageBlobs) {
@@ -51,6 +52,7 @@ export async function createFromCapture(
     const todo: Todo = {
       id: nanoid(),
       title: parsed.title,
+      imageIds,
       room,
       tags,
       status: parsed.status === "solved" ? "done" : "open",
