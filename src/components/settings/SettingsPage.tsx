@@ -15,7 +15,11 @@ import {
 } from "@/data/rooms";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { exportAll, importAll } from "@/data/io";
-import { buildGraphTestNotes } from "@/data/seedGraphTest";
+import {
+  attachSeedImagesToNotes,
+  buildGraphTestNotes,
+  buildSeedTestImageSpecs,
+} from "@/data/seedGraphTest";
 import {
   pickSyncFolder,
   disconnectSyncFolder,
@@ -49,6 +53,7 @@ import { CenteredContent, Inline, SectionBlock } from "@/components/common/Layou
 export function SettingsPage() {
   const load = useStore((s) => s.load);
   const save = useStore((s) => s.saveNote);
+  const addImage = useStore((s) => s.addImage);
   const fileRef = useRef<HTMLInputElement>(null);
   const [customRooms, setCustomRooms] = useState(() => listCustomRooms());
   const [newRoomName, setNewRoomName] = useState("");
@@ -158,14 +163,23 @@ export function SettingsPage() {
                 variant="outline"
                 onClick={async () => {
                   const notes = buildGraphTestNotes();
-                  for (const n of notes) await save(n);
+                  const imageSpecs = buildSeedTestImageSpecs();
+                  const imageIds: string[] = [];
+
+                  for (const image of imageSpecs) {
+                    const created = await addImage(image.blob, image.name, image.caption);
+                    imageIds.push(created.id);
+                  }
+
+                  const notesWithImages = attachSeedImagesToNotes(notes, imageIds);
+                  for (const n of notesWithImages) await save(n);
                   await load();
                   toast.success(
-                    `Seeded ${notes.length} notes across ${new Set(notes.map((n) => n.room)).size} rooms`,
+                    `Seeded ${notesWithImages.length} notes across ${new Set(notesWithImages.map((n) => n.room)).size} rooms with ${imageIds.length} images`,
                   );
                 }}
               >
-                Seed graph test data (~70 rooms)
+                Seed graph test data with images
               </Button>
             </SettingsSubsection>
           </SettingsSection>

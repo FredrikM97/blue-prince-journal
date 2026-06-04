@@ -7,6 +7,12 @@
 import { nanoid } from "nanoid";
 import type { Note, NoteType, RunScope } from "@/lib/types";
 
+export interface SeedImageSpec {
+  name: string;
+  caption: string;
+  blob: Blob;
+}
+
 // Each wing has a set of rooms, shared tags, and occasional bridge rooms that
 // link it to another wing.
 const WINGS: Array<{
@@ -116,4 +122,57 @@ export function buildGraphTestNotes(): Note[] {
   }
 
   return notes;
+}
+
+function buildSeedSvg(index: number): string {
+  const palettes = [
+    ["#0F766E", "#14B8A6", "#99F6E4"],
+    ["#1D4ED8", "#3B82F6", "#93C5FD"],
+    ["#B45309", "#D97706", "#FCD34D"],
+    ["#9F1239", "#E11D48", "#FDA4AF"],
+    ["#3F6212", "#65A30D", "#BEF264"],
+  ];
+  const palette = palettes[index % palettes.length];
+  const label = `Seed ${index + 1}`;
+  return [
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">',
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${palette[0]}"/><stop offset="60%" stop-color="${palette[1]}"/><stop offset="100%" stop-color="${palette[2]}"/></linearGradient></defs>`,
+    '<rect width="1200" height="900" fill="url(#g)"/>',
+    '<circle cx="960" cy="180" r="160" fill="rgba(255,255,255,0.18)"/>',
+    '<circle cx="220" cy="720" r="200" fill="rgba(0,0,0,0.15)"/>',
+    '<rect x="120" y="180" width="620" height="480" rx="28" fill="rgba(0,0,0,0.18)"/>',
+    `<text x="170" y="300" fill="white" font-family="ui-sans-serif,system-ui" font-size="74" font-weight="700">${label}</text>`,
+    '<text x="170" y="390" fill="rgba(255,255,255,0.9)" font-family="ui-sans-serif,system-ui" font-size="38">Generated test screenshot</text>',
+    '<text x="170" y="452" fill="rgba(255,255,255,0.82)" font-family="ui-sans-serif,system-ui" font-size="30">Use for preview, gallery, and note attachment checks</text>',
+    "</svg>",
+  ].join("");
+}
+
+export function buildSeedTestImageSpecs(count = 12): SeedImageSpec[] {
+  const specs: SeedImageSpec[] = [];
+  for (let i = 0; i < count; i++) {
+    const svg = buildSeedSvg(i);
+    specs.push({
+      name: `seed-image-${String(i + 1).padStart(2, "0")}.svg`,
+      caption: `Seed image ${i + 1}`,
+      blob: new Blob([svg], { type: "image/svg+xml" }),
+    });
+  }
+  return specs;
+}
+
+export function attachSeedImagesToNotes(notes: Note[], imageIds: string[]): Note[] {
+  if (imageIds.length === 0) return notes;
+
+  return notes.map((note, index) => {
+    const attached: string[] = [];
+    if (index % 3 === 0) attached.push(imageIds[index % imageIds.length]);
+    if (index % 7 === 0) attached.push(imageIds[(index + 3) % imageIds.length]);
+    if (attached.length === 0) return note;
+
+    return {
+      ...note,
+      imageIds: Array.from(new Set(attached)),
+    };
+  });
 }

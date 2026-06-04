@@ -13,13 +13,19 @@ import type { Note, StoredImage } from "@/lib/types";
 
 // Image styling containers (requires wrapper for CSS styling)
 function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
-  // eslint-disable-next-line no-restricted-syntax
-  return <div className="images-detail-preview">{children}</div>;
+  return (
+    <Stack gap="0" className="images-detail-preview">
+      {children}
+    </Stack>
+  );
 }
 
 function ImageZoomPreview({ children }: { children: React.ReactNode }) {
-  // eslint-disable-next-line no-restricted-syntax
-  return <div className="images-detail-preview">{children}</div>;
+  return (
+    <Stack gap="0" className="images-zoom-preview">
+      {children}
+    </Stack>
+  );
 }
 
 function getImageLabel(img: StoredImage): string {
@@ -181,7 +187,7 @@ function ImagesInspectorPanel({
             <DialogTitle>{getImageLabel(img)}</DialogTitle>
           </DialogHeader>
           <ImageZoomPreview>
-            <StoredImageView id={img.id} alt={img.name} className="images-detail-preview-image" />
+            <StoredImageView id={img.id} alt={img.name} className="images-zoom-preview-image" />
           </ImageZoomPreview>
         </DialogContent>
       </Dialog>
