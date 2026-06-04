@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useStore } from "@/data/store";
-import type { Note, NoteType } from "@/lib/types";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import { saveNote, removeNote, removeTodo } from "@/data/mutations";
+import type { Note, NoteType, Todo } from "@/lib/types";
 import { PageLayout } from "@/components/common/PageLayout";
 import { Button } from "@/components/common/Button";
 import {
@@ -31,15 +34,12 @@ export function NotesPage({
   title: string;
   emptyHint?: string;
 }) {
-  const notes = useStore((s) => s.notes);
-  const todos = useStore((s) => s.todos);
+  const notes: Note[] = useLiveQuery(() => db.notes.orderBy("updatedAt").reverse().toArray()) ?? [];
+  const todos: Todo[] = useLiveQuery(() => db.todos.orderBy("updatedAt").reverse().toArray()) ?? [];
   const search = useStore((s) => s.search);
   const openCapture = useStore((s) => s.openCapture);
   const captureOpen = useStore((s) => s.captureOpen);
   const closeCapture = useStore((s) => s.closeCapture);
-  const saveNote = useStore((s) => s.saveNote);
-  const removeNote = useStore((s) => s.removeNote);
-  const removeTodo = useStore((s) => s.removeTodo);
   const {
     uiState,
     uiActions,

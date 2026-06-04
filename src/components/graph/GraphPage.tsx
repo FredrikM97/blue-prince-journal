@@ -16,7 +16,8 @@ import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
 import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
-import { useGraphStoreData } from "@/hooks/useGraphStoreData";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
 import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
 import { getRoomCatalog, ROOM_GROUPS } from "@/data/rooms";
 import type { Note, Todo } from "@/lib/types";
@@ -110,7 +111,9 @@ const TYPE_ICON: Record<
 };
 
 export function GraphPage() {
-  const { notes, todos, dataVersion } = useGraphStoreData();
+  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
+  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
+  const dataVersion = notes.length + todos.length;
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [hiddenRooms, setHiddenRooms] = useState<Set<string>>(new Set());
   const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set());

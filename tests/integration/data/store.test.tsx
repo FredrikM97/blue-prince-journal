@@ -1,71 +1,116 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { GridCell, Note, Todo } from "@/lib/types";
+import type { Note, Todo } from "@/lib/types";
 import { buildNote, buildTodo } from "../../fixtures/domainBuilders";
+import { useStore } from "@/data/store";
 
-const mockCtx = vi.hoisted(() => ({
-  nanoidMock: vi.fn(),
-  parseCaptureMock: vi.fn(),
-  scheduleSyncWriteMock: vi.fn(),
-  db: {
-    isBrowser: vi.fn(() => true),
-    clearAllData: vi.fn(async () => {}),
-    listNotes: vi.fn(async () => []),
-    listTodos: vi.fn(async () => []),
-    listImages: vi.fn(async () => []),
-    listRoomStates: vi.fn(async () => []),
-    listSections: vi.fn(async () => []),
-    listGridCells: vi.fn(async () => []),
-    putNote: vi.fn(async () => {}),
-    putTodo: vi.fn(async () => {}),
-    putImage: vi.fn(async () => {}),
-    putRoomState: vi.fn(async () => {}),
-    putSection: vi.fn(async () => {}),
-    putGridCell: vi.fn(async () => {}),
-    deleteGridCell: vi.fn(async () => {}),
-    deleteNote: vi.fn(async () => {}),
-    deleteTodo: vi.fn(async () => {}),
-    deleteImage: vi.fn(async () => {}),
-    deleteSection: vi.fn(async () => {}),
-  },
-}));
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
 
-vi.mock("nanoid", () => ({ nanoid: () => mockCtx.nanoidMock() }));
-vi.mock("@/data/db", () => mockCtx.db);
-vi.mock("@/data/parse", () => ({
-  parseCapture: (...args: unknown[]) => mockCtx.parseCaptureMock(...args),
-}));
+const mockScheduleWrite = vi.fn();
+
 vi.mock("@/data/sync", () => ({
   syncRuntime: {
-    scheduleWrite: () => mockCtx.scheduleSyncWriteMock(),
+    scheduleWrite: mockScheduleWrite,
     disconnect: vi.fn(async () => {}),
   },
 }));
+
+const mockDb = {
+  notes: {
+    put: vi.fn(async () => {}),
+    delete: vi.fn(async () => {}),
+    get: vi.fn(async () => undefined),
+    toArray: vi.fn(async () => []),
+  },
+  todos: {
+    put: vi.fn(async () => {}),
+    delete: vi.fn(async () => {}),
+    get: vi.fn(async () => undefined),
+    toArray: vi.fn(async () => []),
+  },
+  images: {
+    put: vi.fn(async () => {}),
+    delete: vi.fn(async () => {}),
+    toArray: vi.fn(async () => []),
+  },
+  rooms: {
+    put: vi.fn(async () => {}),
+    toArray: vi.fn(async () => []),
+  },
+  sections: {
+    put: vi.fn(async () => {}),
+    delete: vi.fn(async () => {}),
+    toArray: vi.fn(async () => []),
+  },
+  grid: {
+    put: vi.fn(async () => {}),
+    delete: vi.fn(async () => {}),
+    get: vi.fn(async () => undefined),
+    toArray: vi.fn(async () => []),
+  },
+  meta: {
+    put: vi.fn(async () => {}),
+  },
+  transaction: vi.fn(async (_m: string, _t: unknown[], fn: () => Promise<void>) => fn()),
+};
+
+vi.mock("@/data/db", () => ({
+  db: mockDb,
+  clearAllData: vi.fn(async () => {}),
+  ensureBootSeed: vi.fn(async () => {}),
+  getMeta: vi.fn(async () => undefined),
+  setMeta: vi.fn(async () => {}),
+  deleteMeta: vi.fn(async () => {}),
+  readSnapshot: vi.fn(async () => ({
+    notes: [],
+    todos: [],
+    images: [],
+    rooms: [],
+    sections: [],
+    gridCells: [],
+    customRooms: [],
+  })),
+  applySnapshot: vi.fn(async () => {}),
+}));
+
 vi.mock("@/data/rooms", () => ({
   cellId: (row: number, col: number) => `${row},${col}`,
   clearCustomRooms: vi.fn(),
 }));
+
 vi.mock("@/data/imageNames", () => ({
   buildUniqueFileName: vi.fn(() => "image-unique.png"),
 }));
 
-import { useStore } from "@/data/store";
+vi.mock("@/data/parse", () => ({
+  parseCapture: vi.fn(() => ({
+    isTodo: false,
+    title: "Parsed Title",
+    room: "",
+    tags: [],
+    type: "observation",
+    status: "open",
+    scope: "cross-run",
+    date: "",
+    priority: undefined,
+  })),
+}));
 
-describe("store flows", () => {
+vi.mock("nanoid", () => ({ nanoid: vi.fn(() => "mock-id") }));
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+describe("UIState (store)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCtx.nanoidMock.mockReturnValue("id-1");
-
     useStore.setState({
       loaded: false,
-      dataVersion: 0,
-      notes: [],
-      todos: [],
-      images: [],
-      rooms: [],
-      sections: [],
-      gridCells: [],
       search: "",
       syncFolderName: null,
+      steamFolderName: null,
       captureOpen: false,
       captureDefault: "note",
       capturePrefill: "",
@@ -102,95 +147,95 @@ describe("store flows", () => {
     expect(useStore.getState().capturePrefill).toBe("");
   });
 
-  it("creates a note from capture and schedules sync", async () => {
-    mockCtx.parseCaptureMock.mockReturnValue({
-      isTodo: false,
-      title: "Find clue",
-      room: "Entrance Hall",
-      tags: ["story"],
-      type: "clue",
-      status: "open",
-      scope: "this-run",
-      date: "",
-      priority: undefined,
-    });
+  it("opens capture from todo and closes cleanly", () => {
+    const todo: Todo = buildTodo({ id: "t1", title: "Task", priority: "high" });
 
-    const result = await useStore.getState().createFromCapture("raw note", {
-      body: "  body text  ",
-      tags: ["manual"],
-    });
+    useStore.getState().openCapture({ todo });
 
-    expect(result.noteId).toBe("id-1");
-    expect(mockCtx.db.putNote).toHaveBeenCalledTimes(1);
-    expect(useStore.getState().notes).toHaveLength(1);
-    expect(useStore.getState().notes[0].title).toBe("Find clue");
-    expect(useStore.getState().notes[0].tags).toEqual(["manual", "story"]);
-    expect(mockCtx.scheduleSyncWriteMock).toHaveBeenCalled();
+    const state = useStore.getState();
+    expect(state.captureOpen).toBe(true);
+    expect(state.captureDefault).toBe("todo");
+    expect(state.captureEditTodoId).toBe("t1");
+    expect(state.capturePrefillPriority).toBe("high");
   });
 
-  it("creates a todo from capture and toggles status", async () => {
-    mockCtx.parseCaptureMock.mockReturnValue({
-      isTodo: true,
-      title: "Solve puzzle",
-      room: "Parlor",
-      tags: ["task"],
-      type: "task",
-      status: "open",
-      scope: "cross-run",
-      date: "",
-      priority: "high",
-    });
-
-    const result = await useStore.getState().createFromCapture("todo raw", { kind: "todo" });
-    expect(result.todoId).toBe("id-1");
-    expect(mockCtx.db.putTodo).toHaveBeenCalledTimes(1);
-
-    await useStore.getState().toggleTodoStatus("id-1", "done");
-    const todo = useStore.getState().todos[0] as Todo;
-    expect(todo.status).toBe("done");
-    expect(todo.completedAt).toBeTypeOf("number");
+  it("setSearch updates search state", () => {
+    useStore.getState().setSearch("test query");
+    expect(useStore.getState().search).toBe("test query");
   });
 
-  it("saves and removes note/todo records", async () => {
-    const existingNote: Note = buildNote({ id: "n1", type: "story", title: "Old" });
-    const existingTodo: Todo = buildTodo({ id: "t1", title: "Todo" });
+  it("setSyncFolderName updates syncFolderName", () => {
+    useStore.getState().setSyncFolderName("MyFolder");
+    expect(useStore.getState().syncFolderName).toBe("MyFolder");
+  });
+});
 
-    useStore.setState({ notes: [existingNote], todos: [existingTodo] });
-
-    await useStore.getState().saveNote({ ...existingNote, title: "New" });
-    expect(useStore.getState().notes[0].title).toBe("New");
-
-    await useStore.getState().saveTodo({ ...existingTodo, title: "Todo New" });
-    expect(useStore.getState().todos[0].title).toBe("Todo New");
-
-    await useStore.getState().removeNote("n1");
-    await useStore.getState().removeTodo("t1");
-    expect(mockCtx.db.deleteNote).toHaveBeenCalledWith("n1");
-    expect(mockCtx.db.deleteTodo).toHaveBeenCalledWith("t1");
-    expect(useStore.getState().notes).toHaveLength(0);
-    expect(useStore.getState().todos).toHaveLength(0);
+describe("mutations", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it("adds and removes images", async () => {
+  it("saveNote writes to db and schedules sync", async () => {
+    const { saveNote } = await import("@/data/mutations");
+    const note = buildNote({ id: "n1", title: "Test" });
+    await saveNote(note);
+    expect(mockDb.notes.put).toHaveBeenCalled();
+    expect(mockScheduleWrite).toHaveBeenCalled();
+  });
+
+  it("saveTodo writes to db and schedules sync", async () => {
+    const { saveTodo } = await import("@/data/mutations");
+    const todo = buildTodo({ id: "t1", title: "Task" });
+    await saveTodo(todo);
+    expect(mockDb.todos.put).toHaveBeenCalled();
+    expect(mockScheduleWrite).toHaveBeenCalled();
+  });
+
+  it("removeNote deletes from db and schedules sync", async () => {
+    const { removeNote } = await import("@/data/mutations");
+    await removeNote("n1");
+    expect(mockDb.notes.delete).toHaveBeenCalledWith("n1");
+    expect(mockScheduleWrite).toHaveBeenCalled();
+  });
+
+  it("removeTodo deletes from db and schedules sync", async () => {
+    const { removeTodo } = await import("@/data/mutations");
+    await removeTodo("t1");
+    expect(mockDb.todos.delete).toHaveBeenCalledWith("t1");
+    expect(mockScheduleWrite).toHaveBeenCalled();
+  });
+
+  it("toggleTodoStatus updates todo status", async () => {
+    const { toggleTodoStatus } = await import("@/data/mutations");
+    const todo = buildTodo({ id: "t1", status: "open" });
+    mockDb.todos.get.mockResolvedValueOnce(todo as never);
+    await toggleTodoStatus("t1", "done");
+    const putArg = (mockDb.todos.put as ReturnType<typeof vi.fn>).mock.calls[0][0] as Todo;
+    expect(putArg.status).toBe("done");
+    expect(putArg.completedAt).toBeTypeOf("number");
+  });
+
+  it("addImage creates unique-named image in db", async () => {
+    const { addImage } = await import("@/data/mutations");
+    mockDb.images.toArray.mockResolvedValueOnce([]);
     const blob = new Blob(["img"], { type: "image/png" });
-
-    const created = await useStore.getState().addImage(blob, "original.png");
-    expect(created.name).toBe("image-unique.png");
-    expect(mockCtx.db.putImage).toHaveBeenCalledTimes(1);
-
-    await useStore.getState().removeImage(created.id);
-    expect(mockCtx.db.deleteImage).toHaveBeenCalledWith(created.id);
+    const img = await addImage(blob, "original.png");
+    expect(img.name).toBe("image-unique.png");
+    expect(mockDb.images.put).toHaveBeenCalled();
   });
 
-  it("upserts and clears grid cells", async () => {
-    await useStore.getState().upsertCell({ row: 1, col: 2, roomName: "Library" });
-    expect(mockCtx.db.putGridCell).toHaveBeenCalledTimes(1);
-    const cell = useStore.getState().gridCells[0] as GridCell;
-    expect(cell.id).toBe("1,2");
-    expect(cell.roomName).toBe("Library");
+  it("upsertCell writes grid cell to db", async () => {
+    const { upsertCell } = await import("@/data/mutations");
+    mockDb.grid.get.mockResolvedValueOnce(undefined);
+    await upsertCell({ row: 1, col: 2, roomName: "Library" });
+    const putArg = (mockDb.grid.put as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(putArg.id).toBe("1,2");
+    expect(putArg.roomName).toBe("Library");
+  });
 
-    await useStore.getState().clearCell(1, 2);
-    expect(mockCtx.db.deleteGridCell).toHaveBeenCalledWith("1,2");
-    expect(useStore.getState().gridCells).toHaveLength(0);
+  it("clearCell deletes grid cell from db", async () => {
+    const { clearCell } = await import("@/data/mutations");
+    await clearCell(1, 2);
+    expect(mockDb.grid.delete).toHaveBeenCalledWith("1,2");
   });
 });

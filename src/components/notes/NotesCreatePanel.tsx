@@ -1,6 +1,10 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useStore } from "@/data/store";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import { saveNote, saveTodo, createFromCapture } from "@/data/mutations";
+import type { Note, Todo } from "@/lib/types";
 import { Button } from "@/components/common/Button";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { Tabs, TabsList, TabsTrigger } from "@/components/common/Tabs";
@@ -40,12 +44,9 @@ function useNotesStoreSlice() {
   const prefillPriority = useStore((s) => s.capturePrefillPriority);
   const editNoteId = useStore((s) => s.captureEditNoteId);
   const editTodoId = useStore((s) => s.captureEditTodoId);
-  const saveNote = useStore((s) => s.saveNote);
-  const saveTodo = useStore((s) => s.saveTodo);
-  const notes = useStore((s) => s.notes);
-  const todos = useStore((s) => s.todos);
+  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
+  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
   const returnTo = useStore((s) => s.captureReturnTo);
-  const create = useStore((s) => s.createFromCapture);
 
   return {
     open,
@@ -64,7 +65,7 @@ function useNotesStoreSlice() {
     notes,
     todos,
     returnTo,
-    create,
+    create: createFromCapture,
   };
 }
 

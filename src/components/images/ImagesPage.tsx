@@ -1,5 +1,9 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useStore } from "@/data/store";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import { addImage, removeImage, updateImage } from "@/data/mutations";
+import type { StoredImage, Note } from "@/lib/types";
 import { PageLayout, usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
 import { StoredImageView } from "@/components/StoredImageView";
 import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
@@ -7,7 +11,6 @@ import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
-import type { StoredImage } from "@/lib/types";
 import { toast } from "sonner";
 import {
   connectSteamImportFolder,
@@ -19,18 +22,15 @@ import {
   syncConnectedSteamFolder,
 } from "@/data/steamImport";
 import { syncRuntime } from "@/data/sync";
-import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/browserStorage";
+import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storageHealth";
 
 function getImageLabel(img: StoredImage): string {
   return img.caption?.trim() || img.name;
 }
 
 export function ImagesPage() {
-  const images = useStore((s) => s.images);
-  const notes = useStore((s) => s.notes);
-  const addImage = useStore((s) => s.addImage);
-  const removeImage = useStore((s) => s.removeImage);
-  const updateImage = useStore((s) => s.updateImage);
+  const images: StoredImage[] = useLiveQuery(() => db.images.toArray()) ?? [];
+  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
   const search = useStore((s) => s.search);
   const deferredSearch = useDeferredValue(search);
   const [selectedId, setSelectedId] = useState<string | null>(null);

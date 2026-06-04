@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FolderOpen, FolderSync, Unlink } from "lucide-react";
 import { useStore } from "@/data/store";
+import { db } from "@/data/db";
+import { addImage, saveNote, saveTodo } from "@/data/mutations";
 import { Button } from "@/components/common/Button";
 import { KeyboardKey } from "@/components/common/KeyboardKey";
 import { PageLayout } from "@/components/common/PageLayout";
@@ -14,19 +16,14 @@ import {
   type RoomCategory,
 } from "@/data/rooms";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
-import { exportAll, importAll } from "@/data/io";
+import { exportAll, importAll } from "@/data/backup";
 import {
   attachSeedImagesToNotes,
   buildGraphTestNotes,
   buildGraphTestTodos,
   buildSeedTestImageSpecs,
 } from "@/data/seedGraphTest";
-import {
-  connectSyncFolderWithConflictResolution,
-  countLocalSyncItems,
-  syncRuntime,
-  type SyncMode,
-} from "@/data/sync";
+import { connectSyncFolderWithConflictResolution, syncRuntime, type SyncMode } from "@/data/sync";
 import {
   connectSteamImportFolder,
   disconnectSteamImportFolder,
@@ -35,8 +32,7 @@ import {
   restoreSteamImportFolder,
   syncConnectedSteamFolder,
 } from "@/data/steamImport";
-import { LOCAL_BACKUP_KEY, canUseLocalStorage, isIndexedDbAvailable } from "@/data/storageHealth";
-import { getLocalStorageValue } from "@/data/browserStorage";
+import { isIndexedDbAvailable } from "@/data/storageHealth";
 import { toast } from "sonner";
 import { SettingsSection, SettingsSubsection } from "./SettingsSection";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
@@ -56,32 +52,13 @@ import {
 
 type StorageHealthSnapshot = {
   indexedDbAvailable: boolean;
-  localStorageAvailable: boolean;
-  backupPresent: boolean;
 };
 
 function readStorageHealthSnapshot(): StorageHealthSnapshot {
-  let backupPresent = false;
-  if (canUseLocalStorage()) {
-    backupPresent = Boolean(getLocalStorageValue(LOCAL_BACKUP_KEY));
-  }
-  return {
-    indexedDbAvailable: isIndexedDbAvailable(),
-    localStorageAvailable: canUseLocalStorage(),
-    backupPresent,
-  };
-}
-
-function healthLabel(isHealthy: boolean, healthyLabel: string, cautionLabel: string): string {
-  if (isHealthy) return healthyLabel;
-  return cautionLabel;
+  return { indexedDbAvailable: isIndexedDbAvailable() };
 }
 
 export function SettingsPage() {
-  const load = useStore((s) => s.load);
-  const save = useStore((s) => s.saveNote);
-  const saveTodo = useStore((s) => s.saveTodo);
-  const addImage = useStore((s) => s.addImage);
   const syncFolderName = useStore((s) => s.syncFolderName);
   const steamFolderName = useStore((s) => s.steamFolderName);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -142,10 +119,9 @@ export function SettingsPage() {
       imageIds.push(created.id);
     }
     const notesWithImages = attachSeedImagesToNotes(notes, imageIds);
-    for (const n of notesWithImages) await save(n);
+    for (const n of notesWithImages) await saveNote(n);
     const todos = buildGraphTestTodos(notesWithImages);
     for (const t of todos) await saveTodo(t);
-    await load();
     toast.success(
       `Seeded ${notesWithImages.length} notes and ${todos.length} todos across ${new Set(notesWithImages.map((n) => n.room)).size} rooms with ${imageIds.length} images`,
     );
@@ -201,7 +177,6 @@ export function SettingsPage() {
                   const mode = (e.target.dataset.mode as "merge" | "replace") || "merge";
                   try {
                     await importAll(f, mode);
-                    await load();
                     toast.success("Imported");
                   } catch (err) {
                     toast.error((err as Error).message);
@@ -227,16 +202,6 @@ export function SettingsPage() {
                         : storageHealth.indexedDbAvailable
                           ? "Browser (IndexedDB)"
                           : "Local (fallback)"}
-                    </Text>
-                  </Inline>
-                  <Inline gap="2" justify="between" align="center">
-                    <MetaText as="span">Data backup</MetaText>
-                    <Text
-                      as="span"
-                      size="xs"
-                      tone={storageHealth.backupPresent ? "default" : "muted"}
-                    >
-                      {healthLabel(storageHealth.backupPresent, "Saved", "Not saved yet")}
                     </Text>
                   </Inline>
                   <Inline gap="2" justify="between" align="center">
@@ -384,7 +349,6 @@ export function SettingsPage() {
 }
 
 function SteamImportSection() {
-  const addImage = useStore((s) => s.addImage);
   const steamFolderName = useStore((s) => s.steamFolderName);
   const setSteamFolderName = useStore((s) => s.setSteamFolderName);
   const [lastRefreshAt, setLastRefreshAt] = useState<number | null>(null);
@@ -526,7 +490,6 @@ function SteamImportSection() {
 function SyncFolderSection() {
   const syncFolderName = useStore((s) => s.syncFolderName);
   const setSyncFolderName = useStore((s) => s.setSyncFolderName);
-  const load = useStore((s) => s.load);
   const [busy, setBusy] = useState(false);
   const [syncMode, setSyncModeState] = useState<SyncMode>("auto");
   const [dirty, setDirty] = useState(false);
@@ -597,8 +560,13 @@ function SyncFolderSection() {
   async function handleConnect() {
     setBusy(true);
     try {
-      const storeState = useStore.getState();
-      const localItemsCount = countLocalSyncItems(storeState);
+      const [noteCount, todoCount, imageCount, cellCount] = await Promise.all([
+        db.notes.count(),
+        db.todos.count(),
+        db.images.count(),
+        db.grid.count(),
+      ]);
+      const localItemsCount = noteCount + todoCount + imageCount + cellCount;
 
       const connectResult = await connectSyncFolderWithConflictResolution(
         localItemsCount,
@@ -609,7 +577,7 @@ function SyncFolderSection() {
       }
 
       if (connectResult.importedFolderData) {
-        await load();
+        // useLiveQuery will update reactively
       }
 
       if (connectResult.resolution === "connected-empty") {

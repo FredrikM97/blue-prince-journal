@@ -1,11 +1,45 @@
 import type { Note, Todo, RoomState, SectionDef, GridCell } from "@/lib/types";
-import {
-  isLocalStorageAvailable,
-  readLocalStorageJson,
-  writeLocalStorageJson,
-} from "@/data/browserStorage";
 
-export const LOCAL_BACKUP_KEY = "bp-local-backup-v2";
+// ---------------------------------------------------------------------------
+// localStorage utilities
+// ---------------------------------------------------------------------------
+
+function getLocalStorageValue(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function setLocalStorageValue(key: string, value: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    window.localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function getLocalStorageFlag(key: string): boolean {
+  return getLocalStorageValue(key) === "1";
+}
+
+export function setLocalStorageFlag(key: string): boolean {
+  return setLocalStorageValue(key, "1");
+}
+
+export { getLocalStorageValue };
+
+export function isIndexedDbAvailable(): boolean {
+  return typeof indexedDB !== "undefined";
+}
+
+// ---------------------------------------------------------------------------
+// Types kept for potential future use but not actively written
+// ---------------------------------------------------------------------------
 
 export interface LocalBackupSnapshot {
   version: number;
@@ -17,30 +51,3 @@ export interface LocalBackupSnapshot {
   gridCells: GridCell[];
 }
 
-export function canUseLocalStorage(): boolean {
-  return isLocalStorageAvailable();
-}
-
-export function isIndexedDbAvailable(): boolean {
-  return typeof indexedDB !== "undefined";
-}
-
-export function readLocalBackup(key: string): LocalBackupSnapshot | null {
-  if (!canUseLocalStorage()) return null;
-  const parsed = readLocalStorageJson<Partial<LocalBackupSnapshot>>(key);
-  if (!parsed) return null;
-  return {
-    version: typeof parsed.version === "number" ? parsed.version : 1,
-    savedAt: typeof parsed.savedAt === "number" ? parsed.savedAt : 0,
-    notes: Array.isArray(parsed.notes) ? parsed.notes : [],
-    todos: Array.isArray(parsed.todos) ? parsed.todos : [],
-    rooms: Array.isArray(parsed.rooms) ? parsed.rooms : [],
-    sections: Array.isArray(parsed.sections) ? parsed.sections : [],
-    gridCells: Array.isArray(parsed.gridCells) ? parsed.gridCells : [],
-  };
-}
-
-export function writeLocalBackup(key: string, snapshot: LocalBackupSnapshot): void {
-  if (!canUseLocalStorage()) return;
-  writeLocalStorageJson(key, snapshot);
-}

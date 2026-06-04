@@ -2,12 +2,171 @@
  * File System Access API sync runtime.
  *
  * Manages the active folder handle, dirty/clean state, and scheduled writes.
- * Folder I/O is in syncStorage/folderIo.ts; storage read/write goes through
- * the storageAdapter facade.
+ * Includes folder I/O (manifest + images) and conflict resolution orchestration.
  */
-import { getMeta, setMeta, deleteMeta } from "./db";
-import { storageAdapter } from "./storageAdapter";
-import { type DirHandle, readFolder, writeFolder } from "./syncStorage/folderIo";
+import { getMeta, setMeta, deleteMeta, readSnapshot, applySnapshot, clearAllData } from "./db";
+import { clearCustomRooms } from "./rooms";
+import { buildUniqueFileName } from "./imageNames";
+import type { RoomCategory } from "./rooms";
+import type { StoredImage } from "@/lib/types";
+import type { AppDataSnapshot } from "./db";
+
+// ---------------------------------------------------------------------------
+// File System Access API types
+// ---------------------------------------------------------------------------
+
+export interface DirHandle {
+  readonly name: string;
+  getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<DirHandle>;
+  getFileHandle(name: string, options?: { create?: boolean }): Promise<FileHandle>;
+  queryPermission(descriptor: { mode: "read" | "readwrite" }): Promise<PermissionState>;
+  requestPermission(descriptor: { mode: "read" | "readwrite" }): Promise<PermissionState>;
+}
+
+interface FileHandle {
+  getFile(): Promise<File>;
+  createWritable(): Promise<{
+    write(data: string | BufferSource | Blob): Promise<void>;
+    close(): Promise<void>;
+  }>;
+}
+
+declare global {
+  interface Window {
+    showDirectoryPicker(options?: {
+      mode?: "read" | "readwrite";
+      startIn?: DirHandle;
+    }): Promise<DirHandle>;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// On-disk manifest format
+// ---------------------------------------------------------------------------
+
+const MANIFEST_FILE = "manifest.json";
+const IMAGES_DIR = "images";
+
+type FolderImageRef = Omit<StoredImage, "blob"> & { fileName: string };
+
+interface FolderManifest {
+  app: "blue-prince-notes";
+  syncVersion: 1;
+  syncedAt: number;
+  notes: AppDataSnapshot["notes"];
+  todos: AppDataSnapshot["todos"];
+  images: FolderImageRef[];
+  rooms: AppDataSnapshot["rooms"];
+  sections: AppDataSnapshot["sections"];
+  gridCells: AppDataSnapshot["gridCells"];
+  customRooms: Array<{ name: string; category: RoomCategory }>;
+}
+
+// ---------------------------------------------------------------------------
+// Folder read / write
+// ---------------------------------------------------------------------------
+
+async function readFolder(handle: DirHandle): Promise<AppDataSnapshot | null> {
+  try {
+    const fh = await handle.getFileHandle(MANIFEST_FILE, { create: false });
+    const manifest = JSON.parse(await (await fh.getFile()).text()) as FolderManifest;
+    if (manifest.app !== "blue-prince-notes") return null;
+
+    let imagesDir: DirHandle | null = null;
+    try {
+      imagesDir = await handle.getDirectoryHandle(IMAGES_DIR, { create: false });
+    } catch {
+      imagesDir = null;
+    }
+
+    const images: StoredImage[] = [];
+    if (imagesDir) {
+      for (const img of manifest.images ?? []) {
+        try {
+          const imageFile = await imagesDir.getFileHandle(img.fileName, { create: false });
+          const buffer = await (await imageFile.getFile()).arrayBuffer();
+          images.push({
+            id: img.id,
+            name: img.name,
+            caption: img.caption,
+            tags: img.tags ?? [],
+            mime: img.mime,
+            blob: new Blob([buffer], { type: img.mime }),
+            createdAt: img.createdAt,
+          });
+        } catch {
+          // Skip missing / corrupt image files and continue.
+        }
+      }
+    }
+
+    return {
+      notes: manifest.notes ?? [],
+      todos: manifest.todos ?? [],
+      images,
+      rooms: manifest.rooms ?? [],
+      sections: manifest.sections ?? [],
+      gridCells: manifest.gridCells ?? [],
+      customRooms: manifest.customRooms ?? [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function writeFolder(handle: DirHandle, data: AppDataSnapshot): Promise<void> {
+  const imagesDir = await handle.getDirectoryHandle(IMAGES_DIR, { create: true });
+  const usedFileNames: string[] = [];
+  const imageRefs: FolderImageRef[] = [];
+
+  for (const image of data.images) {
+    const fileName = buildUniqueFileName(usedFileNames, image.name, image.id, "png");
+    usedFileNames.push(fileName);
+
+    let alreadyOnDisk = false;
+    try {
+      await imagesDir.getFileHandle(fileName, { create: false });
+      alreadyOnDisk = true;
+    } catch {
+      // File not found — needs writing.
+    }
+
+    if (!alreadyOnDisk) {
+      const imageFile = await imagesDir.getFileHandle(fileName, { create: true });
+      const writable = await imageFile.createWritable();
+      await writable.write(image.blob);
+      await writable.close();
+    }
+
+    imageRefs.push({
+      id: image.id,
+      name: image.name,
+      caption: image.caption,
+      tags: image.tags,
+      mime: image.mime,
+      createdAt: image.createdAt,
+      fileName,
+    });
+  }
+
+  const manifest: FolderManifest = {
+    app: "blue-prince-notes",
+    syncVersion: 1,
+    syncedAt: Date.now(),
+    notes: data.notes,
+    todos: data.todos,
+    images: imageRefs,
+    rooms: data.rooms,
+    sections: data.sections,
+    gridCells: data.gridCells,
+    customRooms: data.customRooms,
+  };
+
+  const fh = await handle.getFileHandle(MANIFEST_FILE, { create: true });
+  const writable = await fh.createWritable();
+  await writable.write(JSON.stringify(manifest, null, 2));
+  await writable.close();
+}
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -140,7 +299,7 @@ class SyncRuntimeBase {
     if (localIsEmpty) {
       const data = await readFolder(handle);
       if (data) {
-        await storageAdapter.write(data);
+        await applySnapshot(data);
         return { folderName, appliedFolderData: true };
       }
     }
@@ -212,7 +371,7 @@ class SyncRuntimeBase {
 
   private async flush(handle: DirHandle) {
     try {
-      const data = await storageAdapter.read();
+      const data = await readSnapshot();
       await writeFolder(handle, data);
       this.dirty = false;
       this.lastDirtyAt = null;
@@ -259,15 +418,16 @@ export async function connectSyncFolderWithConflictResolution(
 
   if (!folderData) {
     // Folder is empty — write local data into it.
-    const localData = await storageAdapter.read();
+    const localData = await readSnapshot();
     await writeFolder(handle, localData);
     return { handle, resolution: "connected-empty", importedFolderData: false };
   }
 
   if (localItemCount === 0) {
     // No user content locally — always use folder data.
-    await storageAdapter.clear();
-    await storageAdapter.write(folderData);
+    await clearAllData();
+    clearCustomRooms();
+    await applySnapshot(folderData);
     return { handle, resolution: "use-folder-data", importedFolderData: true };
   }
 
@@ -280,13 +440,14 @@ export async function connectSyncFolderWithConflictResolution(
   }
 
   if (choice === "overwrite") {
-    await storageAdapter.clear();
-    await storageAdapter.write(folderData);
+    await clearAllData();
+    clearCustomRooms();
+    await applySnapshot(folderData);
     return { handle, resolution: "use-folder-data", importedFolderData: true };
   }
 
   // "keep" — overwrite folder with local data.
-  const localData = await storageAdapter.read();
+  const localData = await readSnapshot();
   await writeFolder(handle, localData);
   return { handle, resolution: "keep-local-data", importedFolderData: false };
 }

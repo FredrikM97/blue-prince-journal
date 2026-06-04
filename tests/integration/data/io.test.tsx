@@ -93,7 +93,7 @@ describe("io boundaries", () => {
       download: "",
     } as unknown as HTMLAnchorElement);
 
-    const io = await import("@/data/io");
+    const io = await import("@/data/backup");
     await io.exportAll();
 
     lastZipInstance = FakeZip.latest;
@@ -103,7 +103,7 @@ describe("io boundaries", () => {
   });
 
   it("imports legacy json data", async () => {
-    const io = await import("@/data/io");
+    const io = await import("@/data/backup");
     const legacyJson = JSON.stringify({
       app: "blue-prince-notes",
       version: 2,
@@ -155,7 +155,7 @@ describe("io boundaries", () => {
     loadedZipInstance.file("manifest.json", JSON.stringify(manifest));
     loadedZipInstance.file("images/img-1", new Blob(["img"], { type: "image/png" }));
 
-    const io = await import("@/data/io");
+    const io = await import("@/data/backup");
     const zipFile = {
       name: "backup.zip",
       type: "application/zip",

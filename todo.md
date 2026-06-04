@@ -1,3 +1,9 @@
+- [x] Move Todo delete action back into dropdown menu
+- [x] Confirm local backup helpers are still used and keep backup fallback path
+- [x] Introduce clearer indexedDbStorage module path under syncStorage and migrate imports
+- [x] Keep db.tsx as compatibility re-export to avoid breaking existing references
+- [x] Simplify storageHealth backup API to use LOCAL_BACKUP_KEY internally
+
 - [x] Prevent long todo titles from overflowing row borders
 - [x] Replace native todo delete confirm with in-app delete dialog
 - [x] Move todo delete action from dropdown into dedicated delete icon button

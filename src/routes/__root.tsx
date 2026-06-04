@@ -21,7 +21,10 @@ import { ImagesPage } from "@/components/images/ImagesPage";
 import { GraphPage } from "@/components/graph/GraphPage";
 import { useStore } from "@/data/store";
 import { syncRuntime } from "@/data/sync";
-import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/browserStorage";
+import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storageHealth";
+import { db, ensureBootSeed } from "@/data/db";
+import { useLiveQuery } from "dexie-react-hooks";
+import type { Note, Todo, SectionDef } from "@/lib/types";
 
 type RouterContext = {
   queryClient: QueryClient;
@@ -32,11 +35,11 @@ export function RootShellView({ children }: { children: React.ReactNode }) {
 }
 
 function AppFrame({ children }: { children: React.ReactNode }) {
-  const load = useStore((s) => s.load);
   const loaded = useStore((s) => s.loaded);
-  const notes = useStore((s) => s.notes);
-  const todos = useStore((s) => s.todos);
+  const setLoaded = useStore((s) => s.setLoaded);
   const setSyncFolderName = useStore((s) => s.setSyncFolderName);
+  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
+  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
 
   const [initState, setInitState] = useState<"checking" | "welcome" | "ready">("checking");
   const [welcomeSource, setWelcomeSource] = useState<"auto" | "manual" | null>(null);
@@ -44,17 +47,18 @@ function AppFrame({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function init() {
       try {
-        await load();
+        await ensureBootSeed();
+        setLoaded(true);
 
-        const state = useStore.getState();
-        const localIsEmpty = state.notes.length === 0 && state.todos.length === 0;
-        const { folderName, appliedFolderData } = await syncRuntime.boot(localIsEmpty);
+        const noteCount = await db.notes.count();
+        const todoCount = await db.todos.count();
+        const localIsEmpty = noteCount === 0 && todoCount === 0;
+        const { folderName } = await syncRuntime.boot(localIsEmpty);
         if (folderName) setSyncFolderName(folderName);
-        if (appliedFolderData) await load();
+        // If folder data was applied, useLiveQuery will reactively update
 
         const welcomed = getLocalStorageFlag("bp-welcomed");
-        const afterState = useStore.getState();
-        const hasData = afterState.notes.length > 0 || afterState.todos.length > 0;
+        const hasData = (await db.notes.count()) > 0 || (await db.todos.count()) > 0;
         const hasSyncFolder = Boolean(syncRuntime.getActiveFolderName());
 
         if (!welcomed && !hasData && !hasSyncFolder) {
@@ -220,7 +224,7 @@ export function NotesIndexView() {
 }
 
 export function SectionView({ id }: { id: string }) {
-  const sections = useStore((s) => s.sections);
+  const sections: SectionDef[] = useLiveQuery(() => db.sections.toArray()) ?? [];
   const section = useMemo(() => sections.find((s) => s.id === id), [sections, id]);
 
   if (!section) {

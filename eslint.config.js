@@ -55,6 +55,10 @@ export default tseslint.config(
             "JSXAttribute[name.name='className'][value.type='Literal'][value.value='border-t border-border/70 pt-6']",
           message: "Use `SectionBlock` primitive for top-divider sections.",
         },
+        {
+          selector: "Program > :not(ImportDeclaration) ~ ImportDeclaration",
+          message: "Keep all imports at the top of the file.",
+        },
       ],
       "react-refresh/only-export-components": [
         "warn",

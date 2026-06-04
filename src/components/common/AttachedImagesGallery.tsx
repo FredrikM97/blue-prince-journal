@@ -3,7 +3,9 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { Button } from "@/components/common/Button";
 import { StoredImageView } from "@/components/StoredImageView";
-import { useStore } from "@/data/store";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import type { StoredImage } from "@/lib/types";
 import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
@@ -24,7 +26,7 @@ export function AttachedImagesGallery({
    */
   compact?: boolean;
 }) {
-  const images = useStore((s) => s.images);
+  const images: StoredImage[] = useLiveQuery(() => db.images.toArray()) ?? [];
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const imageById = useMemo(() => new Map(images.map((img) => [img.id, img])), [images]);

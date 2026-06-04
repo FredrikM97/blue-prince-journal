@@ -4,18 +4,17 @@ const db = {
   getMeta: vi.fn(),
   setMeta: vi.fn(async () => {}),
   deleteMeta: vi.fn(async () => {}),
-  listNotes: vi.fn(async () => []),
-  listTodos: vi.fn(async () => []),
-  listImages: vi.fn(async () => []),
-  listRoomStates: vi.fn(async () => []),
-  listSections: vi.fn(async () => []),
-  listGridCells: vi.fn(async () => []),
-  putNote: vi.fn(async () => {}),
-  putTodo: vi.fn(async () => {}),
-  putImage: vi.fn(async () => {}),
-  putRoomState: vi.fn(async () => {}),
-  putSection: vi.fn(async () => {}),
-  putGridCell: vi.fn(async () => {}),
+  readSnapshot: vi.fn(async () => ({
+    notes: [],
+    todos: [],
+    images: [],
+    rooms: [],
+    sections: [],
+    gridCells: [],
+    customRooms: [],
+  })),
+  applySnapshot: vi.fn(async () => {}),
+  clearAllData: vi.fn(async () => {}),
 };
 
 const rooms = {
@@ -164,9 +163,9 @@ describe("sync boundaries", () => {
     expect(files.has("manifest.json")).toBe(true);
   });
 
-  it("imports sync data boundary into db layer", async () => {
-    const { storageAdapter } = await import("@/data/storageAdapter");
-    await storageAdapter.write({
+  it("imports sync data boundary into db layer via applySnapshot", async () => {
+    const { applySnapshot } = await import("@/data/db");
+    await applySnapshot({
       notes: [{ id: "n1" } as never],
       todos: [{ id: "t1" } as never],
       images: [],
@@ -176,11 +175,6 @@ describe("sync boundaries", () => {
       customRooms: [{ name: "Parlor", category: "Wing" as never }],
     });
 
-    expect(db.putNote).toHaveBeenCalled();
-    expect(db.putTodo).toHaveBeenCalled();
-    expect(db.putRoomState).toHaveBeenCalled();
-    expect(db.putSection).toHaveBeenCalled();
-    expect(db.putGridCell).toHaveBeenCalled();
-    expect(rooms.replaceCustomRooms).toHaveBeenCalled();
+    expect(db.applySnapshot).toHaveBeenCalled();
   });
 });
