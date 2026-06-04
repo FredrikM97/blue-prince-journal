@@ -7,7 +7,7 @@ import type { Note, Todo, GridCell } from "@/lib/types";
 export interface SuggestionSources {
   roomSuggestions: string[];
   tagSuggestions: string[];
-  /** Note titles — used to suggest ^ note-reference tokens. */
+  /** Note and todo titles — used to suggest ^ reference tokens. */
   noteSuggestions: string[];
 }
 
@@ -44,9 +44,18 @@ function buildSuggestionSources({
  * Memoized — only recomputes when underlying data changes.
  */
 export function useSuggestionSources(): SuggestionSources {
-  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
-  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
-  const gridCells: GridCell[] = useLiveQuery(() => db.grid.toArray()) ?? [];
+  const liveNotes = useLiveQuery(() => db.notes.toArray());
+  const liveTodos = useLiveQuery(() => db.todos.toArray());
+  const liveGridCells = useLiveQuery(() => db.grid.toArray());
+
+  const notes: Note[] = useMemo(() => liveNotes ?? [], [liveNotes]);
+  const todos: Todo[] = useMemo(() => liveTodos ?? [], [liveTodos]);
+  const gridCells: GridCell[] = useMemo(() => liveGridCells ?? [], [liveGridCells]);
+
+  const referenceSuggestions = useMemo(
+    () => Array.from(new Set([...notes.map((n) => n.title), ...todos.map((t) => t.title)])).sort(),
+    [notes, todos],
+  );
 
   return useMemo(
     () => ({
@@ -56,8 +65,8 @@ export function useSuggestionSources(): SuggestionSources {
         extraRooms: gridCells.map((cell) => cell.roomName ?? "").filter(Boolean),
         includeCatalog: true,
       }),
-      noteSuggestions: notes.map((n) => n.title).sort(),
+      noteSuggestions: referenceSuggestions,
     }),
-    [gridCells, notes, todos],
+    [gridCells, notes, todos, referenceSuggestions],
   );
 }

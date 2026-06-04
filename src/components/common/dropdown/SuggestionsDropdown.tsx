@@ -102,7 +102,7 @@ function suggestNotes(token: string, noteTitles: string[]): TokenSuggestion[] {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
     if (!slug.includes(q)) continue;
-    out.push({ value: `^${slug}`, hint: "note" });
+    out.push({ value: `^${slug}`, hint: "ref" });
     if (out.length >= 8) break;
   }
   return out;
