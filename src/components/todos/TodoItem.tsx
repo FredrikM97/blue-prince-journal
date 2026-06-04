@@ -90,16 +90,6 @@ export function TodoItem({
             <Stack as="div" className="todo-row-title-wrap" gap="0">
               {titleEditor}
             </Stack>
-            <Button
-              variant="ghost"
-              size="icon"
-              tone="destructive"
-              aria-label="Delete todo"
-              onClick={() => onDelete()}
-              className="todo-row-delete-button"
-            >
-              <Trash2 />
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -149,6 +139,14 @@ export function TodoItem({
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem tone="active" onSelect={() => onDelete()}>
+                  <Trash2 className="icon-sm" />
+                  <Text as="span" size="sm">
+                    Delete
+                  </Text>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </Stack>
