@@ -1,18 +1,17 @@
 import { useRef, useState } from "react";
 import { FolderOpen, Sparkles, Upload, Waypoints } from "lucide-react";
 import { importAll } from "@/data/io";
-import {
-  connectSyncFolderWithConflictResolution,
-  confirmSyncFolderConflict,
-  countLocalSyncItems,
-  getActiveSyncFolderName,
-} from "@/data/sync";
+import { connectSyncFolderWithConflictResolution, syncRuntime } from "@/data/sync";
 import { useStore } from "@/data/store";
 import { Heading, Text } from "@/components/common/Typography";
 import { CenteredContent, Inline } from "@/components/common/LayoutPrimitives";
 import { Button } from "@/components/common/Button";
 import { Stack } from "@/components/common/Stack";
 import { toast } from "sonner";
+import {
+  SyncConflictDialog,
+  type SyncConflictChoice,
+} from "@/components/common/SyncConflictDialog";
 
 function WelcomeCard({
   icon: Icon,
@@ -66,11 +65,25 @@ export function WelcomeScreen({
   const load = useStore((s) => s.load);
   const startFresh = useStore((s) => s.startFresh);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [connecting, setConnecting] = useState(false);
-  const [resetting, setResetting] = useState(false);
+  const [busy, setBusy] = useState(false);
+  // Promise-based conflict dialog — set when the connect flow needs a choice.
+  const [conflictResolve, setConflictResolve] = useState<
+    ((choice: SyncConflictChoice) => void) | null
+  >(null);
+
+  function openConflictDialog(): Promise<SyncConflictChoice> {
+    return new Promise((resolve) => {
+      setConflictResolve(() => resolve);
+    });
+  }
+
+  function handleConflictChoice(choice: SyncConflictChoice) {
+    setConflictResolve(null);
+    conflictResolve?.(choice);
+  }
 
   async function handleStartFresh() {
-    setResetting(true);
+    setBusy(true);
     try {
       await startFresh();
       toast.success("Started fresh");
@@ -78,18 +91,21 @@ export function WelcomeScreen({
     } catch {
       toast.error("Could not reset existing data");
     } finally {
-      setResetting(false);
+      setBusy(false);
     }
   }
 
   async function handleConnectFolder() {
-    setConnecting(true);
+    setBusy(true);
     try {
       const storeState = useStore.getState();
-      const localItemsCount = countLocalSyncItems(storeState);
+      // Only count notes/todos/images — not seeded grid cells — as real local data.
+      const localItemsCount =
+        storeState.notes.length + storeState.todos.length + storeState.images.length;
 
-      const connectResult = await connectSyncFolderWithConflictResolution(localItemsCount, () =>
-        confirmSyncFolderConflict((message) => window.confirm(message)),
+      const connectResult = await connectSyncFolderWithConflictResolution(
+        localItemsCount,
+        openConflictDialog,
       );
       if (!connectResult) {
         return;
@@ -110,7 +126,7 @@ export function WelcomeScreen({
       if (connectResult.resolution === "keep-local-data") {
         toast.success(`Keeping local data and syncing to "${connectResult.handle.name}"`);
       }
-      onDone(getActiveSyncFolderName() ?? connectResult.handle.name);
+      onDone(syncRuntime.getActiveFolderName() ?? connectResult.handle.name);
     } catch (err) {
       const message = err instanceof Error ? err.message.toLowerCase() : "";
       if (message.includes("system files") || message.includes("sensitive")) {
@@ -119,7 +135,7 @@ export function WelcomeScreen({
         toast.error("Could not connect to folder");
       }
     } finally {
-      setConnecting(false);
+      setBusy(false);
     }
   }
 
@@ -158,6 +174,7 @@ export function WelcomeScreen({
               title="Continue"
               description="Pick up where you left off"
               onClick={onContinue}
+              disabled={busy}
             />
           ) : null}
           <WelcomeCard
@@ -165,20 +182,21 @@ export function WelcomeScreen({
             title="Start fresh"
             description="Clear existing data and begin with an empty notebook"
             onClick={handleStartFresh}
-            disabled={resetting || connecting}
+            disabled={busy}
           />
           <WelcomeCard
             icon={Upload}
             title="Import backup"
             description="Load a ZIP or JSON export"
             onClick={() => fileRef.current?.click()}
+            disabled={busy}
           />
           <WelcomeCard
             icon={FolderOpen}
             title="Sync folder"
             description="Pick a local or cloud-backed folder to auto-sync"
             onClick={handleConnectFolder}
-            disabled={connecting || resetting}
+            disabled={busy}
           />
         </Inline>
 
@@ -200,6 +218,8 @@ export function WelcomeScreen({
           e.target.value = "";
         }}
       />
+
+      <SyncConflictDialog open={Boolean(conflictResolve)} onChoice={handleConflictChoice} />
     </Stack>
   );
 }

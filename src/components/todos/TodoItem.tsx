@@ -4,6 +4,7 @@ import { Chip } from "@/components/common/Chip";
 import { CheckCircle2, Circle, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { Stack } from "@/components/common/Stack";
 import { InputField } from "@/components/common/input/InputField";
 import { Text } from "@/components/common/Typography";
 import {
@@ -82,92 +83,90 @@ export function TodoItem({
   }
 
   return (
-    <li className="todo-row-item">
-      <div className="todo-row-main">
-        <div className="todo-row-title-line">
-          <div className="todo-row-title-wrap">{titleEditor}</div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                tone="muted"
-                aria-label="Todo actions"
-                className="todo-row-menu-button"
-              >
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" variant="select">
-              <DropdownMenuItem onSelect={() => onOpenPreview()}>
-                <Eye className="icon-sm" />
-                <Text as="span" size="sm">
-                  Preview
-                </Text>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Circle className="icon-sm" />
+    <li>
+      <Stack as="div" className="todo-row-item" gap="0">
+        <Stack as="div" className="todo-row-main" gap="0">
+          <Stack as="div" className="todo-row-title-line" gap="0">
+            <Stack as="div" className="todo-row-title-wrap" gap="0">
+              {titleEditor}
+            </Stack>
+            <Button
+              variant="ghost"
+              size="icon"
+              tone="destructive"
+              aria-label="Delete todo"
+              onClick={() => onDelete()}
+              className="todo-row-delete-button"
+            >
+              <Trash2 />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  tone="muted"
+                  aria-label="Todo actions"
+                  className="todo-row-menu-button"
+                >
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" variant="select">
+                <DropdownMenuItem onSelect={() => onOpenPreview()}>
+                  <Eye className="icon-sm" />
                   <Text as="span" size="sm">
-                    Set status
+                    Preview
                   </Text>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuItem onSelect={() => onToggle("open" as TodoStatus)}>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
                     <Circle className="icon-sm" />
                     <Text as="span" size="sm">
-                      Open
+                      Set status
                     </Text>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => onToggle("in-progress" as TodoStatus)}>
-                    <Circle className="icon-sm" />
-                    <Text as="span" size="sm">
-                      In progress
-                    </Text>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => onToggle("done" as TodoStatus)}>
-                    <CheckCircle2 className="icon-sm" />
-                    <Text as="span" size="sm">
-                      Done
-                    </Text>
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem onSelect={() => onToggle("open" as TodoStatus)}>
+                      <Circle className="icon-sm" />
+                      <Text as="span" size="sm">
+                        Open
+                      </Text>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onToggle("in-progress" as TodoStatus)}>
+                      <Circle className="icon-sm" />
+                      <Text as="span" size="sm">
+                        In progress
+                      </Text>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onToggle("done" as TodoStatus)}>
+                      <CheckCircle2 className="icon-sm" />
+                      <Text as="span" size="sm">
+                        Done
+                      </Text>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </Stack>
 
-              <DropdownMenuSeparator />
-              <DropdownMenuItem tone="active" onSelect={() => onDelete()}>
-                <Trash2 className="icon-sm" />
-                <Text as="span" size="sm">
-                  Delete
-                </Text>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        <div className="todo-row-tags-line">
-          <Inline as="div" gap="1" align="center" wrap>
-            <Chip variant={getPriorityVariant(todo.priority)}>
-              <span className="todo-row-chip-text">{todo.priority}</span>
-            </Chip>
-            <Chip variant="solid">
-              <span className="todo-row-chip-text">{todo.scope}</span>
-            </Chip>
-            {todo.room && (
-              <Chip variant="room">
-                <span className="todo-row-chip-text">@{todo.room}</span>
-              </Chip>
-            )}
-            {todo.tags.map((tag) => (
-              <Chip key={tag} variant="tag">
-                <span className="todo-row-chip-text">#{tag}</span>
-              </Chip>
-            ))}
-          </Inline>
-        </div>
-      </div>
+          <Stack as="div" className="todo-row-tags-line" gap="0">
+            <Inline as="div" gap="1" align="center" wrap>
+              <Chip variant={getPriorityVariant(todo.priority)}>{todo.priority}</Chip>
+              <Chip variant="solid">{todo.scope}</Chip>
+              {todo.room && <Chip variant="room">@{todo.room}</Chip>}
+              {todo.tags.map((tag) => (
+                <Chip key={tag} variant="tag">
+                  #{tag}
+                </Chip>
+              ))}
+            </Inline>
+          </Stack>
+        </Stack>
+      </Stack>
     </li>
   );
 }

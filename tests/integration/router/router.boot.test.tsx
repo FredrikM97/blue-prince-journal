@@ -4,12 +4,18 @@ import { renderRootLayoutWithProviders } from "../../helpers/renderWithProviders
 
 const ctx = vi.hoisted(() => ({
   sync: {
-    restoreSyncHandle: vi.fn<() => Promise<{ name: string } | null>>(async () => null),
-    readFromSyncFolder: vi.fn<
-      () => Promise<{ manifest: { app: string }; images: unknown[] } | null>
-    >(async () => null),
-    importSyncManifest: vi.fn(async () => {}),
-    getActiveSyncFolderName: vi.fn(() => null as string | null),
+    syncRuntime: {
+      boot: vi.fn<
+        (
+          localIsEmpty: boolean,
+        ) => Promise<{ folderName: string | null; appliedFolderData: boolean }>
+      >(async () => ({ folderName: null, appliedFolderData: false })),
+      getActiveFolderName: vi.fn(() => null as string | null),
+      subscribeStatus: vi.fn(() => () => {}),
+      loadMode: vi.fn(async () => "auto" as const),
+    },
+    connectSyncFolderWithConflictResolution: vi.fn(async () => null),
+    countLocalSyncItems: vi.fn(() => 0),
   },
   state: {
     load: vi.fn(async () => {}),
@@ -127,18 +133,17 @@ describe("router boot and welcome gating", () => {
   });
 
   it("restores sync folder and imports when local store is empty", async () => {
-    ctx.sync.restoreSyncHandle.mockResolvedValueOnce({ name: "RecoveredSync" });
-    ctx.sync.readFromSyncFolder.mockResolvedValueOnce({
-      manifest: { app: "blue-prince-notes" },
-      images: [],
+    ctx.sync.syncRuntime.boot.mockResolvedValueOnce({
+      folderName: "RecoveredSync",
+      appliedFolderData: true,
     });
 
     renderRootLayoutWithProviders();
 
     await waitFor(() => {
       expect(ctx.state.setSyncFolderName).toHaveBeenCalledWith("RecoveredSync");
-      expect(ctx.sync.importSyncManifest).toHaveBeenCalled();
-      expect(ctx.state.load).toHaveBeenCalledTimes(2);
+      expect(ctx.sync.syncRuntime.boot).toHaveBeenCalledWith(true); // localIsEmpty = true
+      expect(ctx.state.load).toHaveBeenCalledTimes(2); // initial + after folder import
     });
   });
 

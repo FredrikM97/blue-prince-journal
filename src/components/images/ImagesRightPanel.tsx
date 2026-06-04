@@ -122,6 +122,15 @@ function ImagesInspectorPanel({
             <Button variant="ghost" size="icon" onClick={onNext} aria-label="Next image">
               <ChevronRight />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              tone="destructive"
+              onClick={onDelete}
+              aria-label="Delete image"
+            >
+              <Trash2 />
+            </Button>
           </Inline>
         }
         onClose={onClose}
@@ -170,15 +179,6 @@ function ImagesInspectorPanel({
             title="Details from notes"
             emptyLabel="No notes currently reference this image."
           />
-
-          <Inline gap="2" justify="between" wrap align="center">
-            <Button variant="ghost" tone="destructive" onClick={onDelete}>
-              <Text as="span" variant="sr-only">
-                Delete image
-              </Text>
-              <Trash2 />
-            </Button>
-          </Inline>
         </Stack>
       </SidePanel.Right>
 

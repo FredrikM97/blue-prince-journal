@@ -28,7 +28,7 @@ const INITIAL_UI_STATE: NotesPageUiState = {
   typeFilter: null,
   roomFilter: null,
   tagFilter: null,
-  statusFilter: null,
+  statusFilter: "open",
   activeNoteId: null,
   panelMode: "edit",
   draft: null,

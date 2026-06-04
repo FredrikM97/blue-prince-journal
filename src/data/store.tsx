@@ -37,7 +37,7 @@ import type {
 } from "@/lib/types";
 import { cellId, clearCustomRooms } from "./rooms";
 import { parseCapture } from "./parse";
-import { disconnectSyncFolder, scheduleSyncWrite } from "./sync";
+import { syncRuntime } from "./sync";
 import { buildUniqueFileName } from "./imageNames";
 import {
   LOCAL_BACKUP_KEY,
@@ -71,6 +71,9 @@ interface State {
 
   syncFolderName: string | null;
   setSyncFolderName: (name: string | null) => void;
+
+  steamFolderName: string | null;
+  setSteamFolderName: (name: string | null) => void;
 
   load: () => Promise<void>;
   startFresh: () => Promise<void>;
@@ -221,6 +224,7 @@ export const useStore = create<State>((set, get) => ({
   gridCells: [],
   search: "",
   syncFolderName: null,
+  steamFolderName: null,
   captureOpen: false,
   captureDefault: "note",
   capturePrefill: "",
@@ -335,10 +339,11 @@ export const useStore = create<State>((set, get) => ({
   },
 
   setSyncFolderName: (name) => set({ syncFolderName: name }),
+  setSteamFolderName: (name) => set({ steamFolderName: name }),
 
   async startFresh() {
     if (!isBrowser()) return;
-    await disconnectSyncFolder();
+    await syncRuntime.disconnect();
     set({
       notes: [],
       todos: [],
@@ -348,6 +353,7 @@ export const useStore = create<State>((set, get) => ({
       gridCells: [],
       dataVersion: Date.now(),
       syncFolderName: null,
+      steamFolderName: null,
     });
     await clearAllData();
     clearCustomRooms();
@@ -454,7 +460,7 @@ export const useStore = create<State>((set, get) => ({
       };
       await safeDbWrite(() => putTodo(todo));
       set((s) => ({ todos: [todo, ...s.todos], dataVersion: s.dataVersion + 1 }));
-      scheduleSyncWrite();
+      syncRuntime.scheduleWrite();
       syncLocalBackupFromState(get());
       return { todoId: todo.id };
     }
@@ -474,7 +480,7 @@ export const useStore = create<State>((set, get) => ({
     };
     await safeDbWrite(() => putNote(note));
     set((s) => ({ notes: [note, ...s.notes], dataVersion: s.dataVersion + 1 }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
     return { noteId: note.id };
   },
@@ -483,26 +489,26 @@ export const useStore = create<State>((set, get) => ({
     const updated = { ...n, updatedAt: Date.now() };
     await safeDbWrite(() => putNote(updated));
     set((s) => ({ notes: [updated, ...s.notes.filter((x) => x.id !== n.id)] }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
   async saveTodo(t) {
     const updated = { ...t, updatedAt: Date.now() };
     await safeDbWrite(() => putTodo(updated));
     set((s) => ({ todos: [updated, ...s.todos.filter((x) => x.id !== t.id)] }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
   async removeNote(id) {
     await safeDbWrite(() => dbDeleteNote(id));
     set((s) => ({ notes: s.notes.filter((n) => n.id !== id) }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
   async removeTodo(id) {
     await safeDbWrite(() => dbDeleteTodo(id));
     set((s) => ({ todos: s.todos.filter((t) => t.id !== id) }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
   async toggleTodoStatus(id, status) {
@@ -516,7 +522,7 @@ export const useStore = create<State>((set, get) => ({
     };
     await safeDbWrite(() => putTodo(next));
     set((s) => ({ todos: s.todos.map((x) => (x.id === id ? next : x)) }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
 
@@ -540,20 +546,20 @@ export const useStore = create<State>((set, get) => ({
     };
     await safeDbWrite(() => putImage(img));
     set((s) => ({ images: [img, ...s.images] }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
     return img;
   },
   async updateImage(img) {
     await safeDbWrite(() => putImage(img));
     set((s) => ({ images: s.images.map((x) => (x.id === img.id ? img : x)) }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
   async removeImage(id) {
     await safeDbWrite(() => dbDeleteImage(id));
     set((s) => ({ images: s.images.filter((i) => i.id !== id) }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
 
@@ -565,7 +571,7 @@ export const useStore = create<State>((set, get) => ({
         ? s.rooms.map((x) => (x.name === name ? r : x))
         : [...s.rooms, r],
     }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
 
@@ -574,13 +580,13 @@ export const useStore = create<State>((set, get) => ({
     const s: SectionDef = { id: nanoid(), label, order: sections.length };
     await safeDbWrite(() => putSection(s));
     set((st) => ({ sections: [...st.sections, s].sort((a, b) => a.order - b.order) }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
   async removeSection(id) {
     await safeDbWrite(() => dbDeleteSection(id));
     set((s) => ({ sections: s.sections.filter((x) => x.id !== id) }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
 
@@ -602,14 +608,14 @@ export const useStore = create<State>((set, get) => ({
         ? s.gridCells.map((c) => (c.id === id ? next : c))
         : [...s.gridCells, next],
     }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
   async clearCell(row, col) {
     const id = cellId(row, col);
     await safeDbWrite(() => deleteGridCell(id));
     set((s) => ({ gridCells: s.gridCells.filter((c) => c.id !== id) }));
-    scheduleSyncWrite();
+    syncRuntime.scheduleWrite();
     syncLocalBackupFromState(get());
   },
 }));

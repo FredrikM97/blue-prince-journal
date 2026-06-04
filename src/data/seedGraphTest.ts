@@ -5,7 +5,7 @@
  * Wipe with Settings → Start Fresh when done.
  */
 import { nanoid } from "nanoid";
-import type { Note, NoteType, RunScope } from "@/lib/types";
+import type { Note, NoteType, Priority, RunScope, Todo, TodoScope, TodoStatus } from "@/lib/types";
 
 export interface SeedImageSpec {
   name: string;
@@ -173,6 +173,214 @@ export function attachSeedImagesToNotes(notes: Note[], imageIds: string[]): Note
     return {
       ...note,
       imageIds: Array.from(new Set(attached)),
+    };
+  });
+}
+
+const TODO_SEEDS: Array<{
+  title: string;
+  notes?: string;
+  room: string;
+  priority: Priority;
+  status: TodoStatus;
+  scope: TodoScope;
+  tags: string[];
+}> = [
+  {
+    title: "Search the Kitchen for hidden compartments",
+    room: "Kitchen",
+    priority: "high",
+    status: "open",
+    scope: "this-run",
+    tags: ["search", "hidden"],
+  },
+  {
+    title: "Inspect the coal cellar for a second exit",
+    room: "Coal Cellar",
+    priority: "med",
+    status: "open",
+    scope: "this-run",
+    tags: ["search"],
+  },
+  {
+    title: "Cross-reference the butler's log with pantry stock",
+    room: "Butler Pantry",
+    priority: "low",
+    status: "done",
+    scope: "cross-run",
+    tags: ["papers", "supplies"],
+  },
+  {
+    title: "Decode the cipher found in the Map Room",
+    room: "Map Room",
+    priority: "high",
+    status: "in-progress",
+    scope: "this-run",
+    tags: ["code", "papers"],
+  },
+  {
+    title: "Return the stolen book to the Library shelf",
+    room: "Library",
+    notes: "Check the third row from the top near the window.",
+    priority: "med",
+    status: "open",
+    scope: "cross-run",
+    tags: ["books"],
+  },
+  {
+    title: "Find the missing key to the Reading Nook cabinet",
+    room: "Reading Nook",
+    priority: "high",
+    status: "open",
+    scope: "this-run",
+    tags: ["key", "locked"],
+  },
+  {
+    title: "Inventory weapons in the Armory",
+    room: "Armory",
+    priority: "med",
+    status: "done",
+    scope: "this-run",
+    tags: ["weapons"],
+  },
+  {
+    title: "Inspect the Dungeon for recent footprints",
+    room: "Dungeon",
+    priority: "high",
+    status: "open",
+    scope: "this-run",
+    tags: ["trap", "guards"],
+  },
+  {
+    title: "Interview the trophy keeper",
+    room: "Trophy Room",
+    priority: "low",
+    status: "open",
+    scope: "someday",
+    tags: ["guards"],
+  },
+  {
+    title: "Look for a hidden passage behind the portrait",
+    room: "Portrait Gallery",
+    priority: "high",
+    status: "in-progress",
+    scope: "this-run",
+    tags: ["portrait", "hidden"],
+  },
+  {
+    title: "Trace the melody played in the Music Room",
+    room: "Music Room",
+    priority: "med",
+    status: "open",
+    scope: "cross-run",
+    tags: ["music"],
+  },
+  {
+    title: "Calibrate the Observatory telescope",
+    room: "Observatory",
+    priority: "low",
+    status: "done",
+    scope: "this-run",
+    tags: ["science", "mechanism"],
+  },
+  {
+    title: "Repair the Clock Room mechanism",
+    room: "Clock Room",
+    priority: "high",
+    status: "open",
+    scope: "this-run",
+    tags: ["clock", "mechanism"],
+  },
+  {
+    title: "Recover documents from the Underground Vault",
+    room: "Underground Vault",
+    priority: "high",
+    status: "open",
+    scope: "this-run",
+    tags: ["passage", "locked"],
+  },
+  {
+    title: "Translate the ritual text in the Chapel",
+    room: "Chapel",
+    priority: "med",
+    status: "open",
+    scope: "cross-run",
+    tags: ["sacred", "ritual"],
+  },
+  {
+    title: "Map the Crypt layout",
+    room: "Crypt",
+    priority: "med",
+    status: "in-progress",
+    scope: "this-run",
+    tags: ["mystery", "passage"],
+  },
+  {
+    title: "Identify the figure in the Hall of Mirrors",
+    room: "Hall of Mirrors",
+    priority: "low",
+    status: "open",
+    scope: "someday",
+    tags: ["shadow", "mystery"],
+  },
+  {
+    title: "Examine the Throne Room for pressure plates",
+    room: "Throne Room",
+    priority: "high",
+    status: "open",
+    scope: "this-run",
+    tags: ["trap", "ritual"],
+  },
+  {
+    title: "Check the Workshop for improvised devices",
+    room: "Workshop",
+    priority: "med",
+    status: "open",
+    scope: "this-run",
+    tags: ["mechanism", "science"],
+  },
+  {
+    title: "Record the Bell Tower strike pattern",
+    room: "Bell Tower",
+    priority: "low",
+    status: "done",
+    scope: "cross-run",
+    tags: ["clock", "hidden"],
+  },
+];
+
+const TODO_SCOPES: TodoScope[] = ["this-run", "cross-run", "someday"];
+
+export function buildGraphTestTodos(notes: Note[]): Todo[] {
+  const now = Date.now();
+  const roomToNoteIds = new Map<string, string[]>();
+  for (const note of notes) {
+    if (!note.room) continue;
+    if (!roomToNoteIds.has(note.room)) roomToNoteIds.set(note.room, []);
+    roomToNoteIds.get(note.room)!.push(note.id);
+  }
+
+  return TODO_SEEDS.map((seed) => {
+    const roomNotes = roomToNoteIds.get(seed.room) ?? [];
+    // Link up to 2 notes from the same room
+    const linkedNoteIds = roomNotes.slice(0, 2);
+    const completedAt =
+      seed.status === "done"
+        ? now - Math.floor(Math.random() * 3 * 24 * 60 * 60 * 1000)
+        : undefined;
+    return {
+      id: nanoid(),
+      title: seed.title,
+      notes: seed.notes,
+      room: seed.room,
+      tags: seed.tags,
+      status: seed.status,
+      priority: seed.priority,
+      scope: pick(TODO_SCOPES),
+      linkedNoteIds,
+      createdAt: now - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000),
+      updatedAt: now,
+      ...(completedAt !== undefined && { completedAt }),
     };
   });
 }

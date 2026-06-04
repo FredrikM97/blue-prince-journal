@@ -18,26 +18,18 @@ import { exportAll, importAll } from "@/data/io";
 import {
   attachSeedImagesToNotes,
   buildGraphTestNotes,
+  buildGraphTestTodos,
   buildSeedTestImageSpecs,
 } from "@/data/seedGraphTest";
 import {
   connectSyncFolderWithConflictResolution,
-  confirmSyncFolderConflict,
   countLocalSyncItems,
-  disconnectSyncFolder,
-  saveSyncNow,
-  loadSyncMode,
-  setSyncMode,
-  subscribeSyncStatus,
+  syncRuntime,
   type SyncMode,
-  getActiveSyncHandle,
-  getActiveSyncFolderName,
-  openSyncFolderInPicker,
 } from "@/data/sync";
 import {
   connectSteamImportFolder,
   disconnectSteamImportFolder,
-  getActiveSteamFolderName,
   isSteamFolderSyncSupported,
   loadSteamImportStatus,
   restoreSteamImportFolder,
@@ -50,13 +42,22 @@ import { SettingsSection, SettingsSubsection } from "./SettingsSection";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
 import { CenteredContent, Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
+import {
+  SyncConflictDialog,
+  type SyncConflictChoice,
+} from "@/components/common/SyncConflictDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/common/Dialog";
 
 type StorageHealthSnapshot = {
   indexedDbAvailable: boolean;
   localStorageAvailable: boolean;
   backupPresent: boolean;
-  syncConnected: boolean;
-  steamConnected: boolean;
 };
 
 function readStorageHealthSnapshot(): StorageHealthSnapshot {
@@ -64,13 +65,10 @@ function readStorageHealthSnapshot(): StorageHealthSnapshot {
   if (canUseLocalStorage()) {
     backupPresent = Boolean(getLocalStorageValue(LOCAL_BACKUP_KEY));
   }
-
   return {
     indexedDbAvailable: isIndexedDbAvailable(),
     localStorageAvailable: canUseLocalStorage(),
     backupPresent,
-    syncConnected: Boolean(getActiveSyncFolderName()),
-    steamConnected: Boolean(getActiveSteamFolderName()),
   };
 }
 
@@ -82,8 +80,12 @@ function healthLabel(isHealthy: boolean, healthyLabel: string, cautionLabel: str
 export function SettingsPage() {
   const load = useStore((s) => s.load);
   const save = useStore((s) => s.saveNote);
+  const saveTodo = useStore((s) => s.saveTodo);
   const addImage = useStore((s) => s.addImage);
+  const syncFolderName = useStore((s) => s.syncFolderName);
+  const steamFolderName = useStore((s) => s.steamFolderName);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [confirmSeed, setConfirmSeed] = useState(false);
   const [customRooms, setCustomRooms] = useState(() => listCustomRooms());
   const [newRoomName, setNewRoomName] = useState("");
   const [newRoomCategory, setNewRoomCategory] = useState<RoomCategory>(ROOM_GROUPS[0]);
@@ -131,260 +133,263 @@ export function SettingsPage() {
     toast.success("Room removed");
   }
 
+  async function handleSeedData() {
+    const notes = buildGraphTestNotes();
+    const imageSpecs = buildSeedTestImageSpecs();
+    const imageIds: string[] = [];
+    for (const image of imageSpecs) {
+      const created = await addImage(image.blob, image.name, image.caption);
+      imageIds.push(created.id);
+    }
+    const notesWithImages = attachSeedImagesToNotes(notes, imageIds);
+    for (const n of notesWithImages) await save(n);
+    const todos = buildGraphTestTodos(notesWithImages);
+    for (const t of todos) await saveTodo(t);
+    await load();
+    toast.success(
+      `Seeded ${notesWithImages.length} notes and ${todos.length} todos across ${new Set(notesWithImages.map((n) => n.room)).size} rooms with ${imageIds.length} images`,
+    );
+  }
+
   return (
-    <PageLayout>
-      <PageLayout.Middle>
-        <CenteredContent max="2xl" align="left">
-          <header>
-            <Heading as="h1" size="3xl">
-              Settings
-            </Heading>
-            <Text size="sm" tone="muted">
-              All data lives in your browser. Export regularly to keep a backup.
-            </Text>
-          </header>
+    <>
+      <PageLayout>
+        <PageLayout.Middle>
+          <CenteredContent max="2xl" align="left">
+            <header>
+              <Heading as="h1" size="3xl">
+                Settings
+              </Heading>
+              <Text size="sm" tone="muted">
+                All data lives in your browser. Export regularly to keep a backup.
+              </Text>
+            </header>
 
-          <SettingsSection title="Data">
-            <Inline gap="2" wrap>
-              <Button
-                variant="brass"
-                size="sm"
-                onClick={() => exportAll().then(() => toast.success("Exported"))}
-              >
-                Export ZIP
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
-                Import (merge)...
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={async () => {
-                  const f = fileRef.current;
-                  if (!f) return;
-                  f.dataset.mode = "replace";
-                  f.click();
-                }}
-              >
-                Import (replace)...
-              </Button>
-            </Inline>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".zip,application/zip,application/json,.json"
-              hidden
-              onChange={async (e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                const mode = (e.target.dataset.mode as "merge" | "replace") || "merge";
-                try {
-                  await importAll(f, mode);
-                  await load();
-                  toast.success("Imported");
-                } catch (err) {
-                  toast.error((err as Error).message);
-                }
-                e.target.value = "";
-                e.target.dataset.mode = "merge";
-              }}
-            />
-
-            <SettingsSubsection title="Storage health">
-              <Stack gap="1.5" variant="panel-card">
-                <Inline gap="2" justify="between" align="center">
-                  <MetaText as="span">IndexedDB</MetaText>
-                  <Text
-                    as="span"
-                    size="xs"
-                    tone={storageHealth.indexedDbAvailable ? "default" : "muted"}
-                  >
-                    {healthLabel(
-                      storageHealth.indexedDbAvailable,
-                      "Primary storage active",
-                      "Primary storage unavailable",
-                    )}
-                  </Text>
-                </Inline>
-                <Inline gap="2" justify="between" align="center">
-                  <MetaText as="span">localStorage</MetaText>
-                  <Text
-                    as="span"
-                    size="xs"
-                    tone={storageHealth.localStorageAvailable ? "default" : "muted"}
-                  >
-                    {healthLabel(
-                      storageHealth.localStorageAvailable,
-                      "Backup channel ready",
-                      "Backup channel unavailable",
-                    )}
-                  </Text>
-                </Inline>
-                <Inline gap="2" justify="between" align="center">
-                  <MetaText as="span">Local backup snapshot</MetaText>
-                  <Text
-                    as="span"
-                    size="xs"
-                    tone={storageHealth.backupPresent ? "default" : "muted"}
-                  >
-                    {healthLabel(
-                      storageHealth.backupPresent,
-                      "Recovery snapshot saved",
-                      "No snapshot yet",
-                    )}
-                  </Text>
-                </Inline>
-                <Inline gap="2" justify="between" align="center">
-                  <MetaText as="span">Sync folder</MetaText>
-                  <Text
-                    as="span"
-                    size="xs"
-                    tone={storageHealth.syncConnected ? "default" : "muted"}
-                  >
-                    {storageHealth.syncConnected ? "Connected" : "Disconnected"}
-                  </Text>
-                </Inline>
-                <Inline gap="2" justify="between" align="center">
-                  <MetaText as="span">Screenshot folder</MetaText>
-                  <Text
-                    as="span"
-                    size="xs"
-                    tone={storageHealth.steamConnected ? "default" : "muted"}
-                  >
-                    {storageHealth.steamConnected ? "Connected" : "Disconnected"}
-                  </Text>
-                </Inline>
-              </Stack>
-            </SettingsSubsection>
-
-            <SettingsSubsection title="Sync folder">
-              <SyncFolderSection />
-            </SettingsSubsection>
-
-            <SettingsSubsection title="Steam screenshots import">
-              <SteamImportSection />
-            </SettingsSubsection>
-
-            <SettingsSubsection title="Dev utilities">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={async () => {
-                  const notes = buildGraphTestNotes();
-                  const imageSpecs = buildSeedTestImageSpecs();
-                  const imageIds: string[] = [];
-
-                  for (const image of imageSpecs) {
-                    const created = await addImage(image.blob, image.name, image.caption);
-                    imageIds.push(created.id);
-                  }
-
-                  const notesWithImages = attachSeedImagesToNotes(notes, imageIds);
-                  for (const n of notesWithImages) await save(n);
-                  await load();
-                  toast.success(
-                    `Seeded ${notesWithImages.length} notes across ${new Set(notesWithImages.map((n) => n.room)).size} rooms with ${imageIds.length} images`,
-                  );
-                }}
-              >
-                Seed graph test data with images
-              </Button>
-            </SettingsSubsection>
-          </SettingsSection>
-
-          <SectionBlock>
-            <SettingsSection title="Rooms">
-              <MetaText>
-                Add custom rooms under any group. They appear in Map, New Note, and Edit Note room
-                dropdowns.
-              </MetaText>
-
-              <Inline gap="2" wrap align="end">
-                <InputField
-                  value={newRoomName}
-                  onChange={setNewRoomName}
-                  placeholder="New room name"
-                  grow
-                />
-
-                <DropdownSelect
-                  value={newRoomCategory}
-                  onValueChange={(value) => setNewRoomCategory(value as RoomCategory)}
-                  options={categoryOptions}
-                />
-
-                <Button size="sm" variant="outline" onClick={addRoom}>
-                  Add room
+            <SettingsSection title="Data">
+              <Inline gap="2" wrap>
+                <Button
+                  variant="brass"
+                  size="sm"
+                  onClick={() => exportAll().then(() => toast.success("Exported"))}
+                >
+                  Export ZIP
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
+                  Import (merge)...
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    const f = fileRef.current;
+                    if (!f) return;
+                    f.dataset.mode = "replace";
+                    f.click();
+                  }}
+                >
+                  Import (replace)...
                 </Button>
               </Inline>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".zip,application/zip,application/json,.json"
+                hidden
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  const mode = (e.target.dataset.mode as "merge" | "replace") || "merge";
+                  try {
+                    await importAll(f, mode);
+                    await load();
+                    toast.success("Imported");
+                  } catch (err) {
+                    toast.error((err as Error).message);
+                  }
+                  e.target.value = "";
+                  e.target.dataset.mode = "merge";
+                }}
+              />
 
-              <Stack gap="3" variant="panel-card">
-                {[...customRoomsByCategory.entries()].map(([group, rooms]) => {
-                  if (rooms.length === 0) return null;
+              <SettingsSubsection title="Storage health">
+                <Stack gap="1.5" variant="panel-card">
+                  <Inline gap="2" justify="between" align="center">
+                    <MetaText as="span">Active storage</MetaText>
+                    <Text
+                      as="span"
+                      size="xs"
+                      tone={
+                        syncFolderName || storageHealth.indexedDbAvailable ? "default" : "muted"
+                      }
+                    >
+                      {syncFolderName
+                        ? `Local (${syncFolderName})`
+                        : storageHealth.indexedDbAvailable
+                          ? "Browser (IndexedDB)"
+                          : "Local (fallback)"}
+                    </Text>
+                  </Inline>
+                  <Inline gap="2" justify="between" align="center">
+                    <MetaText as="span">Data backup</MetaText>
+                    <Text
+                      as="span"
+                      size="xs"
+                      tone={storageHealth.backupPresent ? "default" : "muted"}
+                    >
+                      {healthLabel(storageHealth.backupPresent, "Saved", "Not saved yet")}
+                    </Text>
+                  </Inline>
+                  <Inline gap="2" justify="between" align="center">
+                    <MetaText as="span">Sync folder</MetaText>
+                    <Text as="span" size="xs" tone={syncFolderName ? "default" : "muted"}>
+                      {syncFolderName ? `Connected (${syncFolderName})` : "Disconnected"}
+                    </Text>
+                  </Inline>
+                  <Inline gap="2" justify="between" align="center">
+                    <MetaText as="span">Steam images</MetaText>
+                    <Text as="span" size="xs" tone={steamFolderName ? "default" : "muted"}>
+                      {steamFolderName ? `Connected (${steamFolderName})` : "Not connected"}
+                    </Text>
+                  </Inline>
+                </Stack>
+              </SettingsSubsection>
 
-                  return (
-                    <Stack key={group} gap="2">
-                      <Heading as="h3" size="base" variant="section-label">
-                        {group}
-                      </Heading>
-                      <Inline gap="1.5" wrap>
-                        {rooms.map((name) => (
-                          <Button
-                            key={`${group}-${name}`}
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => removeRoom(name)}
-                            className="settings-room-chip"
-                            title="Remove room"
-                          >
-                            {name}
-                          </Button>
-                        ))}
-                      </Inline>
-                    </Stack>
-                  );
-                })}
-                {customRooms.length === 0 && <MetaText>No custom rooms yet.</MetaText>}
-              </Stack>
+              <SettingsSubsection title="Sync folder">
+                <SyncFolderSection />
+              </SettingsSubsection>
+
+              <SettingsSubsection title="Steam images">
+                <SteamImportSection />
+              </SettingsSubsection>
+
+              <SettingsSubsection title="Dev utilities">
+                <Button size="sm" variant="outline" onClick={() => setConfirmSeed(true)}>
+                  Seed graph test data with images
+                </Button>
+              </SettingsSubsection>
             </SettingsSection>
-          </SectionBlock>
 
-          <SectionBlock>
-            <SettingsSection title="Keyboard">
-              <Stack as="ul" gap="1">
-                <li>
-                  <Text size="sm" tone="muted">
-                    <KeyboardKey>N</KeyboardKey> - open quick capture
-                  </Text>
-                </li>
-                <li>
-                  <Text size="sm" tone="muted">
-                    <KeyboardKey>Esc</KeyboardKey> - close capture
-                  </Text>
-                </li>
-                <li>
-                  <Text size="sm" tone="muted">
-                    <KeyboardKey>Ctrl+Enter</KeyboardKey> - save ·{" "}
-                    <KeyboardKey>Ctrl+Shift+Enter</KeyboardKey> - save &amp; keep open
-                  </Text>
-                </li>
-              </Stack>
-            </SettingsSection>
-          </SectionBlock>
-        </CenteredContent>
-      </PageLayout.Middle>
-    </PageLayout>
+            <SectionBlock>
+              <SettingsSection title="Rooms">
+                <MetaText>
+                  Add custom rooms under any group. They appear in Map, New Note, and Edit Note room
+                  dropdowns.
+                </MetaText>
+
+                <Inline gap="2" wrap align="end">
+                  <InputField
+                    value={newRoomName}
+                    onChange={setNewRoomName}
+                    placeholder="New room name"
+                    grow
+                  />
+
+                  <DropdownSelect
+                    value={newRoomCategory}
+                    onValueChange={(value) => setNewRoomCategory(value as RoomCategory)}
+                    options={categoryOptions}
+                  />
+
+                  <Button size="sm" variant="outline" onClick={addRoom}>
+                    Add room
+                  </Button>
+                </Inline>
+
+                <Stack gap="3" variant="panel-card">
+                  {[...customRoomsByCategory.entries()].map(([group, rooms]) => {
+                    if (rooms.length === 0) return null;
+
+                    return (
+                      <Stack key={group} gap="2">
+                        <Heading as="h3" size="base" variant="section-label">
+                          {group}
+                        </Heading>
+                        <Inline gap="1.5" wrap>
+                          {rooms.map((name) => (
+                            <Button
+                              key={`${group}-${name}`}
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeRoom(name)}
+                              className="settings-room-chip"
+                              title="Remove room"
+                            >
+                              {name}
+                            </Button>
+                          ))}
+                        </Inline>
+                      </Stack>
+                    );
+                  })}
+                  {customRooms.length === 0 && <MetaText>No custom rooms yet.</MetaText>}
+                </Stack>
+              </SettingsSection>
+            </SectionBlock>
+
+            <SectionBlock>
+              <SettingsSection title="Keyboard">
+                <Stack as="ul" gap="1">
+                  <li>
+                    <Text size="sm" tone="muted">
+                      <KeyboardKey>N</KeyboardKey> - open quick capture
+                    </Text>
+                  </li>
+                  <li>
+                    <Text size="sm" tone="muted">
+                      <KeyboardKey>Esc</KeyboardKey> - close capture
+                    </Text>
+                  </li>
+                  <li>
+                    <Text size="sm" tone="muted">
+                      <KeyboardKey>Ctrl+Enter</KeyboardKey> - save ·{" "}
+                      <KeyboardKey>Ctrl+Shift+Enter</KeyboardKey> - save &amp; keep open
+                    </Text>
+                  </li>
+                </Stack>
+              </SettingsSection>
+            </SectionBlock>
+          </CenteredContent>
+        </PageLayout.Middle>
+      </PageLayout>
+
+      <Dialog open={confirmSeed} onOpenChange={setConfirmSeed}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Seed graph test data?</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            This will add test notes, todos, and images. Existing data will not be removed, but
+            rooms may overlap with seeded content.
+          </DialogDescription>
+          <Inline gap="2" justify="end">
+            <Button variant="outline" size="sm" onClick={() => setConfirmSeed(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="brass"
+              size="sm"
+              onClick={() => {
+                setConfirmSeed(false);
+                void handleSeedData();
+              }}
+            >
+              Seed data
+            </Button>
+          </Inline>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
 function SteamImportSection() {
   const addImage = useStore((s) => s.addImage);
+  const steamFolderName = useStore((s) => s.steamFolderName);
+  const setSteamFolderName = useStore((s) => s.setSteamFolderName);
   const [lastRefreshAt, setLastRefreshAt] = useState<number | null>(null);
   const [lastImported, setLastImported] = useState(0);
   const [lastSkipped, setLastSkipped] = useState(0);
-  const [connected, setConnected] = useState(false);
-  const [folderName, setFolderName] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const isSupported = isSteamFolderSyncSupported();
 
@@ -397,19 +402,17 @@ function SteamImportSection() {
     });
     void restoreSteamImportFolder().then((handle) => {
       if (!handle) return;
-      setConnected(true);
-      setFolderName(handle.name);
+      setSteamFolderName(handle.name);
     });
-  }, [isSupported]);
+  }, [isSupported, setSteamFolderName]);
 
   async function handleConnect() {
     setBusy(true);
     try {
       const handle = await connectSteamImportFolder();
       if (!handle) return;
-      setConnected(true);
-      setFolderName(handle.name);
-      toast.success(`Connected Steam folder: ${handle.name}`);
+      setSteamFolderName(handle.name);
+      toast.success(`Connected Steam images folder: ${handle.name}`);
     } catch {
       toast.error("Could not connect Steam folder");
     } finally {
@@ -444,8 +447,7 @@ function SteamImportSection() {
     setBusy(true);
     try {
       await disconnectSteamImportFolder();
-      setConnected(false);
-      setFolderName(null);
+      setSteamFolderName(null);
       toast.success("Steam folder disconnected");
     } catch {
       toast.error("Could not disconnect Steam folder");
@@ -465,15 +467,16 @@ function SteamImportSection() {
   return (
     <Stack gap="3">
       <MetaText>
-        Connect a Steam screenshots folder once, then sync from it any time. Imported files are
-        skipped automatically.
+        Connect a Steam images folder once, then sync from it any time. Imported files are skipped
+        automatically.
       </MetaText>
       <MetaText>
-        Browsers cannot reliably access protected Steam system folders. Set Steam screenshots to a
-        normal user folder (for example, Downloads/BluePrinceScreenshots), then connect it here.
+        Browsers cannot reliably access protected Steam system folders. Set Steam to save
+        screenshots to a normal user folder (e.g. Downloads/BluePrinceScreenshots), then connect it
+        here.
       </MetaText>
 
-      {!connected && (
+      {!steamFolderName && (
         <Button
           variant="brass"
           size="sm"
@@ -486,7 +489,7 @@ function SteamImportSection() {
         </Button>
       )}
 
-      {connected && (
+      {steamFolderName && (
         <Stack gap="1.5">
           <Inline gap="2" wrap align="center">
             <Button
@@ -505,7 +508,7 @@ function SteamImportSection() {
             </Button>
           </Inline>
           <MetaText as="span" size="xs">
-            Connected: {folderName ?? getActiveSteamFolderName() ?? "Unknown"}
+            Connected: {steamFolderName}
           </MetaText>
         </Stack>
       )}
@@ -531,12 +534,26 @@ function SyncFolderSection() {
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const lastReminderRef = useRef<number>(0);
+  const [conflictResolve, setConflictResolve] = useState<
+    ((choice: SyncConflictChoice) => void) | null
+  >(null);
+
+  function openConflictDialog(): Promise<SyncConflictChoice> {
+    return new Promise((resolve) => {
+      setConflictResolve(() => resolve);
+    });
+  }
+
+  function handleConflictChoice(choice: SyncConflictChoice) {
+    setConflictResolve(null);
+    conflictResolve?.(choice);
+  }
 
   const isSupported = typeof window !== "undefined" && "showDirectoryPicker" in window;
 
   useEffect(() => {
-    void loadSyncMode().then(setSyncModeState);
-    const unsubscribe = subscribeSyncStatus((status) => {
+    void syncRuntime.loadMode().then(setSyncModeState);
+    const unsubscribe = syncRuntime.subscribeStatus((status) => {
       setSyncModeState(status.mode);
       setDirty(status.dirty);
       setLastDirtyAt(status.lastDirtyAt);
@@ -568,7 +585,7 @@ function SyncFolderSection() {
   async function handleModeChange(nextMode: SyncMode) {
     setBusy(true);
     try {
-      await setSyncMode(nextMode);
+      await syncRuntime.setMode(nextMode);
       toast.success(nextMode === "manual" ? "Manual sync enabled" : "Auto sync enabled");
     } catch {
       toast.error("Could not update sync mode");
@@ -583,8 +600,9 @@ function SyncFolderSection() {
       const storeState = useStore.getState();
       const localItemsCount = countLocalSyncItems(storeState);
 
-      const connectResult = await connectSyncFolderWithConflictResolution(localItemsCount, () =>
-        confirmSyncFolderConflict((message) => window.confirm(message)),
+      const connectResult = await connectSyncFolderWithConflictResolution(
+        localItemsCount,
+        openConflictDialog,
       );
       if (!connectResult) {
         return;
@@ -604,10 +622,15 @@ function SyncFolderSection() {
         toast.success(`Keeping local data and syncing to "${connectResult.handle.name}"`);
       }
 
-      setSyncFolderName(getActiveSyncFolderName() ?? connectResult.handle.name);
+      setSyncFolderName(syncRuntime.getActiveFolderName() ?? connectResult.handle.name);
     } catch (err) {
-      const message = err instanceof Error ? err.message.toLowerCase() : "";
-      if (message.includes("system files") || message.includes("sensitive")) {
+      const message = err instanceof Error ? err.message : "";
+      if (message === "sync-folder-iframe-blocked") {
+        toast.error("Open the app in a browser tab — VS Code's preview panel blocks folder access");
+      } else if (
+        message.toLowerCase().includes("system files") ||
+        message.toLowerCase().includes("sensitive")
+      ) {
         toast.error("That folder is restricted by the browser. Pick a normal folder instead.");
       } else {
         toast.error("Could not connect to folder");
@@ -618,16 +641,16 @@ function SyncFolderSection() {
   }
 
   async function handleDisconnect() {
-    await disconnectSyncFolder();
+    await syncRuntime.disconnect();
     setSyncFolderName(null);
     toast.success("Sync folder disconnected");
   }
 
   async function handleSyncNow() {
-    if (!getActiveSyncHandle()) return;
+    if (!syncRuntime.getActiveHandle()) return;
     setBusy(true);
     try {
-      await saveSyncNow();
+      await syncRuntime.saveNow();
       toast.success("Saved to disk");
     } catch {
       toast.error("Sync failed — folder permission may have been revoked");
@@ -638,7 +661,7 @@ function SyncFolderSection() {
 
   async function handleOpenSyncFolder() {
     try {
-      const opened = await openSyncFolderInPicker();
+      const opened = await syncRuntime.openInPicker();
       if (!opened) return;
       toast.success("Opened sync folder picker");
     } catch {
@@ -749,6 +772,7 @@ function SyncFolderSection() {
         <FolderOpen className="mr-2 h-4 w-4" />
         Connect folder…
       </Button>
+      <SyncConflictDialog open={Boolean(conflictResolve)} onChoice={handleConflictChoice} />
     </Stack>
   );
 }

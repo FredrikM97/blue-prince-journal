@@ -102,11 +102,15 @@
   }
 
   .todo-row-title-button {
-    @apply w-full py-0.5;
+    @apply w-full min-w-0 overflow-hidden whitespace-normal break-words py-0.5;
   }
 
   .todo-row-title-wrap {
-    @apply min-w-0 flex-1;
+    @apply min-w-0 flex-1 overflow-hidden;
+  }
+
+  .todo-row-delete-button {
+    @apply h-7 w-7 shrink-0 rounded border border-destructive/40 bg-card/70 text-destructive hover:bg-destructive/10;
   }
 
   .todo-row-menu-button {
