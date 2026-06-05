@@ -26,8 +26,10 @@ import {
   loadSteamDeletedImports,
   loadSteamImportStatus,
   markSteamImportedImageDeleted,
+  getSteamImportedImageIdsForSource,
   restoreSteamImportFolder,
   restoreDeletedSteamImportImage,
+  permanentlyDeleteSteamImport,
   syncConnectedSteamFolder,
   type SteamDeletedImportEntry,
 } from "@/data/steamImport";
@@ -254,6 +256,14 @@ export function ImagesPage() {
               }
               toast.success(`Re-enabled import for ${fileName}`);
             }}
+            onHardDelete={async (sourceKey, fileName) => {
+              try {
+                await steamSync.hardDeleteImport(sourceKey);
+                toast.success(`Permanently deleted ${fileName}`);
+              } catch {
+                toast.error(`Could not permanently delete ${fileName}`);
+              }
+            }}
             loadPreview={steamSync.loadDeletedImportPreview}
           />
         )}
@@ -305,11 +315,13 @@ function DeletedImportsList({
   entries,
   busy,
   onUndelete,
+  onHardDelete,
   loadPreview,
 }: {
   entries: Array<{ sourceKey: string; fileName: string; deletedAt: number }>;
   busy: boolean;
   onUndelete: (sourceKey: string, fileName: string) => Promise<void>;
+  onHardDelete: (sourceKey: string, fileName: string) => Promise<void>;
   loadPreview: (sourceKey: string) => Promise<Blob | null>;
 }) {
   if (entries.length === 0) {
@@ -330,6 +342,7 @@ function DeletedImportsList({
           deletedAt={entry.deletedAt}
           busy={busy}
           onUndelete={onUndelete}
+          onHardDelete={onHardDelete}
           loadPreview={loadPreview}
         />
       ))}
@@ -452,6 +465,20 @@ function useSteamSyncPanel(
     return restored;
   }
 
+  async function hardDeleteImport(sourceKey: string) {
+    setBusy(true);
+    try {
+      const imageIds = await getSteamImportedImageIdsForSource(sourceKey);
+      for (const imageId of imageIds) {
+        await removeImage(imageId);
+      }
+      await permanentlyDeleteSteamImport(sourceKey);
+      await refreshDeletedImports();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function loadDeletedImportPreview(sourceKey: string): Promise<Blob | null> {
     return loadSteamImportSourceBlob(sourceKey);
   }
@@ -469,6 +496,7 @@ function useSteamSyncPanel(
     disconnect,
     markDeletedByImageId,
     undeleteImport,
+    hardDeleteImport,
     loadDeletedImportPreview,
   };
 

@@ -312,6 +312,39 @@ export async function restoreDeletedSteamImportImage(
   return created;
 }
 
+export async function getSteamImportedImageIdsForSource(sourceKey: string): Promise<string[]> {
+  const normalizedSourceKey = normalizeSteamSourceKey(sourceKey);
+  const manifest = await loadSteamImportManifest();
+  const matches: string[] = [];
+  for (const [imageId, entry] of Object.entries(manifest.sourceByImageId)) {
+    if (entry.sourceKey !== normalizedSourceKey) continue;
+    matches.push(imageId);
+  }
+  return matches;
+}
+
+export async function permanentlyDeleteSteamImport(sourceKey: string): Promise<void> {
+  const normalizedSourceKey = normalizeSteamSourceKey(sourceKey);
+  const manifest = await loadSteamImportManifest();
+
+  let changed = false;
+  for (const [imageId, entry] of Object.entries(manifest.sourceByImageId)) {
+    if (entry.sourceKey !== normalizedSourceKey) continue;
+    delete manifest.sourceByImageId[imageId];
+    changed = true;
+  }
+
+  const nextDeleted = manifest.deleted.filter((entry) => entry.sourceKey !== normalizedSourceKey);
+  if (nextDeleted.length !== manifest.deleted.length) {
+    manifest.deleted = nextDeleted;
+    changed = true;
+  }
+
+  if (changed) {
+    await saveSteamImportManifest(manifest);
+  }
+}
+
 export async function markSteamImportedImageDeleted(
   imageId: string,
   fallbackFileName?: string,

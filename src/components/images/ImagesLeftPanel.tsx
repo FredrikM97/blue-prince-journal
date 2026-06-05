@@ -22,6 +22,7 @@ export type SteamSyncPanelModel = {
   disconnect: () => Promise<void>;
   markDeletedByImageId: (imageId: string, fileName: string) => Promise<void>;
   undeleteImport: (sourceKey: string, fileName: string) => Promise<StoredImage | null>;
+  hardDeleteImport: (sourceKey: string) => Promise<void>;
   loadDeletedImportPreview: (sourceKey: string) => Promise<Blob | null>;
 };
 

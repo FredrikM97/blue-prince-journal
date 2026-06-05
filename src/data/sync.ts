@@ -19,6 +19,8 @@ export interface DirHandle {
   readonly name: string;
   getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<DirHandle>;
   getFileHandle(name: string, options?: { create?: boolean }): Promise<FileHandle>;
+  values?(): AsyncIterable<FileSystemHandle>;
+  removeEntry?(name: string, options?: { recursive?: boolean }): Promise<void>;
   queryPermission(descriptor: { mode: "read" | "readwrite" }): Promise<PermissionState>;
   requestPermission(descriptor: { mode: "read" | "readwrite" }): Promise<PermissionState>;
 }
@@ -147,6 +149,20 @@ async function writeFolder(handle: DirHandle, data: AppDataSnapshot): Promise<vo
       createdAt: image.createdAt,
       fileName,
     });
+  }
+
+  // Remove files no longer referenced by current app data to keep sync folder clean.
+  if (imagesDir.values && imagesDir.removeEntry) {
+    const keep = new Set(usedFileNames);
+    for await (const entry of imagesDir.values()) {
+      if (entry.kind !== "file") continue;
+      if (keep.has(entry.name)) continue;
+      try {
+        await imagesDir.removeEntry(entry.name);
+      } catch {
+        // Ignore remove failures so manifest writes still proceed.
+      }
+    }
   }
 
   const manifest: FolderManifest = {
@@ -286,8 +302,8 @@ class SyncRuntimeBase {
   }
 
   /** Restores the persisted folder handle (without prompting), then — if
-   * `localIsEmpty` is true — reads folder data and merges it into local
-   * storage. Call this once on app start after the initial store `load()`.
+   * available — reads folder data and applies it into local storage.
+   * Call this once on app start after the initial store `load()`.
    * Returns the folder name (for storing in the UI) and whether data was
    * imported from the folder (so the caller knows to reload the store). */
   async boot(
@@ -296,13 +312,16 @@ class SyncRuntimeBase {
     const handle = await this.restoreHandle();
     if (!handle) return { folderName: null, appliedFolderData: false };
     const folderName = this.getActiveFolderName();
-    if (localIsEmpty) {
-      const data = await readFolder(handle);
-      if (data) {
-        await applySnapshot(data);
-        return { folderName, appliedFolderData: true };
-      }
+    const data = await readFolder(handle);
+    if (data) {
+      await clearAllData();
+      clearCustomRooms();
+      await applySnapshot(data);
+      return { folderName, appliedFolderData: true };
     }
+
+    // Keep legacy `localIsEmpty` parameter to avoid changing call sites.
+    void localIsEmpty;
     return { folderName, appliedFolderData: false };
   }
 

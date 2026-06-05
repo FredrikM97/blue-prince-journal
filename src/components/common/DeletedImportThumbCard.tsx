@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { Stack } from "@/components/common/Stack";
 import { Text } from "@/components/common/Typography";
 
@@ -10,6 +12,7 @@ export function DeletedImportThumbCard({
   deletedAt,
   busy,
   onUndelete,
+  onHardDelete,
   loadPreview,
 }: {
   sourceKey: string;
@@ -17,9 +20,11 @@ export function DeletedImportThumbCard({
   deletedAt: number;
   busy: boolean;
   onUndelete: (sourceKey: string, fileName: string) => void;
+  onHardDelete: (sourceKey: string, fileName: string) => void;
   loadPreview: (sourceKey: string) => Promise<Blob | null>;
 }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -43,30 +48,49 @@ export function DeletedImportThumbCard({
   return (
     <Stack gap="1.5" variant="deleted-import-thumb">
       <Stack as="div" gap="0" variant="deleted-import-thumb-stage">
-        {previewUrl ? (
-          <img
-            src={previewUrl}
-            alt={fileName}
-            style={{ height: "100%", width: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <Stack as="div" gap="0" variant="deleted-import-thumb-fallback">
-            <Text as="div" size="xs" tone="muted">
-              Preview unavailable
-            </Text>
-          </Stack>
-        )}
+        <Button
+          variant="transparent"
+          size="content"
+          aria-label={`Open deleted import preview for ${fileName}`}
+          onClick={() => setPreviewOpen(true)}
+        >
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt={fileName}
+              style={{ height: "100%", width: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <Stack as="div" gap="0" variant="deleted-import-thumb-fallback">
+              <Text as="div" size="xs" tone="muted">
+                Preview unavailable
+              </Text>
+            </Stack>
+          )}
+        </Button>
         <Stack as="div" gap="0" variant="deleted-import-thumb-action">
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={busy}
-            aria-label="Undelete image import"
-            title="Undelete"
-            onClick={() => onUndelete(sourceKey, fileName)}
-          >
-            <RotateCcw className="icon-sm" />
-          </Button>
+          <Inline gap="1">
+            <Button
+              variant="outline-destructive"
+              size="icon"
+              disabled={busy}
+              aria-label="Permanently delete image import"
+              title="Permanently delete"
+              onClick={() => onHardDelete(sourceKey, fileName)}
+            >
+              <Trash2 className="icon-sm" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={busy}
+              aria-label="Undelete image import"
+              title="Undelete"
+              onClick={() => onUndelete(sourceKey, fileName)}
+            >
+              <RotateCcw className="icon-sm" />
+            </Button>
+          </Inline>
         </Stack>
         <Stack as="div" gap="0" variant="deleted-import-thumb-overlay">
           <Text as="div" size="xs" tone="default" variant="default" truncate>
@@ -82,6 +106,29 @@ export function DeletedImportThumbCard({
           Deleted {new Date(deletedAt).toLocaleDateString()}
         </Text>
       </Stack>
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent variant="expand">
+          <DialogHeader>
+            <DialogTitle>{fileName}</DialogTitle>
+          </DialogHeader>
+          {previewUrl && (
+            <Stack as="div" gap="0" variant="images-zoom-preview">
+              <img
+                src={previewUrl}
+                alt={fileName}
+                style={{ maxHeight: "80vh", width: "100%", objectFit: "contain" }}
+              />
+            </Stack>
+          )}
+          {!previewUrl && (
+            <Stack as="div" gap="0" variant="deleted-import-thumb-fallback">
+              <Text as="div" size="sm" tone="muted">
+                Preview unavailable
+              </Text>
+            </Stack>
+          )}
+        </DialogContent>
+      </Dialog>
     </Stack>
   );
 }

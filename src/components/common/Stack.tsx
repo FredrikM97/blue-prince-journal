@@ -77,6 +77,8 @@ type StackVariant =
   | "todo-row-title-button-wrap"
   | "todo-row-tags-line"
   | "images-detail-preview"
+  | "images-zoom-preview"
+  | "images-zoom-preview-image"
   | "deleted-import-thumb"
   | "deleted-import-thumb-stage"
   | "deleted-import-thumb-action"
@@ -181,6 +183,8 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "todo-row-title-button-wrap": "todo-row-title-button-wrap",
   "todo-row-tags-line": "todo-row-tags-line",
   "images-detail-preview": "images-detail-preview",
+  "images-zoom-preview": "images-zoom-preview",
+  "images-zoom-preview-image": "images-zoom-preview-image",
   "deleted-import-thumb": "deleted-import-thumb",
   "deleted-import-thumb-stage": "deleted-import-thumb-stage",
   "deleted-import-thumb-action": "deleted-import-thumb-action",
