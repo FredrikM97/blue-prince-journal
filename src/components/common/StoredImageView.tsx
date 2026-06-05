@@ -11,6 +11,33 @@ type ThumbCacheEntry = {
 
 const thumbCache = new Map<string, ThumbCacheEntry>();
 
+// ---------------------------------------------------------------------------
+// Concurrency limiter — cap simultaneous createImageBitmap/canvas ops
+// ---------------------------------------------------------------------------
+const THUMB_CONCURRENCY = 6;
+let thumbRunning = 0;
+const thumbQueue: Array<() => void> = [];
+
+function runThumbTask<T>(fn: () => Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    function attempt() {
+      if (thumbRunning >= THUMB_CONCURRENCY) {
+        thumbQueue.push(attempt);
+        return;
+      }
+      thumbRunning++;
+      fn()
+        .then(resolve, reject)
+        .finally(() => {
+          thumbRunning--;
+          const next = thumbQueue.shift();
+          if (next) next();
+        });
+    }
+    attempt();
+  });
+}
+
 function getBlobCacheKey(blob: Blob): string {
   return `${blob.size}:${blob.type}`;
 }
@@ -48,46 +75,48 @@ function cacheThumbUrl(id: string, blob: Blob, url: string): void {
 }
 
 async function createThumbUrl(blob: Blob): Promise<string> {
-  if (typeof createImageBitmap !== "function") {
-    return URL.createObjectURL(blob);
-  }
-
-  const bitmap = await createImageBitmap(blob);
-  try {
-    const maxEdge = Math.max(bitmap.width, bitmap.height);
-    if (maxEdge <= THUMB_MAX_EDGE) {
+  return runThumbTask(async () => {
+    if (typeof createImageBitmap !== "function") {
       return URL.createObjectURL(blob);
     }
 
-    const scale = THUMB_MAX_EDGE / maxEdge;
-    const width = Math.max(1, Math.round(bitmap.width * scale));
-    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const bitmap = await createImageBitmap(blob);
+    try {
+      const maxEdge = Math.max(bitmap.width, bitmap.height);
+      if (maxEdge <= THUMB_MAX_EDGE) {
+        return URL.createObjectURL(blob);
+      }
 
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      return URL.createObjectURL(blob);
+      const scale = THUMB_MAX_EDGE / maxEdge;
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        return URL.createObjectURL(blob);
+      }
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(bitmap, 0, 0, width, height);
+
+      const thumbBlob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((result) => {
+          if (result) {
+            resolve(result);
+            return;
+          }
+          reject(new Error("Failed to create image thumbnail"));
+        }, blob.type || "image/png");
+      });
+      return URL.createObjectURL(thumbBlob);
+    } finally {
+      bitmap.close();
     }
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(bitmap, 0, 0, width, height);
-
-    const thumbBlob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((result) => {
-        if (result) {
-          resolve(result);
-          return;
-        }
-        reject(new Error("Failed to create image thumbnail"));
-      }, blob.type || "image/png");
-    });
-    return URL.createObjectURL(thumbBlob);
-  } finally {
-    bitmap.close();
-  }
+  });
 }
 
 export function StoredImageView({
@@ -95,14 +124,17 @@ export function StoredImageView({
   className,
   alt,
   mode = "full",
+  lazy = false,
 }: {
   id: string;
   className?: string;
   alt?: string;
   mode?: "full" | "thumb";
+  lazy?: boolean;
 }) {
   const [url, setUrl] = useState<string | undefined>();
   useEffect(() => {
+    if (lazy) return;
     let active = true;
     let uncachedUrl: string | undefined;
     db.images
@@ -148,7 +180,7 @@ export function StoredImageView({
       active = false;
       if (uncachedUrl) URL.revokeObjectURL(uncachedUrl);
     };
-  }, [id, mode]);
+  }, [id, mode, lazy]);
 
   let loading: "lazy" | "eager" | undefined;
   if (mode === "thumb") loading = "lazy";

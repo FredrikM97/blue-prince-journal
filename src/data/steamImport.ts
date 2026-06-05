@@ -57,6 +57,20 @@ declare global {
 
 let activeSteamHandle: SteamDirHandle | null = null;
 
+// ---------------------------------------------------------------------------
+// Manifest in-memory cache
+// ---------------------------------------------------------------------------
+let manifestCache: SteamImportManifest | null = null;
+
+// ---------------------------------------------------------------------------
+// Steam file-handle cache (per source key, cleared when handle changes)
+// ---------------------------------------------------------------------------
+const fileHandleCache = new Map<string, SteamFileHandle | null>();
+
+function clearFileHandleCache(): void {
+  fileHandleCache.clear();
+}
+
 async function findChildHandleByName(
   directory: SteamDirHandle,
   segmentName: string,
@@ -72,28 +86,48 @@ async function findChildHandleByName(
 async function getSourceFileFromActiveHandle(sourceKey: string): Promise<File | null> {
   if (!activeSteamHandle) return null;
 
+  if (fileHandleCache.has(sourceKey)) {
+    const cached = fileHandleCache.get(sourceKey);
+    if (!cached) return null;
+    return cached.getFile();
+  }
+
   const segments = sourceKey
     .split("/")
     .map((segment) => segment.trim())
     .filter(Boolean);
-  if (segments.length === 0) return null;
+  if (segments.length === 0) {
+    fileHandleCache.set(sourceKey, null);
+    return null;
+  }
 
   let currentDirectory: SteamDirHandle = activeSteamHandle;
   for (let i = 0; i < segments.length; i += 1) {
     const child = await findChildHandleByName(currentDirectory, segments[i]);
-    if (!child) return null;
+    if (!child) {
+      fileHandleCache.set(sourceKey, null);
+      return null;
+    }
 
     const isLast = i === segments.length - 1;
     if (isLast) {
-      if (child.kind !== "file") return null;
+      if (child.kind !== "file") {
+        fileHandleCache.set(sourceKey, null);
+        return null;
+      }
       const fileHandle = child as unknown as SteamFileHandle;
+      fileHandleCache.set(sourceKey, fileHandle);
       return fileHandle.getFile();
     }
 
-    if (child.kind !== "directory") return null;
+    if (child.kind !== "directory") {
+      fileHandleCache.set(sourceKey, null);
+      return null;
+    }
     currentDirectory = child as unknown as SteamDirHandle;
   }
 
+  fileHandleCache.set(sourceKey, null);
   return null;
 }
 
@@ -148,6 +182,7 @@ export async function connectSteamImportFolder(): Promise<SteamDirHandle | null>
     if (!granted) return null;
     await setMeta(STEAM_IMPORT_DIR_HANDLE_META_KEY, handle);
     activeSteamHandle = handle;
+    clearFileHandleCache();
     return handle;
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
@@ -160,6 +195,7 @@ export async function connectSteamImportFolder(): Promise<SteamDirHandle | null>
 export async function disconnectSteamImportFolder(): Promise<void> {
   await deleteMeta(STEAM_IMPORT_DIR_HANDLE_META_KEY);
   activeSteamHandle = null;
+  clearFileHandleCache();
 }
 
 async function collectImageFiles(
@@ -259,11 +295,14 @@ function normalizeManifest(raw: unknown): SteamImportManifest {
 }
 
 async function loadSteamImportManifest(): Promise<SteamImportManifest> {
+  if (manifestCache) return manifestCache;
   const raw = await getMeta<unknown>(STEAM_IMPORT_MANIFEST_META_KEY);
-  return normalizeManifest(raw);
+  manifestCache = normalizeManifest(raw);
+  return manifestCache;
 }
 
 async function saveSteamImportManifest(manifest: SteamImportManifest): Promise<void> {
+  manifestCache = manifest;
   await setMeta(STEAM_IMPORT_MANIFEST_META_KEY, manifest);
 }
 

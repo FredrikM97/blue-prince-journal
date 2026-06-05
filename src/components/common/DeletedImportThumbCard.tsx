@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Inline } from "@/components/common/LayoutPrimitives";
@@ -25,22 +25,34 @@ export function DeletedImportThumbCard({
 }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     let active = true;
     let objectUrl: string | null = null;
 
-    async function load() {
-      const blob = await loadPreview(sourceKey);
-      if (!active || !blob) return;
-      objectUrl = URL.createObjectURL(blob);
-      setPreviewUrl(objectUrl);
-    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        observer.disconnect();
 
-    void load();
+        async function load() {
+          const blob = await loadPreview(sourceKey);
+          if (!active || !blob) return;
+          objectUrl = URL.createObjectURL(blob);
+          setPreviewUrl(objectUrl);
+        }
+        void load();
+      },
+      { rootMargin: "120px" },
+    );
+
+    const el = buttonRef.current;
+    if (el) observer.observe(el);
 
     return () => {
       active = false;
+      observer.disconnect();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [loadPreview, sourceKey]);
@@ -49,6 +61,7 @@ export function DeletedImportThumbCard({
     <Stack gap="1.5" variant="deleted-import-thumb">
       <Stack as="div" gap="0" variant="deleted-import-thumb-stage">
         <Button
+          ref={buttonRef}
           variant="transparent"
           size="content"
           aria-label={`Open deleted import preview for ${fileName}`}
