@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
-import { HelpCircle, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, HelpCircle, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import {
   DropdownMenu,
@@ -22,7 +22,17 @@ function clampZoom(value: number): number {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
 }
 
-export function ImageZoomDialogContent({ imageId, alt }: { imageId: string; alt: string }) {
+export function ImageZoomDialogContent({
+  imageId,
+  alt,
+  onPreviousImage,
+  onNextImage,
+}: {
+  imageId: string;
+  alt: string;
+  onPreviousImage?: () => void;
+  onNextImage?: () => void;
+}) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const pointersRef = useRef(new Map<number, Point>());
   const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
@@ -231,6 +241,30 @@ export function ImageZoomDialogContent({ imageId, alt }: { imageId: string; alt:
                 </Text>
               </DropdownMenuContent>
             </DropdownMenu>
+            {onPreviousImage && onNextImage && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Previous image"
+                  title="Previous image"
+                  onClick={onPreviousImage}
+                >
+                  <ChevronLeft className="icon-sm" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Next image"
+                  title="Next image"
+                  onClick={onNextImage}
+                >
+                  <ChevronRight className="icon-sm" />
+                </Button>
+              </>
+            )}
           </Inline>
           <Text as="span" size="xs" tone="muted">
             {zoomPercent}%

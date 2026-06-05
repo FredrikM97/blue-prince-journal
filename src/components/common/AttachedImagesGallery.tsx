@@ -42,6 +42,36 @@ export function AttachedImagesGallery({
   };
 
   const wrapperVariant = "note-details-images";
+  const zoomedImageIndex = zoomedImageId ? imageIds.indexOf(zoomedImageId) : -1;
+  const hasZoomedImage = zoomedImageIndex >= 0;
+  const hasMultipleImages = imageIds.length > 1;
+
+  function showPreviousImage() {
+    if (!hasZoomedImage) return;
+    const nextIndex = (zoomedImageIndex - 1 + imageIds.length) % imageIds.length;
+    setZoomedImageId(imageIds[nextIndex]);
+  }
+
+  function showNextImage() {
+    if (!hasZoomedImage) return;
+    const nextIndex = (zoomedImageIndex + 1) % imageIds.length;
+    setZoomedImageId(imageIds[nextIndex]);
+  }
+
+  let zoomedTitle = "Image preview";
+  if (hasZoomedImage) {
+    zoomedTitle = getImageLabel(imageIds[zoomedImageIndex]);
+  }
+
+  let zoomedCounterText = "";
+  if (hasZoomedImage) {
+    zoomedCounterText = `${zoomedImageIndex + 1} / ${imageIds.length}`;
+  }
+
+  let headerSuffix = "";
+  if (hasZoomedImage && hasMultipleImages) {
+    headerSuffix = ` (${zoomedCounterText})`;
+  }
 
   return (
     <Stack as="section" variant={wrapperVariant} gap="0">
@@ -87,15 +117,15 @@ export function AttachedImagesGallery({
       >
         <DialogContent variant="expand">
           <DialogHeader>
-            <DialogTitle>
-              {zoomedImageId ? getImageLabel(zoomedImageId) : "Image preview"}
-            </DialogTitle>
+            <DialogTitle>{`${zoomedTitle}${headerSuffix}`}</DialogTitle>
           </DialogHeader>
           {zoomedImageId && (
             <ImageZoomDialogContent
               key={zoomedImageId}
               imageId={zoomedImageId}
               alt="Enlarged note image"
+              onPreviousImage={hasMultipleImages ? showPreviousImage : undefined}
+              onNextImage={hasMultipleImages ? showNextImage : undefined}
             />
           )}
         </DialogContent>
