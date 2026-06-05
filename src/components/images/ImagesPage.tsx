@@ -195,7 +195,6 @@ export function ImagesPage() {
             busy={steamSync.busy}
             onUndelete={async (sourceKey, fileName) => {
               const restored = await steamSync.undeleteImport(sourceKey, fileName);
-              setViewMode("library");
               if (restored) {
                 setSelectedId(restored.id);
               }
