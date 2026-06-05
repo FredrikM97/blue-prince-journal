@@ -43,7 +43,7 @@ describe("useNotesPageData", () => {
         todos,
         search: "library",
         filterType: "clue",
-        roomFilter: null,
+        roomFilters: [],
         tagFilter: null,
         statusFilter: null,
       }),
@@ -62,7 +62,7 @@ describe("useNotesPageData", () => {
         todos,
         search: "@library #puzzle ^library -exit",
         filterType: undefined,
-        roomFilter: null,
+        roomFilters: [],
         tagFilter: null,
         statusFilter: null,
       }),
@@ -78,7 +78,7 @@ describe("useNotesPageData", () => {
         todos,
         search: "@library #puzzle ^library",
         filterType: undefined,
-        roomFilter: null,
+        roomFilters: [],
         tagFilter: null,
         statusFilter: null,
       }),
@@ -86,5 +86,21 @@ describe("useNotesPageData", () => {
 
     expect(result.current.filtered).toHaveLength(1);
     expect(result.current.filtered[0]?.id).toBe("n1");
+  });
+
+  it("supports multiple selected room filters", () => {
+    const { result } = renderHook(() =>
+      useNotesPageData({
+        notes,
+        todos,
+        search: "",
+        filterType: undefined,
+        roomFilters: ["Library", "Attic"],
+        tagFilter: null,
+        statusFilter: null,
+      }),
+    );
+
+    expect(result.current.filtered).toHaveLength(2);
   });
 });

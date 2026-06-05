@@ -7,7 +7,7 @@ export type NotesFilterState = {
   filterType?: NoteType;
   typeFilter: NoteType | null;
   statusFilter: "open" | "solved" | null;
-  roomFilter: string | null;
+  roomFilters: string[];
   tagFilter: string | null;
   rooms: string[];
   tags: string[];
@@ -16,7 +16,7 @@ export type NotesFilterState = {
 export type NotesFilterActions = {
   setTypeFilter: (value: NoteType | null) => void;
   setStatusFilter: (value: "open" | "solved" | null) => void;
-  setRoomFilter: (value: string | null) => void;
+  setRoomFilters: (value: string[]) => void;
   setTagFilter: (value: string | null) => void;
 };
 
@@ -78,7 +78,7 @@ export function useNotesPageUI({
     todos,
     search: deferredSearch,
     filterType: effectiveType ?? undefined,
-    roomFilter: uiState.roomFilter,
+    roomFilters: uiState.roomFilters,
     tagFilter: uiState.tagFilter,
     statusFilter: uiState.statusFilter,
   });
@@ -150,7 +150,7 @@ export function useNotesPageUI({
     filterType,
     typeFilter: uiState.typeFilter,
     statusFilter: uiState.statusFilter,
-    roomFilter: uiState.roomFilter,
+    roomFilters: uiState.roomFilters,
     tagFilter: uiState.tagFilter,
     rooms,
     tags,
@@ -159,7 +159,7 @@ export function useNotesPageUI({
   const filterActions: NotesFilterActions = {
     setTypeFilter: uiActions.setTypeFilter,
     setStatusFilter: uiActions.setStatusFilter,
-    setRoomFilter: uiActions.setRoomFilter,
+    setRoomFilters: uiActions.setRoomFilters,
     setTagFilter: uiActions.setTagFilter,
   };
 

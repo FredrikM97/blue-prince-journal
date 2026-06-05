@@ -11,6 +11,7 @@ import { Dialog, DialogContent } from "@/components/common/Dialog";
 import { EmptyState } from "@/components/common/EmptyState";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
+import { GroupedRoomFilterSection } from "@/components/common/filter/GroupedRoomFilterSection";
 import { PageLayout } from "@/components/common/PageLayout";
 import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
@@ -18,7 +19,6 @@ import { Stack } from "@/components/common/Stack";
 import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
 import { db } from "@/data/db";
 import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
-import { getRoomCatalog, ROOM_GROUPS } from "@/data/rooms";
 import type { Note, Todo } from "@/lib/types";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 
@@ -128,54 +128,6 @@ export function GraphPage() {
     return [...rooms].sort((a, b) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b)));
   }, [graphEntries]);
 
-  const roomCategoryByName = useMemo(() => {
-    const map = new Map<string, string>();
-    const catalog = getRoomCatalog();
-    for (const room of catalog) {
-      map.set(room.name.toLowerCase(), String(room.category));
-    }
-    return map;
-  }, []);
-
-  const groupedRoomFilters = useMemo(() => {
-    const grouped = new Map<string, string[]>();
-    for (const group of ROOM_GROUPS) {
-      grouped.set(group, []);
-    }
-    grouped.set("Ungrouped", []);
-
-    for (const room of allRooms) {
-      if (room === "") {
-        const emptyRooms = grouped.get("Ungrouped");
-        if (emptyRooms) emptyRooms.push(room);
-        continue;
-      }
-
-      const category = roomCategoryByName.get(room.toLowerCase());
-      if (!category) {
-        const unknownGroup = grouped.get("Ungrouped");
-        if (unknownGroup) unknownGroup.push(room);
-        continue;
-      }
-
-      const knownGroup = grouped.get(category);
-      if (knownGroup) {
-        knownGroup.push(room);
-      } else {
-        const fallback = grouped.get("Ungrouped");
-        if (fallback) fallback.push(room);
-      }
-    }
-
-    const result: Array<{ name: string; rooms: string[] }> = [];
-    grouped.forEach((rooms, name) => {
-      if (rooms.length === 0) return;
-      result.push({ name, rooms: [...rooms].sort((a, b) => a.localeCompare(b)) });
-    });
-
-    return result;
-  }, [allRooms, roomCategoryByName]);
-
   const visibleEntries = useMemo(
     () =>
       hiddenRooms.size === 0 && hiddenTypes.size === 0
@@ -238,11 +190,6 @@ export function GraphPage() {
 
   let onResetRooms: (() => void) | undefined = undefined;
   if (hiddenRooms.size > 0) onResetRooms = () => setHiddenRooms(new Set());
-
-  let roomBadge: string | undefined = undefined;
-  if (hiddenRooms.size > 0) {
-    roomBadge = `(${allRooms.length - hiddenRooms.size}/${allRooms.length})`;
-  }
 
   const typeFilterItems = ALL_NOTE_TYPES.map((type) => ({
     key: type,
@@ -309,75 +256,21 @@ export function GraphPage() {
               </FilterSection>
 
               {allRooms.length > 1 && (
-                <FilterSection
+                <GroupedRoomFilterSection
+                  rooms={allRooms}
+                  isRoomActive={(room) => !hiddenRooms.has(room)}
+                  onToggleRoom={(room) => {
+                    setHiddenRooms((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(room)) next.delete(room);
+                      else next.add(room);
+                      return next;
+                    });
+                  }}
+                  onResetAll={onResetRooms}
                   title="Rooms"
-                  collapsible
                   defaultOpen={false}
-                  width="fit"
-                  variant="compact"
-                  badge={roomBadge}
-                  onReset={onResetRooms}
-                >
-                  <Stack gap="2">
-                    {groupedRoomFilters.map((group) => {
-                      const hiddenInGroup = group.rooms.filter((room) =>
-                        hiddenRooms.has(room),
-                      ).length;
-                      let groupBadge: string | undefined = undefined;
-                      if (hiddenInGroup > 0) {
-                        groupBadge = `(${group.rooms.length - hiddenInGroup}/${group.rooms.length})`;
-                      }
-
-                      let onResetGroup: (() => void) | undefined = undefined;
-                      if (hiddenInGroup > 0) {
-                        onResetGroup = () => {
-                          setHiddenRooms((prev) => {
-                            const next = new Set(prev);
-                            for (const room of group.rooms) {
-                              next.delete(room);
-                            }
-                            return next;
-                          });
-                        };
-                      }
-
-                      const groupItems = group.rooms.map((room) => ({
-                        key: room || "__ungrouped__",
-                        label: room || "Ungrouped",
-                        active: !hiddenRooms.has(room),
-                        onToggle: () =>
-                          setHiddenRooms((prev) => {
-                            const next = new Set(prev);
-                            if (next.has(room)) next.delete(room);
-                            else next.add(room);
-                            return next;
-                          }),
-                      }));
-
-                      return (
-                        <FilterSection
-                          key={group.name}
-                          title={group.name}
-                          collapsible
-                          defaultOpen={false}
-                          width="fit"
-                          variant="compact"
-                          badge={groupBadge}
-                          onReset={onResetGroup}
-                        >
-                          <FilterToggleGrid
-                            items={groupItems}
-                            leftAligned
-                            size="compact"
-                            layout="wrap"
-                            width="fit"
-                            activeStyle="filled"
-                          />
-                        </FilterSection>
-                      );
-                    })}
-                  </Stack>
-                </FilterSection>
+                />
               )}
 
               {isolatedCount > 0 && (

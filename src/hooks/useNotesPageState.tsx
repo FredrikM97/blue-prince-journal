@@ -3,7 +3,7 @@ import type { Note, NoteType } from "@/lib/types";
 
 interface NotesPageUiState {
   typeFilter: NoteType | null;
-  roomFilter: string | null;
+  roomFilters: string[];
   tagFilter: string | null;
   statusFilter: "open" | "solved" | null;
   activeNoteId: string | null;
@@ -14,7 +14,7 @@ interface NotesPageUiState {
 
 type NotesPageAction =
   | { type: "setTypeFilter"; value: NoteType | null }
-  | { type: "setRoomFilter"; value: string | null }
+  | { type: "setRoomFilters"; value: string[] }
   | { type: "setTagFilter"; value: string | null }
   | { type: "setStatusFilter"; value: "open" | "solved" | null }
   | { type: "openEdit"; note: Note }
@@ -26,7 +26,7 @@ type NotesPageAction =
 
 const INITIAL_UI_STATE: NotesPageUiState = {
   typeFilter: null,
-  roomFilter: null,
+  roomFilters: [],
   tagFilter: null,
   statusFilter: "open",
   activeNoteId: null,
@@ -39,11 +39,16 @@ const INITIAL_UI_STATE: NotesPageUiState = {
  * Local reducer for notes-page UI-only state.
  */
 function notesPageReducer(state: NotesPageUiState, action: NotesPageAction): NotesPageUiState {
+  function hasSameRoomFilters(next: string[]): boolean {
+    if (state.roomFilters.length !== next.length) return false;
+    return state.roomFilters.every((room, index) => room === next[index]);
+  }
+
   switch (action.type) {
     case "setTypeFilter":
       return state.typeFilter === action.value ? state : { ...state, typeFilter: action.value };
-    case "setRoomFilter":
-      return state.roomFilter === action.value ? state : { ...state, roomFilter: action.value };
+    case "setRoomFilters":
+      return hasSameRoomFilters(action.value) ? state : { ...state, roomFilters: action.value };
     case "setTagFilter":
       return state.tagFilter === action.value ? state : { ...state, tagFilter: action.value };
     case "setStatusFilter":
@@ -103,8 +108,8 @@ export function useNotesPageState() {
     (value: NoteType | null) => dispatch({ type: "setTypeFilter", value }),
     [],
   );
-  const setRoomFilter = useCallback(
-    (value: string | null) => dispatch({ type: "setRoomFilter", value }),
+  const setRoomFilters = useCallback(
+    (value: string[]) => dispatch({ type: "setRoomFilters", value }),
     [],
   );
   const setTagFilter = useCallback(
@@ -131,7 +136,7 @@ export function useNotesPageState() {
   const actions = useMemo(
     () => ({
       setTypeFilter,
-      setRoomFilter,
+      setRoomFilters,
       setTagFilter,
       setStatusFilter,
       openEdit,
@@ -143,7 +148,7 @@ export function useNotesPageState() {
     }),
     [
       setTypeFilter,
-      setRoomFilter,
+      setRoomFilters,
       setTagFilter,
       setStatusFilter,
       openEdit,

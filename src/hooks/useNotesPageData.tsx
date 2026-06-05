@@ -7,7 +7,7 @@ export function useNotesPageData({
   todos,
   search,
   filterType,
-  roomFilter,
+  roomFilters,
   tagFilter,
   statusFilter,
 }: {
@@ -15,7 +15,7 @@ export function useNotesPageData({
   todos: Todo[];
   search: string;
   filterType?: NoteType;
-  roomFilter: string | null;
+  roomFilters: string[];
   tagFilter: string | null;
   statusFilter: "open" | "solved" | null;
 }) {
@@ -54,13 +54,13 @@ export function useNotesPageData({
     const query = parseSearchQuery(search);
     return noteListItems.filter((note) => {
       if (filterType && note.type !== filterType) return false;
-      if (roomFilter && note.room !== roomFilter) return false;
+      if (roomFilters.length > 0 && !roomFilters.includes(note.room ?? "")) return false;
       if (tagFilter && !note.tags.includes(tagFilter)) return false;
       if (statusFilter && note.status !== statusFilter) return false;
       if (!matchesSearchQuery(note, query)) return false;
       return true;
     });
-  }, [noteListItems, filterType, roomFilter, tagFilter, statusFilter, search]);
+  }, [noteListItems, filterType, roomFilters, tagFilter, statusFilter, search]);
 
   return { filtered, rooms, tags, noteListItems };
 }

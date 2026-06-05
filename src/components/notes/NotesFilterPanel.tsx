@@ -1,6 +1,7 @@
 import type { NoteType } from "@/lib/types";
 import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
 import { FilterSection } from "@/components/common/filter/FilterSection";
+import { GroupedRoomFilterSection } from "@/components/common/filter/GroupedRoomFilterSection";
 
 const TYPE_OPTIONS: { value: NoteType; label: string }[] = [
   { value: "observation", label: "Observations" },
@@ -23,7 +24,7 @@ export function NotesFilterPanel({
     filterType?: NoteType;
     typeFilter: NoteType | null;
     statusFilter: "open" | "solved" | null;
-    roomFilter: string | null;
+    roomFilters: string[];
     tagFilter: string | null;
     rooms: string[];
     tags: string[];
@@ -31,16 +32,15 @@ export function NotesFilterPanel({
   actions: {
     setTypeFilter: (value: NoteType | null) => void;
     setStatusFilter: (value: "open" | "solved" | null) => void;
-    setRoomFilter: (value: string | null) => void;
+    setRoomFilters: (value: string[]) => void;
     setTagFilter: (value: string | null) => void;
   };
 }) {
-  const { filterType, typeFilter, statusFilter, roomFilter, tagFilter, rooms, tags } = filters;
-  const { setTypeFilter, setStatusFilter, setRoomFilter, setTagFilter } = actions;
+  const { filterType, typeFilter, statusFilter, roomFilters, tagFilter, rooms, tags } = filters;
+  const { setTypeFilter, setStatusFilter, setRoomFilters, setTagFilter } = actions;
 
   const typeOptions = TYPE_OPTIONS;
   const statusOptions = STATUS_OPTIONS;
-  const roomOptions = rooms.map((r) => ({ value: r, label: r }));
   const tagOptions = tags.map((t) => ({ value: t, label: `#${t}` }));
 
   return (
@@ -64,15 +64,20 @@ export function NotesFilterPanel({
         />
       </FilterSection>
       {rooms.length > 0 && (
-        <FilterSection
+        <GroupedRoomFilterSection
+          rooms={rooms}
           title="Room"
-          collapsible
           defaultOpen={rooms.length <= 4}
-          width="fit"
-          variant="compact"
-        >
-          <FilterButtonGroup value={roomFilter} options={roomOptions} onChange={setRoomFilter} />
-        </FilterSection>
+          isRoomActive={(room) => roomFilters.includes(room)}
+          onToggleRoom={(room) => {
+            if (roomFilters.includes(room)) {
+              setRoomFilters(roomFilters.filter((selectedRoom) => selectedRoom !== room));
+              return;
+            }
+            setRoomFilters([...roomFilters, room]);
+          }}
+          onResetAll={() => setRoomFilters([])}
+        />
       )}
       {tags.length > 0 && (
         <FilterSection
