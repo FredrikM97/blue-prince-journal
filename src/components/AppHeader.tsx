@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/common/dropdown/DropdownMenu";
+import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { KeyboardKey } from "@/components/common/KeyboardKey";
@@ -268,21 +269,23 @@ export function AppHeader() {
             <ThemeToggle />
             <Stack variant="app-search-wrap" gap="0">
               <Search className="app-search-icon" />
-              <InputField
-                label="Search"
-                hideLabel
-                inputRef={searchInputRef}
-                value={searchInput}
-                onChange={setSearchInput}
-                onKeyDown={(event) => {
-                  if (event.key === "Escape") {
-                    setSearchInput("");
-                    searchInputRef.current?.blur();
-                  }
-                }}
-                placeholder=" "
-                size="sm"
-              />
+              <SuggestionsDropdown>
+                <InputField
+                  label="Search"
+                  hideLabel
+                  inputRef={searchInputRef}
+                  value={searchInput}
+                  onChange={setSearchInput}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      setSearchInput("");
+                      searchInputRef.current?.blur();
+                    }
+                  }}
+                  placeholder=" "
+                  size="sm"
+                />
+              </SuggestionsDropdown>
             </Stack>
             <Button
               size="sm"

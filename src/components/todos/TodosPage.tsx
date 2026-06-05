@@ -18,6 +18,7 @@ import {
 } from "@/components/common/Dialog";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
+import { matchesSearchQuery, parseSearchQuery } from "@/lib/searchQuery";
 
 export function TodosPage() {
   const todos: Todo[] = useLiveQueryArray(() => db.todos.orderBy("updatedAt").reverse().toArray());
@@ -29,12 +30,10 @@ export function TodosPage() {
   const [pendingDeleteTodoId, setPendingDeleteTodoId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const query = parseSearchQuery(search);
     return todos.filter((t) => {
       if (scopeFilter && t.scope !== scopeFilter) return false;
-      if (q && !`${t.title} ${t.tags.join(" ")} ${t.room ?? ""}`.toLowerCase().includes(q)) {
-        return false;
-      }
+      if (!matchesSearchQuery(t, query)) return false;
       return true;
     });
   }, [todos, search, scopeFilter]);

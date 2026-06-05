@@ -54,4 +54,37 @@ describe("useNotesPageData", () => {
     expect(result.current.filtered).toHaveLength(1);
     expect(result.current.filtered[0]?.id).toBe("n1");
   });
+
+  it("supports room/tag/note tokens and excluded terms", () => {
+    const { result } = renderHook(() =>
+      useNotesPageData({
+        notes,
+        todos,
+        search: "@library #puzzle ^library -exit",
+        filterType: undefined,
+        roomFilter: null,
+        tagFilter: null,
+        statusFilter: null,
+      }),
+    );
+
+    expect(result.current.filtered).toHaveLength(0);
+  });
+
+  it("matches token fields by type", () => {
+    const { result } = renderHook(() =>
+      useNotesPageData({
+        notes,
+        todos,
+        search: "@library #puzzle ^library",
+        filterType: undefined,
+        roomFilter: null,
+        tagFilter: null,
+        statusFilter: null,
+      }),
+    );
+
+    expect(result.current.filtered).toHaveLength(1);
+    expect(result.current.filtered[0]?.id).toBe("n1");
+  });
 });

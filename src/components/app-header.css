@@ -87,6 +87,14 @@
     display: none;
   }
 
+  .app-search-wrap .capture-suggestion-field {
+    @apply relative;
+  }
+
+  .app-search-wrap .capture-suggestion-dropdown {
+    @apply right-0 left-auto top-[calc(100%+0.25rem)] min-w-40;
+  }
+
   .app-add-button {
     @apply bg-brass px-2 text-brass-foreground hover:bg-brass;
   }

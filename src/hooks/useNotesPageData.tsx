@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { Note, NoteType, Todo } from "@/lib/types";
+import { matchesSearchQuery, parseSearchQuery } from "@/lib/searchQuery";
 
 export function useNotesPageData({
   notes,
@@ -50,18 +51,13 @@ export function useNotesPageData({
   }, [noteListItems]);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const query = parseSearchQuery(search);
     return noteListItems.filter((note) => {
       if (filterType && note.type !== filterType) return false;
       if (roomFilter && note.room !== roomFilter) return false;
       if (tagFilter && !note.tags.includes(tagFilter)) return false;
       if (statusFilter && note.status !== statusFilter) return false;
-      if (q) {
-        const hay = [note.title, note.body, note.tags.join(" "), note.room ?? ""]
-          .join(" ")
-          .toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
+      if (!matchesSearchQuery(note, query)) return false;
       return true;
     });
   }, [noteListItems, filterType, roomFilter, tagFilter, statusFilter, search]);
