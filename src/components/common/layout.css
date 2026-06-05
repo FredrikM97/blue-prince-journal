@@ -650,7 +650,15 @@
   .ui-layout-mobile-drawer .ui-header-panel,
   .page-layout-mobile-drawer .panel-header,
   .page-layout-mobile-drawer .ui-header-panel {
-    @apply sticky top-0 z-10 bg-background pt-3;
+    @apply sticky top-0 z-10 border-b border-border bg-background/95 pt-3 backdrop-blur-sm;
+    box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--border) 75%, transparent);
+  }
+
+  .ui-layout-mobile-drawer .ui-header-actions,
+  .ui-layout-mobile-drawer .preview-header-actions,
+  .page-layout-mobile-drawer .ui-header-actions,
+  .page-layout-mobile-drawer .preview-header-actions {
+    @apply items-center gap-1.5;
   }
 
   /* SidebarPanel — fixed right overlay, slides in from the right edge */
@@ -692,5 +700,23 @@
   .page-layout-mode-mobile .page-layout-content {
     height: auto;
     overflow-y: visible;
+  }
+
+  .ui-layout-variant-panel.ui-layout-mode-mobile .ui-layout-mobile-drawer,
+  .page-layout-variant-panel.page-layout-mode-mobile .page-layout-mobile-drawer {
+    @apply border border-border/70;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--border) 45%, transparent),
+      0 10px 28px -18px rgb(0 0 0 / 0.55);
+  }
+
+  .ui-layout-variant-panel.ui-layout-mode-mobile .ui-layout-mobile-drawer-right,
+  .page-layout-variant-panel.page-layout-mode-mobile .page-layout-mobile-drawer-right {
+    @apply border-l border-r-0;
+  }
+
+  .ui-layout-variant-panel.ui-layout-mode-mobile .ui-layout-mobile-drawer-left,
+  .page-layout-variant-panel.page-layout-mode-mobile .page-layout-mobile-drawer-left {
+    @apply border-r border-l-0;
   }
 }
