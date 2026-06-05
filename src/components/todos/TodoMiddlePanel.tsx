@@ -10,7 +10,6 @@ function TodoColumn({
   todos,
   onToggle,
   onDelete,
-  onEdit,
   onOpenPreview,
 }: {
   label: string;
@@ -18,22 +17,21 @@ function TodoColumn({
   todos: Todo[];
   onToggle: (id: string, next: TodoStatus) => void;
   onDelete: (id: string) => void;
-  onEdit: (t: Todo) => void;
   onOpenPreview: (t: Todo) => void;
 }) {
   return (
-    <section className="todos-column">
-      <header className="todos-column-header">
+    <Stack as="section" gap="0" className="todos-column">
+      <Stack as="header" gap="0" className="todos-column-header">
         <Heading as="h2" size="base" variant="section-label">
           {label}
         </Heading>
         <MetaText as="span">{todos.length}</MetaText>
-      </header>
-      <ul className="todos-column-list">
+      </Stack>
+      <Stack as="ul" gap="0" className="todos-column-list">
         {todos.length === 0 && (
-          <li className="todos-column-empty">
+          <Stack as="li" gap="0" className="todos-column-empty">
             {value === "open" ? "Press N to add a todo" : "Empty"}
-          </li>
+          </Stack>
         )}
         {todos.map((t) => (
           <TodoItem
@@ -41,12 +39,11 @@ function TodoColumn({
             todo={t}
             onToggle={(next) => onToggle(t.id, next)}
             onDelete={() => onDelete(t.id)}
-            onEdit={onEdit}
             onOpenPreview={() => onOpenPreview(t)}
           />
         ))}
-      </ul>
-    </section>
+      </Stack>
+    </Stack>
   );
 }
 
@@ -54,18 +51,16 @@ export function TodoMiddlePanel({
   grouped,
   onToggle,
   onDelete,
-  onEdit,
   onOpenPreview,
 }: {
   grouped: Record<TodoStatus, Todo[]>;
   onToggle: (id: string, next: TodoStatus) => void;
   onDelete: (id: string) => void;
-  onEdit: (todo: Todo) => void;
   onOpenPreview: (todo: Todo) => void;
 }) {
   return (
     <Stack as="section" gap="0">
-      <div className="todos-columns-grid">
+      <Stack as="div" gap="0" className="todos-columns-grid">
         {TODO_STATUS_COLUMNS.map((col) => (
           <TodoColumn
             key={col.value}
@@ -74,11 +69,10 @@ export function TodoMiddlePanel({
             todos={grouped[col.value]}
             onToggle={onToggle}
             onDelete={onDelete}
-            onEdit={onEdit}
             onOpenPreview={onOpenPreview}
           />
         ))}
-      </div>
+      </Stack>
     </Stack>
   );
 }

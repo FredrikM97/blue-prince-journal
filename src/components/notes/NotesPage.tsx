@@ -168,8 +168,11 @@ function NotesCaptureMobileDrawerSync({ captureOpen }: { captureOpen: boolean })
   const drawerControls = usePageLayoutMobileDrawerControls();
 
   useEffect(() => {
-    if (!captureOpen) return;
     if (!drawerControls?.isPageLayoutMobile) return;
+    if (!captureOpen) {
+      drawerControls.closeMobileDrawer();
+      return;
+    }
     drawerControls.openMobileDrawer("right");
   }, [captureOpen, drawerControls]);
 

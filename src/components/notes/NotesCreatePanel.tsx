@@ -329,8 +329,8 @@ function NotesFooterActions({
   const attachRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-2">
+    <Inline gap="2" align="center" wrap>
+      <Inline gap="2" align="center">
         <Button
           type="button"
           variant="outline"
@@ -354,19 +354,21 @@ function NotesFooterActions({
             e.target.value = "";
           }}
         />
-      </div>
-      <div className="ml-auto flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={close}>
-          Cancel
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => submit(true)}>
-          Save + next
-        </Button>
-        <Button variant="brass" size="sm" onClick={() => submit(false)}>
-          Save
-        </Button>
-      </div>
-    </div>
+      </Inline>
+      <Stack as="div" gap="0" className="ml-auto">
+        <Inline gap="2" align="center">
+          <Button variant="ghost" size="sm" onClick={close}>
+            Cancel
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => submit(true)}>
+            Save + next
+          </Button>
+          <Button variant="brass" size="sm" onClick={() => submit(false)}>
+            Save
+          </Button>
+        </Inline>
+      </Stack>
+    </Inline>
   );
 }
 
@@ -836,7 +838,7 @@ function SelectExistingImagesDialog({
           Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
         </MetaText>
 
-        <Stack variant="dialog-scroll-body" gap="0">
+        <Stack variant="dialog-scroll-body" gap="0" className="min-h-[68vh]">
           {sortedImages.length > 0 ? (
             <Stack variant="note-image-picker-grid" gap="0">
               {pageImages.map((img) => {

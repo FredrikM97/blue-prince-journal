@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState } from "react";
 import type { Todo, TodoStatus } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
 import { CheckCircle2, Circle, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
-import { InputField } from "@/components/common/input/InputField";
 import { Text } from "@/components/common/Typography";
 import {
   DropdownMenu,
@@ -28,89 +26,15 @@ export function TodoItem({
   todo,
   onToggle,
   onDelete,
-  onEdit,
   onOpenPreview,
 }: {
   todo: Todo;
   onToggle: (s: TodoStatus) => void;
   onDelete: () => void;
-  onEdit: (t: Todo) => void;
   onOpenPreview: () => void;
 }) {
-  const titleClickTimeoutRef = useRef<number | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [title, setTitle] = useState(todo.title);
   const titleTone = todo.status === "done" ? "muted" : "default";
   const titleDecoration = todo.status === "done" ? "line-through" : "none";
-
-  useEffect(() => {
-    return () => {
-      if (titleClickTimeoutRef.current === null) return;
-      window.clearTimeout(titleClickTimeoutRef.current);
-      titleClickTimeoutRef.current = null;
-    };
-  }, []);
-
-  const queuePreviewOpen = () => {
-    if (titleClickTimeoutRef.current !== null) {
-      window.clearTimeout(titleClickTimeoutRef.current);
-      titleClickTimeoutRef.current = null;
-    }
-    titleClickTimeoutRef.current = window.setTimeout(() => {
-      onOpenPreview();
-      titleClickTimeoutRef.current = null;
-    }, 200);
-  };
-
-  const openTitleEditor = () => {
-    if (titleClickTimeoutRef.current !== null) {
-      window.clearTimeout(titleClickTimeoutRef.current);
-      titleClickTimeoutRef.current = null;
-    }
-    setEditing(true);
-  };
-
-  let titleEditor = (
-    <Button
-      type="button"
-      variant="transparent"
-      size="content"
-      justify="start"
-      textAlign="left"
-      tone={titleTone}
-      onClick={queuePreviewOpen}
-      onDoubleClick={openTitleEditor}
-      className="todo-row-title-button"
-    >
-      <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
-        {todo.title}
-      </Text>
-    </Button>
-  );
-
-  if (editing) {
-    titleEditor = (
-      <InputField
-        label="Todo title"
-        hideLabel
-        value={title}
-        onChange={setTitle}
-        onBlur={() => {
-          setEditing(false);
-          if (title.trim() && title !== todo.title) onEdit({ ...todo, title: title.trim() });
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-          if (e.key === "Escape") {
-            setTitle(todo.title);
-            setEditing(false);
-          }
-        }}
-        autoFocus
-        size="sm"
-      />
-    );
-  }
 
   return (
     <li>
@@ -118,7 +42,20 @@ export function TodoItem({
         <Stack as="div" className="todo-row-main" gap="0">
           <Stack as="div" className="todo-row-title-line" gap="0">
             <Stack as="div" className="todo-row-title-wrap" gap="0">
-              {titleEditor}
+              <Button
+                type="button"
+                variant="transparent"
+                size="content"
+                justify="start"
+                textAlign="left"
+                tone={titleTone}
+                onClick={onOpenPreview}
+                className="todo-row-title-button"
+              >
+                <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
+                  {todo.title}
+                </Text>
+              </Button>
             </Stack>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

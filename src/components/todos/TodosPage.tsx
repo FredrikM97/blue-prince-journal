@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useStore } from "@/data/store";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
-import { toggleTodoStatus, removeTodo, saveTodo } from "@/data/mutations";
+import { toggleTodoStatus, removeTodo } from "@/data/mutations";
 import type { Todo } from "@/lib/types";
 import { groupTodosByStatus } from "@/components/todos/Constants";
 import { PageLayout } from "@/components/common/PageLayout";
@@ -20,11 +20,11 @@ import {
 import { Inline } from "@/components/common/LayoutPrimitives";
 
 export function TodosPage() {
-  const todos: Todo[] = useLiveQuery(() => db.todos.orderBy("updatedAt").reverse().toArray()) ?? [];
+  const rawTodos = useLiveQuery(() => db.todos.orderBy("updatedAt").reverse().toArray());
+  const todos: Todo[] = useMemo(() => rawTodos ?? [], [rawTodos]);
   const search = useStore((s) => s.search);
   const toggle = toggleTodoStatus;
   const remove = removeTodo;
-  const save = saveTodo;
   const [scopeFilter, setScopeFilter] = useState<string | null>(null);
   const [previewTodoId, setPreviewTodoId] = useState<string | null>(null);
   const [pendingDeleteTodoId, setPendingDeleteTodoId] = useState<string | null>(null);
@@ -73,7 +73,6 @@ export function TodosPage() {
             grouped={grouped}
             onToggle={(id, next) => toggle(id, next)}
             onDelete={(id) => setPendingDeleteTodoId(id)}
-            onEdit={save}
             onOpenPreview={(todo) => setPreviewTodoId(todo.id)}
           />
         </PageLayout.Middle>

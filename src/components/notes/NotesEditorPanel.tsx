@@ -373,7 +373,7 @@ function SelectExistingImagesDialog({
           Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
         </MetaText>
 
-        <Stack variant="dialog-scroll-body" gap="0">
+        <Stack variant="dialog-scroll-body" gap="0" className="min-h-[68vh]">
           {sortedImages.length > 0 ? (
             <Stack variant="note-image-picker-grid" gap="0">
               {pageImages.map((img) => {
