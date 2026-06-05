@@ -157,7 +157,7 @@
   }
 
   .dialog-content-wide .dialog-scroll-body {
-    @apply flex min-h-0 overflow-hidden;
+    @apply flex-col min-h-0 overflow-y-auto;
   }
 
   /* Full-screen-ish dialog (graph fullscreen, leaves 1rem margin) */
