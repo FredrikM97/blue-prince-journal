@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { PenLine } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { SidePanel } from "@/components/common/SidePanel";
+import { Stack } from "@/components/common/Stack";
 
 export function PreviewSidePanel({
   title,
@@ -52,7 +53,9 @@ export function PreviewSidePanel({
       headerActions={headerActions}
       expandDialog={renderExpandDialog(expanded, setExpanded)}
     >
-      {children}
+      <Stack gap="2" variant="dialog-scroll-body">
+        {children}
+      </Stack>
     </SidePanel.Right>
   );
 }

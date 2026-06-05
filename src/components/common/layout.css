@@ -143,7 +143,7 @@
 
   /* Standard preview/note dialog: tall, wide, flex-col */
   .dialog-content-preview {
-    @apply flex max-h-[calc(100dvh-2rem)] w-[90vw] max-w-2xl flex-col gap-4 overflow-hidden p-6;
+    @apply flex h-[calc(100dvh-2rem)] max-h-[calc(100dvh-2rem)] w-[96vw] max-w-5xl flex-col gap-4 overflow-hidden p-6;
   }
 
   /* Expand dialog (4xl wide, used by PreviewExpandDialog) */

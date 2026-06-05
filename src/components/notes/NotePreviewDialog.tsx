@@ -103,6 +103,8 @@ export function NotePreviewDialog({
   let title = activeNote.title;
   let strikeTitle = activeNote.status === "solved";
   let showHeaderClose = true;
+  let dialogVariant: "preview" | "wide" = "preview";
+  let bodyVariant: "dialog-scroll-body" | "dialog-scroll-body-tall" = "dialog-scroll-body";
   let headerActions: React.ReactNode = (
     <Button
       variant="ghost"
@@ -121,6 +123,8 @@ export function NotePreviewDialog({
     subtitle = undefined;
     strikeTitle = false;
     showHeaderClose = false;
+    dialogVariant = "wide";
+    bodyVariant = "dialog-scroll-body-tall";
     headerActions = (
       <PreviewEditModeActions
         onCancel={closeEditDetails}
@@ -130,12 +134,12 @@ export function NotePreviewDialog({
       />
     );
     content = (
-      <Stack gap="3">
+      <Stack gap="0" variant="dialog-scroll-body">
         <MarkdownEditor
           value={detailsDraft}
           onChange={setDetailsDraft}
           placeholder="Details (markdown supported)…"
-          rows={12}
+          rows={24}
           allowExpand={false}
         />
       </Stack>
@@ -156,6 +160,8 @@ export function NotePreviewDialog({
       strikeTitle={strikeTitle}
       headerActions={headerActions}
       showHeaderClose={showHeaderClose}
+      dialogVariant={dialogVariant}
+      bodyVariant={bodyVariant}
     >
       {content}
     </PreviewDialog>

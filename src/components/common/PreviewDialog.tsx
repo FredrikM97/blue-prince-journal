@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
+import type { DialogVariant } from "@/components/common/Dialog";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
@@ -18,13 +19,7 @@ function PreviewDialogHeaderRow({
   showClose: boolean;
 }) {
   return (
-    <Inline
-      as="div"
-      gap="2"
-      justify="between"
-      align="start"
-      className="preview-dialog-title-row"
-    >
+    <Inline as="div" gap="2" justify="between" align="start" className="preview-dialog-title-row">
       <DialogTitle className={titleClassName}>{title}</DialogTitle>
       <Inline as="div" gap="1" align="center" className="preview-dialog-title-actions">
         {headerActions}
@@ -48,6 +43,8 @@ export function PreviewDialog({
   strikeTitle = false,
   headerActions,
   showHeaderClose = true,
+  dialogVariant = "preview",
+  bodyVariant = "dialog-scroll-body",
   children,
 }: {
   open: boolean;
@@ -57,6 +54,8 @@ export function PreviewDialog({
   strikeTitle?: boolean;
   headerActions?: ReactNode;
   showHeaderClose?: boolean;
+  dialogVariant?: DialogVariant;
+  bodyVariant?: "dialog-scroll-body" | "dialog-scroll-body-tall";
   children: ReactNode;
 }) {
   let titleClassName = "text-xl";
@@ -66,7 +65,7 @@ export function PreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant="preview" showClose={false}>
+      <DialogContent variant={dialogVariant} showClose={false}>
         <DialogHeader>
           <PreviewDialogHeaderRow
             title={title}
@@ -80,7 +79,7 @@ export function PreviewDialog({
             </MetaText>
           )}
         </DialogHeader>
-        <Stack gap="2" variant="dialog-scroll-body">
+        <Stack gap="2" variant={bodyVariant}>
           {children}
         </Stack>
       </DialogContent>

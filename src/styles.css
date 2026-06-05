@@ -70,7 +70,7 @@
 :root {
   /* Shared shape token */
   --radius: 0.5rem;
-  --sidebar-panel-width: 20rem;
+  --sidebar-panel-width: 24rem;
 
   /* Light mode: core surfaces and text */
   --background: oklch(0.97 0.008 95);
@@ -154,19 +154,19 @@
 
 @media (min-width: 48rem) {
   :root {
-    --sidebar-panel-width: 24rem;
+    --sidebar-panel-width: 28rem;
   }
 }
 
 @media (min-width: 64rem) {
   :root {
-    --sidebar-panel-width: 30rem;
+    --sidebar-panel-width: 36rem;
   }
 }
 
 @media (min-width: 80rem) {
   :root {
-    --sidebar-panel-width: 34rem;
+    --sidebar-panel-width: 42rem;
   }
 }
 
