@@ -61,13 +61,20 @@ export const DialogContent = React.forwardRef<
     overlayVariant?: DialogOverlayVariant;
   }
 >(({ children, variant = "default", showClose, overlayVariant = "default", ...props }, ref) => {
+  const { ["aria-describedby"]: ariaDescribedBy, ...contentProps } = props;
+
   let shouldShowClose = getDefaultShowClose(variant);
   if (showClose !== undefined) shouldShowClose = showClose;
 
   return (
     <DialogPrimitive.Portal>
       <DialogOverlay variant={overlayVariant} />
-      <DialogPrimitive.Content ref={ref} className={getDialogContentClass(variant)} {...props}>
+      <DialogPrimitive.Content
+        ref={ref}
+        className={getDialogContentClass(variant)}
+        aria-describedby={ariaDescribedBy ?? undefined}
+        {...contentProps}
+      >
         {children}
         {shouldShowClose && (
           <DialogPrimitive.Close className="dialog-close-btn">

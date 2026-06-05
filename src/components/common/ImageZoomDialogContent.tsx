@@ -167,7 +167,9 @@ export function ImageZoomDialogContent({
 
   const onWheel = useCallback(
     (event: ReactWheelEvent<HTMLDivElement>) => {
-      event.preventDefault();
+      if (event.cancelable) {
+        event.preventDefault();
+      }
 
       if (event.deltaY === 0) return;
       if (event.deltaY < 0) {
