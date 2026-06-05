@@ -9,20 +9,13 @@ import { Stack } from "@/components/common/Stack";
 import { SidePanel } from "@/components/common/SidePanel";
 import { Text } from "@/components/common/Typography";
 import { InputField } from "@/components/common/input/InputField";
+import { ImageZoomDialogContent } from "@/components/common/ImageZoomDialogContent";
 import type { Note, StoredImage } from "@/lib/types";
 
 // Image styling containers (requires wrapper for CSS styling)
 function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
   return (
     <Stack gap="0" className="images-detail-preview">
-      {children}
-    </Stack>
-  );
-}
-
-function ImageZoomPreview({ children }: { children: React.ReactNode }) {
-  return (
-    <Stack gap="0" className="images-zoom-preview">
       {children}
     </Stack>
   );
@@ -187,9 +180,7 @@ function ImagesInspectorPanel({
           <DialogHeader>
             <DialogTitle>{getImageLabel(img)}</DialogTitle>
           </DialogHeader>
-          <ImageZoomPreview>
-            <StoredImageView id={img.id} alt={img.name} className="images-zoom-preview-image" />
-          </ImageZoomPreview>
+          <ImageZoomDialogContent key={img.id} imageId={img.id} alt={img.name} />
         </DialogContent>
       </Dialog>
     </>

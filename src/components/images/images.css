@@ -59,6 +59,45 @@
     @apply max-h-[80vh] w-full object-contain;
   }
 
+  .image-zoom-dialog-shell {
+    @apply w-full;
+  }
+
+  .image-zoom-toolbar {
+    @apply rounded-md border border-border/70 bg-card/40 px-2 py-1.5;
+  }
+
+  .image-zoom-stage {
+    @apply relative flex max-h-[78vh] min-h-[18rem] w-full items-center justify-center overflow-hidden rounded bg-black/75;
+    touch-action: none;
+  }
+
+  .image-zoom-stage-transform {
+    @apply transition-transform duration-100 ease-out;
+    will-change: transform;
+  }
+
+  .image-zoom-stage-image {
+    @apply max-h-[76vh] w-full select-none object-contain;
+    -webkit-user-drag: none;
+  }
+
+  .image-zoom-stage-can-zoom {
+    @apply cursor-zoom-in;
+  }
+
+  .image-zoom-stage-can-pan {
+    @apply cursor-grab;
+  }
+
+  .image-zoom-stage-panning {
+    @apply cursor-grabbing;
+  }
+
+  .image-zoom-help-text {
+    @apply text-center;
+  }
+
   .images-size-info {
     @apply text-xs text-muted-foreground;
   }

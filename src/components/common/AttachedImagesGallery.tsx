@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { Button } from "@/components/common/Button";
-import { StoredImageView } from "@/components/common/StoredImageView";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import type { StoredImage } from "@/lib/types";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { ImageCard } from "@/components/common/ImageCard";
+import { ImageZoomDialogContent } from "@/components/common/ImageZoomDialogContent";
 
 export function AttachedImagesGallery({
   imageIds,
@@ -91,15 +91,13 @@ export function AttachedImagesGallery({
               {zoomedImageId ? getImageLabel(zoomedImageId) : "Image preview"}
             </DialogTitle>
           </DialogHeader>
-          <Stack variant="note-details-zoom-preview" gap="0">
-            {zoomedImageId && (
-              <StoredImageView
-                id={zoomedImageId}
-                className="mx-auto max-h-[70vh] w-full object-contain"
-                alt="Enlarged note image"
-              />
-            )}
-          </Stack>
+          {zoomedImageId && (
+            <ImageZoomDialogContent
+              key={zoomedImageId}
+              imageId={zoomedImageId}
+              alt="Enlarged note image"
+            />
+          )}
         </DialogContent>
       </Dialog>
     </Stack>

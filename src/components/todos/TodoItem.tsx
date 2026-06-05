@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Todo, TodoStatus } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
 import { CheckCircle2, Circle, Eye, MoreHorizontal, Trash2 } from "lucide-react";
@@ -37,10 +37,39 @@ export function TodoItem({
   onEdit: (t: Todo) => void;
   onOpenPreview: () => void;
 }) {
+  const titleClickTimeoutRef = useRef<number | null>(null);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(todo.title);
   const titleTone = todo.status === "done" ? "muted" : "default";
   const titleDecoration = todo.status === "done" ? "line-through" : "none";
+
+  useEffect(() => {
+    return () => {
+      if (titleClickTimeoutRef.current === null) return;
+      window.clearTimeout(titleClickTimeoutRef.current);
+      titleClickTimeoutRef.current = null;
+    };
+  }, []);
+
+  const queuePreviewOpen = () => {
+    if (titleClickTimeoutRef.current !== null) {
+      window.clearTimeout(titleClickTimeoutRef.current);
+      titleClickTimeoutRef.current = null;
+    }
+    titleClickTimeoutRef.current = window.setTimeout(() => {
+      onOpenPreview();
+      titleClickTimeoutRef.current = null;
+    }, 200);
+  };
+
+  const openTitleEditor = () => {
+    if (titleClickTimeoutRef.current !== null) {
+      window.clearTimeout(titleClickTimeoutRef.current);
+      titleClickTimeoutRef.current = null;
+    }
+    setEditing(true);
+  };
+
   let titleEditor = (
     <Button
       type="button"
@@ -49,7 +78,8 @@ export function TodoItem({
       justify="start"
       textAlign="left"
       tone={titleTone}
-      onDoubleClick={() => setEditing(true)}
+      onClick={queuePreviewOpen}
+      onDoubleClick={openTitleEditor}
       className="todo-row-title-button"
     >
       <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
