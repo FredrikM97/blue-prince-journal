@@ -33,7 +33,7 @@
   }
 
   .map-cell-room-name {
-    @apply text-[10px] leading-tight sm:text-[11px];
+    @apply block w-full overflow-hidden text-[10px] leading-tight break-words line-clamp-2 sm:text-[11px];
   }
 
   .map-cell-meta {
@@ -81,12 +81,12 @@
 
   @media (max-width: 40rem) {
     .map-grid {
-      width: min(100%, 18rem);
+      width: min(100%, 19.5rem);
       @apply gap-1.5;
     }
 
     .map-cell {
-      @apply p-1.5;
+      @apply px-1.5 py-1;
     }
 
     .map-cell-room-name {
@@ -96,7 +96,7 @@
 
     .map-cell-meta,
     .map-cell-coord {
-      font-size: 8px;
+      font-size: 9px;
     }
   }
 }
