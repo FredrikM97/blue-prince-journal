@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { ChevronLeft, ChevronRight, HelpCircle, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import {
@@ -41,6 +41,11 @@ export function ImageZoomDialogContent({
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
+  const zoomRef = useRef(zoom);
+
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
 
   const clampOffset = useCallback((next: Point, activeZoom: number): Point => {
     if (activeZoom <= 1) return { x: 0, y: 0 };
@@ -165,21 +170,25 @@ export function ImageZoomDialogContent({
     [zoom],
   );
 
-  const onWheel = useCallback(
-    (event: ReactWheelEvent<HTMLDivElement>) => {
-      if (event.cancelable) {
-        event.preventDefault();
-      }
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
 
+    const onWheelEvent = (event: WheelEvent) => {
+      event.preventDefault();
       if (event.deltaY === 0) return;
       if (event.deltaY < 0) {
-        applyZoom(zoom + ZOOM_STEP);
+        applyZoom(zoomRef.current + ZOOM_STEP);
         return;
       }
-      applyZoom(zoom - ZOOM_STEP);
-    },
-    [applyZoom, zoom],
-  );
+      applyZoom(zoomRef.current - ZOOM_STEP);
+    };
+
+    stage.addEventListener("wheel", onWheelEvent, { passive: false });
+    return () => {
+      stage.removeEventListener("wheel", onWheelEvent);
+    };
+  }, [applyZoom]);
 
   const onDoubleClick = useCallback(() => {
     if (zoom > 1) {
@@ -281,7 +290,6 @@ export function ImageZoomDialogContent({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        onWheel={onWheel}
         onDoubleClick={onDoubleClick}
       >
         <div
