@@ -6,7 +6,7 @@ import { Stack } from "@/components/common/Stack";
 import {
   usePageLayoutMobileDrawerControls,
   type MobileDrawerSide,
-} from "@/components/common/PageLayout";
+} from "@/hooks/usePageLayoutMobileDrawer";
 
 type SidePanelBaseProps = {
   title: string;

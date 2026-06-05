@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
 import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
-import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
+import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
 import { ImageCard } from "@/components/common/ImageCard";
 
 type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";

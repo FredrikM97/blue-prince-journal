@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useStore } from "@/data/store";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { toggleTodoStatus, removeTodo } from "@/data/mutations";
 import type { Todo } from "@/lib/types";
@@ -18,10 +17,10 @@ import {
   DialogTitle,
 } from "@/components/common/Dialog";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 
 export function TodosPage() {
-  const rawTodos = useLiveQuery(() => db.todos.orderBy("updatedAt").reverse().toArray());
-  const todos: Todo[] = useMemo(() => rawTodos ?? [], [rawTodos]);
+  const todos: Todo[] = useLiveQueryArray(() => db.todos.orderBy("updatedAt").reverse().toArray());
   const search = useStore((s) => s.search);
   const toggle = toggleTodoStatus;
   const remove = removeTodo;

@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useStore } from "@/data/store";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { saveNote, saveTodo, createFromCapture } from "@/data/mutations";
 import type { Note, Todo } from "@/lib/types";
@@ -22,9 +21,10 @@ import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
-import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
 import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
 import { Chip } from "@/components/common/Chip";
+import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
+import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
 
 const NOTE_PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
@@ -57,9 +57,9 @@ function useNotesStoreSlice() {
   const prefillPriority = useStore((s) => s.capturePrefillPriority);
   const editNoteId = useStore((s) => s.captureEditNoteId);
   const editTodoId = useStore((s) => s.captureEditTodoId);
-  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
-  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
-  const images = useLiveQuery(() => db.images.toArray()) ?? [];
+  const notes: Note[] = useLiveQueryArray(() => db.notes.toArray());
+  const todos: Todo[] = useLiveQueryArray(() => db.todos.toArray());
+  const images = useLiveQueryArray(() => db.images.toArray());
   const returnTo = useStore((s) => s.captureReturnTo);
 
   return {

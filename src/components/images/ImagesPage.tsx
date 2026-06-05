@@ -1,10 +1,9 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useStore } from "@/data/store";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { addImage, removeImage, updateImage } from "@/data/mutations";
 import type { StoredImage, Note } from "@/lib/types";
-import { PageLayout, usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
+import { PageLayout } from "@/components/common/PageLayout";
 import { StoredImageView } from "@/components/common/StoredImageView";
 import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
@@ -23,14 +22,15 @@ import {
 } from "@/data/steamImport";
 import { syncRuntime } from "@/data/sync";
 import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storageHealth";
+import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 
 function getImageLabel(img: StoredImage): string {
   return img.caption?.trim() || img.name;
 }
 
 export function ImagesPage() {
-  const images: StoredImage[] = useLiveQuery(() => db.images.toArray()) ?? [];
-  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
+  const images: StoredImage[] = useLiveQueryArray(() => db.images.toArray());
+  const notes: Note[] = useLiveQueryArray(() => db.notes.toArray());
   const search = useStore((s) => s.search);
   const deferredSearch = useDeferredValue(search);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -116,7 +116,7 @@ export function ImagesPage() {
   }, [selectByOffset, selected]);
 
   return (
-    <PageLayout variant="panel">
+    <PageLayout variant="panel" mobileDrawerOpen={Boolean(selectedId)} mobileDrawerSide="right">
       <PageLayout.Left>
         <ImagesLeftPanel total={filtered.length} steamSync={steamSync} />
       </PageLayout.Left>
@@ -287,7 +287,6 @@ function ImagesGrid({
   selectedId: string | null;
   setSelectedId: (id: string | null) => void;
 }) {
-  const mobileDrawerControls = usePageLayoutMobileDrawerControls();
   return (
     <Stack as="div" variant="images-grid">
       {filtered.map((img) => (
@@ -297,9 +296,6 @@ function ImagesGrid({
           selected={img.id === selectedId}
           onClick={() => {
             setSelectedId(img.id);
-            if (mobileDrawerControls?.isPageLayoutMobile) {
-              mobileDrawerControls.openMobileDrawer("right");
-            }
           }}
         />
       ))}

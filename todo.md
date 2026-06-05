@@ -1,3 +1,24 @@
+- [x] Extract mobile drawer context + sync hooks out of PageLayout into dedicated hook module
+
+- [x] Move mobile drawer auto-open/close into shared PageLayout props and remove per-page sync components
+- [x] Reduce mobile drawer control flicker by avoiding redundant open/close state updates
+- [x] Expand useLiveQueryArray usage in key page/store flows for consistent query-array handling
+
+- [x] Add shared live-query array hook to remove raw+memo duplication in map/graph
+- [x] Generalize PageLayout mobile drawer sync hook to support configurable side (left/right)
+
+- [x] Extract shared PageLayout mobile right-drawer sync hook and reuse in MapPage + GraphPage
+
+- [x] Fix Map mobile right drawer auto-open by using PageLayout drawer hook inside layout context
+
+- [x] Remove todo inline title editing and keep title click opening preview
+- [x] Prevent mobile note-create flow from leaving preview drawer visible after save/close
+- [x] Auto-open map mobile right details drawer when selecting a cell
+- [x] Increase attach-existing-image dialog height to show more images per page
+
+- [x] Confirm todo title click timing cleanup via useEffect is appropriate and safe
+- [x] Add image popup zoom controls, pan gesture support, and reset-to-default action
+
 - [x] Move Todo delete action back into dropdown menu
 - [x] Confirm local backup helpers are still used and keep backup fallback path
 - [x] Introduce clearer indexedDbStorage module path under syncStorage and migrate imports

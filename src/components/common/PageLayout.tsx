@@ -3,9 +3,7 @@ import {
   Children,
   Fragment,
   useCallback,
-  createContext,
   isValidElement,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -26,34 +24,11 @@ import {
   useOnPageLayoutMobileChange,
 } from "@/components/common/usePageLayoutMobile";
 import { PanelLeft, PanelRight } from "lucide-react";
-
-export type MobileDrawerSide = "left" | "right";
-
-export type MobileDrawerControls = {
-  isPageLayoutMobile: boolean;
-  openMobileDrawer: (side: MobileDrawerSide) => void;
-  closeMobileDrawer: () => void;
-};
-
-const PageLayoutMobileDrawerContext = createContext<MobileDrawerControls | null>(null);
-
-function PageLayoutMobileDrawerProvider({
-  value,
-  children,
-}: {
-  value: MobileDrawerControls;
-  children: ReactNode;
-}) {
-  return (
-    <PageLayoutMobileDrawerContext.Provider value={value}>
-      {children}
-    </PageLayoutMobileDrawerContext.Provider>
-  );
-}
-
-export function usePageLayoutMobileDrawerControls() {
-  return useContext(PageLayoutMobileDrawerContext);
-}
+import {
+  PageLayoutMobileDrawerProvider,
+  type MobileDrawerSide,
+  type MobileDrawerControls,
+} from "@/hooks/usePageLayoutMobileDrawer";
 
 type MobilePanelLabelKey = "default" | "graph" | "map" | "notes" | "images" | "todos";
 
@@ -203,14 +178,20 @@ function useMobilePageLayoutDrawersState({
   const mobileRightOpen = mobileOpen === "right";
 
   const closeMobileDrawer = useCallback(() => {
-    setMobileOpen(null);
+    setMobileOpen((prev) => {
+      if (prev === null) return prev;
+      return null;
+    });
   }, []);
 
   const openMobileDrawer = useCallback(
     (side: MobileDrawerSide) => {
       if (side === "left" && !hasLeft) return;
       if (side === "right" && !hasRight) return;
-      setMobileOpen(side);
+      setMobileOpen((prev) => {
+        if (prev === side) return prev;
+        return side;
+      });
     },
     [hasLeft, hasRight],
   );
@@ -320,10 +301,16 @@ function PageLayoutComponent({
   children,
   className,
   variant = "default",
+  mobileDrawerOpen,
+  mobileDrawerSide = "right",
+  mobileDrawerCloseWhenClosed = true,
 }: {
   children?: ReactNode;
   className?: string;
   variant?: PageLayoutVariant;
+  mobileDrawerOpen?: boolean;
+  mobileDrawerSide?: MobileDrawerSide;
+  mobileDrawerCloseWhenClosed?: boolean;
 }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isPageLayoutMobile = useIsPageLayoutMobile();
@@ -360,6 +347,29 @@ function PageLayoutComponent({
     }),
     [isPageLayoutMobile, mobileDrawerState.closeMobileDrawer, mobileDrawerState.openMobileDrawer],
   );
+  const closeMobileDrawer = mobileDrawerState.closeMobileDrawer;
+  const openMobileDrawer = mobileDrawerState.openMobileDrawer;
+
+  useEffect(() => {
+    if (!isPageLayoutMobile) return;
+    if (mobileDrawerOpen === undefined) return;
+
+    if (!mobileDrawerOpen) {
+      if (mobileDrawerCloseWhenClosed) {
+        closeMobileDrawer();
+      }
+      return;
+    }
+
+    openMobileDrawer(mobileDrawerSide);
+  }, [
+    closeMobileDrawer,
+    isPageLayoutMobile,
+    mobileDrawerCloseWhenClosed,
+    mobileDrawerOpen,
+    mobileDrawerSide,
+    openMobileDrawer,
+  ]);
 
   let layoutClass = `ui-layout-frame ${columnClass}`;
   const variantClass = getVariantClass(variant);

@@ -16,11 +16,11 @@ import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
 import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
 import { getRoomCatalog, ROOM_GROUPS } from "@/data/rooms";
 import type { Note, Todo } from "@/lib/types";
+import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 
 const ALL_NOTE_TYPES = ["clue", "code", "observation", "theory", "story", "task"] as const;
 
@@ -111,8 +111,8 @@ const TYPE_ICON: Record<
 };
 
 export function GraphPage() {
-  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
-  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
+  const notes: Note[] = useLiveQueryArray(() => db.notes.toArray());
+  const todos: Todo[] = useLiveQueryArray(() => db.todos.toArray());
   const dataVersion = notes.length + todos.length;
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [hiddenRooms, setHiddenRooms] = useState<Set<string>>(new Set());
@@ -279,7 +279,12 @@ export function GraphPage() {
 
   return (
     <>
-      <PageLayout className="graph-page-layout" variant="panel">
+      <PageLayout
+        className="graph-page-layout"
+        variant="panel"
+        mobileDrawerOpen={Boolean(selectedNodeId)}
+        mobileDrawerSide="right"
+      >
         <PageLayout.Left>
           <SidePanel.Left
             title="Graph"

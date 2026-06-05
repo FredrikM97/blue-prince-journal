@@ -4,7 +4,7 @@ import { Button } from "@/components/common/Button";
 import { NotesListItemSummary } from "./NotesListItemSummary";
 import { ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Text } from "@/components/common/Typography";
-import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
+import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
 import { Stack } from "@/components/common/Stack";
 
 export function NotesView({

@@ -5,13 +5,13 @@ import { MapMiddlePanel } from "./MapMiddlePanel";
 import { MapRightPanel } from "./MapRightPanel";
 import { GRID_ROWS, cellId } from "@/data/rooms";
 import { useStore } from "@/data/store";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { upsertCell, clearCell } from "@/data/mutations";
 import type { GridCell, Note, Todo } from "@/lib/types";
 import { MetaText } from "@/components/common/Typography";
 import { SidePanel } from "@/components/common/SidePanel";
 import { Stack } from "@/components/common/Stack";
+import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 
 const COL_LABELS = ["A", "B", "C", "D", "E"] as const;
 
@@ -29,9 +29,9 @@ const STATUS_COLOR: Record<GridCell["status"], string> = {
 type ActiveCellCoord = { row: number; col: number };
 
 export function MapPage() {
-  const gridCells: GridCell[] = useLiveQuery(() => db.grid.toArray()) ?? [];
-  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
-  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
+  const gridCells: GridCell[] = useLiveQueryArray(() => db.grid.toArray());
+  const notes: Note[] = useLiveQueryArray(() => db.notes.toArray());
+  const todos: Todo[] = useLiveQueryArray(() => db.todos.toArray());
   const openCapture = useStore((s) => s.openCapture);
   const [active, setActive] = useState<ActiveCellCoord | null>(null);
 
@@ -92,7 +92,7 @@ export function MapPage() {
   }
 
   return (
-    <PageLayout variant="panel">
+    <PageLayout variant="panel" mobileDrawerOpen={Boolean(active)} mobileDrawerSide="right">
       <PageLayout.Left>
         <MapLeftPanel />
       </PageLayout.Left>

@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useStore } from "@/data/store";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { saveNote, removeNote, removeTodo } from "@/data/mutations";
 import type { Note, NoteType, Todo } from "@/lib/types";
@@ -23,7 +22,7 @@ import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
 import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
+import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 
 export function NotesPage({
   filterType,
@@ -34,8 +33,8 @@ export function NotesPage({
   title: string;
   emptyHint?: string;
 }) {
-  const notes: Note[] = useLiveQuery(() => db.notes.orderBy("updatedAt").reverse().toArray()) ?? [];
-  const todos: Todo[] = useLiveQuery(() => db.todos.orderBy("updatedAt").reverse().toArray()) ?? [];
+  const notes: Note[] = useLiveQueryArray(() => db.notes.orderBy("updatedAt").reverse().toArray());
+  const todos: Todo[] = useLiveQueryArray(() => db.todos.orderBy("updatedAt").reverse().toArray());
   const search = useStore((s) => s.search);
   const openCapture = useStore((s) => s.openCapture);
   const captureOpen = useStore((s) => s.captureOpen);
@@ -112,14 +111,13 @@ export function NotesPage({
 
   return (
     <>
-      <PageLayout variant="panel">
+      <PageLayout variant="panel" mobileDrawerOpen={captureOpen} mobileDrawerSide="right">
         <PageLayout.Left>
           <SidePanel.Left title={title} subtitle={`${filtered.length} ${entryLabel}`}>
             <NotesFilterPanel filters={filterState} actions={filterActions} />
           </SidePanel.Left>
         </PageLayout.Left>
         <PageLayout.Middle>
-          <NotesCaptureMobileDrawerSync captureOpen={captureOpen} />
           <NotesView
             emptyHint={emptyHint}
             filtered={filtered}
@@ -162,21 +160,6 @@ export function NotesPage({
       </Dialog>
     </>
   );
-}
-
-function NotesCaptureMobileDrawerSync({ captureOpen }: { captureOpen: boolean }) {
-  const drawerControls = usePageLayoutMobileDrawerControls();
-
-  useEffect(() => {
-    if (!drawerControls?.isPageLayoutMobile) return;
-    if (!captureOpen) {
-      drawerControls.closeMobileDrawer();
-      return;
-    }
-    drawerControls.openMobileDrawer("right");
-  }, [captureOpen, drawerControls]);
-
-  return null;
 }
 
 function NotesRightPanel({
