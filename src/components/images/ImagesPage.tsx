@@ -16,7 +16,6 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { Grid } from "@/components/common/LayoutPrimitives";
 import { Text } from "@/components/common/Typography";
 import { toast } from "sonner";
-import { hashBlob } from "@/lib/blobHash";
 import {
   connectSteamImportFolder,
   disconnectSteamImportFolder,
@@ -50,63 +49,10 @@ export function ImagesPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"library" | "deleted-imports">("library");
   const [sortMode, setSortMode] = useState<ImagesSortMode>("newest");
-  const [uniqueImages, setUniqueImages] = useState<StoredImage[] | null>(null);
-  const [duplicateRedirects, setDuplicateRedirects] = useState(new Map<string, string>());
   const steamSync = useSteamSyncPanel(addImage);
 
-  useEffect(() => {
-    let active = true;
-
-    async function dedupeImages() {
-      if (images.length === 0) {
-        setUniqueImages([]);
-        setDuplicateRedirects(new Map());
-        return;
-      }
-
-      const hashedImages = await Promise.all(
-        images.map(async (image) => ({
-          image,
-          hash: await hashBlob(image.blob),
-        })),
-      );
-
-      if (!active) return;
-
-      const chosenByHash = new Map<string, StoredImage>();
-      const redirects = new Map<string, string>();
-
-      for (const entry of hashedImages) {
-        const current = chosenByHash.get(entry.hash);
-        if (!current) {
-          chosenByHash.set(entry.hash, entry.image);
-          continue;
-        }
-
-        const survivor = entry.image.createdAt >= current.createdAt ? entry.image : current;
-        const removed = survivor.id === entry.image.id ? current : entry.image;
-        chosenByHash.set(entry.hash, survivor);
-        redirects.set(removed.id, survivor.id);
-      }
-
-      setUniqueImages(Array.from(chosenByHash.values()));
-      setDuplicateRedirects(redirects);
-    }
-
-    void dedupeImages();
-
-    return () => {
-      active = false;
-    };
-  }, [images]);
-
-  const resolvedSelectedId = useMemo(() => {
-    if (!selectedId) return null;
-    return duplicateRedirects.get(selectedId) ?? selectedId;
-  }, [duplicateRedirects, selectedId]);
-
   const sortedImages = useMemo(() => {
-    const next = [...(uniqueImages ?? images)];
+    const next = [...images];
     if (sortMode === "newest") {
       next.sort((a, b) => b.createdAt - a.createdAt);
       return next;
@@ -121,7 +67,7 @@ export function ImagesPage() {
     }
     next.sort((a, b) => getImageLabel(b).localeCompare(getImageLabel(a)));
     return next;
-  }, [images, sortMode, uniqueImages]);
+  }, [images, sortMode]);
 
   const filtered = useMemo(() => {
     const q = deferredSearch.trim().toLowerCase();
@@ -147,13 +93,13 @@ export function ImagesPage() {
   }, [steamSync.deletedImports, deferredSearch, sortMode]);
 
   const selectedIndex = useMemo(
-    () => filtered.findIndex((img) => img.id === resolvedSelectedId),
-    [filtered, resolvedSelectedId],
+    () => filtered.findIndex((img) => img.id === selectedId),
+    [filtered, selectedId],
   );
   const selected = useMemo(() => {
-    if (!resolvedSelectedId) return null;
-    return filtered.find((img) => img.id === resolvedSelectedId) ?? null;
-  }, [filtered, resolvedSelectedId]);
+    if (!selectedId) return null;
+    return filtered.find((img) => img.id === selectedId) ?? null;
+  }, [filtered, selectedId]);
 
   const relatedNotes = useMemo(
     () => (selected ? notes.filter((note) => note.imageIds.includes(selected.id)) : []),

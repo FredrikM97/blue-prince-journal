@@ -2,7 +2,6 @@ import { nanoid } from "nanoid";
 import { db } from "./db";
 import { syncRuntime } from "./sync";
 import { buildUniqueFileName } from "./imageNames";
-import { hashBlob } from "@/lib/blobHash";
 import { cellId, clearCustomRooms } from "./rooms";
 import { parseCapture } from "@/lib/parse";
 import { clearAllData } from "./db";
@@ -125,14 +124,7 @@ export async function toggleTodoStatus(id: string, status: TodoStatus): Promise<
 }
 
 export async function addImage(blob: Blob, name?: string, caption?: string): Promise<StoredImage> {
-  const incomingHash = await hashBlob(blob);
   const existingImages = await db.images.toArray();
-  for (const existing of existingImages) {
-    const existingHash = await hashBlob(existing.blob);
-    if (existingHash === incomingHash) {
-      return existing;
-    }
-  }
 
   const sourceName = name ?? (blob instanceof File ? blob.name : undefined);
   const mimeExt = blob.type?.startsWith("image/") ? blob.type.split("/")[1] : "png";

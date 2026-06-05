@@ -72,7 +72,7 @@ export function DeletedImportThumbCard({
           <Inline gap="1">
             <Button
               variant="outline-destructive"
-              size="icon"
+              size="icon-h2"
               disabled={busy}
               aria-label="Permanently delete image import"
               title="Permanently delete"
@@ -82,7 +82,7 @@ export function DeletedImportThumbCard({
             </Button>
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-h2"
               disabled={busy}
               aria-label="Undelete image import"
               title="Undelete"
@@ -96,15 +96,10 @@ export function DeletedImportThumbCard({
           <Text as="div" size="xs" tone="default" variant="default" truncate>
             {fileName}
           </Text>
+          <Text as="div" size="xs" tone="muted" truncate>
+            Deleted {new Date(deletedAt).toLocaleDateString()}
+          </Text>
         </Stack>
-      </Stack>
-      <Stack gap="0">
-        <Text as="div" size="sm" truncate>
-          {fileName}
-        </Text>
-        <Text as="div" size="xs" tone="muted" truncate>
-          Deleted {new Date(deletedAt).toLocaleDateString()}
-        </Text>
       </Stack>
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent variant="expand">

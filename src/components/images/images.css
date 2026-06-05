@@ -52,7 +52,7 @@
   }
 
   .deleted-import-thumb {
-    @apply space-y-2;
+    @apply space-y-0;
   }
 
   .deleted-import-thumb-stage {
@@ -64,7 +64,7 @@
   }
 
   .deleted-import-thumb-action > .inline-row > button {
-    @apply h-8 w-8 rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur-sm;
+    @apply h-7 w-7 rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur-sm;
   }
 
   .deleted-import-thumb-action > .inline-row > button:first-child {
