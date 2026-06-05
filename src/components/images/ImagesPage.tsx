@@ -4,9 +4,14 @@ import { db } from "@/data/db";
 import { addImage, removeImage, updateImage } from "@/data/mutations";
 import type { StoredImage, Note } from "@/lib/types";
 import { PageLayout } from "@/components/common/PageLayout";
-import { StoredImageView } from "@/components/common/StoredImageView";
-import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
+import {
+  ImagesLeftPanel,
+  type ImagesSortMode,
+  type SteamSyncPanelModel,
+} from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
+import { ImageThumbButton } from "@/components/common/ImageThumbButton";
+import { DeletedImportThumbCard } from "../common/DeletedImportThumbCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Grid } from "@/components/common/LayoutPrimitives";
 import { Text } from "@/components/common/Typography";
@@ -16,9 +21,14 @@ import {
   disconnectSteamImportFolder,
   getActiveSteamFolderName,
   isSteamFolderSyncSupported,
+  loadSteamImportSourceBlob,
+  loadSteamDeletedImports,
   loadSteamImportStatus,
+  markSteamImportedImageDeleted,
   restoreSteamImportFolder,
+  restoreDeletedSteamImportImage,
   syncConnectedSteamFolder,
+  type SteamDeletedImportEntry,
 } from "@/data/steamImport";
 import { syncRuntime } from "@/data/sync";
 import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storageHealth";
@@ -35,18 +45,50 @@ export function ImagesPage() {
   const deferredSearch = useDeferredValue(search);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"library" | "deleted-imports">("library");
+  const [sortMode, setSortMode] = useState<ImagesSortMode>("newest");
   const steamSync = useSteamSyncPanel(addImage);
 
-  const sortedImages = useMemo(
-    () => [...images].sort((a, b) => b.createdAt - a.createdAt),
-    [images],
-  );
+  const sortedImages = useMemo(() => {
+    const next = [...images];
+    if (sortMode === "newest") {
+      next.sort((a, b) => b.createdAt - a.createdAt);
+      return next;
+    }
+    if (sortMode === "oldest") {
+      next.sort((a, b) => a.createdAt - b.createdAt);
+      return next;
+    }
+    if (sortMode === "name-asc") {
+      next.sort((a, b) => getImageLabel(a).localeCompare(getImageLabel(b)));
+      return next;
+    }
+    next.sort((a, b) => getImageLabel(b).localeCompare(getImageLabel(a)));
+    return next;
+  }, [images, sortMode]);
 
   const filtered = useMemo(() => {
     const q = deferredSearch.trim().toLowerCase();
     if (!q) return sortedImages;
     return sortedImages.filter((i) => `${i.name} ${getImageLabel(i)}`.toLowerCase().includes(q));
   }, [sortedImages, deferredSearch]);
+
+  const filteredDeletedImports = useMemo(() => {
+    const q = deferredSearch.trim().toLowerCase();
+    const next = [...steamSync.deletedImports];
+    if (sortMode === "newest") {
+      next.sort((a, b) => b.deletedAt - a.deletedAt);
+    } else if (sortMode === "oldest") {
+      next.sort((a, b) => a.deletedAt - b.deletedAt);
+    } else if (sortMode === "name-asc") {
+      next.sort((a, b) => a.fileName.localeCompare(b.fileName));
+    } else {
+      next.sort((a, b) => b.fileName.localeCompare(a.fileName));
+    }
+
+    if (!q) return next;
+    return next.filter((entry) => `${entry.fileName} ${entry.sourceKey}`.toLowerCase().includes(q));
+  }, [steamSync.deletedImports, deferredSearch, sortMode]);
 
   const selectedIndex = useMemo(
     () => filtered.findIndex((img) => img.id === selectedId),
@@ -115,67 +157,150 @@ export function ImagesPage() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [selectByOffset, selected]);
 
+  function handleChangeViewMode(mode: "library" | "deleted-imports") {
+    if (mode === "deleted-imports") {
+      setSelectedId(null);
+      setPreviewOpen(false);
+    }
+    setViewMode(mode);
+  }
+
   return (
     <PageLayout variant="panel" mobileDrawerOpen={Boolean(selectedId)} mobileDrawerSide="right">
       <PageLayout.Left>
-        <ImagesLeftPanel total={filtered.length} steamSync={steamSync} />
+        <ImagesLeftPanel
+          total={filtered.length}
+          steamSync={steamSync}
+          viewMode={viewMode}
+          sortMode={sortMode}
+          onChangeViewMode={handleChangeViewMode}
+          onChangeSortMode={setSortMode}
+        />
       </PageLayout.Left>
 
       <PageLayout.Middle>
-        {filtered.length === 0 && (
+        {viewMode === "library" && filtered.length === 0 && (
           <EmptyState>
             <Text>No images yet. Add one from note capture or from a note editor.</Text>
           </EmptyState>
         )}
 
-        {filtered.length > 0 && (
+        {viewMode === "library" && filtered.length > 0 && (
           <ImagesGrid filtered={filtered} selectedId={selectedId} setSelectedId={setSelectedId} />
+        )}
+
+        {viewMode === "deleted-imports" && (
+          <DeletedImportsList
+            entries={filteredDeletedImports}
+            busy={steamSync.busy}
+            onUndelete={async (sourceKey, fileName) => {
+              const restored = await steamSync.undeleteImport(sourceKey, fileName);
+              setViewMode("library");
+              if (restored) {
+                setSelectedId(restored.id);
+              }
+              toast.success(`Re-enabled import for ${fileName}`);
+            }}
+            loadPreview={steamSync.loadDeletedImportPreview}
+          />
         )}
       </PageLayout.Middle>
 
       <PageLayout.Right>
-        <ImagesRightPanel
-          img={selected}
-          relatedNotes={relatedNotes}
-          previewOpen={previewOpen}
-          setPreviewOpen={setPreviewOpen}
-          onPrev={() => selectByOffset(-1)}
-          onNext={() => selectByOffset(1)}
-          onClose={() => setSelectedId(null)}
-          onDelete={async () => {
-            if (!selected) return;
-            await removeImage(selected.id);
-            const remaining = filtered.filter((img) => img.id !== selected.id);
-            if (remaining.length === 0) {
-              setSelectedId(null);
-              return;
-            }
-            const nextIndex = Math.min(selectedIndex, remaining.length - 1);
-            setSelectedId(remaining[nextIndex].id);
-          }}
-          onSaveLabel={async (label) => {
-            if (!selected) return;
-            const next = label.trim() || selected.name;
-            if (next === getImageLabel(selected)) return;
-            await updateImage({ ...selected, caption: next });
-            toast.success("Image label updated");
-          }}
-        />
+        {viewMode === "library" && (
+          <ImagesRightPanel
+            img={selected}
+            relatedNotes={relatedNotes}
+            previewOpen={previewOpen}
+            setPreviewOpen={setPreviewOpen}
+            onPrev={() => selectByOffset(-1)}
+            onNext={() => selectByOffset(1)}
+            onClose={() => setSelectedId(null)}
+            onDelete={async () => {
+              if (!selected) return;
+              await steamSync.markDeletedByImageId(selected.id, selected.name);
+              await removeImage(selected.id);
+              const remaining = filtered.filter((img) => img.id !== selected.id);
+              if (remaining.length === 0) {
+                setSelectedId(null);
+                return;
+              }
+              const nextIndex = Math.min(selectedIndex, remaining.length - 1);
+              setSelectedId(remaining[nextIndex].id);
+            }}
+            onSaveLabel={async (label) => {
+              if (!selected) return;
+              const next = label.trim() || selected.name;
+              if (next === getImageLabel(selected)) return;
+              await updateImage({ ...selected, caption: next });
+              toast.success("Image label updated");
+            }}
+          />
+        )}
+
+        {viewMode === "deleted-imports" && (
+          <EmptyState>
+            <Text>Select Library view to inspect active images.</Text>
+          </EmptyState>
+        )}
       </PageLayout.Right>
     </PageLayout>
   );
 }
 
+function DeletedImportsList({
+  entries,
+  busy,
+  onUndelete,
+  loadPreview,
+}: {
+  entries: Array<{ sourceKey: string; fileName: string; deletedAt: number }>;
+  busy: boolean;
+  onUndelete: (sourceKey: string, fileName: string) => Promise<void>;
+  loadPreview: (sourceKey: string) => Promise<Blob | null>;
+}) {
+  if (entries.length === 0) {
+    return (
+      <EmptyState>
+        <Text>No deleted Steam imports found for this filter.</Text>
+      </EmptyState>
+    );
+  }
+
+  return (
+    <Grid as="div" variant="gallery" gap="3">
+      {entries.map((entry) => (
+        <DeletedImportThumbCard
+          key={entry.sourceKey}
+          sourceKey={entry.sourceKey}
+          fileName={entry.fileName}
+          deletedAt={entry.deletedAt}
+          busy={busy}
+          onUndelete={onUndelete}
+          loadPreview={loadPreview}
+        />
+      ))}
+    </Grid>
+  );
+}
+
 function useSteamSyncPanel(
-  addImage: (blob: Blob, name?: string, caption?: string) => Promise<unknown>,
+  addImage: (blob: Blob, name?: string, caption?: string) => Promise<StoredImage>,
 ) {
   const [connected, setConnected] = useState(false);
   const [folderName, setFolderName] = useState<string | null>(null);
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  const [deletedImports, setDeletedImports] = useState<SteamDeletedImportEntry[]>([]);
+
+  async function refreshDeletedImports() {
+    const entries = await loadSteamDeletedImports();
+    setDeletedImports(entries);
+  }
 
   useEffect(() => {
     void loadSteamImportStatus().then((s) => setLastSyncAt(s.lastRefreshAt));
+    void loadSteamDeletedImports().then((entries) => setDeletedImports(entries));
     void restoreSteamImportFolder().then((handle) => {
       if (!handle) return;
       setConnected(true);
@@ -263,16 +388,35 @@ function useSteamSyncPanel(
     }
   }
 
+  async function markDeletedByImageId(imageId: string, fileName: string) {
+    await markSteamImportedImageDeleted(imageId, fileName);
+    await refreshDeletedImports();
+  }
+
+  async function undeleteImport(sourceKey: string) {
+    const restored = await restoreDeletedSteamImportImage(sourceKey, addImage);
+    await refreshDeletedImports();
+    return restored;
+  }
+
+  async function loadDeletedImportPreview(sourceKey: string): Promise<Blob | null> {
+    return loadSteamImportSourceBlob(sourceKey);
+  }
+
   const steamSync: SteamSyncPanelModel = {
     supported: isSteamFolderSyncSupported(),
     connected,
     folderName: folderName ?? getActiveSteamFolderName(),
     lastSyncAt,
+    deletedImports,
     busy,
     connect,
     syncNow,
     forceReimportAll,
     disconnect,
+    markDeletedByImageId,
+    undeleteImport,
+    loadDeletedImportPreview,
   };
 
   return steamSync;
@@ -312,16 +456,13 @@ function ImageThumb({
   selected: boolean;
   onClick: () => void;
 }) {
-  let thumbClass = "group images-thumb";
-  if (selected) thumbClass = "group images-thumb images-thumb-selected";
   return (
-    <button type="button" onClick={onClick} className={thumbClass}>
-      <StoredImageView id={img.id} alt={img.name} className="images-thumb-image" mode="thumb" />
-      <div className="images-thumb-overlay">
-        <Text as="div" size="xs" tone="default" variant="default" truncate>
-          {getImageLabel(img)}
-        </Text>
-      </div>
-    </button>
+    <ImageThumbButton
+      imageId={img.id}
+      imageName={img.name}
+      label={getImageLabel(img)}
+      selected={selected}
+      onClick={onClick}
+    />
   );
 }

@@ -77,6 +77,11 @@ type StackVariant =
   | "todo-row-title-button-wrap"
   | "todo-row-tags-line"
   | "images-detail-preview"
+  | "deleted-import-thumb"
+  | "deleted-import-thumb-stage"
+  | "deleted-import-thumb-action"
+  | "deleted-import-thumb-overlay"
+  | "deleted-import-thumb-fallback"
   | "dialog-scroll-body-tall"
   | "note-row-item"
   | "note-row-inner"
@@ -176,6 +181,11 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "todo-row-title-button-wrap": "todo-row-title-button-wrap",
   "todo-row-tags-line": "todo-row-tags-line",
   "images-detail-preview": "images-detail-preview",
+  "deleted-import-thumb": "deleted-import-thumb",
+  "deleted-import-thumb-stage": "deleted-import-thumb-stage",
+  "deleted-import-thumb-action": "deleted-import-thumb-action",
+  "deleted-import-thumb-overlay": "deleted-import-thumb-overlay",
+  "deleted-import-thumb-fallback": "deleted-import-thumb-fallback",
   "dialog-scroll-body-tall": "dialog-scroll-body min-h-[68vh]",
   "note-row-item": "note-row-item",
   "note-row-inner": "note-row-inner",
