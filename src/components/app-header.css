@@ -96,7 +96,12 @@
   }
 
   .app-add-shortcut {
-    @apply rounded border border-brass-foreground/55 bg-brass-foreground/20 px-1 py-0 text-[10px] leading-4 text-brass-foreground;
+    @apply rounded border border-border/80 bg-background/75 px-1 py-0 text-[10px] font-semibold leading-4 text-foreground opacity-100;
+  }
+
+  .dark .app-add-shortcut,
+  [data-theme="dark"] .app-add-shortcut {
+    @apply border-border bg-background/90 text-foreground opacity-100;
   }
 
   @media (max-width: 639px) {
