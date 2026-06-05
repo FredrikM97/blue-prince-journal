@@ -56,15 +56,15 @@
   }
 
   .image-zoom-dialog-shell {
-    @apply w-full;
+    @apply flex min-h-0 w-full flex-1 flex-col gap-2;
   }
 
   .image-zoom-toolbar {
-    @apply rounded-md border border-border bg-card px-2 py-1.5;
+    @apply px-1 py-0.5;
   }
 
   .image-zoom-stage {
-    @apply relative flex max-h-[78vh] min-h-[18rem] w-full items-center justify-center overflow-hidden rounded bg-background;
+    @apply relative flex min-h-0 flex-1 w-full items-center justify-center overflow-hidden rounded-md border border-border/40 bg-background;
     touch-action: none;
   }
 
@@ -74,7 +74,7 @@
   }
 
   .image-zoom-stage-image {
-    @apply max-h-[76vh] w-full select-none object-contain;
+    @apply h-auto max-h-full w-auto max-w-full select-none object-contain;
     -webkit-user-drag: none;
   }
 
