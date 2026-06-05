@@ -8,8 +8,8 @@ import { StoredImageView } from "@/components/common/StoredImageView";
 import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Grid } from "@/components/common/LayoutPrimitives";
 import { Text } from "@/components/common/Typography";
-import { Stack } from "@/components/common/Stack";
 import { toast } from "sonner";
 import {
   connectSteamImportFolder,
@@ -288,7 +288,7 @@ function ImagesGrid({
   setSelectedId: (id: string | null) => void;
 }) {
   return (
-    <Stack as="div" variant="images-grid">
+    <Grid as="div" variant="gallery" gap="3">
       {filtered.map((img) => (
         <ImageThumb
           key={img.id}
@@ -299,7 +299,7 @@ function ImagesGrid({
           }}
         />
       ))}
-    </Stack>
+    </Grid>
   );
 }
 

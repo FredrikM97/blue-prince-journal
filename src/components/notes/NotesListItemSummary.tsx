@@ -3,10 +3,18 @@ import type { Note } from "@/lib/types";
 import { Lightbulb } from "lucide-react";
 import { TYPE_ICON, TYPE_LABEL, relTime } from "@/lib/noteMetadata";
 import { Chip } from "@/components/common/Chip";
-import { Stack } from "@/components/common/Stack";
 import { Text } from "@/components/common/Typography";
+import { Stack } from "@/components/common/Stack";
 
-const TYPE_ICON_CLASS: Record<Note["type"], string> = {
+const TYPE_ICON_VARIANT: Record<
+  Note["type"],
+  | "note-summary-icon-clue"
+  | "note-summary-icon-code"
+  | "note-summary-icon-observation"
+  | "note-summary-icon-theory"
+  | "note-summary-icon-story"
+  | "note-summary-icon-task"
+> = {
   clue: "note-summary-icon-clue",
   code: "note-summary-icon-code",
   observation: "note-summary-icon-observation",
@@ -19,25 +27,25 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
   const Icon = TYPE_ICON[note.type] ?? Lightbulb;
 
   return (
-    <Stack gap="0" className="note-summary-wrap">
-      <Stack as="span" gap="0" className={`note-summary-icon ${TYPE_ICON_CLASS[note.type]}`}>
+    <Stack variant="note-summary-wrap" gap="0">
+      <Stack as="span" variant={TYPE_ICON_VARIANT[note.type]} gap="0">
         <Icon
           className="note-summary-icon-svg group-hover:scale-110"
           aria-label={`Type: ${TYPE_LABEL[note.type]}`}
         />
       </Stack>
-      <Stack gap="0" className="note-summary-body">
-        <Text as="div" size="base" weight="medium" leading="tight" truncate>
+      <Stack variant="note-summary-body" gap="0">
+        <Text as="div" size="sm" weight="normal" truncate>
           {note.title}
         </Text>
-        <Stack gap="0" className="note-summary-meta">
-          <Stack gap="0" className="note-summary-pills">
-            <Stack as="span" gap="0" className="note-summary-time">
+        <Stack variant="note-summary-meta" gap="0">
+          <Stack variant="note-summary-pills" gap="0">
+            <Stack as="span" variant="note-summary-time" gap="0">
               {relTime(note.updatedAt)}
             </Stack>
-            <Stack as="span" gap="0" className="note-summary-tags-date">
+            <Stack as="span" variant="note-summary-tags-date" gap="0">
               {note.date && (
-                <Stack as="span" gap="0" className="note-pill note-pill-date">
+                <Stack as="span" variant="note-pill-date" gap="0">
                   {note.date}
                 </Stack>
               )}
@@ -49,12 +57,12 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
             </Stack>
             {note.room && <Chip variant="room">@{note.room}</Chip>}
             {note.status === "solved" && (
-              <Stack as="span" gap="0" className="note-pill note-pill-solved">
+              <Stack as="span" variant="note-pill-solved" gap="0">
                 solved
               </Stack>
             )}
             {note.imageIds.length > 0 && (
-              <Stack as="span" gap="0" className="note-summary-image-count">
+              <Stack as="span" variant="note-summary-image-count" gap="0">
                 📎 {note.imageIds.length}
               </Stack>
             )}

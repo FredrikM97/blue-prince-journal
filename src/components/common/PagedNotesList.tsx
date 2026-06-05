@@ -22,10 +22,12 @@ export function PagedNotesList({
   notes,
   title,
   emptyLabel = "No notes.",
+  cardVariant = "panel-card",
 }: {
   notes: Note[];
   title: string;
   emptyLabel?: string;
+  cardVariant?: "panel-card" | "default";
 }) {
   const [index, setIndex] = useState(0);
   const total = notes.length;
@@ -34,16 +36,15 @@ export function PagedNotesList({
 
   return (
     <div>
-      <SectionHeader>
+      <SectionHeader density="compact">
         <Heading as="h3" size="base" variant="section-label">
           {title}
         </Heading>
         {total > 1 && (
-          <SectionHeaderActions>
+          <SectionHeaderActions density="compact">
             <Button
               variant="outline"
-              size="icon"
-              className="h-7 w-7"
+              size="icon-h2"
               onClick={() => setIndex((i) => (((i - 1) % total) + total) % total)}
               aria-label="Previous note"
             >
@@ -54,8 +55,7 @@ export function PagedNotesList({
             </MetaText>
             <Button
               variant="outline"
-              size="icon"
-              className="h-7 w-7"
+              size="icon-h2"
               onClick={() => setIndex((i) => (i + 1) % total)}
               aria-label="Next note"
             >
@@ -66,7 +66,7 @@ export function PagedNotesList({
       </SectionHeader>
 
       {note ? (
-        <Text as="div" size="sm" variant="panel-card">
+        <Text as="div" size="sm" variant={cardVariant}>
           <Stack gap="1.5">
             <Text weight="medium">{note.title}</Text>
             {note.body.trim() && <MarkdownPreview>{note.body}</MarkdownPreview>}

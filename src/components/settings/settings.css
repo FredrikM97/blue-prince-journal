@@ -1,18 +1,6 @@
 @layer components {
   /* ─── Page layout ───────────────────────────────────────────────────────── */
 
-  .settings-section {
-    @apply space-y-5;
-  }
-
-  .settings-section-title {
-    @apply flex items-center gap-3 text-xl leading-tight;
-  }
-
-  .settings-section-rule {
-    @apply h-5 w-px bg-border;
-  }
-
   /* Divider block between sub-sections within a SettingsSection */
   .settings-subsection {
     @apply space-y-3 border-t border-border pt-4;
@@ -23,7 +11,4 @@
     @apply rounded border border-border bg-secondary px-2 py-1 text-xs text-foreground hover:border-destructive hover:text-destructive;
   }
 
-  .settings-steam-action {
-    @apply inline-flex items-center gap-1.5;
-  }
 }

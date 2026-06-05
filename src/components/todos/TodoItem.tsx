@@ -38,34 +38,30 @@ export function TodoItem({
 
   return (
     <li>
-      <Stack as="div" className="todo-row-item" gap="0">
-        <Stack as="div" className="todo-row-main" gap="0">
-          <Stack as="div" className="todo-row-title-line" gap="0">
-            <Stack as="div" className="todo-row-title-wrap" gap="0">
-              <Button
-                type="button"
-                variant="transparent"
-                size="content"
-                justify="start"
-                textAlign="left"
-                tone={titleTone}
-                onClick={onOpenPreview}
-                className="todo-row-title-button"
-              >
-                <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
-                  {todo.title}
-                </Text>
-              </Button>
+      <Stack variant="todo-row-item" gap="0">
+        <Stack variant="todo-row-main" gap="0">
+          <Stack variant="todo-row-title-line" gap="0">
+            <Stack variant="todo-row-title-wrap" gap="0">
+              <Stack variant="todo-row-title-button-wrap" gap="0">
+                <Button
+                  type="button"
+                  variant="transparent"
+                  size="content"
+                  fullWidth
+                  justify="start"
+                  textAlign="left"
+                  tone={titleTone}
+                  onClick={onOpenPreview}
+                >
+                  <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
+                    {todo.title}
+                  </Text>
+                </Button>
+              </Stack>
             </Stack>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  tone="muted"
-                  aria-label="Todo actions"
-                  className="todo-row-menu-button"
-                >
+                <Button variant="outline" size="icon-h2" tone="muted" aria-label="Todo actions">
                   <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
@@ -118,7 +114,7 @@ export function TodoItem({
             </DropdownMenu>
           </Stack>
 
-          <Stack as="div" className="todo-row-tags-line" gap="0">
+          <Stack variant="todo-row-tags-line" gap="0">
             <Inline as="div" gap="1" align="center" wrap>
               <Chip variant={getPriorityVariant(todo.priority)}>{todo.priority}</Chip>
               <Chip variant="solid">{todo.scope}</Chip>

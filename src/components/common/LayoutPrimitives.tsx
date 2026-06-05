@@ -4,6 +4,9 @@ type InlineElement = "div" | "section" | "header" | "footer" | "label";
 type InlineGap = "1" | "1.5" | "2" | "3";
 type InlineAlign = "start" | "center" | "end";
 type InlineJustify = "start" | "center" | "between" | "end";
+type GridElement = "div" | "section" | "ul";
+type GridGap = "2" | "3" | "4";
+type GridVariant = "default" | "gallery" | "cols-3-md" | "auto-fill-card" | "auto-fit" | "map-grid";
 
 function inlineGapClass(gap: InlineGap) {
   if (gap === "1") return "inline-gap-1";
@@ -31,6 +34,7 @@ export function Inline({
   align = "center",
   justify = "start",
   wrap = false,
+  className = "",
   children,
 }: {
   as?: InlineElement;
@@ -38,24 +42,79 @@ export function Inline({
   align?: InlineAlign;
   justify?: InlineJustify;
   wrap?: boolean;
+  className?: string;
   children: ReactNode;
 }) {
   let classes = `inline-row ${inlineGapClass(gap)} ${inlineAlignClass(align)} ${inlineJustifyClass(justify)}`;
   if (wrap) classes = `${classes} inline-wrap`;
+  if (className) classes = `${classes} ${className}`;
   return createElement(as, { className: classes }, children);
+}
+
+function gridGapClass(gap: GridGap) {
+  if (gap === "2") return "grid-gap-2";
+  if (gap === "4") return "grid-gap-4";
+  return "grid-gap-3";
+}
+
+function gridVariantClass(variant: GridVariant) {
+  if (variant === "gallery") return "grid-gallery";
+  if (variant === "cols-3-md") return "grid-cols-3-md";
+  if (variant === "auto-fill-card") return "grid-auto-fill-card";
+  if (variant === "auto-fit") return "ui-grid-auto-fit";
+  if (variant === "map-grid") return "map-grid";
+  return "";
+}
+
+export function Grid({
+  as = "div",
+  gap = "3",
+  variant = "default",
+  className = "",
+  children,
+}: {
+  as?: GridElement;
+  gap?: GridGap;
+  variant?: GridVariant;
+  className?: string;
+  children: ReactNode;
+}) {
+  let classes = `grid-layout ${gridGapClass(gap)} ${gridVariantClass(variant)}`;
+  if (className) classes = `${classes} ${className}`;
+  return createElement(as, { className: classes.trim() }, children);
 }
 
 export function SectionBlock({ children }: { children: ReactNode }) {
   return <section className="section-block">{children}</section>;
 }
 
-export function SectionHeader({ children }: { children: ReactNode }) {
-  return <header className="section-header-row">{children}</header>;
+export function SectionHeader({
+  density = "default",
+  children,
+}: {
+  density?: "default" | "compact";
+  children: ReactNode;
+}) {
+  let className = "section-header-row";
+  if (density === "compact") {
+    className = `${className} section-header-row-compact`;
+  }
+  return <header className={className}>{children}</header>;
 }
 
-export function SectionHeaderActions({ children }: { children: ReactNode }) {
+export function SectionHeaderActions({
+  density = "default",
+  children,
+}: {
+  density?: "default" | "compact";
+  children: ReactNode;
+}) {
+  let className = "section-actions";
+  if (density === "compact") {
+    className = `${className} section-actions-compact`;
+  }
   return (
-    <Inline as="div" gap="1" align="center">
+    <Inline as="div" gap="1" align="center" className={className}>
       {children}
     </Inline>
   );

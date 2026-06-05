@@ -555,38 +555,46 @@ function GraphCanvas({
         <Stack variant="graph-toolbar-controls" gap="0">
           {actions}
           <Stack variant="graph-zoom-controls" gap="0">
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-r-none border-r-0 px-2"
-              onClick={() => {
-                const cx = GRAPH_VB_W / 2;
-                const cy = GRAPH_VB_H / 2;
-                setZoom((z) => {
-                  const nz = Math.max(MIN_ZOOM, parseFloat((z / 1.3).toFixed(4)));
-                  setPan((p) => ({ x: cx - ((cx - p.x) / z) * nz, y: cy - ((cy - p.y) / z) * nz }));
-                  return nz;
-                });
-              }}
-            >
-              −
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-l-none px-2"
-              onClick={() => {
-                const cx = GRAPH_VB_W / 2;
-                const cy = GRAPH_VB_H / 2;
-                setZoom((z) => {
-                  const nz = Math.min(MAX_ZOOM, parseFloat((z * 1.3).toFixed(4)));
-                  setPan((p) => ({ x: cx - ((cx - p.x) / z) * nz, y: cy - ((cy - p.y) / z) * nz }));
-                  return nz;
-                });
-              }}
-            >
-              +
-            </Button>
+            <Stack variant="graph-zoom-btn-minus" gap="0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const cx = GRAPH_VB_W / 2;
+                  const cy = GRAPH_VB_H / 2;
+                  setZoom((z) => {
+                    const nz = Math.max(MIN_ZOOM, parseFloat((z / 1.3).toFixed(4)));
+                    setPan((p) => ({
+                      x: cx - ((cx - p.x) / z) * nz,
+                      y: cy - ((cy - p.y) / z) * nz,
+                    }));
+                    return nz;
+                  });
+                }}
+              >
+                −
+              </Button>
+            </Stack>
+            <Stack variant="graph-zoom-btn-plus" gap="0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const cx = GRAPH_VB_W / 2;
+                  const cy = GRAPH_VB_H / 2;
+                  setZoom((z) => {
+                    const nz = Math.min(MAX_ZOOM, parseFloat((z * 1.3).toFixed(4)));
+                    setPan((p) => ({
+                      x: cx - ((cx - p.x) / z) * nz,
+                      y: cy - ((cy - p.y) / z) * nz,
+                    }));
+                    return nz;
+                  });
+                }}
+              >
+                +
+              </Button>
+            </Stack>
           </Stack>
           <Button variant="outline" size="sm" onClick={resetView}>
             Reset view

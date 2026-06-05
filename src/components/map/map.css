@@ -3,10 +3,12 @@
   .map-layout-main {
     @apply flex flex-col items-center justify-start pt-0;
     height: 100%;
+    min-height: 0;
   }
 
   .map-grid {
     @apply mx-auto grid gap-2.5;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     /*
      * Fit whichever axis is the bottleneck.
      * Grid is 5 cols × 9 rows (aspect 5:9).
@@ -18,26 +20,34 @@
   }
 
   .map-cell {
-    @apply relative z-0 flex h-auto w-full aspect-square overflow-hidden flex-col items-center justify-center gap-0.5 rounded-md border px-1.5 py-1.5 text-center text-xs font-normal leading-tight whitespace-normal transition hover:z-10 hover:scale-[1.03] hover:border-brass;
+    @apply relative z-0 flex h-auto w-full aspect-square overflow-hidden flex-col items-center justify-center gap-0.5 rounded-md border px-1 py-1.5 text-center text-xs font-normal leading-tight whitespace-normal transition hover:z-10 hover:scale-[1.03] hover:border-brass;
     width: 100% !important;
     height: auto !important;
     aspect-ratio: 1 / 1;
   }
 
-  .map-cell-neutral {
+  .btn-variant-map-cell[data-map-status="neutral"] {
     @apply bg-card border-border text-muted-foreground;
   }
 
-  .map-cell-cleared {
+  .btn-variant-map-cell[data-map-status="cleared"] {
     @apply bg-brass border-brass text-brass-foreground;
   }
 
+  .btn-variant-map-cell[data-map-selected="true"] {
+    @apply border-ring ring-2 ring-ring ring-inset;
+  }
+
   .map-cell-room-name {
-    @apply block w-full overflow-hidden text-[10px] leading-tight break-words line-clamp-2 sm:text-[11px];
+    @apply block w-full overflow-hidden text-[9px] leading-tight break-normal sm:text-[10px];
+    white-space: pre-line;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
   }
 
   .map-cell-meta {
-    @apply text-[8px] opacity-80 sm:text-[9px];
+    @apply inline-flex items-center gap-0.5 whitespace-nowrap text-[8px] leading-tight opacity-80 sm:text-[9px];
   }
 
   .map-cell-coord {
@@ -73,24 +83,29 @@
   }
 
   @media (max-width: 63.99rem) {
+    .map-layout-main {
+      @apply justify-center;
+      padding-bottom: 4.5rem;
+    }
+
     .map-grid {
-      width: min(100%, 19.25rem);
+      width: min(100%, calc((100dvh - 12rem) * 5 / 9));
       gap: 0.5rem;
     }
   }
 
   @media (max-width: 40rem) {
     .map-grid {
-      width: min(100%, 19.5rem);
+      width: min(100%, calc((100dvh - 12.5rem) * 5 / 9));
       @apply gap-1.5;
     }
 
     .map-cell {
-      @apply px-1.5 py-1;
+      @apply px-1 py-1;
     }
 
     .map-cell-room-name {
-      font-size: 10px;
+      font-size: 9px;
       line-height: 1.15;
     }
 

@@ -32,6 +32,10 @@
 
   /* Trigger button: full-width, matches text input height */
   .dropdown-trigger {
+    @apply w-full;
+  }
+
+  .dropdown-trigger > button {
     @apply h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:bg-secondary;
   }
 
@@ -39,11 +43,15 @@
     @apply w-auto min-w-40;
   }
 
-  .dropdown-trigger-room {
+  .dropdown-trigger-fit > button {
+    @apply w-auto min-w-40;
+  }
+
+  .dropdown-trigger-room > button {
     @apply bg-secondary;
   }
 
-  .dropdown-trigger-flat {
+  .dropdown-trigger-flat > button {
     @apply border-transparent bg-transparent shadow-none hover:bg-transparent;
   }
 

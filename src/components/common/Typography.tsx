@@ -20,7 +20,10 @@ type TextVariant =
   | "sync-folder-name"
   | "feedback-build-code"
   | "graph-toolbar-hint"
-  | "graph-legend-label";
+  | "graph-legend-label"
+  | "map-cell-room-name"
+  | "map-cell-meta"
+  | "map-cell-coord";
 
 const TEXT_SIZE_CLASS: Record<TextSize, string> = {
   xs: "text-xs",
@@ -71,12 +74,15 @@ const TEXT_VARIANT_CLASS: Record<TextVariant, string> = {
   "feedback-build-code": "feedback-build-code",
   "graph-toolbar-hint": "graph-toolbar-hint",
   "graph-legend-label": "graph-legend-label",
+  "map-cell-room-name": "map-cell-room-name",
+  "map-cell-meta": "map-cell-meta",
+  "map-cell-coord": "map-cell-coord",
 };
 
 type HeadingElement = "h1" | "h2" | "h3";
 type HeadingSize = "3xl" | "2xl" | "xl" | "lg" | "base";
 type HeadingLeading = "normal" | "snug";
-type HeadingVariant = "default" | "section-label" | "settings-section-title";
+type HeadingVariant = "default" | "section-label" | "section-title-h1";
 
 const HEADING_SIZE_CLASS: Record<HeadingSize, string> = {
   "3xl": "text-3xl",
@@ -94,7 +100,7 @@ const HEADING_LEADING_CLASS: Record<HeadingLeading, string> = {
 const HEADING_VARIANT_CLASS: Record<HeadingVariant, string> = {
   default: "",
   "section-label": "section-label",
-  "settings-section-title": "settings-section-title",
+  "section-title-h1": "section-title-h1",
 };
 
 export function Text({

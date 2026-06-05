@@ -6,7 +6,10 @@ import { MetaText, Text } from "@/components/common/Typography";
 type DropdownTriggerVariant = "default" | "room" | "flat";
 type DropdownTriggerWidth = "full" | "fit";
 
-type DropdownTriggerButtonProps = Omit<ComponentProps<typeof Button>, "children" | "variant"> & {
+type DropdownTriggerButtonProps = Omit<
+  ComponentProps<typeof Button>,
+  "children" | "variant" | "className"
+> & {
   valueLabel?: string;
   placeholder: string;
   hasValue: boolean;
@@ -56,17 +59,12 @@ export const DropdownTriggerButton = forwardRef<HTMLButtonElement, DropdownTrigg
     }
 
     return (
-      <Button
-        ref={ref}
-        type="button"
-        variant={buttonVariant}
-        className={triggerClass}
-        data-has-value={hasValue}
-        {...buttonProps}
-      >
-        <span className="dropdown-trigger-label">{triggerText}</span>
-        <ChevronDown className="icon-md opacity-50" />
-      </Button>
+      <div className={triggerClass} data-has-value={hasValue}>
+        <Button ref={ref} type="button" variant={buttonVariant} {...buttonProps}>
+          <span className="dropdown-trigger-label">{triggerText}</span>
+          <ChevronDown className="icon-md opacity-50" />
+        </Button>
+      </div>
     );
   },
 );

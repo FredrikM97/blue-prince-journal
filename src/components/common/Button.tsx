@@ -3,6 +3,9 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 type Variant =
   | "default"
   | "brass"
+  | "map-cell"
+  | "control-row"
+  | "action-link"
   | "ghost"
   | "transparent"
   | "outline"
@@ -12,13 +15,16 @@ type Variant =
   | "select"
   | "filter-toggle"
   | "overlay";
-type Size = "default" | "sm" | "lg" | "icon" | "content";
+type Size = "default" | "sm" | "lg" | "h1" | "h2" | "icon" | "icon-h2" | "content";
 type GhostTone = "default" | "muted" | "destructive";
 type GhostSurface = "default" | "mobile-toggle";
 type FilterToggleAlign = "center" | "left";
 type FilterToggleDensity = "default" | "compact";
 type FilterToggleWidth = "full" | "fit";
 type FilterToggleStateStyle = "filled" | "outline";
+type ControlRowWidth = "fill" | "fit";
+type ControlRowSize = "default" | "compact";
+type ActionLinkSize = "default" | "compact";
 type ButtonWidth = "auto" | "full";
 type ButtonJustify = "center" | "start" | "between";
 type ButtonTextAlign = "center" | "left";
@@ -28,28 +34,34 @@ type ButtonIconSize = "sm" | "md" | "lg" | "xl" | "2xl" | "hero";
 const BASE =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0";
 
+const MAP_CELL_BASE =
+  "inline-flex cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed";
+
 const VARIANT: Record<Variant, string> = {
-  default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-  brass: "bg-brass text-brass-foreground shadow hover:bg-brass/90",
-  destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-  outline:
-    "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-  "outline-destructive":
-    "border border-destructive/60 bg-background text-destructive shadow-sm hover:bg-destructive/10 hover:text-destructive",
-  secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-  ghost: "hover:bg-accent hover:text-accent-foreground",
-  transparent: "bg-transparent hover:opacity-75",
-  select: "h-auto gap-1 rounded-md border px-3 py-1 text-xs font-medium shadow-sm",
-  "filter-toggle": "ui-toggle-chip ui-toggle-chip-surface gap-1.5",
-  overlay:
-    "fixed inset-x-0 bottom-0 top-14 z-40 rounded-none border-0 bg-black/45 p-0 hover:bg-black/45",
+  default: "btn-variant-default",
+  brass: "btn-variant-brass",
+  "map-cell": "map-cell btn-variant-map-cell",
+  "control-row": "ui-control-row",
+  "action-link": "ui-action-link",
+  destructive: "btn-variant-destructive",
+  outline: "btn-variant-outline",
+  "outline-destructive": "btn-variant-outline-destructive",
+  secondary: "btn-variant-secondary",
+  ghost: "btn-variant-ghost",
+  transparent: "btn-variant-transparent",
+  select: "btn-variant-select",
+  "filter-toggle": "btn-variant-filter-toggle",
+  overlay: "btn-variant-overlay",
 };
 
 const SIZE: Record<Size, string> = {
   default: "h-9 px-4 py-2",
   sm: "h-8 rounded-md px-3 text-xs",
   lg: "h-10 rounded-md px-8",
+  h1: "h-10 rounded-md px-8",
+  h2: "h-8 rounded-md px-3 text-xs",
   icon: "h-9 w-9",
+  "icon-h2": "h-7 w-7",
   content: "h-auto p-0",
 };
 
@@ -95,6 +107,21 @@ const FILTER_TOGGLE_WIDTH: Record<FilterToggleWidth, string> = {
   fit: "ui-toggle-width-fit",
 };
 
+const CONTROL_ROW_WIDTH: Record<ControlRowWidth, string> = {
+  fill: "ui-width-fill",
+  fit: "ui-width-fit",
+};
+
+const CONTROL_ROW_SIZE: Record<ControlRowSize, string> = {
+  default: "ui-control-size-default",
+  compact: "ui-control-size-compact",
+};
+
+const ACTION_LINK_SIZE: Record<ActionLinkSize, string> = {
+  default: "ui-action-link-size-default",
+  compact: "ui-action-link-size-compact",
+};
+
 const BUTTON_WIDTH: Record<ButtonWidth, string> = {
   auto: "",
   full: "w-full",
@@ -125,7 +152,7 @@ const BUTTON_ICON_SIZE: Record<ButtonIconSize, string> = {
   hero: "[&_svg]:size-20",
 };
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> {
   variant?: Variant;
   size?: Size;
   active?: boolean;
@@ -135,6 +162,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   density?: FilterToggleDensity;
   width?: FilterToggleWidth;
   toggleStateStyle?: FilterToggleStateStyle;
+  controlWidth?: ControlRowWidth;
+  controlSize?: ControlRowSize;
+  actionSize?: ActionLinkSize;
   fullWidth?: boolean;
   justify?: ButtonJustify;
   textAlign?: ButtonTextAlign;
@@ -154,23 +184,30 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     density = "default",
     width = "full",
     toggleStateStyle = "filled",
+    controlWidth = "fill",
+    controlSize = "default",
+    actionSize = "default",
     fullWidth = false,
     justify = "center",
     textAlign = "center",
     direction = "row",
     iconSize = "md",
-    className = "",
     ...props
   },
   ref,
 ) {
+  let baseClass = BASE;
+  if (variant === "map-cell") {
+    baseClass = MAP_CELL_BASE;
+  }
+
   let variantClass = VARIANT[variant];
   if (variant === "select") {
     variantClass = active ? "select-btn-active" : "select-btn-inactive";
   }
 
   let sizeClass = SIZE[size];
-  if (variant === "select" || variant === "overlay") {
+  if (variant === "select" || variant === "overlay" || variant === "map-cell") {
     sizeClass = "";
   }
 
@@ -185,6 +222,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     variantExtras =
       `${stateClass} ${FILTER_TOGGLE_ALIGN[align]} ${FILTER_TOGGLE_DENSITY[density]} ${FILTER_TOGGLE_WIDTH[width]}`.trim();
   }
+  if (variant === "control-row") {
+    variantExtras = `${CONTROL_ROW_WIDTH[controlWidth]} ${CONTROL_ROW_SIZE[controlSize]}`.trim();
+  }
+  if (variant === "action-link") {
+    variantExtras = ACTION_LINK_SIZE[actionSize];
+  }
   const layoutClass = [
     BUTTON_WIDTH[fullWidth ? "full" : "auto"],
     BUTTON_JUSTIFY[justify],
@@ -198,7 +241,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <button
       ref={ref}
       {...props}
-      className={`${BASE} ${variantClass} ${sizeClass} ${variantExtras} ${layoutClass} ${className}`.trim()}
+      className={`${baseClass} ${variantClass} ${sizeClass} ${variantExtras} ${layoutClass}`.trim()}
     />
   );
 });

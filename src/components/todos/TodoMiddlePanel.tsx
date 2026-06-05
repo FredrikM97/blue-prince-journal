@@ -1,6 +1,7 @@
 import { TODO_STATUS_COLUMNS } from "./Constants";
 import { TodoItem } from "./TodoItem";
 import type { Todo, TodoStatus } from "@/lib/types";
+import { Grid } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { Heading, MetaText } from "@/components/common/Typography";
 
@@ -20,16 +21,16 @@ function TodoColumn({
   onOpenPreview: (t: Todo) => void;
 }) {
   return (
-    <Stack as="section" gap="0" className="todos-column">
-      <Stack as="header" gap="0" className="todos-column-header">
+    <Stack as="section" variant="todos-column" gap="0">
+      <Stack as="header" variant="todos-column-header" gap="0">
         <Heading as="h2" size="base" variant="section-label">
           {label}
         </Heading>
         <MetaText as="span">{todos.length}</MetaText>
       </Stack>
-      <Stack as="ul" gap="0" className="todos-column-list">
+      <Stack as="ul" variant="todos-column-list" gap="0">
         {todos.length === 0 && (
-          <Stack as="li" gap="0" className="todos-column-empty">
+          <Stack as="li" variant="todos-column-empty" gap="0">
             {value === "open" ? "Press N to add a todo" : "Empty"}
           </Stack>
         )}
@@ -60,7 +61,7 @@ export function TodoMiddlePanel({
 }) {
   return (
     <Stack as="section" gap="0">
-      <Stack as="div" gap="0" className="todos-columns-grid">
+      <Grid as="div" variant="cols-3-md" gap="4">
         {TODO_STATUS_COLUMNS.map((col) => (
           <TodoColumn
             key={col.value}
@@ -72,7 +73,7 @@ export function TodoMiddlePanel({
             onOpenPreview={onOpenPreview}
           />
         ))}
-      </Stack>
+      </Grid>
     </Stack>
   );
 }

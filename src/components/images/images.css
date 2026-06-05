@@ -11,10 +11,6 @@
     @apply text-xs text-muted-foreground;
   }
 
-  .images-grid {
-    @apply grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5;
-  }
-
   .images-thumb {
     @apply relative aspect-square overflow-hidden rounded border border-border bg-card hover:border-brass;
   }

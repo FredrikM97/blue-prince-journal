@@ -13,10 +13,6 @@
     @apply shrink-0 space-y-0.5;
   }
 
-  .capture-label {
-    @apply mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
-  }
-
   .capture-suggestion-field {
     @apply relative;
   }
@@ -26,10 +22,18 @@
   }
 
   .capture-suggestion-item {
-    @apply flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-xs text-popover-foreground hover:bg-muted;
+    @apply rounded;
+  }
+
+  .capture-suggestion-item > button {
+    @apply w-full rounded px-2 py-1.5 text-left text-xs text-popover-foreground hover:bg-muted;
   }
 
   .capture-suggestion-item-active {
+    @apply bg-muted;
+  }
+
+  .capture-suggestion-item-active > button {
     @apply bg-muted;
   }
 
@@ -67,10 +71,10 @@
   }
 
   .note-row-inner {
-    @apply flex items-start gap-3 px-4 py-3;
+    @apply flex items-center gap-3 px-4 py-3;
   }
 
-  .note-row-preview-btn {
+  .note-row-inner > .item-title > button {
     @apply flex min-w-0 flex-1 items-start gap-0 rounded-sm hover:bg-transparent focus-visible:ring-0;
   }
 
@@ -186,12 +190,6 @@
 
   .note-pill-solved {
     @apply border-border bg-secondary text-muted-foreground;
-  }
-
-  /* Image grid inside the picker */
-  .note-image-picker-grid {
-    @apply grid gap-3;
-    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
   }
 
 }

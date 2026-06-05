@@ -106,10 +106,6 @@
     @apply space-y-2;
   }
 
-  .note-details-images-compact {
-    @apply space-y-2;
-  }
-
   .note-details-images-label {
     @apply text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
   }
@@ -118,11 +114,11 @@
 
   /* Backdrop — shown behind every dialog */
   .dialog-overlay {
-    @apply fixed inset-0 z-50 bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+    @apply fixed inset-0 z-50 bg-background/35 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
   }
 
   .dialog-overlay-subtle {
-    @apply bg-background;
+    @apply bg-background/25 backdrop-blur-[2px];
   }
 
   /* Shared positioning + animation — applied directly to all dialog content variants */
@@ -200,6 +196,26 @@
     @apply flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
   }
 
+  .input-field-h1 {
+    @apply h-10;
+  }
+
+  .input-field-h2 {
+    @apply h-8;
+  }
+
+  .input-label {
+    @apply mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
+  }
+
+  .input-label-h1 {
+    @apply text-xs;
+  }
+
+  .input-label-h2 {
+    @apply text-[10px];
+  }
+
   .input-width-fit {
     @apply w-auto min-w-40;
   }
@@ -235,6 +251,30 @@
   /* Flex row for a section title with a right-side count/action */
   .section-header-row {
     @apply mb-2 flex items-center justify-between gap-2;
+  }
+
+  .section-header-row-compact {
+    @apply mb-1.5 gap-1.5;
+  }
+
+  .section-actions {
+    @apply flex items-center gap-1;
+  }
+
+  .section-actions-compact {
+    @apply gap-1;
+  }
+
+  .stack-gap-4 {
+    @apply space-y-4;
+  }
+
+  .section-title-h1 {
+    @apply flex items-center gap-3 text-xl leading-tight;
+  }
+
+  .section-rule {
+    @apply h-5 w-px bg-border;
   }
 
   /* Panel title — serif heading used in SidePanel / RightPreviewPanel */
@@ -282,6 +322,52 @@
     @apply inline-flex items-center rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] text-foreground;
   }
 
+  /* ─── Button variants ────────────────────────────────────────────────────── */
+
+  .btn-variant-default {
+    @apply bg-primary text-primary-foreground shadow hover:bg-primary/90;
+  }
+
+  .btn-variant-brass {
+    @apply bg-brass text-brass-foreground shadow hover:bg-brass/90;
+  }
+
+  .btn-variant-destructive {
+    @apply bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90;
+  }
+
+  .btn-variant-outline {
+    @apply border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground;
+  }
+
+  .btn-variant-outline-destructive {
+    @apply border border-destructive/60 bg-background text-destructive shadow-sm hover:bg-destructive/10 hover:text-destructive;
+  }
+
+  .btn-variant-secondary {
+    @apply bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80;
+  }
+
+  .btn-variant-ghost {
+    @apply hover:bg-accent hover:text-accent-foreground;
+  }
+
+  .btn-variant-transparent {
+    @apply bg-transparent hover:opacity-75;
+  }
+
+  .btn-variant-select {
+    @apply h-auto gap-1 rounded-md border px-3 py-1 text-xs font-medium shadow-sm;
+  }
+
+  .btn-variant-filter-toggle {
+    @apply flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card transition-colors hover:border-brass hover:bg-accent;
+  }
+
+  .btn-variant-overlay {
+    @apply fixed inset-x-0 bottom-0 top-14 z-40 rounded-none border-0 bg-black/45 p-0 hover:bg-black/45;
+  }
+
   /* ─── SelectButton states ────────────────────────────────────────────────── */
 
   .select-btn-active {
@@ -312,6 +398,34 @@
   }
 
   /* ─── Structural primitives ─────────────────────────────────────────────── */
+
+  .item-shell {
+    @apply rounded-lg border border-border bg-card;
+  }
+
+  .item-pad-sm {
+    @apply px-3 py-2;
+  }
+
+  .item-pad-md {
+    @apply px-4 py-3;
+  }
+
+  .item-content {
+    @apply min-w-0;
+  }
+
+  .item-header {
+    @apply flex min-w-0 items-center justify-between gap-2;
+  }
+
+  .item-title {
+    @apply min-w-0 flex-1 overflow-hidden;
+  }
+
+  .item-meta {
+    @apply mt-1 pt-1;
+  }
 
   .inline-row {
     @apply flex;
@@ -411,7 +525,7 @@
   }
 
   .ui-header-text-compact {
-    @apply text-[8px];
+    @apply text-[10px];
   }
 
   /* Generic control row behavior */
@@ -432,7 +546,7 @@
   }
 
   .ui-control-size-compact {
-    @apply min-h-4.5 px-0.5 text-[7px];
+    @apply min-h-6 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground;
   }
 
   /* Generic link-like action text */
@@ -445,7 +559,7 @@
   }
 
   .ui-action-link-size-compact {
-    @apply text-[7px];
+    @apply text-[10px];
   }
 
   /* Generic selectable chip/toggle base */
@@ -502,6 +616,34 @@
   /* Generic wrapped controls row */
   .ui-wrap-controls {
     @apply flex w-full flex-wrap gap-1.5;
+  }
+
+  .grid-layout {
+    @apply grid;
+  }
+
+  .grid-gap-2 {
+    @apply gap-2;
+  }
+
+  .grid-gap-3 {
+    @apply gap-3;
+  }
+
+  .grid-gap-4 {
+    @apply gap-4;
+  }
+
+  .grid-gallery {
+    @apply grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5;
+  }
+
+  .grid-cols-3-md {
+    @apply md:grid-cols-3;
+  }
+
+  .grid-auto-fill-card {
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
   }
 
   /* ─── Page layout ───────────────────────────────────────────────────────── */

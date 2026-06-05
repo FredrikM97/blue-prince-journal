@@ -49,6 +49,18 @@
     @apply flex items-center gap-1.5;
   }
 
+  .graph-zoom-btn > button {
+    @apply px-2;
+  }
+
+  .graph-zoom-btn-minus > button {
+    @apply rounded-r-none border-r-0;
+  }
+
+  .graph-zoom-btn-plus > button {
+    @apply rounded-l-none;
+  }
+
   /* ─── Right panel ───────────────────────────────────────────────────────── */
 
   /* Metadata row: outgoing/incoming counts */

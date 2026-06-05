@@ -15,7 +15,7 @@ import type { Note, StoredImage } from "@/lib/types";
 // Image styling containers (requires wrapper for CSS styling)
 function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
   return (
-    <Stack gap="0" className="images-detail-preview">
+    <Stack variant="images-detail-preview" gap="0">
       {children}
     </Stack>
   );
@@ -52,12 +52,11 @@ export function ImagesRightPanel({
   if (!img) {
     return (
       <SidePanel.Right title="Image" panelKey="image-empty">
-        {/* eslint-disable-next-line no-restricted-syntax */}
-        <div className="flex items-center justify-center py-8">
+        <Stack variant="centered-empty-message" gap="0">
           <Text tone="muted" size="sm">
             Select an image from the library to view details
           </Text>
-        </div>
+        </Stack>
       </SidePanel.Right>
     );
   }
@@ -171,6 +170,7 @@ function ImagesInspectorPanel({
             notes={relatedNotes}
             title="Details from notes"
             emptyLabel="No notes currently reference this image."
+            cardVariant="default"
           />
         </Stack>
       </SidePanel.Right>

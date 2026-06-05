@@ -258,7 +258,6 @@ export function MarkdownEditor({
   onTextKeyDown,
   placeholder,
   rows = 6,
-  className,
   textareaRef,
   allowExpand = true,
   defaultPreview = false,
@@ -270,7 +269,6 @@ export function MarkdownEditor({
   onTextKeyDown?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => boolean | void;
   placeholder?: string;
   rows?: number;
-  className?: string;
   textareaRef?: RefObject<HTMLTextAreaElement | null>;
   allowExpand?: boolean;
   defaultPreview?: boolean;
@@ -313,7 +311,7 @@ export function MarkdownEditor({
   }
 
   return (
-    <Stack as="div" gap="0" className={className}>
+    <Stack as="div" gap="0">
       <MarkdownToolbar
         primaryActions={primaryToolbarActions}
         overflowActions={overflowToolbarActions}

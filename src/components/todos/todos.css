@@ -57,11 +57,6 @@
     @apply inline-flex items-center rounded border border-transparent bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground;
   }
 
-  /* Kanban columns */
-  .todos-columns-grid {
-    @apply grid gap-4 md:grid-cols-3;
-  }
-
   .todos-column {
     @apply rounded-lg border border-border bg-card;
   }
@@ -90,7 +85,7 @@
 
   /* List item row with hover state and grouped action reveal */
   .todo-row-item {
-    @apply px-3 py-2 hover:bg-muted;
+    @apply rounded-lg border border-border bg-card px-3 py-2 hover:bg-muted;
   }
 
   .todo-row-main {
@@ -101,11 +96,11 @@
     @apply flex min-w-0 items-center justify-between gap-2;
   }
 
-  .todo-row-title-button {
+  .todo-row-title-button-wrap > button {
     @apply w-full min-w-0 overflow-hidden whitespace-normal break-words py-0.5;
   }
 
-  .todo-row-title-button > span {
+  .todo-row-title-button-wrap > button > span {
     @apply line-clamp-2;
   }
 
@@ -113,16 +108,12 @@
     @apply min-w-0 flex-1 overflow-hidden;
   }
 
-  .todo-row-menu-button {
-    @apply h-7 w-7 shrink-0 rounded border border-border bg-card;
-  }
-
   .todo-row-chip-text {
     @apply inline-block max-w-36 truncate align-bottom;
   }
 
   .todo-row-tags-line {
-    @apply border-t border-border pt-1;
+    @apply mt-1 pt-1;
   }
 
   /* Inline status dropdown inside a todo row */

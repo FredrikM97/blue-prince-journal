@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { usePasteImages } from "@/hooks/usePasteImages";
 import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
 import { MetaText, Text } from "@/components/common/Typography";
-import { Inline } from "@/components/common/LayoutPrimitives";
+import { Grid, Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { ImageCard } from "@/components/common/ImageCard";
 
@@ -298,8 +298,7 @@ function SelectExistingImagesDialog({
               <Button
                 type="button"
                 variant="secondary"
-                size="icon"
-                className="h-7 w-7"
+                size="icon-h2"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={safePage === 0}
                 aria-label="Previous page"
@@ -312,8 +311,7 @@ function SelectExistingImagesDialog({
               <Button
                 type="button"
                 variant="secondary"
-                size="icon"
-                className="h-7 w-7"
+                size="icon-h2"
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={safePage === totalPages - 1}
                 aria-label="Next page"
@@ -326,13 +324,7 @@ function SelectExistingImagesDialog({
               onValueChange={(value) => handleSortChange(value as ImageSort)}
               options={IMAGE_SORT_OPTIONS}
             />
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="shrink-0 border border-input"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
               <X className="h-3.5 w-3.5" />
               Close
             </Button>
@@ -342,9 +334,9 @@ function SelectExistingImagesDialog({
           Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
         </MetaText>
 
-        <Stack variant="dialog-scroll-body" gap="0" className="min-h-[68vh]">
+        <Stack variant="dialog-scroll-body-tall" gap="0">
           {sortedImages.length > 0 ? (
-            <Stack variant="note-image-picker-grid" gap="0">
+            <Grid variant="auto-fill-card" gap="3">
               {pageImages.map((img) => {
                 const selected = selectedSet.has(img.id);
                 return (
@@ -366,7 +358,7 @@ function SelectExistingImagesDialog({
                   />
                 );
               })}
-            </Stack>
+            </Grid>
           ) : (
             <MetaText size="sm">
               No available images to attach. Upload or paste a new image first.

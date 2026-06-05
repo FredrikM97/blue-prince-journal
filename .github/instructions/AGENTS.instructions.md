@@ -22,6 +22,8 @@ applyTo: "src/**/*.{ts,tsx,css},tests/**/*.{ts,tsx},.github/instructions/*.md"
 - Use `if/else` before `return`, then render with `&&` and `!condition &&`.
 - Never nest ternaries anywhere.
 - Keep wrapper markup minimal; remove redundant `div` layers.
+- Avoid adding new raw `div`/`section` wrappers with `className`; prefer shared primitives (`Stack`, `Inline`, `Grid`, typography primitives) and typed props.
+- Do not replace an existing `Stack` wrapper with a raw `div`/`section` to apply styles. Add/extend a typed `Stack` variant (and supporting CSS) instead.
 
 # Styling Rules
 
@@ -31,6 +33,7 @@ applyTo: "src/**/*.{ts,tsx,css},tests/**/*.{ts,tsx},.github/instructions/*.md"
 - If a class pattern repeats, extract it immediately.
 - Shared layout primitives belong in `src/components/common/layout.css`; feature-specific styles belong in feature CSS files.
 - Avoid one-off feature CSS when a shared primitive variant can represent the pattern. Prefer extending shared variants (`Stack`, `Inline`, dialog/panel primitives, `layout.css`) over creating new single-use selectors.
+- Remove alias classes that only re-apply one existing shared class (for example feature-prefixed wrappers that only `@apply` a single primitive token).
 
 # Component Reuse Rules
 

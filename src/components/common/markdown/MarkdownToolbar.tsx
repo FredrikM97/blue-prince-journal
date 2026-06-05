@@ -46,11 +46,10 @@ export function MarkdownToolbar({
       {primaryActions.map((action) => (
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-h2"
           key={action.key}
           aria-label={action.label}
           title={action.label}
-          className="h-7 w-7"
           onClick={action.onSelect}
         >
           {action.icon}
@@ -61,10 +60,9 @@ export function MarkdownToolbar({
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            size="icon"
+            size="icon-h2"
             aria-label="More formatting tools"
             title="More formatting tools"
-            className="h-7 w-7"
           >
             <MoreHorizontal className="h-3.5 w-3.5" />
           </Button>
@@ -100,10 +98,9 @@ export function MarkdownToolbar({
 
       <Button
         variant="ghost"
-        size="icon"
+        size="icon-h2"
         aria-label={previewToggleLabel}
         title={previewToggleLabel}
-        className="h-7 w-7"
         onClick={onTogglePreview}
       >
         {preview && <EyeOff className="icon-sm" />}
@@ -115,10 +112,9 @@ export function MarkdownToolbar({
           <Stack as="span" gap="0" variant="md-toolbar-divider" />
           <Button
             variant="ghost"
-            size="icon"
+            size="icon-h2"
             aria-label={expandLabel}
             title={expandLabel}
-            className="h-7 w-7"
             onClick={onExpand}
           >
             <Maximize2 className="h-3.5 w-3.5" />

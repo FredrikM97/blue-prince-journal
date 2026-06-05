@@ -19,7 +19,7 @@ import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
 import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText, Text } from "@/components/common/Typography";
-import { Inline } from "@/components/common/LayoutPrimitives";
+import { Grid, Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
 import { Chip } from "@/components/common/Chip";
@@ -331,7 +331,7 @@ function NotesFooterActions({
   const attachRef = useRef<HTMLInputElement>(null);
 
   return (
-    <Inline gap="2" align="center" wrap>
+    <Inline gap="2" align="center" justify="between" wrap>
       <Inline gap="2" align="center">
         <Button
           type="button"
@@ -357,20 +357,18 @@ function NotesFooterActions({
           }}
         />
       </Inline>
-      <Stack as="div" gap="0" className="ml-auto">
-        <Inline gap="2" align="center">
-          {showSaveNext && (
-            <Button variant="ghost" size="sm" onClick={() => submit(true)}>
-              Save + next
-            </Button>
-          )}
-          {showPrimarySave && (
-            <Button variant="brass" size="sm" onClick={() => submit(false)}>
-              Save
-            </Button>
-          )}
-        </Inline>
-      </Stack>
+      <Inline gap="2" align="center">
+        {showSaveNext && (
+          <Button variant="ghost" size="sm" onClick={() => submit(true)}>
+            Save + next
+          </Button>
+        )}
+        {showPrimarySave && (
+          <Button variant="brass" size="sm" onClick={() => submit(false)}>
+            Save
+          </Button>
+        )}
+      </Inline>
     </Inline>
   );
 }
@@ -843,8 +841,7 @@ function SelectExistingImagesDialog({
               <Button
                 type="button"
                 variant="secondary"
-                size="icon"
-                className="h-7 w-7"
+                size="icon-h2"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={safePage === 0}
                 aria-label="Previous page"
@@ -857,8 +854,7 @@ function SelectExistingImagesDialog({
               <Button
                 type="button"
                 variant="secondary"
-                size="icon"
-                className="h-7 w-7"
+                size="icon-h2"
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={safePage === totalPages - 1}
                 aria-label="Next page"
@@ -871,13 +867,7 @@ function SelectExistingImagesDialog({
               onValueChange={(value) => handleSortChange(value as ImageSort)}
               options={IMAGE_SORT_OPTIONS}
             />
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="shrink-0 border border-input"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
               <X className="h-3.5 w-3.5" />
               Close
             </Button>
@@ -887,9 +877,9 @@ function SelectExistingImagesDialog({
           Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
         </MetaText>
 
-        <Stack variant="dialog-scroll-body" gap="0" className="min-h-[68vh]">
+        <Stack variant="dialog-scroll-body-tall" gap="0">
           {sortedImages.length > 0 ? (
-            <Stack variant="note-image-picker-grid" gap="0">
+            <Grid variant="auto-fill-card" gap="3">
               {pageImages.map((img) => {
                 const selected = selectedSet.has(img.id);
                 return (
@@ -909,7 +899,7 @@ function SelectExistingImagesDialog({
                   />
                 );
               })}
-            </Stack>
+            </Grid>
           ) : (
             <MetaText size="sm">
               No available images to attach. Upload or paste a new image first.

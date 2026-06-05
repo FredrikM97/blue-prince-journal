@@ -6,25 +6,21 @@ import { MetaText } from "@/components/common/Typography";
 
 type FilterSectionVariant = "default" | "compact";
 type FilterSectionWidth = "fill" | "fit";
+type FilterSectionHeaderVariant = "filter-section-header-default" | "filter-section-header-compact";
 
-const HEADER_TEXT_CLASS_BY_VARIANT: Record<FilterSectionVariant, string> = {
-  default: "ui-header-text-default",
-  compact: "ui-header-text-default ui-header-text-compact",
+const HEADER_VARIANT_BY_SIZE: Record<FilterSectionVariant, FilterSectionHeaderVariant> = {
+  default: "filter-section-header-default",
+  compact: "filter-section-header-compact",
 };
 
-const TOGGLE_WIDTH_CLASS_BY_WIDTH: Record<FilterSectionWidth, string> = {
-  fill: "ui-width-fill",
-  fit: "ui-width-fit",
+const CONTROL_SIZE_BY_VARIANT: Record<FilterSectionVariant, "default" | "compact"> = {
+  default: "default",
+  compact: "compact",
 };
 
-const TOGGLE_SIZE_CLASS_BY_VARIANT: Record<FilterSectionVariant, string> = {
-  default: "ui-control-size-default",
-  compact: "ui-control-size-compact",
-};
-
-const CLEAR_BUTTON_SIZE_CLASS_BY_VARIANT: Record<FilterSectionVariant, string> = {
-  default: "ui-action-link-size-default",
-  compact: "ui-action-link-size-compact",
+const ACTION_SIZE_BY_VARIANT: Record<FilterSectionVariant, "default" | "compact"> = {
+  default: "default",
+  compact: "compact",
 };
 
 const CHEVRON_ICON_CLASS_BY_VARIANT: Record<FilterSectionVariant, string> = {
@@ -53,28 +49,21 @@ export function FilterSection({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const ChevronIcon = open ? ChevronDown : ChevronRight;
-  const headerTextClassName = HEADER_TEXT_CLASS_BY_VARIANT[variant];
-  const toggleClassName = [
-    "ui-control-row",
-    TOGGLE_WIDTH_CLASS_BY_WIDTH[width],
-    TOGGLE_SIZE_CLASS_BY_VARIANT[variant],
-  ].join(" ");
-  const clearButtonClassName = ["ui-action-link", CLEAR_BUTTON_SIZE_CLASS_BY_VARIANT[variant]].join(
-    " ",
-  );
+  const headerVariant = HEADER_VARIANT_BY_SIZE[variant];
+  const controlSize = CONTROL_SIZE_BY_VARIANT[variant];
+  const actionSize = ACTION_SIZE_BY_VARIANT[variant];
   const chevronIconClassName = CHEVRON_ICON_CLASS_BY_VARIANT[variant];
 
   return (
     <Stack variant="filter-section" gap="0">
       {collapsible && (
-        <Stack variant="filter-section-header" gap="0" className={headerTextClassName}>
+        <Stack variant={headerVariant} gap="0">
           <Button
             type="button"
-            variant="transparent"
+            variant="control-row"
             size="content"
-            justify="between"
-            textAlign="left"
-            className={toggleClassName}
+            controlWidth={width}
+            controlSize={controlSize}
             onClick={() => setOpen((v) => !v)}
           >
             <span>
@@ -90,9 +79,9 @@ export function FilterSection({
           {onReset && (
             <Button
               type="button"
-              variant="ghost"
+              variant="action-link"
               size="content"
-              className={clearButtonClassName}
+              actionSize={actionSize}
               onClick={onReset}
             >
               All
@@ -102,14 +91,14 @@ export function FilterSection({
       )}
 
       {!collapsible && (
-        <Stack variant="filter-section-header" gap="0" className={headerTextClassName}>
+        <Stack variant={headerVariant} gap="0">
           <span>{title}</span>
           {onReset && (
             <Button
               type="button"
-              variant="ghost"
+              variant="action-link"
               size="content"
-              className={clearButtonClassName}
+              actionSize={actionSize}
               onClick={onReset}
             >
               All

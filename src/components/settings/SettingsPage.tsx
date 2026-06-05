@@ -275,9 +275,8 @@ export function SettingsPage() {
                               key={`${group}-${name}`}
                               type="button"
                               size="sm"
-                              variant="ghost"
+                              variant="outline-destructive"
                               onClick={() => removeRoom(name)}
-                              className="settings-room-chip"
                               title="Remove room"
                             >
                               {name}
@@ -441,13 +440,7 @@ function SteamImportSection() {
       </MetaText>
 
       {!steamFolderName && (
-        <Button
-          variant="brass"
-          size="sm"
-          onClick={handleConnect}
-          disabled={busy}
-          className="settings-steam-action"
-        >
+        <Button variant="brass" size="sm" onClick={handleConnect} disabled={busy}>
           <FolderOpen className="icon-sm" />
           Connect folder…
         </Button>
@@ -456,13 +449,7 @@ function SteamImportSection() {
       {steamFolderName && (
         <Stack gap="1.5">
           <Inline gap="2" wrap align="center">
-            <Button
-              variant="brass"
-              size="sm"
-              onClick={handleSync}
-              disabled={busy}
-              className="settings-steam-action"
-            >
+            <Button variant="brass" size="sm" onClick={handleSync} disabled={busy}>
               <FolderSync className="icon-sm" />
               Sync now
             </Button>

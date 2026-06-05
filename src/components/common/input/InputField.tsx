@@ -26,9 +26,17 @@ function getInputClass({
   let className = "input-base";
   if (width === "fit") className = `${className} input-width-fit`;
   if (width === "compact") className = `${className} input-width-compact`;
-  if (size === "sm") className = `${className} h-8`;
-  if (size === "lg") className = `${className} h-10`;
+  if (size === "sm") className = `${className} input-field-h2`;
+  if (size === "lg") className = `${className} input-field-h1`;
   if (grow) className = `${className} flex-1`;
+  return className;
+}
+
+function getLabelClass({ size, hideLabel }: { size: InputFieldSize; hideLabel: boolean }) {
+  let className = "input-label";
+  if (size === "sm") className = `${className} input-label-h2`;
+  if (size === "lg") className = `${className} input-label-h1`;
+  if (hideLabel) className = `${className} sr-only`;
   return className;
 }
 
@@ -99,8 +107,7 @@ export function InputField({
 
   if (!label) return <>{field}</>;
 
-  let labelClassName = "capture-label";
-  if (hideLabel) labelClassName = `${labelClassName} sr-only`;
+  const labelClassName = getLabelClass({ size, hideLabel });
 
   return (
     <>

@@ -19,13 +19,6 @@ function coordLabel(row: number, col: number) {
   return `${COL_LABELS[col] ?? String(col + 1)}${GRID_ROWS - row}`;
 }
 
-const STATUS_COLOR: Record<GridCell["status"], string> = {
-  unknown: "map-cell-neutral",
-  drafted: "map-cell-neutral",
-  explored: "map-cell-neutral",
-  cleared: "map-cell-cleared",
-};
-
 type ActiveCellCoord = { row: number; col: number };
 
 export function MapPage() {
@@ -100,9 +93,9 @@ export function MapPage() {
         <MapMiddlePanel
           byId={byId}
           noteCountByRoom={noteCountByRoom}
-          statusColor={STATUS_COLOR}
           coordLabel={coordLabel}
           onOpenCell={openCell}
+          activeCell={active}
         />
       </PageLayout.Middle>
       <PageLayout.Right>{rightSidebar}</PageLayout.Right>

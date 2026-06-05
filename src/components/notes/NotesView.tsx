@@ -36,9 +36,11 @@ export function NotesView({
           <Text size="sm" tone="muted">
             {emptyHint ?? "No notes yet. Press N to add one."}
           </Text>
-          <Button variant="brass" className="mt-4" onClick={openCapture}>
-            Add your first note
-          </Button>
+          <Stack as="div" gap="0" marginTop="2">
+            <Button variant="brass" onClick={openCapture}>
+              Add your first note
+            </Button>
+          </Stack>
         </Stack>
       ) : (
         <Stack variant="notes-view-list" gap="2">
@@ -75,23 +77,24 @@ const NotesListRow = memo(function NotesListRow({
   onDelete: (note: Note) => void;
 }) {
   return (
-    <Stack variant="note-row-item" gap="1">
-      <Stack variant="note-row-inner" gap="1">
-        <Button
-          type="button"
-          variant="transparent"
-          size="content"
-          fullWidth
-          justify="start"
-          textAlign="left"
-          className="note-row-preview-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenPreview(note);
-          }}
-        >
-          <NotesListItemSummary note={note} />
-        </Button>
+    <Stack variant="note-row-item" gap="0">
+      <Stack variant="note-row-inner" gap="0">
+        <Stack variant="item-title" gap="0">
+          <Button
+            type="button"
+            variant="transparent"
+            size="content"
+            fullWidth
+            justify="start"
+            textAlign="left"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenPreview(note);
+            }}
+          >
+            <NotesListItemSummary note={note} />
+          </Button>
+        </Stack>
         <Button
           variant="ghost"
           size="icon"
@@ -106,7 +109,7 @@ const NotesListRow = memo(function NotesListRow({
         <Button
           variant="ghost"
           size="icon"
-          className="text-destructive hover:text-destructive"
+          tone="destructive"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(note);

@@ -376,21 +376,25 @@ function SuggestionItems({
           itemClass = "capture-suggestion-item capture-suggestion-item-active";
         }
         return (
-          <Button
-            key={suggestion.value}
-            type="button"
-            variant="ghost"
-            className={itemClass}
-            aria-selected={index === activeIndex}
-            onMouseEnter={() => onHover(index)}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              onApply(suggestion);
-            }}
-          >
-            <span>{suggestion.value}</span>
-            <span className="capture-suggestion-hint">{suggestion.hint}</span>
-          </Button>
+          <div key={suggestion.value} className={itemClass}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="content"
+              fullWidth
+              justify="between"
+              textAlign="left"
+              aria-selected={index === activeIndex}
+              onMouseEnter={() => onHover(index)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onApply(suggestion);
+              }}
+            >
+              <span>{suggestion.value}</span>
+              <span className="capture-suggestion-hint">{suggestion.hint}</span>
+            </Button>
+          </div>
         );
       })}
     </div>

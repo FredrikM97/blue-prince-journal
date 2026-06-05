@@ -63,9 +63,9 @@ export function PanelHeader({
     titleDecoration = "line-through";
   }
 
-  let closeButtonClassName = "lg:hidden";
+  let shouldShowClose = false;
   if (showCloseOnDesktop || forceShowClose) {
-    closeButtonClassName = "";
+    shouldShowClose = true;
   }
 
   let headingSize: "base" | "lg" = "base";
@@ -96,11 +96,10 @@ export function PanelHeader({
               <Maximize2 className="icon-md" />
             </Button>
           )}
-          {onClose && (
+          {onClose && shouldShowClose && (
             <Button
               variant="ghost"
               size="icon"
-              className={closeButtonClassName}
               onClick={onClose}
               title="Close"
               aria-label="Close panel"

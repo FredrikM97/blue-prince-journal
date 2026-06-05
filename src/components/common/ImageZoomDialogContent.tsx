@@ -188,8 +188,8 @@ export function ImageZoomDialogContent({ imageId, alt }: { imageId: string; alt:
   }
 
   return (
-    <Stack gap="2" className="image-zoom-dialog-shell">
-      <Stack as="div" gap="0" className="image-zoom-toolbar">
+    <Stack variant="image-zoom-dialog-shell" gap="0">
+      <Stack variant="image-zoom-toolbar" gap="0">
         <Inline gap="2" align="center" justify="between">
           <Inline gap="1" align="center">
             <Button

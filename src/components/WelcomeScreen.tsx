@@ -28,29 +28,30 @@ function WelcomeCard({
   disabled?: boolean;
 }) {
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="content"
-      iconSize="2xl"
-      onClick={onClick}
-      disabled={disabled}
-      className="welcome-card"
-      fullWidth
-      direction="column"
-      justify="start"
-      textAlign="center"
-    >
-      <Icon className="text-brass" />
-      <Stack gap="1" variant="default">
-        <Text size="base" weight="medium">
-          {title}
-        </Text>
-        <Text size="xs" tone="muted" marginTop="1">
-          {description}
-        </Text>
-      </Stack>
-    </Button>
+    <Stack variant="welcome-card" gap="0">
+      <Button
+        type="button"
+        variant="ghost"
+        size="content"
+        iconSize="2xl"
+        onClick={onClick}
+        disabled={disabled}
+        fullWidth
+        direction="column"
+        justify="start"
+        textAlign="center"
+      >
+        <Icon className="text-brass" />
+        <Stack gap="1" variant="default">
+          <Text size="base" weight="medium">
+            {title}
+          </Text>
+          <Text size="xs" tone="muted" marginTop="1">
+            {description}
+          </Text>
+        </Stack>
+      </Button>
+    </Stack>
   );
 }
 

@@ -31,6 +31,7 @@ export function AttachedImagesGallery({
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const imageById = useMemo(() => new Map(images.map((img) => [img.id, img])), [images]);
+  const collapseButtonSize = compact ? "icon-h2" : "icon";
 
   if (imageIds.length === 0) return null;
 
@@ -40,7 +41,7 @@ export function AttachedImagesGallery({
     return img.caption?.trim() || img.name;
   };
 
-  const wrapperVariant = compact ? "note-details-images-compact" : "note-details-images";
+  const wrapperVariant = "note-details-images";
 
   return (
     <Stack as="section" variant={wrapperVariant} gap="0">
@@ -51,11 +52,10 @@ export function AttachedImagesGallery({
           </Stack>
           {collapsible && (
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              size={collapseButtonSize}
               aria-label={collapsed ? "Expand images" : "Collapse images"}
               title={collapsed ? "Expand images" : "Collapse images"}
-              className="h-6 w-6 rounded border border-input"
               onClick={() => setCollapsed((v) => !v)}
             >
               {collapsed && <ChevronDown />}

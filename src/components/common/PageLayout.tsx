@@ -27,7 +27,6 @@ import { PanelLeft, PanelRight } from "lucide-react";
 import {
   PageLayoutMobileDrawerProvider,
   type MobileDrawerSide,
-  type MobileDrawerControls,
 } from "@/hooks/usePageLayoutMobileDrawer";
 
 type MobilePanelLabelKey = "default" | "graph" | "map" | "notes" | "images" | "todos";
