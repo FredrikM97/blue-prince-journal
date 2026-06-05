@@ -14,11 +14,11 @@
 
   /* Logo icon badge */
   .welcome-icon {
-    @apply mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-brass/15 text-brass;
+    @apply mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-brass text-brass-foreground;
   }
 
   /* Selectable option card */
   .welcome-card {
-    @apply !flex w-full max-w-sm !flex-col !items-center !justify-start !gap-3 !rounded-xl !border border-border !bg-card/60 !px-4 !py-4 !text-center !whitespace-normal !shadow-sm transition-colors hover:!border-brass/60 hover:!bg-card disabled:pointer-events-none disabled:opacity-50 sm:min-h-[8rem] sm:w-[15.5rem] lg:w-[12rem] xl:w-[11rem];
+    @apply !flex w-full max-w-sm !flex-col !items-center !justify-start !gap-3 !rounded-xl !border border-border !bg-card !px-4 !py-4 !text-center !whitespace-normal !shadow-sm transition-colors hover:!border-brass hover:!bg-card disabled:pointer-events-none disabled:opacity-50 sm:min-h-[8rem] sm:w-[15.5rem] lg:w-[12rem] xl:w-[11rem];
   }
 }

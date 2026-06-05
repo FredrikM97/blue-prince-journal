@@ -14,7 +14,7 @@ export function TodoRightPanel({
   return (
     <PreviewSidePanel
       title={todo.title}
-      subtitle={`${todo.status} · Created ${new Date(todo.createdAt).toLocaleDateString()}`}
+      subtitle={`Created ${new Date(todo.createdAt).toLocaleDateString()}`}
       done={todo.status === "done"}
       panelKey={`todo:${todo.id}`}
       onClose={onClose}

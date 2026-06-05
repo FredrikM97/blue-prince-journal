@@ -54,7 +54,10 @@ type StackVariant =
   | "filter-section-body"
   | "filter-grid"
   | "filter-grid-wrap"
-  | "filter-options";
+  | "filter-options"
+  | "md-toolbar"
+  | "md-editor-body"
+  | "md-toolbar-divider";
 type StackMarginTop = "0" | "2";
 
 const STACK_GAP_CLASS: Record<StackGap, string> = {
@@ -112,6 +115,9 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "filter-grid": "ui-grid-auto-fit",
   "filter-grid-wrap": "ui-wrap-controls",
   "filter-options": "ui-wrap-controls",
+  "md-toolbar": "md-toolbar",
+  "md-editor-body": "md-editor-body",
+  "md-toolbar-divider": "mx-1 h-4 w-px bg-border",
 };
 
 const STACK_MARGIN_TOP_CLASS: Record<StackMarginTop, string> = {
@@ -124,6 +130,8 @@ export function Stack({
   gap = "3",
   variant = "default",
   marginTop = "0",
+  role,
+  ariaLabel,
   className = "",
   children,
 }: {
@@ -131,9 +139,15 @@ export function Stack({
   gap?: StackGap;
   variant?: StackVariant;
   marginTop?: StackMarginTop;
+  role?: string;
+  ariaLabel?: string;
   className?: string;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   const resolvedClassName = `${STACK_GAP_CLASS[gap]} ${STACK_VARIANT_CLASS[variant]} ${STACK_MARGIN_TOP_CLASS[marginTop]} ${className}`;
-  return createElement(as, { className: resolvedClassName.trim() }, children);
+  return createElement(
+    as,
+    { className: resolvedClassName.trim(), role, "aria-label": ariaLabel },
+    children,
+  );
 }

@@ -30,6 +30,7 @@ applyTo: "src/**/*.{ts,tsx,css},tests/**/*.{ts,tsx},.github/instructions/*.md"
 - Do not keep long CSS strings/constants in TSX files. Move styling to CSS classes in feature CSS files or `src/components/common/layout.css`.
 - If a class pattern repeats, extract it immediately.
 - Shared layout primitives belong in `src/components/common/layout.css`; feature-specific styles belong in feature CSS files.
+- Avoid one-off feature CSS when a shared primitive variant can represent the pattern. Prefer extending shared variants (`Stack`, `Inline`, dialog/panel primitives, `layout.css`) over creating new single-use selectors.
 
 # Component Reuse Rules
 

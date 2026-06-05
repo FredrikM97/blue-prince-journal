@@ -39,6 +39,10 @@ export function NotesPage({
   const search = useStore((s) => s.search);
   const openCapture = useStore((s) => s.openCapture);
   const captureOpen = useStore((s) => s.captureOpen);
+  const captureDefault = useStore((s) => s.captureDefault);
+  const captureEditNoteId = useStore((s) => s.captureEditNoteId);
+  const captureEditTodoId = useStore((s) => s.captureEditTodoId);
+  const capturePrefill = useStore((s) => s.capturePrefill);
   const closeCapture = useStore((s) => s.closeCapture);
   const {
     uiState,
@@ -108,7 +112,15 @@ export function NotesPage({
   }
 
   if (captureOpen) {
-    rightPanelContent = <NotesCreatePanel defaultNoteType={filterType} />;
+    let capturePanelKey = `capture:new:${captureDefault}:${capturePrefill}`;
+    if (captureEditNoteId) {
+      capturePanelKey = `capture:edit-note:${captureEditNoteId}`;
+    }
+    if (captureEditTodoId) {
+      capturePanelKey = `capture:edit-todo:${captureEditTodoId}`;
+    }
+
+    rightPanelContent = <NotesCreatePanel key={capturePanelKey} defaultNoteType={filterType} />;
   }
 
   let deleteDescription = "Delete this item?";
@@ -219,6 +231,7 @@ function NotesRightPanel({
     return (
       <SidePanel.Right
         title="Edit note"
+        textSize="h2"
         onClose={onClose}
         panelKey={`note-edit:${activeNote.id}`}
         headerActions={

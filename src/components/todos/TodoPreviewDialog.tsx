@@ -74,7 +74,7 @@ export function TodoPreviewDialog({
 }) {
   if (!todo) return null;
 
-  const subtitle = `${todo.status} · Created ${new Date(todo.createdAt).toLocaleDateString()}`;
+  const subtitle = `Created ${new Date(todo.createdAt).toLocaleDateString()}`;
 
   return (
     <PreviewDialog

@@ -13,7 +13,7 @@
 
   /* Border + background variant (non-plain mode) */
   .graph-canvas-frame {
-    @apply flex flex-col gap-2 overflow-hidden rounded-lg border border-border/70 bg-card/50 p-2;
+    @apply flex flex-col gap-2 overflow-hidden rounded-lg border border-border bg-card p-2;
   }
 
   /* Borderless variant used inside dialogs (plain mode) */

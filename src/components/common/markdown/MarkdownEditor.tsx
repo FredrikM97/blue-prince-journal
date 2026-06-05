@@ -1,18 +1,10 @@
 import { useRef, useState, type RefObject } from "react";
-import {
-  Bold,
-  Eye,
-  EyeOff,
-  Italic,
-  List,
-  ListOrdered,
-  Maximize2,
-  Table,
-  WandSparkles,
-} from "lucide-react";
-import { Button } from "@/components/common/Button";
+import { Bold, Italic, List, ListOrdered, Table } from "lucide-react";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
-import { MarkdownShortcutHelp } from "@/components/common/markdown/MarkdownShortcutHelp";
+import {
+  MarkdownToolbar,
+  type MarkdownToolbarAction,
+} from "@/components/common/markdown/MarkdownToolbar";
 import {
   findTableBlockAtCursor,
   formatTableMarkdown,
@@ -20,6 +12,7 @@ import {
 } from "@/components/common/markdown/MarkdownTables";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 
+import { Stack } from "@/components/common/Stack";
 // ── toolbar actions ───────────────────────────────────────────────
 type WrapMode = "inline" | "block-line";
 interface ToolbarAction {
@@ -286,82 +279,55 @@ export function MarkdownEditor({
   const [expanded, setExpanded] = useState(false);
   const localRef = useRef<HTMLTextAreaElement>(null);
   const ref = textareaRef ?? localRef;
-
-  let previewToggleLabel = "Show preview";
-  let expandLabel = "Expand editor";
+  const primaryActions = ACTIONS.slice(0, 4);
+  const overflowActions = ACTIONS.slice(4);
   let dialogTitle = "Edit details";
   if (preview) {
-    previewToggleLabel = "Hide preview";
-    expandLabel = "Expand preview";
     dialogTitle = "Preview";
   }
 
+  const primaryToolbarActions: MarkdownToolbarAction[] = primaryActions.map((action) => ({
+    key: action.label,
+    label: action.label,
+    icon: action.icon,
+    onSelect: () => {
+      if (!ref.current) return;
+      applyAction(ref.current, action, onChange);
+    },
+  }));
+
+  const overflowToolbarActions: MarkdownToolbarAction[] = overflowActions.map((action) => ({
+    key: action.label,
+    label: action.label,
+    icon: action.icon,
+    onSelect: () => {
+      if (!ref.current) return;
+      applyAction(ref.current, action, onChange);
+    },
+  }));
+
+  function handleFormatTables() {
+    if (!ref.current) return;
+    const formatted = tryFormatTableInEditor(ref.current, onChange);
+    if (!formatted) onChange(formatAllMarkdownTables(value));
+  }
+
   return (
-    <div className={className}>
-      <div className="md-toolbar" role="toolbar" aria-label="Formatting tools">
-        {ACTIONS.map((action) => (
-          <Button
-            variant="ghost"
-            size="icon"
-            key={action.label}
-            aria-label={action.label}
-            title={action.label}
-            className="h-7 w-7"
-            onClick={() => ref.current && applyAction(ref.current, action, onChange)}
-          >
-            {action.icon}
-          </Button>
-        ))}
-        <div className="mx-1 h-4 w-px bg-border" />
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Format tables"
-          title="Format tables"
-          className="h-7 w-7"
-          onClick={() => {
-            if (!ref.current) return;
-            const formatted = tryFormatTableInEditor(ref.current, onChange);
-            if (!formatted) onChange(formatAllMarkdownTables(value));
-          }}
-        >
-          <WandSparkles className="h-3.5 w-3.5" />
-        </Button>
-        <div className="mx-1 h-4 w-px bg-border" />
-        <MarkdownShortcutHelp />
-        <div className="mx-1 h-4 w-px bg-border" />
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={previewToggleLabel}
-          title={previewToggleLabel}
-          className="h-7 w-7"
-          onClick={() => setPreview((v) => !v)}
-        >
-          {preview && <EyeOff className="icon-sm" />}
-          {!preview && <Eye className="icon-sm" />}
-        </Button>
-        {allowExpand && (
-          <>
-            <div className="mx-1 h-4 w-px bg-border" />
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={expandLabel}
-              title={expandLabel}
-              className="h-7 w-7"
-              onClick={() => setExpanded(true)}
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-            </Button>
-          </>
-        )}
-      </div>
+    <Stack as="div" gap="0" className={className}>
+      <MarkdownToolbar
+        primaryActions={primaryToolbarActions}
+        overflowActions={overflowToolbarActions}
+        onFormatTables={handleFormatTables}
+        preview={preview}
+        onTogglePreview={() => setPreview((v) => !v)}
+        allowExpand={allowExpand}
+        onExpand={() => setExpanded(true)}
+      />
 
       {preview && (
-        <div className="md-editor-body">
+        <Stack as="div" gap="0" variant="md-editor-body">
           <MarkdownPreview>{value}</MarkdownPreview>
-        </div>
+        </Stack>
       )}
       {!preview && (
         <textarea
@@ -417,7 +383,7 @@ export function MarkdownEditor({
             <DialogHeader>
               <DialogTitle>{dialogTitle}</DialogTitle>
             </DialogHeader>
-            <div className="min-h-0 flex-1 overflow-auto">
+            <Stack as="div" gap="0" variant="dialog-scroll-body">
               <MarkdownEditor
                 value={value}
                 onChange={onChange}
@@ -426,10 +392,10 @@ export function MarkdownEditor({
                 allowExpand={false}
                 defaultPreview={preview}
               />
-            </div>
+            </Stack>
           </DialogContent>
         </Dialog>
       )}
-    </div>
+    </Stack>
   );
 }

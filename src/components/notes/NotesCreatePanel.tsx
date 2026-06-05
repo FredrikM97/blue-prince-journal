@@ -643,14 +643,33 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   if (!isEditing) {
     showHeaderSaveForCreate = true;
   }
+  if (form.mode === "todo") {
+    showHeaderSaveForCreate = true;
+  }
+
+  const isEditingTodo = isEditing && form.mode === "todo";
 
   let headerActions: React.ReactNode = undefined;
   if (showHeaderSaveForCreate) {
+    let showCancel = false;
+    let showSaveNext = true;
+    if (isEditingTodo) {
+      showCancel = true;
+      showSaveNext = false;
+    }
+
     headerActions = (
       <Inline gap="1" align="center">
-        <Button variant="outline" size="sm" onClick={() => submit(true)}>
-          Save + next
-        </Button>
+        {showCancel && (
+          <Button variant="outline" size="sm" onClick={closeCapturePanel}>
+            Cancel
+          </Button>
+        )}
+        {showSaveNext && (
+          <Button variant="outline" size="sm" onClick={() => submit(true)}>
+            Save + next
+          </Button>
+        )}
         <Button variant="brass" size="sm" onClick={() => submit(false)}>
           <Save className="h-3.5 w-3.5" />
           Save
@@ -761,6 +780,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   return (
     <SidePanel.Right
       title={panelTitle}
+      textSize="h2"
       onClose={closeCapturePanel}
       panelKey={panelKey}
       headerActions={headerActions}

@@ -16,12 +16,12 @@
   }
 
   .todos-add-button {
-    @apply bg-brass text-brass-foreground hover:bg-brass/90;
+    @apply bg-brass text-brass-foreground hover:bg-brass;
   }
 
   /* "This run" quick-view card */
   .todos-run-open-card {
-    @apply mb-6 rounded-lg border border-brass/40 bg-brass/5 p-3;
+    @apply mb-6 rounded-lg border border-brass bg-secondary p-3;
   }
 
   .todos-run-open-title {
@@ -41,16 +41,16 @@
   }
 
   .todos-run-open-chip {
-    @apply border-brass/40 text-brass;
+    @apply border-brass text-brass;
   }
 
   /* Priority chip variants — extend .chip from layout.css */
   .chip-priority-high {
-    @apply inline-flex items-center rounded border border-transparent bg-destructive/30 px-1.5 py-0.5 text-[10px] text-red-200;
+    @apply inline-flex items-center rounded border border-destructive bg-destructive px-1.5 py-0.5 text-[10px] text-destructive-foreground;
   }
 
   .chip-priority-normal {
-    @apply inline-flex items-center rounded border border-transparent bg-brass/20 px-1.5 py-0.5 text-[10px] text-brass;
+    @apply inline-flex items-center rounded border border-brass bg-brass px-1.5 py-0.5 text-[10px] text-brass-foreground;
   }
 
   .chip-priority-low {
@@ -90,7 +90,7 @@
 
   /* List item row with hover state and grouped action reveal */
   .todo-row-item {
-    @apply px-3 py-2 hover:bg-muted/20;
+    @apply px-3 py-2 hover:bg-muted;
   }
 
   .todo-row-main {
@@ -114,7 +114,7 @@
   }
 
   .todo-row-menu-button {
-    @apply h-7 w-7 shrink-0 rounded border border-border/50 bg-card/70;
+    @apply h-7 w-7 shrink-0 rounded border border-border bg-card;
   }
 
   .todo-row-chip-text {
@@ -122,7 +122,7 @@
   }
 
   .todo-row-tags-line {
-    @apply border-t border-border/40 pt-1;
+    @apply border-t border-border pt-1;
   }
 
   /* Inline status dropdown inside a todo row */

@@ -10,6 +10,7 @@ import {
 
 type SidePanelBaseProps = {
   title: string;
+  textSize?: "p" | "h1" | "h2";
   /** Short secondary text shown below the title (e.g. type, status). */
   subtitle?: string;
   /** When true, renders the title with a strikethrough (e.g. completed todo). */
@@ -33,6 +34,7 @@ type SidePanelVariantProps = SidePanelBaseProps & {
 
 export function PanelHeader({
   title,
+  textSize = "p",
   subtitle,
   done = false,
   onClose,
@@ -42,6 +44,7 @@ export function PanelHeader({
   forceShowClose = false,
 }: {
   title: string;
+  textSize?: "p" | "h1" | "h2";
   subtitle?: string;
   done?: boolean;
   onClose?: () => void;
@@ -65,10 +68,18 @@ export function PanelHeader({
     closeButtonClassName = "";
   }
 
+  let headingSize: "base" | "lg" = "base";
+  if (textSize === "h1") {
+    headingSize = "lg";
+  }
+  if (textSize === "h2") {
+    headingSize = "base";
+  }
+
   return (
     <Stack variant="panel-header" gap="0">
       <Stack variant="panel-header-title-wrap" gap="0">
-        <Heading as="h2" size="lg" leading="snug" muted={titleMuted}>
+        <Heading as="h2" size={headingSize} leading="snug" muted={titleMuted}>
           <span style={{ textDecoration: titleDecoration }}>{title}</span>
         </Heading>
         {subtitle && (
@@ -113,6 +124,7 @@ export function PanelHeader({
  */
 function SidePanelComponent({
   title,
+  textSize = "p",
   subtitle,
   done = false,
   onClose,
@@ -147,6 +159,7 @@ function SidePanelComponent({
     <Stack variant="side-panel-shell" gap="0">
       <PanelHeader
         title={title}
+        textSize={textSize}
         subtitle={subtitle}
         done={done}
         headerActions={headerActions}

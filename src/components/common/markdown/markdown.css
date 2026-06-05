@@ -3,7 +3,7 @@
 
   /* Formatting toolbar strip at the top of the editor */
   .md-toolbar {
-    @apply flex flex-wrap items-center gap-0.5 rounded-t-md border border-b-0 border-input bg-muted/40 px-1.5 py-1;
+    @apply flex flex-nowrap items-center gap-0.5 overflow-x-auto rounded-t-md border border-b-0 border-input bg-muted px-1.5 py-1;
   }
 
   /* Preview/edit body below the toolbar */

@@ -46,7 +46,7 @@
   /* Standard panel container with vertical spacing used by sidebars */
   .ui-shell-panel,
   .side-panel-shell {
-    @apply rounded-lg border border-border/70 bg-card/40 p-2.5 text-sm flex flex-col gap-3 sm:p-3;
+    @apply rounded-lg border border-border bg-card p-2.5 text-sm flex flex-col gap-3 sm:p-3;
   }
 
   /* Scrollable body inside a flex-column dialog or panel */
@@ -58,7 +58,7 @@
 
   /* Square card that fills its grid cell — used in galleries */
   .image-card {
-    @apply relative aspect-square w-full overflow-hidden rounded-md border border-border bg-muted cursor-pointer transition-colors hover:border-brass/70;
+    @apply relative aspect-square w-full overflow-hidden rounded-md border border-border bg-muted cursor-pointer transition-colors hover:border-brass;
   }
 
   /* Small fixed-size variant — used in the editor attached-images strip */
@@ -75,20 +75,20 @@
 
   /* Label overlay pinned to the bottom */
   .image-card-label {
-    @apply absolute bottom-0 left-0 right-0 flex items-center gap-1 bg-black/60 px-1.5 py-0.5;
+    @apply absolute bottom-0 left-0 right-0 flex items-center gap-1 bg-background px-1.5 py-0.5;
   }
   .image-card-label-text {
-    @apply min-w-0 flex-1 truncate text-[10px] leading-tight text-white;
+    @apply min-w-0 flex-1 truncate text-[10px] leading-tight text-foreground;
   }
 
   /* Selection state (for picker use) */
   .image-card-selected {
-    @apply border-brass bg-brass/10 ring-1 ring-brass/40;
+    @apply border-brass bg-brass ring-1 ring-brass text-brass-foreground;
   }
 
   /* Remove button — top-right corner, visible on hover */
   .image-card-remove {
-    @apply absolute right-1 top-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80;
+    @apply absolute right-1 top-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-foreground opacity-0 transition-opacity hover:bg-accent;
   }
   .image-card:hover .image-card-remove,
   .image-card-sm:hover .image-card-remove {
@@ -101,15 +101,28 @@
     scrollbar-width: thin;
   }
 
+  /* Attached-images block used in note/todo/graph detail surfaces */
+  .note-details-images {
+    @apply space-y-2;
+  }
+
+  .note-details-images-compact {
+    @apply space-y-2;
+  }
+
+  .note-details-images-label {
+    @apply text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
+  }
+
   /* ─── Dialog primitives ──────────────────────────────────────────────────── */
 
   /* Backdrop — shown behind every dialog */
   .dialog-overlay {
-    @apply fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
+    @apply fixed inset-0 z-50 bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
   }
 
   .dialog-overlay-subtle {
-    @apply bg-black/60;
+    @apply bg-background;
   }
 
   /* Shared positioning + animation — applied directly to all dialog content variants */
@@ -150,8 +163,7 @@
 
   /* Full-screen-ish dialog (graph fullscreen, leaves 1rem margin) */
   .dialog-content-fullscreen {
-    @apply flex max-h-none w-[calc(100vw-2rem)] max-w-none flex-col gap-0 p-3 pr-10;
-    height: calc(100dvh - 2rem);
+    @apply flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col gap-0 p-3 pr-10;
   }
 
   /* Editor dialog — close button hidden, managed by caller */
@@ -185,7 +197,7 @@
   }
 
   .input-base {
-    @apply flex h-9 w-full rounded-md border border-input bg-card/65 px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+    @apply flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
   }
 
   .input-width-fit {
@@ -197,7 +209,7 @@
   }
 
   .textarea-base {
-    @apply flex min-h-[60px] w-full rounded-md border border-input bg-card/65 px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+    @apply flex min-h-[60px] w-full rounded-md border border-input bg-card px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
   }
 
   /* Subtitle under a panel title (e.g. status, date) */
@@ -252,7 +264,7 @@
 
   /* Default: muted border + muted text (metadata tags) */
   .chip {
-    @apply inline-flex items-center rounded border border-border/60 px-1.5 py-0.5 text-[10px] text-muted-foreground;
+    @apply inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground;
   }
 
   /* Solid: full border + foreground text (prominent chips in lists) */
@@ -262,7 +274,7 @@
 
   /* Room: brass-tinted for @room references */
   .chip-room {
-    @apply inline-flex items-center rounded border border-brass/40 px-1.5 py-0.5 text-[10px] text-brass;
+    @apply inline-flex items-center rounded border border-brass px-1.5 py-0.5 text-[10px] text-brass;
   }
 
   /* Tag: secondary bg + foreground text (for #tag pills) */
@@ -277,7 +289,7 @@
   }
 
   .select-btn-inactive {
-    @apply border-border bg-secondary/70 text-foreground hover:border-brass/45 hover:bg-brass/12;
+    @apply border-border bg-secondary text-foreground hover:border-brass hover:bg-accent;
   }
 
   /* ─── Dropdown active item ───────────────────────────────────────────────── */
@@ -291,12 +303,12 @@
 
   /* General-purpose bordered content card (info boxes, lists, snippets) */
   .panel-card {
-    @apply rounded-md border border-border/70 bg-card/50 p-3;
+    @apply rounded-md border border-border bg-card p-3;
   }
 
   /* Single-line bordered status/info row */
   .panel-row {
-    @apply flex items-center gap-2 rounded-lg border border-border bg-card/40 px-3 py-2.5 text-sm;
+    @apply flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm;
   }
 
   /* ─── Structural primitives ─────────────────────────────────────────────── */
@@ -354,7 +366,7 @@
   }
 
   .section-block {
-    @apply border-t border-border/70 pt-6;
+    @apply border-t border-border pt-6;
   }
 
   .content-stack {
@@ -425,7 +437,7 @@
 
   /* Generic link-like action text */
   .ui-action-link {
-    @apply px-1 py-0.5 normal-case text-amber-500 hover:underline;
+    @apply px-1 py-0.5 normal-case text-brass hover:underline;
   }
 
   .ui-action-link-size-default {
@@ -442,7 +454,7 @@
   }
 
   .ui-toggle-chip-surface {
-    @apply border border-border/70 bg-card/50 text-foreground hover:border-brass/45 hover:bg-brass/10;
+    @apply border border-border bg-card text-foreground hover:border-brass hover:bg-accent;
   }
 
   .ui-toggle-width-full {
@@ -470,7 +482,7 @@
   }
 
   .ui-toggle-state-on-outline {
-    @apply border-brass bg-card/50 text-foreground;
+    @apply border-brass bg-card text-foreground;
   }
 
   .ui-toggle-state-off {
@@ -522,7 +534,7 @@
   /* Left sticky sidebar column */
   .ui-layout-sidebar-left,
   .page-layout-sidebar {
-    @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-r border-border/50 bg-transparent;
+    @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-r border-border bg-transparent;
     overscroll-behavior: contain;
     height: calc(100dvh - 5.5rem);
     max-height: calc(100dvh - 5.5rem);
@@ -554,13 +566,13 @@
 
   .ui-surface-panel,
   .page-layout-panel {
-    @apply rounded-lg bg-card/40 p-2.5 text-sm sm:p-3;
+    @apply rounded-lg bg-card p-2.5 text-sm sm:p-3;
   }
 
   /* Right sticky sidebar column */
   .ui-layout-sidebar-right,
   .page-layout-rightbar {
-    @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-l border-border/50 bg-transparent;
+    @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-l border-border bg-transparent;
     overscroll-behavior: contain;
     height: calc(100dvh - 5.5rem);
     max-height: calc(100dvh - 5.5rem);
@@ -569,7 +581,7 @@
 
   .ui-layout-mobile-controls,
   .page-layout-mobile-controls {
-    @apply fixed inset-x-0 bottom-2 z-30 mx-auto flex w-fit items-center gap-2 rounded-full bg-background/95 px-2 py-1.5 shadow-lg backdrop-blur;
+    @apply fixed inset-x-0 bottom-2 z-30 mx-auto flex w-fit items-center gap-2 rounded-full bg-background px-2 py-1.5 shadow-lg backdrop-blur;
   }
 
   .page-layout-mobile-toggle {
@@ -650,8 +662,7 @@
   .ui-layout-mobile-drawer .ui-header-panel,
   .page-layout-mobile-drawer .panel-header,
   .page-layout-mobile-drawer .ui-header-panel {
-    @apply sticky top-0 z-10 border-b border-border bg-background/95 pt-3 backdrop-blur-sm;
-    box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--border) 75%, transparent);
+    @apply sticky top-0 z-10 border-b border-border bg-background pt-3 backdrop-blur-sm;
   }
 
   .ui-layout-mobile-drawer .ui-header-actions,
@@ -704,10 +715,7 @@
 
   .ui-layout-variant-panel.ui-layout-mode-mobile .ui-layout-mobile-drawer,
   .page-layout-variant-panel.page-layout-mode-mobile .page-layout-mobile-drawer {
-    @apply border border-border/70;
-    box-shadow:
-      inset 0 0 0 1px color-mix(in oklab, var(--border) 45%, transparent),
-      0 10px 28px -18px rgb(0 0 0 / 0.55);
+    @apply border border-border shadow-xl;
   }
 
   .ui-layout-variant-panel.ui-layout-mode-mobile .ui-layout-mobile-drawer-right,

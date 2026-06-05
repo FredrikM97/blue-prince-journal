@@ -32,7 +32,7 @@
 
   /* Trigger button: full-width, matches text input height */
   .dropdown-trigger {
-    @apply h-9 w-full justify-between border-input bg-secondary/70 px-3 py-2 text-sm font-normal hover:bg-secondary;
+    @apply h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:bg-secondary;
   }
 
   .dropdown-trigger-fit {
@@ -40,7 +40,7 @@
   }
 
   .dropdown-trigger-room {
-    @apply bg-secondary/70;
+    @apply bg-secondary;
   }
 
   .dropdown-trigger-flat {
@@ -59,7 +59,7 @@
 
   /* Search input inside the dropdown */
   .room-dropdown-search {
-    @apply h-8 w-full rounded border border-input bg-card/65 px-2 text-sm outline-none focus:ring-1 focus:ring-ring;
+    @apply h-8 w-full rounded border border-input bg-card px-2 text-sm outline-none focus:ring-1 focus:ring-ring;
   }
 
   /* Empty-state message when no rooms match the query */
