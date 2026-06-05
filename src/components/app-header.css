@@ -67,7 +67,7 @@
   }
 
   .app-search-wrap {
-    @apply relative hidden lg:block;
+    @apply relative w-28 sm:w-36 lg:w-auto;
   }
 
   .app-search-icon {
@@ -75,7 +75,7 @@
   }
 
   .app-search-wrap .input-base {
-    @apply h-8 w-44 pl-8 transition-[padding];
+    @apply h-8 w-full pl-8 transition-[padding] lg:w-44;
   }
 
   /* When the user has typed something, pull text left and hide the icon */
