@@ -27,7 +27,6 @@ export function useNotesPageUI({
   filterType,
   openCapture,
   closeCapture,
-  removeTodo,
 }: {
   notes: Note[];
   todos: Todo[];
@@ -43,7 +42,6 @@ export function useNotesPageUI({
     returnTo?: string;
   }) => void;
   closeCapture: () => void;
-  removeTodo: (id: string) => Promise<void>;
 }) {
   const deferredSearch = useDeferredValue(search);
   const { state: uiState, actions: uiActions } = useNotesPageState();
@@ -143,14 +141,9 @@ export function useNotesPageUI({
 
   const deleteFromList = useCallback(
     (note: Note) => {
-      const todo = resolveTodoForListItem(note);
-      if (todo) {
-        void removeTodo(todo.id);
-        return;
-      }
       uiActions.setPendingDelete(note);
     },
-    [removeTodo, resolveTodoForListItem, uiActions],
+    [uiActions],
   );
 
   const filterState: NotesFilterState = {

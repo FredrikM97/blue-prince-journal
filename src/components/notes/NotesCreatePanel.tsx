@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/common/Tabs";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { toast } from "sonner";
 import { usePasteImages } from "@/hooks/usePasteImages";
-import { ChevronLeft, ChevronRight, ImagePlus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImagePlus, Save, X } from "lucide-react";
 import type { NoteType, Priority } from "@/lib/types";
 import { NOTE_TYPES } from "@/lib/noteMetadata";
 import { ImageCard } from "@/components/common/ImageCard";
@@ -317,14 +317,16 @@ function NotesTagsField({
 
 function NotesFooterActions({
   submit,
-  close,
   openExistingPicker,
   setPendingImages,
+  showPrimarySave,
+  showSaveNext,
 }: {
   submit: (keepOpen: boolean) => void | Promise<void>;
-  close: () => void;
   openExistingPicker: () => void;
   setPendingImages: React.Dispatch<React.SetStateAction<Blob[]>>;
+  showPrimarySave: boolean;
+  showSaveNext: boolean;
 }) {
   const attachRef = useRef<HTMLInputElement>(null);
 
@@ -357,15 +359,16 @@ function NotesFooterActions({
       </Inline>
       <Stack as="div" gap="0" className="ml-auto">
         <Inline gap="2" align="center">
-          <Button variant="ghost" size="sm" onClick={close}>
-            Cancel
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => submit(true)}>
-            Save + next
-          </Button>
-          <Button variant="brass" size="sm" onClick={() => submit(false)}>
-            Save
-          </Button>
+          {showSaveNext && (
+            <Button variant="ghost" size="sm" onClick={() => submit(true)}>
+              Save + next
+            </Button>
+          )}
+          {showPrimarySave && (
+            <Button variant="brass" size="sm" onClick={() => submit(false)}>
+              Save
+            </Button>
+          )}
         </Inline>
       </Stack>
     </Inline>
@@ -636,6 +639,26 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     panelKey = `capture:edit-todo:${store.editTodoId}`;
   }
 
+  let showHeaderSaveForCreate = false;
+  if (!isEditing) {
+    showHeaderSaveForCreate = true;
+  }
+
+  let headerActions: React.ReactNode = undefined;
+  if (showHeaderSaveForCreate) {
+    headerActions = (
+      <Inline gap="1" align="center">
+        <Button variant="outline" size="sm" onClick={() => submit(true)}>
+          Save + next
+        </Button>
+        <Button variant="brass" size="sm" onClick={() => submit(false)}>
+          <Save className="h-3.5 w-3.5" />
+          Save
+        </Button>
+      </Inline>
+    );
+  }
+
   const content = (
     <>
       {!isEditing && <NotesModeTabs mode={form.mode} setMode={form.setMode} />}
@@ -717,9 +740,10 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
 
       <NotesFooterActions
         submit={submit}
-        close={closeCapturePanel}
         openExistingPicker={() => setImagePickerOpen(true)}
         setPendingImages={form.setPendingImages}
+        showPrimarySave={!showHeaderSaveForCreate}
+        showSaveNext={!showHeaderSaveForCreate}
       />
     </>
   );
@@ -735,7 +759,12 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   }
 
   return (
-    <SidePanel.Right title={panelTitle} onClose={closeCapturePanel} panelKey={panelKey}>
+    <SidePanel.Right
+      title={panelTitle}
+      onClose={closeCapturePanel}
+      panelKey={panelKey}
+      headerActions={headerActions}
+    >
       {content}
     </SidePanel.Right>
   );

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useStore } from "@/data/store";
 import { db } from "@/data/db";
 import { saveNote, removeNote, removeTodo } from "@/data/mutations";
@@ -23,6 +22,8 @@ import { SidePanel } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
+import { Save } from "lucide-react";
+import { PreviewSidePanel } from "@/components/common/PreviewSidePanel";
 
 export function NotesPage({
   filterType,
@@ -61,7 +62,6 @@ export function NotesPage({
     filterType,
     openCapture,
     closeCapture,
-    removeTodo,
   });
 
   let rightPanelContent: React.ReactNode = (
@@ -78,6 +78,9 @@ export function NotesPage({
         draft={currentDraft}
         panelMode={uiState.panelMode}
         setDraft={setEditorDraft}
+        onStartEdit={() => {
+          uiActions.openEdit(activeNote);
+        }}
         onSave={async () => {
           if (!currentDraft) return;
           await saveNote(currentDraft);
@@ -92,16 +95,34 @@ export function NotesPage({
   }
 
   if (previewTodo) {
-    rightPanelContent = <TodoRightPanel todo={previewTodo} onClose={() => setPreviewTodo(null)} />;
+    rightPanelContent = (
+      <TodoRightPanel
+        todo={previewTodo}
+        onClose={() => setPreviewTodo(null)}
+        onEdit={() => {
+          setPreviewTodo(null);
+          openCapture({ todo: previewTodo });
+        }}
+      />
+    );
   }
 
   if (captureOpen) {
     rightPanelContent = <NotesCreatePanel defaultNoteType={filterType} />;
   }
 
-  let deleteDescription = "Delete this note?";
+  let deleteDescription = "Delete this item?";
+  let deleteTitle = "Delete item";
   if (uiState.pendingDelete) {
-    deleteDescription = `Delete "${uiState.pendingDelete.title}"? This cannot be undone.`;
+    const isTodoPendingDelete = uiState.pendingDelete.id.startsWith("todo:");
+    if (isTodoPendingDelete) {
+      deleteTitle = "Delete todo";
+      deleteDescription = `Delete todo "${uiState.pendingDelete.title}"? This cannot be undone.`;
+    }
+    if (!isTodoPendingDelete) {
+      deleteTitle = "Delete note";
+      deleteDescription = `Delete note "${uiState.pendingDelete.title}"? This cannot be undone.`;
+    }
   }
 
   let entryLabel = "entries";
@@ -136,7 +157,7 @@ export function NotesPage({
       >
         <DialogContent variant="compact">
           <DialogHeader>
-            <DialogTitle>Delete note</DialogTitle>
+            <DialogTitle>{deleteTitle}</DialogTitle>
             <DialogDescription>{deleteDescription}</DialogDescription>
           </DialogHeader>
           <Inline gap="2" justify="end">
@@ -148,7 +169,18 @@ export function NotesPage({
               onClick={async () => {
                 const pendingDelete = uiState.pendingDelete;
                 if (!pendingDelete) return;
-                await removeNote(pendingDelete.id);
+
+                if (pendingDelete.id.startsWith("todo:")) {
+                  const todoId = pendingDelete.id.slice(5);
+                  if (todoId) {
+                    await removeTodo(todoId);
+                  }
+                }
+
+                if (!pendingDelete.id.startsWith("todo:")) {
+                  await removeNote(pendingDelete.id);
+                }
+
                 uiActions.clearDeletedIfActive(pendingDelete.id);
                 uiActions.setPendingDelete(null);
               }}
@@ -167,6 +199,7 @@ function NotesRightPanel({
   draft,
   panelMode,
   setDraft,
+  onStartEdit,
   onSave,
   onClose,
 }: {
@@ -174,24 +207,34 @@ function NotesRightPanel({
   draft: Note | null;
   panelMode: "edit" | "preview";
   setDraft: React.Dispatch<React.SetStateAction<Note>>;
+  onStartEdit: () => void;
   onSave: () => Promise<void>;
   onClose: () => void;
 }) {
-  const [previewExpanded, setPreviewExpanded] = useState(false);
-
   if (!activeNote) {
     return null;
   }
 
   if (panelMode === "edit") {
     return (
-      <SidePanel.Right title="Edit note" onClose={onClose} panelKey={`note-edit:${activeNote.id}`}>
-        <NotesEditorPanel
-          draft={draft ?? activeNote}
-          setDraft={setDraft}
-          onSave={onSave}
-          onCancel={onClose}
-        />
+      <SidePanel.Right
+        title="Edit note"
+        onClose={onClose}
+        panelKey={`note-edit:${activeNote.id}`}
+        headerActions={
+          <Button
+            variant="brass"
+            size="sm"
+            onClick={() => {
+              void onSave();
+            }}
+          >
+            <Save className="h-3.5 w-3.5" />
+            Save
+          </Button>
+        }
+      >
+        <NotesEditorPanel draft={draft ?? activeNote} setDraft={setDraft} onSave={onSave} />
       </SidePanel.Right>
     );
   }
@@ -205,21 +248,18 @@ function NotesRightPanel({
     .join(" · ");
 
   return (
-    <SidePanel.Right
+    <PreviewSidePanel
       title={activeNote.title}
       subtitle={subtitle}
-      onExpand={() => setPreviewExpanded(true)}
-      onClose={onClose}
       panelKey={`note-preview:${activeNote.id}`}
-      expandDialog={
-        <NotePreviewDialog
-          note={activeNote}
-          open={previewExpanded}
-          onOpenChange={setPreviewExpanded}
-        />
-      }
+      onClose={onClose}
+      onEdit={onStartEdit}
+      editAriaLabel="Edit note"
+      renderExpandDialog={(open, onOpenChange) => (
+        <NotePreviewDialog note={activeNote} open={open} onOpenChange={onOpenChange} />
+      )}
     >
       <NotePreviewContent note={activeNote} />
-    </SidePanel.Right>
+    </PreviewSidePanel>
   );
 }

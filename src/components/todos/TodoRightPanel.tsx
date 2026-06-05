@@ -1,22 +1,30 @@
-import { useState } from "react";
-import { SidePanel } from "@/components/common/SidePanel";
 import type { Todo } from "@/lib/types";
 import { TodoPreviewContent, TodoPreviewDialog } from "./TodoPreviewDialog";
+import { PreviewSidePanel } from "@/components/common/PreviewSidePanel";
 
-export function TodoRightPanel({ todo, onClose }: { todo: Todo; onClose: () => void }) {
-  const [expanded, setExpanded] = useState(false);
-
+export function TodoRightPanel({
+  todo,
+  onClose,
+  onEdit,
+}: {
+  todo: Todo;
+  onClose: () => void;
+  onEdit?: () => void;
+}) {
   return (
-    <SidePanel.Right
+    <PreviewSidePanel
       title={todo.title}
       subtitle={`${todo.status} · Created ${new Date(todo.createdAt).toLocaleDateString()}`}
       done={todo.status === "done"}
-      onExpand={() => setExpanded(true)}
-      onClose={onClose}
       panelKey={`todo:${todo.id}`}
-      expandDialog={<TodoPreviewDialog todo={todo} open={expanded} onOpenChange={setExpanded} />}
+      onClose={onClose}
+      onEdit={onEdit}
+      editAriaLabel="Edit todo"
+      renderExpandDialog={(open, onOpenChange) => (
+        <TodoPreviewDialog todo={todo} open={open} onOpenChange={onOpenChange} />
+      )}
     >
       <TodoPreviewContent todo={todo} />
-    </SidePanel.Right>
+    </PreviewSidePanel>
   );
 }

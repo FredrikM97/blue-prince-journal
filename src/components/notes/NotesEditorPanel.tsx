@@ -17,7 +17,6 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
 import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
-import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
 import { ImageCard } from "@/components/common/ImageCard";
 
 type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";
@@ -52,15 +51,11 @@ export function NotesEditorPanel({
   draft,
   setDraft,
   onSave,
-  onCancel,
 }: {
   draft: Note;
   setDraft: React.Dispatch<React.SetStateAction<Note>>;
   onSave: () => Promise<void>;
-  onCancel: () => void;
 }) {
-  const mobileDrawerControls = usePageLayoutMobileDrawerControls();
-  const isMobileDrawer = mobileDrawerControls?.isPageLayoutMobile === true;
   const rawImages = useLiveQuery(() => db.images.toArray());
   const images: StoredImage[] = useMemo(() => rawImages ?? [], [rawImages]);
   const [tagsInputDraft, setTagsInputDraft] = useState(draft.tags.join(", "));
@@ -71,17 +66,6 @@ export function NotesEditorPanel({
   const tagsInput = isTagsFocused ? tagsInputDraft : draft.tags.join(", ");
   const existingLabel = "Existing";
   const attachLabel = "Attach";
-  let footerGap: "1" | "2" = "2";
-  if (isMobileDrawer) {
-    footerGap = "1";
-  }
-
-  function handleCancel() {
-    if (mobileDrawerControls?.isPageLayoutMobile) {
-      mobileDrawerControls.closeMobileDrawer();
-    }
-    onCancel();
-  }
 
   usePasteImages({
     onImages: (files) => {
@@ -248,33 +232,18 @@ export function NotesEditorPanel({
         }}
       />
 
-      <Inline gap={footerGap} justify="between" wrap={!isMobileDrawer} align="center">
-        <Inline gap={footerGap} align="center" wrap={!isMobileDrawer}>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setImagePickerOpen(true)}
-          >
-            {existingLabel}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => attachRef.current?.click()}
-          >
-            <ImagePlus className="h-3.5 w-3.5" /> {attachLabel}
-          </Button>
-        </Inline>
-        <Inline gap={footerGap} justify="end" align="center" wrap={!isMobileDrawer}>
-          <Button variant="ghost" size="sm" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button variant="brass" size="sm" onClick={onSave}>
-            Save
-          </Button>
-        </Inline>
+      <Inline gap="2" align="center" wrap>
+        <Button type="button" variant="outline" size="sm" onClick={() => setImagePickerOpen(true)}>
+          {existingLabel}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => attachRef.current?.click()}
+        >
+          <ImagePlus className="h-3.5 w-3.5" /> {attachLabel}
+        </Button>
       </Inline>
     </Stack>
   );
