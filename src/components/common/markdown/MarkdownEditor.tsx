@@ -311,7 +311,7 @@ export function MarkdownEditor({
   }
 
   return (
-    <Stack as="div" gap="0">
+    <Stack as="div" gap="0" variant="md-editor-shell">
       <MarkdownToolbar
         primaryActions={primaryToolbarActions}
         overflowActions={overflowToolbarActions}
@@ -372,7 +372,6 @@ export function MarkdownEditor({
           }}
           placeholder={placeholder}
           rows={rows}
-          className="textarea-base rounded-t-none rounded-b-md border-t-0 font-mono text-[13px] leading-6 [font-variant-numeric:tabular-nums]"
         />
       )}
       {allowExpand && (

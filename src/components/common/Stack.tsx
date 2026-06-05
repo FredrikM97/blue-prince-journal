@@ -56,6 +56,7 @@ type StackVariant =
   | "filter-section-header-compact"
   | "filter-section-body"
   | "md-toolbar"
+  | "md-editor-shell"
   | "md-editor-body"
   | "md-toolbar-divider"
   | "item-shell"
@@ -154,6 +155,7 @@ const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   "filter-section-header-compact": "ui-header-row ui-header-text-default ui-header-text-compact",
   "filter-section-body": "ui-body-tight",
   "md-toolbar": "md-toolbar",
+  "md-editor-shell": "md-editor-shell",
   "md-editor-body": "md-editor-body",
   "md-toolbar-divider": "mx-1 h-4 w-px bg-border",
   "item-shell": "item-shell",

@@ -1,6 +1,14 @@
 @layer components {
   /* ─── Markdown editor ────────────────────────────────────────────────────── */
 
+  .md-editor-shell {
+    @apply flex min-h-0 flex-1 flex-col;
+  }
+
+  .md-editor-shell > textarea {
+    @apply flex min-h-0 flex-1 w-full rounded-t-none rounded-b-md border border-input border-t-0 bg-card px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono text-[13px] leading-6 md:text-sm [font-variant-numeric:tabular-nums];
+  }
+
   /* Formatting toolbar strip at the top of the editor */
   .md-toolbar {
     @apply flex flex-nowrap items-center gap-0.5 overflow-x-auto rounded-t-md border border-b-0 border-input bg-muted px-1.5 py-1;

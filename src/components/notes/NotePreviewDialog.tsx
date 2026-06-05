@@ -1,10 +1,18 @@
+import { useState } from "react";
 import type { Note } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
 import { MetaRow, PreviewSection, PreviewTimestamps } from "@/components/common/PreviewContent";
 import { PreviewDialog } from "@/components/common/PreviewDialog";
+import { MarkdownEditor } from "@/components/common/markdown/MarkdownEditor";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { Button } from "@/components/common/Button";
+import { Stack } from "@/components/common/Stack";
+import { saveNote } from "@/data/mutations";
+import { PenLine } from "lucide-react";
+import { PreviewEditModeActions } from "@/components/common/PreviewEditModeActions";
+import { toast } from "sonner";
 
 export function NotePreviewContent({ note }: { note: Note }) {
   return (
@@ -57,21 +65,99 @@ export function NotePreviewDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  if (!note) return null;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [detailsDraft, setDetailsDraft] = useState("");
 
-  const subtitleParts: string[] = [note.type];
-  if (note.date) subtitleParts.push(note.date);
-  subtitleParts.push(`Created ${new Date(note.createdAt).toLocaleDateString()}`);
+  if (!note) return null;
+  const activeNote = note;
+
+  function startEditDetails() {
+    setEditingNoteId(activeNote.id);
+    setDetailsDraft(activeNote.body);
+    setIsEditing(true);
+  }
+
+  function closeEditDetails() {
+    setIsEditing(false);
+    setEditingNoteId(null);
+  }
+
+  const isEditingCurrentNote = isEditing && editingNoteId === activeNote.id;
+
+  const subtitleParts: string[] = [activeNote.type];
+  if (activeNote.date) subtitleParts.push(activeNote.date);
+  subtitleParts.push(`Created ${new Date(activeNote.createdAt).toLocaleDateString()}`);
+
+  async function saveDraft() {
+    const next: Note = {
+      ...activeNote,
+      body: detailsDraft,
+    };
+    await saveNote(next);
+    closeEditDetails();
+    toast.success("Note saved");
+  }
+
+  let subtitle: string | undefined = subtitleParts.join(" · ");
+  let title = activeNote.title;
+  let strikeTitle = activeNote.status === "solved";
+  let showHeaderClose = true;
+  let headerActions: React.ReactNode = (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={startEditDetails}
+      aria-label="Edit note"
+      title="Edit note"
+    >
+      <PenLine className="h-4 w-4" />
+    </Button>
+  );
+  let content: React.ReactNode = <NotePreviewContent note={activeNote} />;
+
+  if (isEditingCurrentNote) {
+    title = "Edit details";
+    subtitle = undefined;
+    strikeTitle = false;
+    showHeaderClose = false;
+    headerActions = (
+      <PreviewEditModeActions
+        onCancel={closeEditDetails}
+        onSave={() => {
+          void saveDraft();
+        }}
+      />
+    );
+    content = (
+      <Stack gap="3">
+        <MarkdownEditor
+          value={detailsDraft}
+          onChange={setDetailsDraft}
+          placeholder="Details (markdown supported)…"
+          rows={12}
+          allowExpand={false}
+        />
+      </Stack>
+    );
+  }
 
   return (
     <PreviewDialog
       open={open}
-      onOpenChange={onOpenChange}
-      title={note.title}
-      subtitle={subtitleParts.join(" · ")}
-      strikeTitle={note.status === "solved"}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          closeEditDetails();
+        }
+        onOpenChange(nextOpen);
+      }}
+      title={title}
+      subtitle={subtitle}
+      strikeTitle={strikeTitle}
+      headerActions={headerActions}
+      showHeaderClose={showHeaderClose}
     >
-      <NotePreviewContent note={note} />
+      {content}
     </PreviewDialog>
   );
 }

@@ -36,6 +36,7 @@ function getDialogOverlayClass(variant: DialogOverlayVariant): string {
 }
 
 export const Dialog = DialogPrimitive.Root;
+export const DialogClose = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Overlay>,
