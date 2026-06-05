@@ -1,7 +1,12 @@
 import { useCallback, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
-import { RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import { HelpCircle, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/common/Button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/common/dropdown/DropdownMenu";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { StoredImageView } from "@/components/common/StoredImageView";
@@ -211,6 +216,21 @@ export function ImageZoomDialogContent({ imageId, alt }: { imageId: string; alt:
               <RotateCcw className="icon-sm" />
               Reset
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="outline" size="icon" aria-label="Zoom controls help">
+                  <HelpCircle className="icon-sm" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="image-zoom-help-menu">
+                <Text as="p" size="xs" tone="muted">
+                  Mouse: wheel to zoom, drag while zoomed.
+                </Text>
+                <Text as="p" size="xs" tone="muted">
+                  Touch: pinch and drag. Double-click to toggle.
+                </Text>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </Inline>
           <Text as="span" size="xs" tone="muted">
             {zoomPercent}%
@@ -235,12 +255,6 @@ export function ImageZoomDialogContent({ imageId, alt }: { imageId: string; alt:
           <StoredImageView id={imageId} alt={alt} className="image-zoom-stage-image" />
         </div>
       </div>
-
-      <Stack as="div" gap="0" className="image-zoom-help-text">
-        <Text as="p" size="xs" tone="muted">
-          Mouse: wheel to zoom, drag while zoomed. Touch: pinch and drag. Double-click to toggle.
-        </Text>
-      </Stack>
     </Stack>
   );
 }

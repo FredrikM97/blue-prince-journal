@@ -94,8 +94,8 @@
     @apply cursor-grabbing;
   }
 
-  .image-zoom-help-text {
-    @apply text-center;
+  .image-zoom-help-menu {
+    @apply max-w-xs space-y-1 p-2;
   }
 
   .images-size-info {
