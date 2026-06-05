@@ -31,9 +31,13 @@ export function AttachedImagesGallery({
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const imageById = useMemo(() => new Map(images.map((img) => [img.id, img])), [images]);
+  const availableImageIds = useMemo(
+    () => imageIds.filter((id) => imageById.has(id)),
+    [imageIds, imageById],
+  );
   const collapseButtonSize = compact ? "icon-h2" : "icon";
 
-  if (imageIds.length === 0) return null;
+  if (availableImageIds.length === 0) return null;
 
   const getImageLabel = (id: string) => {
     const img = imageById.get(id);
@@ -42,20 +46,20 @@ export function AttachedImagesGallery({
   };
 
   const wrapperVariant = "note-details-images";
-  const zoomedImageIndex = zoomedImageId ? imageIds.indexOf(zoomedImageId) : -1;
+  const zoomedImageIndex = zoomedImageId ? availableImageIds.indexOf(zoomedImageId) : -1;
   const hasZoomedImage = zoomedImageIndex >= 0;
-  const hasMultipleImages = imageIds.length > 1;
+  const hasMultipleImages = availableImageIds.length > 1;
 
   function showPreviousImage() {
     if (!hasZoomedImage) return;
-    const nextIndex = (zoomedImageIndex - 1 + imageIds.length) % imageIds.length;
-    setZoomedImageId(imageIds[nextIndex]);
+    const nextIndex = (zoomedImageIndex - 1 + availableImageIds.length) % availableImageIds.length;
+    setZoomedImageId(availableImageIds[nextIndex]);
   }
 
   function showNextImage() {
     if (!hasZoomedImage) return;
-    const nextIndex = (zoomedImageIndex + 1) % imageIds.length;
-    setZoomedImageId(imageIds[nextIndex]);
+    const nextIndex = (zoomedImageIndex + 1) % availableImageIds.length;
+    setZoomedImageId(availableImageIds[nextIndex]);
   }
 
   let zoomedTitle = "Image preview";
@@ -65,7 +69,7 @@ export function AttachedImagesGallery({
 
   let zoomedCounterText = "";
   if (hasZoomedImage) {
-    zoomedCounterText = `${zoomedImageIndex + 1} / ${imageIds.length}`;
+    zoomedCounterText = `${zoomedImageIndex + 1} / ${availableImageIds.length}`;
   }
 
   let headerSuffix = "";
@@ -78,7 +82,7 @@ export function AttachedImagesGallery({
       <Stack variant="note-details-images-header" gap="0">
         <Inline gap="2">
           <Stack variant="note-details-images-label" gap="0">
-            {title} ({imageIds.length})
+            {title} ({availableImageIds.length})
           </Stack>
           {collapsible && (
             <Button
@@ -97,7 +101,7 @@ export function AttachedImagesGallery({
 
       {!collapsed && (
         <Stack variant="image-card-strip" gap="0">
-          {imageIds.map((id) => (
+          {availableImageIds.map((id) => (
             <ImageCard
               key={id}
               id={id}

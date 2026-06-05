@@ -23,6 +23,7 @@ import { useStore } from "@/data/store";
 import { syncRuntime } from "@/data/sync";
 import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storageHealth";
 import { db, ensureBootSeed } from "@/data/db";
+import { cleanupOrphanedImageRefs } from "@/data/mutations";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { Note, Todo, SectionDef } from "@/lib/types";
 
@@ -48,6 +49,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
     async function init() {
       try {
         await ensureBootSeed();
+        await cleanupOrphanedImageRefs();
         setLoaded(true);
 
         const noteCount = await db.notes.count();

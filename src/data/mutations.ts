@@ -154,6 +154,24 @@ export async function removeImage(id: string): Promise<void> {
   syncRuntime.scheduleWrite();
 }
 
+export async function cleanupOrphanedImageRefs(): Promise<void> {
+  const existingIds = new Set((await db.images.toArray()).map((img) => img.id));
+  const [notes, todos] = await Promise.all([db.notes.toArray(), db.todos.toArray()]);
+
+  const updatedNotes = notes
+    .filter((n) => n.imageIds.some((id) => !existingIds.has(id)))
+    .map((n) => ({ ...n, imageIds: n.imageIds.filter((id) => existingIds.has(id)) }));
+
+  const updatedTodos = todos
+    .filter((t) => (t.imageIds ?? []).some((id) => !existingIds.has(id)))
+    .map((t) => ({ ...t, imageIds: (t.imageIds ?? []).filter((id) => existingIds.has(id)) }));
+
+  if (updatedNotes.length === 0 && updatedTodos.length === 0) return;
+
+  await Promise.all([db.notes.bulkPut(updatedNotes), db.todos.bulkPut(updatedTodos)]);
+  syncRuntime.scheduleWrite();
+}
+
 export async function setRoomStatus(name: string, status: RoomState["status"]): Promise<void> {
   const r: RoomState = { name, status, updatedAt: Date.now() };
   await db.rooms.put(r);
