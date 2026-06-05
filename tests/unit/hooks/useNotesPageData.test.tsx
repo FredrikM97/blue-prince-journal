@@ -88,6 +88,23 @@ describe("useNotesPageData", () => {
     expect(result.current.filtered[0]?.id).toBe("n1");
   });
 
+  it("supports partial room token matches", () => {
+    const { result } = renderHook(() =>
+      useNotesPageData({
+        notes,
+        todos,
+        search: "@lib #puzz",
+        filterType: undefined,
+        roomFilters: [],
+        tagFilter: null,
+        statusFilter: null,
+      }),
+    );
+
+    expect(result.current.filtered).toHaveLength(1);
+    expect(result.current.filtered[0]?.id).toBe("n1");
+  });
+
   it("supports multiple selected room filters", () => {
     const { result } = renderHook(() =>
       useNotesPageData({

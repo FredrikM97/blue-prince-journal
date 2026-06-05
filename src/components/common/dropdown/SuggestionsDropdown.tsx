@@ -28,9 +28,13 @@ import { Button } from "@/components/common/Button";
 
 interface TokenSuggestion {
   value: string;
+  plainValue?: string;
   /** Short label shown beside the suggestion value (e.g. "room", "tag"). */
   hint: string;
 }
+
+type TokenDisplayMode = "token" | "plain";
+type DropdownAlignMode = "token" | "left";
 
 interface ActiveToken {
   token: string;
@@ -76,7 +80,7 @@ function suggestRooms(token: string, rooms: string[]): TokenSuggestion[] {
   const out: TokenSuggestion[] = [];
   for (const room of rooms) {
     if (!normalizeTokenValue(room).includes(q)) continue;
-    out.push({ value: `@${room.replace(/\s+/g, "-")}`, hint: "room" });
+    out.push({ value: `@${room.replace(/\s+/g, "-")}`, plainValue: room, hint: "room" });
     if (out.length >= 8) break;
   }
   return out;
@@ -87,7 +91,7 @@ function suggestTags(token: string, tags: string[]): TokenSuggestion[] {
   const out: TokenSuggestion[] = [];
   for (const tag of tags) {
     if (!normalizeTokenValue(tag).includes(q)) continue;
-    out.push({ value: `#${tag.replace(/\s+/g, "-")}`, hint: "tag" });
+    out.push({ value: `#${tag.replace(/\s+/g, "-")}`, plainValue: tag, hint: "tag" });
     if (out.length >= 8) break;
   }
   return out;
@@ -96,13 +100,14 @@ function suggestTags(token: string, tags: string[]): TokenSuggestion[] {
 function suggestNotes(token: string, noteTitles: string[]): TokenSuggestion[] {
   const q = normalizeTokenValue(token.slice(1));
   const out: TokenSuggestion[] = [];
+
   for (const title of noteTitles) {
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
     if (!slug.includes(q)) continue;
-    out.push({ value: `^${slug}`, hint: "ref" });
+    out.push({ value: `^${slug}`, plainValue: title, hint: "ref" });
     if (out.length >= 8) break;
   }
   return out;
@@ -114,12 +119,14 @@ function suggestTypes(token: string): TokenSuggestion[] {
   const q = token.toLowerCase();
   return TYPE_COMMANDS.filter((cmd) => cmd.includes(q)).map((cmd) => ({
     value: cmd,
+    plainValue: cmd.replace(/^!/, ""),
     hint: "type",
   }));
 }
 
 function suggestDate(): TokenSuggestion[] {
-  return [{ value: `>${new Date().toISOString().slice(0, 10)}`, hint: "date" }];
+  const date = new Date().toISOString().slice(0, 10);
+  return [{ value: `>${date}`, plainValue: date, hint: "date" }];
 }
 
 /** Returns suggestion candidates for @room, #tag, ^note, !type, >date tokens. Empty array when no token matches. */
@@ -128,15 +135,22 @@ export function buildSuggestions(
   rooms: string[],
   tags: string[],
   noteTitles: string[] = [],
+  options?: {
+    includeTypeSuggestions?: boolean;
+    includeDateSuggestions?: boolean;
+  },
 ): TokenSuggestion[] {
   const { token } = activeToken;
   if (!token) return [];
 
+  const includeTypeSuggestions = options?.includeTypeSuggestions ?? true;
+  const includeDateSuggestions = options?.includeDateSuggestions ?? true;
+
   if (token.startsWith("@") || /^room:/i.test(token)) return suggestRooms(token, rooms);
   if (token.startsWith("#")) return suggestTags(token, tags);
   if (token.startsWith("^")) return suggestNotes(token, noteTitles);
-  if (token.startsWith("!")) return suggestTypes(token);
-  if (token.startsWith(">")) return suggestDate();
+  if (token.startsWith("!") && includeTypeSuggestions) return suggestTypes(token);
+  if (token.startsWith(">") && includeDateSuggestions) return suggestDate();
 
   return [];
 }
@@ -229,10 +243,12 @@ function useDropdownStyle({
   inputRef,
   value,
   tokenStart,
+  alignMode = "token",
 }: {
   inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   value: string;
   tokenStart: number;
+  alignMode?: DropdownAlignMode;
 }): CSSProperties {
   // eslint-disable-next-line react-hooks/refs -- intentional: detects element type for layout, ref is always populated before this path is reached
   const isMultiline = inputRef.current instanceof HTMLTextAreaElement;
@@ -253,6 +269,16 @@ function useDropdownStyle({
   const left = tokenAnchorPx
     ? `clamp(0.5rem, ${tokenAnchorPx.left}px, calc(100% - 14rem))`
     : `clamp(0.5rem, calc(0.75rem + ${tokenAnchor.col}ch), calc(100% - 14rem))`;
+
+  if (alignMode === "left") {
+    if (!isMultiline) return { left: "0", top: "calc(100% + 0.25rem)" };
+
+    const top = tokenAnchorPx
+      ? `clamp(3.5rem, ${tokenAnchorPx.top + tokenAnchorPx.lineHeight + 6}px, calc(100% - 12rem))`
+      : `clamp(3.5rem, calc(3.5rem + (${tokenAnchor.line} + 1) * 1.5rem), calc(100% - 12rem))`;
+
+    return { left: "0", top };
+  }
 
   if (!isMultiline) return { left, top: "calc(100% + 0.25rem)" };
 
@@ -275,6 +301,10 @@ function useSuggestionController({
   tagSuggestions,
   noteTitles,
   onCommitCursor,
+  displayMode = "token",
+  includeTypeSuggestions = true,
+  includeDateSuggestions = true,
+  preservePrefixesInPlainMode = [],
 }: {
   value: string;
   setValue: (value: string) => void;
@@ -284,11 +314,26 @@ function useSuggestionController({
   tagSuggestions: string[];
   noteTitles: string[];
   onCommitCursor?: (cursor: number) => void;
+  displayMode?: TokenDisplayMode;
+  includeTypeSuggestions?: boolean;
+  includeDateSuggestions?: boolean;
+  preservePrefixesInPlainMode?: string[];
 }) {
   const activeToken = useMemo(() => getActiveToken(value, cursorPos), [value, cursorPos]);
   const suggestions = useMemo(
-    () => buildSuggestions(activeToken, roomSuggestions, tagSuggestions, noteTitles),
-    [activeToken, roomSuggestions, tagSuggestions, noteTitles],
+    () =>
+      buildSuggestions(activeToken, roomSuggestions, tagSuggestions, noteTitles, {
+        includeTypeSuggestions,
+        includeDateSuggestions,
+      }),
+    [
+      activeToken,
+      roomSuggestions,
+      tagSuggestions,
+      noteTitles,
+      includeTypeSuggestions,
+      includeDateSuggestions,
+    ],
   );
   const [activeIndex, setActiveIndex] = useState(0);
   const [dismissedForKey, setDismissedForKey] = useState<string | null>(null);
@@ -298,7 +343,16 @@ function useSuggestionController({
   const isOpen = suggestions.length > 0 && dismissedForKey !== suggestionKey;
 
   function apply(suggestion: TokenSuggestion) {
-    const next = applySuggestionToValue(value, activeToken, suggestion.value);
+    let suggestionValue = suggestion.value;
+    if (displayMode === "plain") {
+      const shouldPreservePrefix = preservePrefixesInPlainMode.some((prefix) =>
+        suggestion.value.startsWith(prefix),
+      );
+      if (!shouldPreservePrefix) {
+        suggestionValue = suggestion.plainValue ?? suggestion.value.replace(/^[@#^!>]/, "");
+      }
+    }
+    const next = applySuggestionToValue(value, activeToken, suggestionValue);
     setValue(next.value);
     setCursorPos(next.cursor);
     onCommitCursor?.(next.cursor);
@@ -354,6 +408,8 @@ function SuggestionItems({
   onHover,
   isOpen,
   style,
+  showHint = true,
+  displayMode = "token",
 }: {
   suggestions: TokenSuggestion[];
   activeIndex: number;
@@ -361,6 +417,8 @@ function SuggestionItems({
   onHover: (index: number) => void;
   isOpen: boolean;
   style?: CSSProperties;
+  showHint?: boolean;
+  displayMode?: TokenDisplayMode;
 }) {
   if (!isOpen || suggestions.length === 0) return null;
   return (
@@ -371,6 +429,11 @@ function SuggestionItems({
       style={style}
     >
       {suggestions.map((suggestion, index) => {
+        let displayValue = suggestion.value;
+        if (displayMode === "plain") {
+          displayValue = suggestion.plainValue ?? suggestion.value.replace(/^[@#^!>]/, "");
+        }
+
         let itemClass = "capture-suggestion-item";
         if (index === activeIndex) {
           itemClass = "capture-suggestion-item capture-suggestion-item-active";
@@ -382,7 +445,7 @@ function SuggestionItems({
               variant="ghost"
               size="content"
               fullWidth
-              justify="between"
+              justify={showHint ? "between" : "start"}
               textAlign="left"
               aria-selected={index === activeIndex}
               onMouseEnter={() => onHover(index)}
@@ -391,8 +454,8 @@ function SuggestionItems({
                 onApply(suggestion);
               }}
             >
-              <span>{suggestion.value}</span>
-              <span className="capture-suggestion-hint">{suggestion.hint}</span>
+              <span>{displayValue}</span>
+              {showHint && <span className="capture-suggestion-hint">{suggestion.hint}</span>}
             </Button>
           </div>
         );
@@ -417,10 +480,22 @@ function SuggestionItems({
 export function SuggestionsDropdown({
   children,
   onSubmitShortcut,
+  showSuggestionHint = true,
+  displayMode = "token",
+  includeTypeSuggestions = true,
+  includeDateSuggestions = true,
+  dropdownAlign = "token",
+  preservePrefixesInPlainMode = [],
 }: {
   children: ReactNode;
   /** Optional: called with keepOpen=true when Shift is held during Cmd/Ctrl+Enter. */
   onSubmitShortcut?: (keepOpen: boolean) => void;
+  showSuggestionHint?: boolean;
+  displayMode?: TokenDisplayMode;
+  includeTypeSuggestions?: boolean;
+  includeDateSuggestions?: boolean;
+  dropdownAlign?: DropdownAlignMode;
+  preservePrefixesInPlainMode?: string[];
 }) {
   const sharedSuggestions = useSuggestionSources();
   const [localValue, setLocalValue] = useState("");
@@ -459,6 +534,10 @@ export function SuggestionsDropdown({
     roomSuggestions: sharedSuggestions.roomSuggestions,
     tagSuggestions: sharedSuggestions.tagSuggestions,
     noteTitles: sharedSuggestions.noteSuggestions,
+    displayMode,
+    includeTypeSuggestions,
+    includeDateSuggestions,
+    preservePrefixesInPlainMode,
     onCommitCursor: (nextCursor) => {
       requestAnimationFrame(() => {
         inputElRef.current?.focus();
@@ -471,6 +550,7 @@ export function SuggestionsDropdown({
     inputRef: inputElRef,
     value: localValue,
     tokenStart: controller.tokenStart,
+    alignMode: dropdownAlign,
   });
 
   return (
@@ -498,6 +578,8 @@ export function SuggestionsDropdown({
         onHover={controller.setActiveIndex}
         isOpen={controller.isOpen}
         style={dropdownStyle}
+        showHint={showSuggestionHint}
+        displayMode={displayMode}
       />
     </div>
   );

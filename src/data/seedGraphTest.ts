@@ -107,7 +107,7 @@ export function buildGraphTestNotes(): Note[] {
         notes.push({
           id: nanoid(),
           type,
-          title: `${type.charAt(0).toUpperCase() + type.slice(1)}: ${room} ${i + 1}`,
+          title: `${room} ${i + 1}`,
           body,
           room,
           tags,

@@ -98,7 +98,7 @@ export function parseSearchQuery(rawQuery: string): ParsedSearchQuery {
 
 export function matchesSearchQuery(target: SearchMatchTarget, query: ParsedSearchQuery): boolean {
   const room = normalizeRoom(target.room ?? "");
-  const tags = new Set((target.tags ?? []).map(normalizeTag));
+  const tags = (target.tags ?? []).map(normalizeTag);
   const titleSlug = normalizeNoteSlug(target.title);
   const haystack = [
     target.title,
@@ -118,19 +118,19 @@ export function matchesSearchQuery(target: SearchMatchTarget, query: ParsedSearc
   }
 
   for (const token of query.roomIncludes) {
-    if (room !== token) return false;
+    if (!room.includes(token)) return false;
   }
 
   for (const token of query.roomExcludes) {
-    if (room === token) return false;
+    if (room.includes(token)) return false;
   }
 
   for (const token of query.tagIncludes) {
-    if (!tags.has(token)) return false;
+    if (!tags.some((tag) => tag.includes(token))) return false;
   }
 
   for (const token of query.tagExcludes) {
-    if (tags.has(token)) return false;
+    if (tags.some((tag) => tag.includes(token))) return false;
   }
 
   for (const token of query.noteIncludes) {

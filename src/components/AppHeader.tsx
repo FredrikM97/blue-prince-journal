@@ -269,7 +269,14 @@ export function AppHeader() {
             <ThemeToggle />
             <Stack variant="app-search-wrap" gap="0">
               <Search className="app-search-icon" />
-              <SuggestionsDropdown>
+              <SuggestionsDropdown
+                showSuggestionHint={false}
+                displayMode="plain"
+                includeTypeSuggestions={false}
+                includeDateSuggestions={false}
+                dropdownAlign="left"
+                preservePrefixesInPlainMode={["@", "#", "^"]}
+              >
                 <InputField
                   label="Search"
                   hideLabel
