@@ -11,6 +11,7 @@ import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
 import { StoredImageView } from "@/components/common/StoredImageView";
 import { Text } from "@/components/common/Typography";
+import { getWheelStepDelta, useNonPassiveWheel } from "@/hooks/useNonPassiveWheel";
 
 type Point = { x: number; y: number };
 
@@ -170,25 +171,18 @@ export function ImageZoomDialogContent({
     [zoom],
   );
 
-  useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    const onWheelEvent = (event: WheelEvent) => {
-      event.preventDefault();
-      if (event.deltaY === 0) return;
-      if (event.deltaY < 0) {
-        applyZoom(zoomRef.current + ZOOM_STEP);
-        return;
-      }
-      applyZoom(zoomRef.current - ZOOM_STEP);
-    };
-
-    stage.addEventListener("wheel", onWheelEvent, { passive: false });
-    return () => {
-      stage.removeEventListener("wheel", onWheelEvent);
-    };
-  }, [applyZoom]);
+  useNonPassiveWheel(
+    stageRef,
+    (events) => {
+      const stepDelta = getWheelStepDelta(events, { invert: true, clampAbs: 4, epsilon: 0.01 });
+      if (stepDelta === 0) return;
+      applyZoom(zoomRef.current + stepDelta * ZOOM_STEP);
+    },
+    {
+      coalesceToAnimationFrame: true,
+      preventDefault: true,
+    },
+  );
 
   const onDoubleClick = useCallback(() => {
     if (zoom > 1) {

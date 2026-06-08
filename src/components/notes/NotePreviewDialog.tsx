@@ -68,9 +68,11 @@ export function NotePreviewDialog({
   const [isEditing, setIsEditing] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [detailsDraft, setDetailsDraft] = useState("");
+  const [savedBodyById, setSavedBodyById] = useState<Record<string, string>>({});
 
   if (!note) return null;
-  const activeNote = note;
+  const optimisticBody = savedBodyById[note.id];
+  const activeNote: Note = optimisticBody === undefined ? note : { ...note, body: optimisticBody };
 
   function startEditDetails() {
     setEditingNoteId(activeNote.id);
@@ -95,6 +97,7 @@ export function NotePreviewDialog({
       body: detailsDraft,
     };
     await saveNote(next);
+    setSavedBodyById((prev) => ({ ...prev, [activeNote.id]: next.body }));
     closeEditDetails();
     toast.success("Note saved");
   }

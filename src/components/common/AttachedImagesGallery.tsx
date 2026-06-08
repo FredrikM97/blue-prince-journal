@@ -64,7 +64,7 @@ export function AttachedImagesGallery({
 
   let zoomedTitle = "Image preview";
   if (hasZoomedImage) {
-    zoomedTitle = getImageLabel(imageIds[zoomedImageIndex]);
+    zoomedTitle = getImageLabel(availableImageIds[zoomedImageIndex]);
   }
 
   let zoomedCounterText = "";

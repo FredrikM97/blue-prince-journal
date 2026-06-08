@@ -1,13 +1,6 @@
-import {
-  useMemo,
-  useRef,
-  useState,
-  type PointerEvent,
-  type ReactNode,
-  type WheelEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { Button } from "@/components/common/Button";
-import { Dialog, DialogContent } from "@/components/common/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { EmptyState } from "@/components/common/EmptyState";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
@@ -21,6 +14,11 @@ import { db } from "@/data/db";
 import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
 import type { Note, Todo } from "@/lib/types";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
+import {
+  computeZoomPanFromWheelDelta,
+  summarizeWheelZoomEvents,
+  useNonPassiveWheel,
+} from "@/hooks/useNonPassiveWheel";
 
 const ALL_NOTE_TYPES = ["clue", "code", "observation", "theory", "story", "task"] as const;
 
@@ -34,8 +32,6 @@ const NODE_RADIUS = 13;
 const EDGE_NODE_PADDING = 16;
 const MIN_ZOOM = 0.3;
 const MAX_ZOOM = 3.0;
-const MIN_LABEL_SCALE = 0.6;
-const MAX_LABEL_SCALE = 1.9;
 const NODE_ICON_SIZE = 12;
 
 interface GraphNode {
@@ -109,7 +105,6 @@ const TYPE_ICON: Record<
   story: BookOpen,
   task: ListTodo,
 };
-
 export function GraphPage() {
   const notes: Note[] = useLiveQueryArray(() => db.notes.toArray());
   const todos: Todo[] = useLiveQueryArray(() => db.todos.toArray());
@@ -158,10 +153,20 @@ export function GraphPage() {
     [nodes, hideIsolated, connectedNodeIds],
   );
 
+  const displayRoomSet = useMemo(
+    () => new Set(displayNodes.map((node) => node.note.room?.trim() || "")),
+    [displayNodes],
+  );
+
+  const visibleClusters = useMemo(
+    () => clusters.filter((cluster) => displayRoomSet.has(cluster.room ?? "")),
+    [clusters, displayRoomSet],
+  );
+
   const nodeById = useMemo(() => indexNodes(displayNodes), [displayNodes]);
   const renderedEdges = useMemo(
-    () => buildRenderedEdges(edges, nodeById, clusters),
-    [edges, nodeById, clusters],
+    () => buildRenderedEdges(edges, nodeById, visibleClusters),
+    [edges, nodeById, visibleClusters],
   );
   const selectedNodeId = useMemo(
     () =>
@@ -217,7 +222,7 @@ export function GraphPage() {
 
   const canvasProps = {
     nodes: displayNodes,
-    clusters,
+    clusters: visibleClusters,
     renderedEdges,
     selectedNoteId,
     dataVersion,
@@ -328,6 +333,9 @@ export function GraphPage() {
 
       <Dialog open={fullscreenOpen} onOpenChange={setFullscreenOpen}>
         <DialogContent variant="fullscreen">
+          <DialogHeader>
+            <DialogTitle>Graph explorer</DialogTitle>
+          </DialogHeader>
           <GraphCanvas {...canvasProps} plain />
         </DialogContent>
       </Dialog>
@@ -354,15 +362,31 @@ function GraphCanvas({
   actions?: ReactNode;
   plain?: boolean;
 }) {
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const viewportRef = useRef<SVGGElement | null>(null);
+  const wheelDeltaRef = useRef(0);
+  const wheelFocusRef = useRef({ x: GRAPH_VB_W / 2, y: GRAPH_VB_H / 2 });
+  const wheelPinchRef = useRef(false);
+  const zoomRef = useRef(1);
+  const panRef = useRef({ x: 0, y: 0 });
   const dragRef = useRef<{
     startSvgX: number;
     startSvgY: number;
     panX: number;
     panY: number;
   } | null>(null);
+
+  function applyViewportTransform(nextZoom: number, nextPan: { x: number; y: number }) {
+    zoomRef.current = nextZoom;
+    panRef.current = nextPan;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    viewport.setAttribute(
+      "transform",
+      `matrix(${nextZoom} 0 0 ${nextZoom} ${nextPan.x} ${nextPan.y})`,
+    );
+  }
 
   function toSvgPoint(clientX: number, clientY: number, element: SVGSVGElement) {
     const pt = element.createSVGPoint();
@@ -377,8 +401,7 @@ function GraphCanvas({
   }
 
   function resetView() {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
+    applyViewportTransform(1, { x: 0, y: 0 });
   }
 
   function startDrag(event: PointerEvent<SVGSVGElement>) {
@@ -386,7 +409,12 @@ function GraphCanvas({
     const tag = (event.target as Element).tagName.toLowerCase();
     if (tag !== "svg" && tag !== "rect") return;
     const svgPt = toSvgPoint(event.clientX, event.clientY, event.currentTarget);
-    dragRef.current = { startSvgX: svgPt.x, startSvgY: svgPt.y, panX: pan.x, panY: pan.y };
+    dragRef.current = {
+      startSvgX: svgPt.x,
+      startSvgY: svgPt.y,
+      panX: panRef.current.x,
+      panY: panRef.current.y,
+    };
     event.currentTarget.setPointerCapture(event.pointerId);
     event.preventDefault();
     setIsDragging(true);
@@ -396,7 +424,7 @@ function GraphCanvas({
     const drag = dragRef.current;
     if (!drag) return;
     const svgPt = toSvgPoint(event.clientX, event.clientY, event.currentTarget);
-    setPan({
+    applyViewportTransform(zoomRef.current, {
       x: drag.panX + (svgPt.x - drag.startSvgX),
       y: drag.panY + (svgPt.y - drag.startSvgY),
     });
@@ -411,27 +439,43 @@ function GraphCanvas({
     setIsDragging(false);
   }
 
-  function zoomWithWheel(event: WheelEvent<SVGSVGElement>) {
-    event.preventDefault();
-    const focus = toSvgPoint(event.clientX, event.clientY, event.currentTarget);
-    const isPinch = event.ctrlKey;
-    const rawDelta = isPinch
-      ? event.deltaY
-      : event.deltaMode === 0
-        ? event.deltaY / 120
-        : event.deltaY;
-    const clamped = Math.max(-2, Math.min(2, rawDelta));
-    const factor = Math.exp(-clamped * (isPinch ? 0.04 : 0.18));
-    setZoom((currentZoom) => {
-      const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, currentZoom * factor));
-      if (Math.abs(nextZoom - currentZoom) < 0.0005) return currentZoom;
-      setPan((currentPan) => ({
-        x: focus.x - ((focus.x - currentPan.x) / currentZoom) * nextZoom,
-        y: focus.y - ((focus.y - currentPan.y) / currentZoom) * nextZoom,
-      }));
-      return nextZoom;
-    });
-  }
+  useEffect(() => {
+    applyViewportTransform(1, { x: 0, y: 0 });
+    // Reset graph viewport when data set changes (React remount key covers svg internals).
+  }, [dataVersion]);
+
+  useNonPassiveWheel(
+    svgRef,
+    (events) => {
+      const svg = svgRef.current;
+      if (!svg) return;
+
+      const summary = summarizeWheelZoomEvents(events, (event) =>
+        toSvgPoint(event.clientX, event.clientY, svg),
+      );
+      if (!summary) return;
+
+      wheelFocusRef.current = summary.focus;
+      wheelPinchRef.current = summary.isPinch;
+      wheelDeltaRef.current = summary.delta;
+
+      const result = computeZoomPanFromWheelDelta({
+        currentZoom: zoomRef.current,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+        pan: panRef.current,
+        focus: wheelFocusRef.current,
+        wheelDelta: wheelDeltaRef.current,
+        wheelFactor: wheelPinchRef.current ? 0.04 : 0.18,
+      });
+      if (!result.changed) return;
+      applyViewportTransform(result.nextZoom, result.nextPan);
+    },
+    {
+      coalesceToAnimationFrame: true,
+      preventDefault: true,
+    },
+  );
 
   let frameVariant: "graph-canvas-frame" | "graph-canvas-frame-plain" = "graph-canvas-frame";
   if (plain) frameVariant = "graph-canvas-frame-plain";
@@ -455,13 +499,12 @@ function GraphCanvas({
                 onClick={() => {
                   const cx = GRAPH_VB_W / 2;
                   const cy = GRAPH_VB_H / 2;
-                  setZoom((z) => {
-                    const nz = Math.max(MIN_ZOOM, parseFloat((z / 1.3).toFixed(4)));
-                    setPan((p) => ({
-                      x: cx - ((cx - p.x) / z) * nz,
-                      y: cy - ((cy - p.y) / z) * nz,
-                    }));
-                    return nz;
+                  const z = zoomRef.current;
+                  const p = panRef.current;
+                  const nz = Math.max(MIN_ZOOM, parseFloat((z / 1.3).toFixed(4)));
+                  applyViewportTransform(nz, {
+                    x: cx - ((cx - p.x) / z) * nz,
+                    y: cy - ((cy - p.y) / z) * nz,
                   });
                 }}
               >
@@ -475,13 +518,12 @@ function GraphCanvas({
                 onClick={() => {
                   const cx = GRAPH_VB_W / 2;
                   const cy = GRAPH_VB_H / 2;
-                  setZoom((z) => {
-                    const nz = Math.min(MAX_ZOOM, parseFloat((z * 1.3).toFixed(4)));
-                    setPan((p) => ({
-                      x: cx - ((cx - p.x) / z) * nz,
-                      y: cy - ((cy - p.y) / z) * nz,
-                    }));
-                    return nz;
+                  const z = zoomRef.current;
+                  const p = panRef.current;
+                  const nz = Math.min(MAX_ZOOM, parseFloat((z * 1.3).toFixed(4)));
+                  applyViewportTransform(nz, {
+                    x: cx - ((cx - p.x) / z) * nz,
+                    y: cy - ((cy - p.y) / z) * nz,
                   });
                 }}
               >
@@ -496,6 +538,7 @@ function GraphCanvas({
       </Stack>
 
       <svg
+        ref={svgRef}
         key={`graph-${dataVersion}`}
         viewBox={GRAPH_VIEWBOX}
         width="100%"
@@ -505,7 +548,6 @@ function GraphCanvas({
         onPointerMove={updateDrag}
         onPointerUp={stopDrag}
         onPointerCancel={stopDrag}
-        onWheel={zoomWithWheel}
       >
         <rect x="0" y="0" width={GRAPH_VB_W} height={GRAPH_VB_H} fill="transparent" />
         <defs>
@@ -532,7 +574,7 @@ function GraphCanvas({
           ))}
         </defs>
 
-        <g transform={`matrix(${zoom} 0 0 ${zoom} ${pan.x} ${pan.y})`}>
+        <g ref={viewportRef} transform="matrix(1 0 0 1 0 0)">
           {clusters.map((cluster) => renderCluster(cluster))}
           {renderedEdges.map(({ key, x1, y1, x2, y2, weight, relations }) => {
             const { stroke, marker } = edgeAppearance(relations);
@@ -558,7 +600,6 @@ function GraphCanvas({
             renderNode(node, {
               selected: node.id === selectedNoteId,
               onSelect: () => onSelectNote(node.id),
-              zoom,
             }),
           )}
         </g>
@@ -597,17 +638,15 @@ function renderNode(
   {
     selected,
     onSelect,
-    zoom,
   }: {
     selected: boolean;
     onSelect: () => void;
-    zoom: number;
   },
 ) {
   const Icon = TYPE_ICON[node.note.type];
   const stroke = selected ? "var(--color-ring)" : "var(--color-foreground)";
   const strokeWidth = selected ? 2.2 : 1.1;
-  const labelScale = labelScaleForZoom(zoom);
+  const labelScale = 1;
 
   return (
     <g
@@ -1297,11 +1336,6 @@ function renderCluster(cluster: GraphCluster) {
       </text>
     </g>
   );
-}
-
-function labelScaleForZoom(zoom: number) {
-  const inverse = 1 / zoom;
-  return Math.max(MIN_LABEL_SCALE, Math.min(MAX_LABEL_SCALE, inverse));
 }
 
 function normalizeTag(value: string) {
