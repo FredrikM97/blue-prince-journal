@@ -1,102 +1,169 @@
+# Agent Instructions
+
+## General Principles
+- Prefer simplicity over abstraction.
+- Optimize for maintainability, not theoretical purity.
+- Keep changes small, localized, and reversible.
+- Do not restructure unrelated code.
+
 ---
-description: Core coding rules for this repository
-applyTo: "src/**/*.{ts,tsx,css},tests/**/*.{ts,tsx},.github/instructions/*.md"
+
+## Architecture Model (Pragmatic Layers)
+
+Use a soft layered architecture:
+
+### UI Layer (Components)
+- Responsible for rendering and local UI behavior.
+- May contain simple derived values and conditional rendering.
+- Must NOT perform:
+  - API calls
+  - persistence / storage access
+  - complex domain transformations
+- Must call services/hooks for external data and side effects.
+
+### Domain Layer (Pure Logic)
+- Contains reusable pure functions.
+- Handles transformations, mapping, normalization, merging.
+- Must not depend on React or UI concerns.
+- Should be easy to test in isolation.
+
+### State Layer (Hooks / Reducers)
+- Encapsulates state transitions and orchestration.
+- Exposes clear actions or functions.
+- Must not contain rendering logic.
+- Should avoid mixing unrelated concerns.
+
+### Data Layer (Services)
+- Handles persistence, APIs, filesystem, storage.
+- Must be isolated from UI.
+- No business logic inside services beyond transport concerns.
+
 ---
 
-# Core Rules
+## React Rules
 
-- Prioritize simplification over backward compatibility unless explicitly requested.
-- Prefer deletion and replacement over compatibility wrappers.
-- Keep solutions small, direct, and reusable.
+- Functional components only.
+- Each component owns its own local logic.
+- Extract logic into hooks only when:
+  - reused across components OR
+  - it meaningfully reduces complexity
+- Avoid “god hooks” that aggregate unrelated concerns.
+- Keep props explicit and minimal.
+- Prefer local state unless sharing is required.
 
-# Scope By File Type
+### Derived State
+- Prefer computed values over duplicated state.
+- Do not store values that can be derived reliably.
 
-- `*.tsx`: component composition, behavior, and state ownership rules apply.
-- `*.css`: named-class styling rules apply.
-- `tests/**/*.tsx`: keep assertions behavior-focused and update snapshots only when changes are intentional.
-- `*.md` instruction files: keep guidance concise, non-contradictory, and current.
+### Effects
+- All side effects must live in:
+  - useEffect
+  - custom hooks
+  - service layer
+- Never run side effects during render.
 
-# JSX / TSX Rules
+---
 
-- Never use ternary operators in TSX/JSX.
-- Use `if/else` before `return`, then render with `&&` and `!condition &&`.
-- Never nest ternaries anywhere.
-- Keep wrapper markup minimal; remove redundant `div` layers.
-- Avoid adding new raw `div`/`section` wrappers with `className`; prefer shared primitives (`Stack`, `Inline`, `Grid`, typography primitives) and typed props.
-- Do not replace an existing `Stack` wrapper with a raw `div`/`section` to apply styles. Add/extend a typed `Stack` variant (and supporting CSS) instead.
+## CSS & Styling System Rules
 
-# Styling Rules
+### Core Principle
+The styling system must remain composable and minimal. Do not grow a second design system in CSS.
 
-- Never use `cn()`, `clsx()`, `twMerge()`, or class-merging helpers.
-- Prefer named CSS classes over inline utility strings.
-- Do not keep long CSS strings/constants in TSX files. Move styling to CSS classes in feature CSS files or `src/components/common/layout.css`.
-- If a class pattern repeats, extract it immediately.
-- Shared layout primitives belong in `src/components/common/layout.css`; feature-specific styles belong in feature CSS files.
-- Avoid one-off feature CSS when a shared primitive variant can represent the pattern. Prefer extending shared variants (`Stack`, `Inline`, dialog/panel primitives, `layout.css`) over creating new single-use selectors.
-- Remove alias classes that only re-apply one existing shared class (for example feature-prefixed wrappers that only `@apply` a single primitive token).
+### Tailwind vs CSS
+- Tailwind is the default styling tool.
+- Custom CSS is allowed only for:
+  - complex selectors
+  - animation/state coupling
+  - layout patterns not reasonably expressible in Tailwind
 
-# Component Reuse Rules
+### Prohibited Patterns
+- Do not recreate Tailwind utilities in CSS.
+- Do not introduce new CSS classes that duplicate existing utilities.
+- Do not create new `.ui-*`, `.btn-*`, `.page-*` classes unless they:
+  - replace multiple existing classes OR
+  - reduce overall complexity
 
-- Prefer shared primitives (`SidePanel`, `PanelHeader`, `FilterSection`, shared dropdown/input components) over one-off panel markup.
-- If multiple features share the same structure, extract a reusable component.
-- Keep state/effects in the component that owns the UI interaction.
-- Prefer shared custom components (`Button`, `GhostButton`, `IconButton`, layout primitives) over raw native elements with ad-hoc class strings. Only use native elements directly when no shared primitive fits.
-- Avoid divergence across similar screens: when two features use the same UI pattern, keep structure, component choice, and visual treatment aligned unless the user explicitly requests a difference.
+---
 
-# Panel / Dialog Rules
+## Variant System Rules (Critical)
 
-- Prefer `SidePanel` + `PanelHeader` for sidebar panel shells and header actions.
-- Prefer `DialogContent` variants and shared dialog helpers over per-caller structural overrides.
-- Avoid custom per-screen dialog structure unless behavior differs materially.
+Avoid variant explosion.
 
-# SidePanel Title Bar Contract
+### Rules:
+- Do NOT add new variant props casually.
+- Each new variant axis must be justified by real reuse.
+- Prefer composition over adding variants.
 
-- The SidePanel title bar is owned by `SidePanel`/`PanelHeader` only.
-- Do not recreate title/subtitle/close/expand rows inside feature panels that already use `SidePanel.Left` or `SidePanel.Right`.
-- Always pass header intent via props (`title`, `subtitle`, `onClose`, `onExpand`) instead of custom header markup.
-- Use `panelKey` only when intentional mobile auto-open is required; omit it for passive panels that should stay closed by default.
+### Before adding a new variant:
+- Check if behavior can be achieved by:
+  - combining existing variants
+  - conditional class composition
+  - minor layout adjustment
+- New variants should exist only if:
+  - used in multiple places OR
+  - represent a clear semantic role (not visual tweak)
 
-# Mobile Behavior Contract
+### Component design goal:
+Keep variant axes minimal and orthogonal.
 
-- Prefer `PageLayout` mobile drawer hooks/context (`usePageLayoutMobileDrawerControls`) for mobile panel behavior.
-- Avoid feature-level `@media` behavior toggles (for example switching row structure or drawer interaction logic) when hook/context-based mobile behavior already exists.
-- Use CSS breakpoints for visual polish only, not as the source of truth for panel open/close or mobile interaction state.
+---
 
-# Notes Row Stability
+## Component Design Rules
 
-- Treat `src/components/notes/NotesView.tsx` + `src/components/notes/notes.css` note-row structure as layout-sensitive.
-- Do not change note row wrapper hierarchy or preview-button geometry unless the task explicitly asks for note row layout changes.
-- Keep note summary content anchored left and preserve action-button column alignment.
+### Ownership
+- Each component owns:
+  - its rendering
+  - its small internal UI logic
+  - its styling composition
+- Components should NOT rely on external hidden behavior.
 
-# Button API Safety
+### Structure
+- Prefer small functions inside files for local logic.
+- Extract only reusable logic into shared modules.
 
-- Do not add or use freeform `className` escape hatches on `GhostButton`.
-- Extend `GhostButton` using typed props/variants (`tone`, `surface`, `active`) when new visual states are needed.
-- Shared custom components should not require consumer-provided `className` strings for core visual states.
-- Add typed variants/props on the shared component instead of expecting callers to assemble styling classes.
+### Avoid
+- “god components”
+- deeply nested conditional styling logic
+- prop-driven styling systems with many dimensions
 
-# Input / Markdown Rules
+---
 
-- Use shared input building blocks from `src/components/common/input`.
-- Use shared markdown components from `src/components/common/markdown`.
-- Avoid duplicate suggestion systems; reuse shared suggestion components/hooks.
+## State Management Rules
 
-# Type Safety / Hygiene
+- Keep state close to where it is used.
+- Avoid global state unless necessary.
+- Do not duplicate state across multiple sources.
+- If multiple sources exist, define a single source of truth.
 
-- Keep `noImplicitAny` clean.
-- Keep imports at the top of files.
-- Do not place imports inside functions.
-- Run typecheck and lint on touched files before finishing.
+---
 
-# Testing Rules
+## Data & Side Effects
 
-- Update/add tests for behavior changes.
-- Snapshot updates are allowed only for intentional UI changes.
-- Mention any test gap explicitly when full validation is not possible.
+- All external interactions go through services.
+- UI must never directly access persistence or APIs.
+- Side effects must be isolated and explicit.
 
-# Instruction Maintenance
+---
 
-- Keep this file short and actionable.
-- Remove outdated guidance when architecture changes.
-- Add new user preferences here when they are project-wide and reusable.
-- For each multi-part user request, create or update `todo.md` at the repo root with a concise checklist of planned work, then mark items complete as changes land.
+## Refactoring Rules
+
+- Do not refactor unrelated code.
+- Prefer incremental cleanup over large rewrites.
+- Only abstract when duplication is stable and proven.
+
+---
+
+## TypeScript Rules
+
+- Avoid `any`.
+- Use explicit types for public interfaces.
+- Narrow types instead of asserting.
+- Prefer discriminated unions for complex states.
+
+---
+
+## Output Rules
+
+- Provide minimal, targeted changes.
+- Avoid unnecessary restructuring.
+- Do not introduce new abstractions unless required to solve a real problem.
