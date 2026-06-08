@@ -1,7 +1,7 @@
 # Agent Instructions
 
 ## Goal
-Maintain and improve a TypeScript + React + Tailwind codebase by reducing complexity, removing duplication, and improving long-term maintainability.
+Maintain and improve a TypeScript + React + Tailwind codebase by reducing complexity, duplication, and long-term maintenance cost.
 
 Prefer practical simplification over theoretical architecture. Avoid unnecessary abstraction.
 
@@ -10,9 +10,9 @@ Prefer practical simplification over theoretical architecture. Avoid unnecessary
 ## General Principles
 - Optimize for maintainability and clarity over elegance.
 - Keep changes small unless a larger rewrite clearly reduces complexity.
+- Prefer deletion over addition.
 - Do not introduce new systems unless they replace existing ones.
-- Preserve existing behavior unless explicitly instructed otherwise.
-- Prefer deletion over addition when simplifying systems.
+- Preserve behavior unless explicitly instructed otherwise.
 
 ---
 
@@ -20,171 +20,181 @@ Prefer practical simplification over theoretical architecture. Avoid unnecessary
 
 Full rewrites are allowed when they reduce systemic complexity.
 
-A rewrite is only valid if it clearly achieves at least one of:
-- reduces number of concepts (variants, props, classes, layers)
-- removes duplicated or overlapping systems
-- consolidates multiple abstractions into fewer, clearer ones
-- simplifies usage for consumers of the API/component
+A rewrite is valid only if it:
+- reduces number of concepts (variants, props, class systems, layers)
+- removes duplication or overlapping abstractions
+- consolidates systems into fewer primitives
+- simplifies usage for consumers
 
 Rewrites must NOT:
-- introduce new abstraction layers without removing existing ones
-- increase number of variants, classes, or configuration axes
-- expand the system surface area
+- increase system surface area
+- introduce new abstraction layers without removing old ones
+- expand variant/class/config complexity
 
-Prefer replacing entire subsystems over incremental patching when:
-- the subsystem is already inconsistent or overextended
-- local fixes would increase complexity further
-
-All rewrites must preserve behavior unless explicitly stated otherwise.
+Prefer replacing entire subsystems when partial fixes increase complexity.
 
 ---
 
-## Architecture Model (Pragmatic, Not Strict)
-
-Use separation of concerns as a guideline, not a rigid rule.
+## Architecture Model (Pragmatic)
 
 ### UI Layer (React Components)
-- Responsible for rendering and basic UI interaction.
-- May contain simple derived values and conditional rendering.
-- Must not directly access persistence, APIs, or external systems.
-- Avoid embedding complex business logic.
+- Responsible for rendering and local interaction
+- May contain simple derived values
+- Must not access persistence or external APIs
+- Avoid complex business logic
 
 ### Domain Layer (Pure Functions)
-- Contains reusable, pure transformations.
-- Handles mapping, normalization, filtering, aggregation.
-- Must not depend on React or UI state.
+- Pure transformations only
+- No React or UI coupling
+- Mapping, filtering, normalization, aggregation
 
 ### State Layer (Hooks / Reducers)
-- Encapsulates state transitions and orchestration.
-- Exposes explicit actions or state functions.
-- Avoid mixing unrelated responsibilities in a single hook.
+- Encapsulates state transitions
+- Exposes explicit actions
+- Avoid mixed responsibilities
 
 ### Data Layer (Services)
-- Handles external systems: API, storage, filesystem, DB.
-- No UI logic.
-- No business rules beyond transport concerns.
+- External systems only (API, DB, storage)
+- No UI logic or business rules
 
 ---
 
 ## React Rules
 
-- Functional components only.
-- Keep components focused and small where possible.
-- Local logic inside components is allowed if it stays simple.
-- Extract logic only when it is reusable or clearly complex.
+- Functional components only
+- Keep components small and focused
+- Local logic is allowed if simple
+- Extract only reusable or clearly complex logic
 
 ### Derived State
-- Prefer computed values over duplicated state.
-- Avoid storing values that can be derived reliably.
+- Prefer computed values over duplicated state
+- Avoid storing derivable values
 
 ### Effects
-- Side effects must live in:
-  - useEffect
-  - custom hooks
-  - service layer
-- Never perform side effects during render.
+- Only in useEffect, hooks, or services
+- Never in render or pure functions
 
 ---
 
-## State Management Rules
+## State Rules
 
-- Keep state close to where it is used.
-- Avoid unnecessary global state.
-- Maintain a single source of truth.
-- Do not duplicate state across layers.
+- Keep state close to usage
+- Avoid unnecessary global state
+- Maintain single source of truth
 
 ---
 
-## CSS & Styling System Rules
+## CSS Ownership Model (CRITICAL)
 
-### Core Principle
-The styling system must remain minimal, composable, and not evolve into a second design framework.
+- Every component owns its styling
+- Styling must be colocated with component (CSS module or local file)
+- Components must not depend on styling defined inside unrelated components
 
-### Tailwind vs CSS
-- Tailwind is the default styling system.
-- Custom CSS is allowed only for:
+### Allowed
+- Button.tsx + Button.module.css
+- Tailwind inside component
+- Shared design tokens only
+
+### Forbidden
+- importing CSS from unrelated components
+- cross-feature .ui-*, .btn-* reuse systems
+- global styling systems that encode component behavior
+
+### Principle
+If styling is reusable, it becomes:
+- a primitive component, or
+- a design token
+
+Not a shared class system.
+
+---
+
+## Tailwind vs CSS
+
+- Tailwind is default
+- CSS only for:
   - complex selectors
-  - animation/state coupling
-  - layout patterns not easily expressed in Tailwind
-
-### Prohibited Patterns
-- Do not recreate Tailwind utilities in CSS.
-- Do not expand `.ui-*`, `.btn-*`, `.page-*` systems unless they reduce complexity.
-- Do not add new CSS abstraction layers that duplicate Tailwind functionality.
+  - animations/state coupling
+  - layout patterns not expressible in Tailwind
 
 ---
 
-## Variant System Rules (Critical)
+## Variant System Rules (CRITICAL)
 
 Avoid variant explosion.
 
-- Do NOT add new variant props without strong justification.
-- Each new variant axis must replace or simplify existing complexity.
-- Prefer composition over adding new variants.
+- Variants must represent semantic meaning only
+- Variants must NOT encode layout or minor visual differences
 
-### Allowed only if:
-- the variant is reused in multiple places, OR
-- it represents a clear semantic role (not a visual tweak)
+### Allowed
+- semantic modes (e.g. destructive, disabled, loading)
 
-### Forbidden:
-- adding variants for minor styling differences
-- creating new orthogonal styling axes unnecessarily
+### Forbidden
+- layout variants
+- spacing-only variants
+- ad-hoc styling buckets
 
-Goal: keep variant systems small, semantic, and stable.
+### Anti-pattern
+- variant maps that behave like CSS routing tables
+
+Variants should not become a second styling system.
+
+---
+
+## className Rules
+
+- Allowed in all components
+- Must not encode repeated patterns across codebase
+- Repeated className patterns must be extracted into:
+  - primitives, or
+  - layout components
 
 ---
 
 ## Component Design Rules
 
-- Each component owns its rendering and local UI behavior.
-- Avoid “god components” and overly generic components.
-- Extract shared logic only when it is reused or clearly domain-level.
-
-### Structure Preference
-- Small local helper functions inside files are preferred over premature abstraction.
-- Avoid unnecessary cross-file dependencies.
+- Components own rendering + local UI behavior
+- Avoid god components
+- Extract only when reuse or complexity justifies it
 
 ---
 
-## CSS System Maintenance Rules
+## CSS System Maintenance
 
-- Prefer removing CSS over adding new classes.
-- Do not duplicate Tailwind utilities in CSS.
-- Merge overlapping utility classes when possible.
-- Collapse redundant design-system abstractions.
-
-Goal: move toward fewer, more reusable primitives instead of many specialized classes.
+- Prefer removing CSS over adding
+- Do not duplicate Tailwind utilities in CSS
+- Collapse redundant design systems
+- Move toward primitives instead of special-case classes
 
 ---
 
 ## Data & Side Effects
 
-- All external interactions must go through services or hooks.
-- UI must never directly access persistence or APIs.
-- Side effects must be explicit and isolated.
+- All external access via services/hooks only
+- No direct API/DB calls in UI
 
 ---
 
 ## Refactoring Rules
 
-- Do not refactor unrelated areas.
-- Prefer incremental cleanup unless a subsystem is clearly overgrown.
-- Rewrites are allowed when they reduce overall complexity.
-- Avoid speculative or future-proofing changes.
+- Do not refactor unrelated code
+- Prefer incremental cleanup
+- Full rewrites allowed when reducing complexity
+- Avoid speculative changes
 
 ---
 
 ## TypeScript Rules
 
-- Avoid `any`.
-- Prefer explicit types for public interfaces.
-- Use narrowing instead of assertions.
-- Prefer discriminated unions for complex states.
+- Avoid any
+- Prefer explicit types for public APIs
+- Use narrowing instead of assertions
+- Prefer discriminated unions for state
 
 ---
 
 ## Output Rules
 
-- Provide minimal, focused changes.
-- Avoid unnecessary restructuring.
-- Keep diffs small unless a full rewrite is explicitly justified by complexity reduction.
+- Minimal, focused changes
+- Avoid unnecessary restructuring
+- Keep diffs small unless rewrite is justified
