@@ -1,0 +1,14 @@
+name = "feedback-system"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "feedback-db"
+database_id = "YOUR_DB_ID"
+
+[[queues.producers]]
+binding = "FEEDBACK_QUEUE"
+queue = "feedback-queue"
+
+[[queues.consumers]]
+queue = "feedback-queue"

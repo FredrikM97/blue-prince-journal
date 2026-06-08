@@ -1,15 +1,14 @@
-import type { D1Database } from "@cloudflare/workers-types";
+import { createIdentifier } from "../lib/identifier";
+import type { FeedbackJob, FeedbackType, Env } from "../lib/types";
 
 type FeedbackPayload = {
   message?: unknown;
   contact?: unknown;
   appVersion?: unknown;
+  type?: unknown;
 };
 
-export async function onRequestPost(context: {
-  request: Request;
-  env: { DB: D1Database };
-}): Promise<Response> {
+export async function onRequestPost(context: { request: Request; env: Env }) {
   const request = context.request;
 
   let body: FeedbackPayload;
@@ -23,34 +22,52 @@ export async function onRequestPost(context: {
   const message = typeof body.message === "string" ? body.message.trim() : "";
 
   if (!message) {
-    return Response.json({ error: "Message is required" }, { status: 400 });
+    return Response.json({ error: "Message required" }, { status: 400 });
   }
 
-  const contact = typeof body.contact === "string" ? body.contact.trim() : "";
-  const appVersion = typeof body.appVersion === "string" ? body.appVersion : "";
+  const contact = typeof body.contact === "string" ? body.contact.trim() : null;
 
-  const tableInfo = await context.env.DB.prepare("PRAGMA table_info(feedback)").all<{
-    name: string;
-  }>();
-  if (!tableInfo.results.some((column) => column.name === "version")) {
-    await context.env.DB.exec("ALTER TABLE feedback ADD COLUMN version TEXT");
-  }
+  const version = typeof body.appVersion === "string" ? body.appVersion : null;
 
-  await context.env.DB.prepare(
-    `
-    INSERT INTO feedback (
+  const allowedTypes: FeedbackType[] = ["bug", "feature", "general"];
+
+  const type: FeedbackType =
+    typeof body.type === "string" && allowedTypes.includes(body.type as FeedbackType)
+      ? (body.type as FeedbackType)
+      : "general";
+
+  const ip = request.headers.get("CF-Connecting-IP") ?? "";
+  const ua = request.headers.get("User-Agent") ?? "";
+
+  const identifier = await createIdentifier(ip, ua, context.env.SECRET_SALT);
+
+  const createdAt = new Date().toISOString();
+
+  const inserted = await context.env.DB.prepare(
+    `INSERT INTO feedback (
       message,
       contact,
       version,
+      type,
+      identifier,
+      status,
       created_at
     )
-    VALUES (?, ?, ?, ?)
-    `,
+    VALUES (?, ?, ?, ?, ?, 'pending', ?)
+    RETURNING id`,
   )
-    .bind(message, contact, appVersion, new Date().toISOString())
-    .run();
+    .bind(message, contact, version, type, identifier, createdAt)
+    .first<{ id: number }>();
 
-  console.log("feedback context", { appVersion });
+  if (!inserted) {
+    return Response.json({ error: "DB insert failed" }, { status: 500 });
+  }
 
-  return Response.json({ ok: true });
+  const job: FeedbackJob = {
+    id: inserted.id,
+  };
+
+  await context.env.FEEDBACK_QUEUE.send(job);
+
+  return Response.json({ ok: true, id: inserted.id });
 }
