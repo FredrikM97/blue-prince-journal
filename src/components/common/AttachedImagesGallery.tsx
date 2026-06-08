@@ -45,7 +45,6 @@ export function AttachedImagesGallery({
     return img.caption?.trim() || img.name;
   };
 
-  const wrapperVariant = "note-details-images";
   const zoomedImageIndex = zoomedImageId ? availableImageIds.indexOf(zoomedImageId) : -1;
   const hasZoomedImage = zoomedImageIndex >= 0;
   const hasMultipleImages = availableImageIds.length > 1;
@@ -78,10 +77,13 @@ export function AttachedImagesGallery({
   }
 
   return (
-    <Stack as="section" variant={wrapperVariant} gap="0">
-      <Stack variant="note-details-images-header" gap="0">
+    <Stack as="section" gap="0" className="space-y-2">
+      <Stack gap="0" className="mb-2">
         <Inline gap="2">
-          <Stack variant="note-details-images-label" gap="0">
+          <Stack
+            gap="0"
+            className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+          >
             {title} ({availableImageIds.length})
           </Stack>
           {collapsible && (
@@ -100,7 +102,7 @@ export function AttachedImagesGallery({
       </Stack>
 
       {!collapsed && (
-        <Stack variant="image-card-strip" gap="0">
+        <Stack gap="0" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
           {availableImageIds.map((id) => (
             <ImageCard
               key={id}

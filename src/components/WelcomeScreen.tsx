@@ -28,7 +28,7 @@ function WelcomeCard({
   disabled?: boolean;
 }) {
   return (
-    <Stack variant="welcome-card" gap="0">
+    <Stack className="welcome-card" gap="0">
       <Button
         type="button"
         variant="ghost"
@@ -152,10 +152,10 @@ export function WelcomeScreen({
   }
 
   return (
-    <Stack as="section" variant="welcome-shell" gap="0">
+    <Stack as="section" className="welcome-shell" gap="0">
       <CenteredContent max="6xl" align="center">
         <Stack gap="2">
-          <Stack as="div" variant="welcome-icon" gap="0">
+          <Stack as="div" className="welcome-icon" gap="0">
             <Text as="span" size="3xl" weight="semibold">
               B
             </Text>

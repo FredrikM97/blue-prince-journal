@@ -30,9 +30,9 @@ export function NotesView({
   }
 
   return (
-    <Stack as="section" variant="notes-view-section" gap="2">
+    <Stack as="section" className="space-y-2" gap="2">
       {filtered.length === 0 ? (
-        <Stack variant="notes-view-empty" gap="2">
+        <Stack className="notes-view-empty" gap="2">
           <Text size="sm" tone="muted">
             {emptyHint ?? "No notes yet. Press N to add one."}
           </Text>
@@ -43,7 +43,7 @@ export function NotesView({
           </Stack>
         </Stack>
       ) : (
-        <Stack variant="notes-view-list" gap="2">
+        <Stack className="notes-view-list" gap="2">
           {filtered.map((n) => (
             <NotesListRow
               key={n.id}
@@ -77,8 +77,8 @@ const NotesListRow = memo(function NotesListRow({
   onDelete: (note: Note) => void;
 }) {
   return (
-    <Stack variant="note-row-item" gap="0">
-      <Stack variant="note-row-inner" gap="0">
+    <Stack gap="0" className="note-row-item">
+      <Stack gap="0" className="note-row-inner">
         <Stack variant="item-title" gap="0">
           <Button
             type="button"

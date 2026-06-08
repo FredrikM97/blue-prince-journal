@@ -2,7 +2,7 @@ import { Button } from "@/components/common/Button";
 import { Heading, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelLeft } from "@/components/common/SidePanel";
 import type { SteamDeletedImportEntry } from "@/data/steamImport";
 import type { StoredImage } from "@/lib/types";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
@@ -60,7 +60,7 @@ export function ImagesLeftPanel({
   }
 
   return (
-    <SidePanel.Left title="Images" subtitle={`${total} stored`} panelKey="images-library">
+    <SidePanelLeft title="Images" subtitle={`${total} stored`} panelKey="images-library">
       <Stack gap="2">
         <Text size="xs" tone="muted">
           Click an image to open details in the right panel.
@@ -147,6 +147,6 @@ export function ImagesLeftPanel({
           </Stack>
         )}
       </Stack>
-    </SidePanel.Left>
+    </SidePanelLeft>
   );
 }

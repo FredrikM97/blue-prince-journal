@@ -9,23 +9,23 @@ type GridGap = "2" | "3" | "4";
 type GridVariant = "default" | "gallery" | "cols-3-md" | "auto-fill-card" | "auto-fit" | "map-grid";
 
 function inlineGapClass(gap: InlineGap) {
-  if (gap === "1") return "inline-gap-1";
-  if (gap === "1.5") return "inline-gap-1_5";
-  if (gap === "2") return "inline-gap-2";
-  return "inline-gap-3";
+  if (gap === "1") return "gap-1";
+  if (gap === "1.5") return "gap-1.5";
+  if (gap === "2") return "gap-2";
+  return "gap-3";
 }
 
 function inlineAlignClass(align: InlineAlign) {
-  if (align === "start") return "inline-align-start";
-  if (align === "end") return "inline-align-end";
-  return "inline-align-center";
+  if (align === "start") return "items-start";
+  if (align === "end") return "items-end";
+  return "items-center";
 }
 
 function inlineJustifyClass(justify: InlineJustify) {
-  if (justify === "start") return "inline-justify-start";
-  if (justify === "center") return "inline-justify-center";
-  if (justify === "end") return "inline-justify-end";
-  return "inline-justify-between";
+  if (justify === "start") return "justify-start";
+  if (justify === "center") return "justify-center";
+  if (justify === "end") return "justify-end";
+  return "justify-between";
 }
 
 export function Inline({
@@ -45,10 +45,10 @@ export function Inline({
   className?: string;
   children: ReactNode;
 }) {
-  let classes = `inline-row ${inlineGapClass(gap)} ${inlineAlignClass(align)} ${inlineJustifyClass(justify)}`;
-  if (wrap) classes = `${classes} inline-wrap`;
+  let classes = `inline-row flex ${inlineGapClass(gap)} ${inlineAlignClass(align)} ${inlineJustifyClass(justify)}`;
+  if (wrap) classes = `${classes} flex-wrap`;
   if (className) classes = `${classes} ${className}`;
-  return createElement(as, { className: classes }, children);
+  return createElement(as, { className: classes.trim() }, children);
 }
 
 function gridGapClass(gap: GridGap) {
@@ -61,7 +61,9 @@ function gridVariantClass(variant: GridVariant) {
   if (variant === "gallery") return "grid-gallery";
   if (variant === "cols-3-md") return "grid-cols-3-md";
   if (variant === "auto-fill-card") return "grid-auto-fill-card";
-  if (variant === "auto-fit") return "ui-grid-auto-fit";
+  if (variant === "auto-fit") {
+    return "grid w-full gap-x-2 gap-y-0.5 [grid-template-columns:repeat(auto-fit,minmax(min(6.75rem,100%),1fr))]";
+  }
   if (variant === "map-grid") return "map-grid";
   return "";
 }

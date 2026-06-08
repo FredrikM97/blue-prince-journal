@@ -9,7 +9,7 @@ import { db } from "@/data/db";
 import { upsertCell, clearCell } from "@/data/mutations";
 import type { GridCell, Note, Todo } from "@/lib/types";
 import { MetaText } from "@/components/common/Typography";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelRight } from "@/components/common/SidePanel";
 import { Stack } from "@/components/common/Stack";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 
@@ -57,11 +57,11 @@ export function MapPage() {
   }
 
   let rightSidebar = (
-    <SidePanel.Right title="Preview" onClose={() => setActive(null)}>
+    <SidePanelRight title="Preview" onClose={() => setActive(null)}>
       <Stack gap="4">
         <MetaText>Select a map cell to edit room details, notes, and todos.</MetaText>
       </Stack>
-    </SidePanel.Right>
+    </SidePanelRight>
   );
   if (active) {
     rightSidebar = (

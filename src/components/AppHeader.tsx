@@ -43,9 +43,10 @@ import { MetaText, Text } from "@/components/common/Typography";
 
 export function AppHeader() {
   const buyMeACoffeeUrl = "https://buymeacoffee.com/fredrikm97";
-  const sections: SectionDef[] =
-    useLiveQuery(() => db.sections.toArray().then((s) => s.sort((a, b) => a.order - b.order))) ??
-    [];
+  const rawSections = useLiveQuery(() =>
+    db.sections.toArray().then((items) => items.sort((a, b) => a.order - b.order)),
+  );
+  const sections: SectionDef[] = useMemo(() => rawSections ?? [], [rawSections]);
   const search = useStore((s) => s.search);
   const setSearch = useStore((s) => s.setSearch);
   const [searchInput, setSearchInput] = useState(search);
@@ -224,8 +225,8 @@ export function AppHeader() {
         </DialogContent>
       </Dialog>
 
-      <Stack as="header" variant="app-header" gap="0">
-        <Stack variant="app-header-inner" gap="0">
+      <Stack as="header" className="app-header" gap="0">
+        <Stack className="app-header-inner" gap="0">
           <Link to="/" className="app-brand-link" onClick={openWelcomeScreen}>
             <Text as="span" variant="app-brand-badge" size="xs" tone="default">
               B
@@ -235,7 +236,7 @@ export function AppHeader() {
             </Text>
           </Link>
 
-          <Stack as="nav" variant="app-nav" gap="0">
+          <Stack as="nav" className="app-nav" gap="0">
             {sections
               .filter((s) => !s.hidden && (Boolean(s.builtin) || s.id === "books"))
               .map((s) => {
@@ -253,7 +254,7 @@ export function AppHeader() {
               })}
           </Stack>
 
-          <Stack variant="app-header-controls" gap="0">
+          <Stack className="app-header-controls" gap="0">
             {syncFolderName && (
               <Link
                 to="/settings"
@@ -267,7 +268,7 @@ export function AppHeader() {
               </Link>
             )}
             <ThemeToggle />
-            <Stack variant="app-search-wrap" gap="0">
+            <Stack className="app-search-wrap" gap="0">
               <Search className="app-search-icon" />
               <SuggestionsDropdown
                 showSuggestionHint={false}

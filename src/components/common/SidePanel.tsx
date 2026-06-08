@@ -77,8 +77,8 @@ export function PanelHeader({
   }
 
   return (
-    <Stack variant="panel-header" gap="0">
-      <Stack variant="panel-header-title-wrap" gap="0">
+    <Stack gap="0" className="panel-header">
+      <Stack gap="0" className="panel-header-title-wrap">
         <Heading as="h2" size={headingSize} leading="snug" muted={titleMuted}>
           <span style={{ textDecoration: titleDecoration }}>{title}</span>
         </Heading>
@@ -89,7 +89,7 @@ export function PanelHeader({
         )}
       </Stack>
       {(headerActions || onExpand || onClose) && (
-        <Stack variant="preview-header-actions" gap="0">
+        <Stack gap="0" className="preview-header-actions">
           {headerActions}
           {onExpand && (
             <Button variant="ghost" size="icon" onClick={onExpand} title="Expand preview">
@@ -155,7 +155,7 @@ function SidePanelComponent({
   }, [mobileDrawerControls, mobileDrawerKey, mobileDrawerSide]);
 
   return (
-    <Stack variant="side-panel-shell" gap="0">
+    <Stack gap="0" className="side-panel-shell">
       <PanelHeader
         title={title}
         textSize={textSize}
@@ -173,15 +173,10 @@ function SidePanelComponent({
   );
 }
 
-function SidePanelRight({ panelKey, ...props }: SidePanelVariantProps) {
+export function SidePanelRight({ panelKey, ...props }: SidePanelVariantProps) {
   return <SidePanelComponent {...props} mobileDrawerSide="right" mobileDrawerKey={panelKey} />;
 }
 
-function SidePanelLeft({ panelKey, ...props }: SidePanelVariantProps) {
+export function SidePanelLeft({ panelKey, ...props }: SidePanelVariantProps) {
   return <SidePanelComponent {...props} mobileDrawerSide="left" mobileDrawerKey={panelKey} />;
 }
-
-export const SidePanel = Object.freeze({
-  Right: SidePanelRight,
-  Left: SidePanelLeft,
-});

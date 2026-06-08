@@ -22,7 +22,7 @@ export function MapMiddlePanel({
   activeCell,
 }: MapMiddlePanelProps) {
   return (
-    <Stack variant="map-layout-main" gap="0">
+    <Stack className="map-layout-main" gap="0">
       <Grid as="div" variant="map-grid" gap="2">
         {Array.from({ length: GRID_ROWS }).flatMap((_, row) =>
           Array.from({ length: GRID_COLS }).map((__, col) => {

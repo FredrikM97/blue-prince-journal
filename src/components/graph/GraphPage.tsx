@@ -6,7 +6,7 @@ import { FilterSection } from "@/components/common/filter/FilterSection";
 import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
 import { GroupedRoomFilterSection } from "@/components/common/filter/GroupedRoomFilterSection";
 import { PageLayout } from "@/components/common/PageLayout";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelLeft } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
 import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
@@ -238,7 +238,7 @@ export function GraphPage() {
         mobileDrawerSide="right"
       >
         <PageLayout.Left>
-          <SidePanel.Left
+          <SidePanelLeft
             title="Graph"
             subtitle={`${displayNodes.length} entries · ${edges.length} links`}
           >
@@ -297,10 +297,10 @@ export function GraphPage() {
                 </FilterSection>
               )}
             </Stack>
-          </SidePanel.Left>
+          </SidePanelLeft>
         </PageLayout.Left>
         <PageLayout.Middle>
-          <Stack variant="graph-page-middle" gap="0">
+          <Stack className="graph-page-middle" gap="0">
             {nodes.length === 0 && (
               <EmptyState>
                 No notes or todos yet. Add entries to build your connection graph.
@@ -491,8 +491,8 @@ function GraphCanvas({
         </MetaText>
         <Stack variant="graph-toolbar-controls" gap="0">
           {actions}
-          <Stack variant="graph-zoom-controls" gap="0">
-            <Stack variant="graph-zoom-btn-minus" gap="0">
+          <Stack gap="0" className="flex items-center">
+            <Stack gap="0" className="graph-zoom-btn graph-zoom-btn-minus">
               <Button
                 variant="outline"
                 size="sm"
@@ -511,7 +511,7 @@ function GraphCanvas({
                 −
               </Button>
             </Stack>
-            <Stack variant="graph-zoom-btn-plus" gap="0">
+            <Stack gap="0" className="graph-zoom-btn graph-zoom-btn-plus">
               <Button
                 variant="outline"
                 size="sm"
