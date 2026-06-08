@@ -183,7 +183,7 @@ export function NotesEditorPanel({
         </Inline>
 
         {draft.imageIds.length > 0 ? (
-          <Stack variant="image-card-strip" gap="0">
+          <Stack gap="0" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
             {draft.imageIds.map((id) => (
               <ImageCard
                 key={id}

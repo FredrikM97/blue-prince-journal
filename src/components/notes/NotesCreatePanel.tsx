@@ -17,7 +17,7 @@ import { ImageCard } from "@/components/common/ImageCard";
 import { PendingImageList } from "@/components/common/input/PendingImageList";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelRight } from "@/components/common/SidePanel";
 import { MetaText, Text } from "@/components/common/Typography";
 import { Grid, Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
@@ -725,7 +725,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
         <Stack gap="1">
           <MetaText>Selected existing images: {form.selectedImageIds.length}</MetaText>
           {form.selectedImageIds.length > 0 && (
-            <Stack variant="image-card-strip" gap="0">
+            <Stack gap="0" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
               {form.selectedImageIds.map((id) => {
                 const img = store.images.find((item) => item.id === id);
                 if (!img) return null;
@@ -767,7 +767,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
 
   if (!store.open) {
     return (
-      <Stack variant="page-layout-panel" gap="2">
+      <Stack className="page-layout-panel" gap="2">
         <Text size="sm" tone="muted">
           Press N or use the add button to create a note.
         </Text>
@@ -776,7 +776,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   }
 
   return (
-    <SidePanel.Right
+    <SidePanelRight
       title={panelTitle}
       textSize="h2"
       onClose={closeCapturePanel}
@@ -784,7 +784,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
       headerActions={headerActions}
     >
       {content}
-    </SidePanel.Right>
+    </SidePanelRight>
   );
 }
 

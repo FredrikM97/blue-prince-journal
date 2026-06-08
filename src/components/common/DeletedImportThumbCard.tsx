@@ -58,8 +58,8 @@ export function DeletedImportThumbCard({
   }, [loadPreview, sourceKey]);
 
   return (
-    <Stack gap="1.5" variant="deleted-import-thumb">
-      <Stack as="div" gap="0" variant="deleted-import-thumb-stage">
+    <Stack gap="1.5" className="deleted-import-thumb">
+      <Stack as="div" gap="0" className="deleted-import-thumb-stage">
         <Button
           ref={buttonRef}
           variant="transparent"
@@ -74,14 +74,14 @@ export function DeletedImportThumbCard({
               style={{ height: "100%", width: "100%", objectFit: "cover" }}
             />
           ) : (
-            <Stack as="div" gap="0" variant="deleted-import-thumb-fallback">
+            <Stack as="div" gap="0" className="deleted-import-thumb-fallback">
               <Text as="div" size="xs" tone="muted">
                 Preview unavailable
               </Text>
             </Stack>
           )}
         </Button>
-        <Stack as="div" gap="0" variant="deleted-import-thumb-action">
+        <Stack as="div" gap="0" className="deleted-import-thumb-action">
           <Inline gap="1">
             <Button
               variant="outline-destructive"
@@ -105,7 +105,7 @@ export function DeletedImportThumbCard({
             </Button>
           </Inline>
         </Stack>
-        <Stack as="div" gap="0" variant="deleted-import-thumb-overlay">
+        <Stack as="div" gap="0" className="deleted-import-thumb-overlay">
           <Text as="div" size="xs" tone="default" variant="default" truncate>
             {fileName}
           </Text>
@@ -120,7 +120,7 @@ export function DeletedImportThumbCard({
             <DialogTitle>{fileName}</DialogTitle>
           </DialogHeader>
           {previewUrl && (
-            <Stack as="div" gap="0" variant="images-zoom-preview">
+            <Stack as="div" gap="0" className="images-zoom-preview">
               <img
                 src={previewUrl}
                 alt={fileName}
@@ -129,7 +129,7 @@ export function DeletedImportThumbCard({
             </Stack>
           )}
           {!previewUrl && (
-            <Stack as="div" gap="0" variant="deleted-import-thumb-fallback">
+            <Stack as="div" gap="0" className="deleted-import-thumb-fallback">
               <Text as="div" size="sm" tone="muted">
                 Preview unavailable
               </Text>

@@ -25,27 +25,28 @@ const TYPE_ICON_VARIANT: Record<
 
 export const NotesListItemSummary = memo(function NotesListItemSummary({ note }: { note: Note }) {
   const Icon = TYPE_ICON[note.type] ?? Lightbulb;
+  const iconClassName = `note-summary-icon ${TYPE_ICON_VARIANT[note.type]}`;
 
   return (
-    <Stack variant="note-summary-wrap" gap="0">
-      <Stack as="span" variant={TYPE_ICON_VARIANT[note.type]} gap="0">
+    <Stack gap="0" className="note-summary-wrap">
+      <Stack as="span" gap="0" className={iconClassName}>
         <Icon
           className="note-summary-icon-svg group-hover:scale-110"
           aria-label={`Type: ${TYPE_LABEL[note.type]}`}
         />
       </Stack>
-      <Stack variant="note-summary-body" gap="0">
+      <Stack gap="0" className="note-summary-body">
         <Text as="div" size="sm" weight="normal" truncate>
           {note.title}
         </Text>
-        <Stack variant="note-summary-meta" gap="0">
-          <Stack variant="note-summary-pills" gap="0">
-            <Stack as="span" variant="note-summary-time" gap="0">
+        <Stack gap="0" className="note-summary-meta">
+          <Stack gap="0" className="note-summary-pills">
+            <Stack as="span" gap="0" className="note-summary-time">
               {relTime(note.updatedAt)}
             </Stack>
-            <Stack as="span" variant="note-summary-tags-date" gap="0">
+            <Stack as="span" gap="0" className="note-summary-tags-date">
               {note.date && (
-                <Stack as="span" variant="note-pill-date" gap="0">
+                <Stack as="span" gap="0" className="note-pill note-pill-date">
                   {note.date}
                 </Stack>
               )}
@@ -57,12 +58,12 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
             </Stack>
             {note.room && <Chip variant="room">@{note.room}</Chip>}
             {note.status === "solved" && (
-              <Stack as="span" variant="note-pill-solved" gap="0">
+              <Stack as="span" gap="0" className="note-pill note-pill-solved">
                 solved
               </Stack>
             )}
             {note.imageIds.length > 0 && (
-              <Stack as="span" variant="note-summary-image-count" gap="0">
+              <Stack as="span" gap="0" className="note-summary-image-count">
                 📎 {note.imageIds.length}
               </Stack>
             )}

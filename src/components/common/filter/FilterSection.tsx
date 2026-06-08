@@ -6,21 +6,20 @@ import { MetaText } from "@/components/common/Typography";
 
 type FilterSectionVariant = "default" | "compact";
 type FilterSectionWidth = "fill" | "fit";
-type FilterSectionHeaderVariant = "filter-section-header-default" | "filter-section-header-compact";
 
-const HEADER_VARIANT_BY_SIZE: Record<FilterSectionVariant, FilterSectionHeaderVariant> = {
-  default: "filter-section-header-default",
-  compact: "filter-section-header-compact",
+const CONTROL_TEXT_CLASS_BY_VARIANT: Record<FilterSectionVariant, string> = {
+  default: "text-[8px]",
+  compact: "text-[10px]",
 };
 
-const CONTROL_SIZE_BY_VARIANT: Record<FilterSectionVariant, "default" | "compact"> = {
-  default: "default",
-  compact: "compact",
+const ACTION_TEXT_CLASS_BY_VARIANT: Record<FilterSectionVariant, string> = {
+  default: "text-[8px]",
+  compact: "text-[10px]",
 };
 
-const ACTION_SIZE_BY_VARIANT: Record<FilterSectionVariant, "default" | "compact"> = {
-  default: "default",
-  compact: "compact",
+const CONTROL_WIDTH_CLASS_BY_VARIANT: Record<FilterSectionWidth, string> = {
+  fill: "min-w-0 flex-1",
+  fit: "w-auto",
 };
 
 const CHEVRON_ICON_CLASS_BY_VARIANT: Record<FilterSectionVariant, string> = {
@@ -49,21 +48,30 @@ export function FilterSection({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const ChevronIcon = open ? ChevronDown : ChevronRight;
-  const headerVariant = HEADER_VARIANT_BY_SIZE[variant];
-  const controlSize = CONTROL_SIZE_BY_VARIANT[variant];
-  const actionSize = ACTION_SIZE_BY_VARIANT[variant];
   const chevronIconClassName = CHEVRON_ICON_CLASS_BY_VARIANT[variant];
+  const headerClassName =
+    variant === "compact"
+      ? "flex items-center justify-between text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+      : "flex items-center justify-between text-[8px] font-medium uppercase tracking-wide text-muted-foreground";
+  const controlButtonClassName = [
+    "flex min-h-6 cursor-pointer select-none items-center justify-between gap-1 px-1 py-0.5 font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+    CONTROL_TEXT_CLASS_BY_VARIANT[variant],
+    CONTROL_WIDTH_CLASS_BY_VARIANT[width],
+  ].join(" ");
+  const actionButtonClassName = [
+    "px-1 py-0.5 normal-case text-brass hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+    ACTION_TEXT_CLASS_BY_VARIANT[variant],
+  ].join(" ");
 
   return (
-    <Stack variant="filter-section" gap="0">
+    <Stack gap="0" className="space-y-1.5">
       {collapsible && (
-        <Stack variant={headerVariant} gap="0">
+        <Stack gap="0" className={headerClassName}>
           <Button
             type="button"
-            variant="control-row"
+            variant="transparent"
             size="content"
-            controlWidth={width}
-            controlSize={controlSize}
+            className={controlButtonClassName}
             onClick={() => setOpen((v) => !v)}
           >
             <span>
@@ -79,9 +87,9 @@ export function FilterSection({
           {onReset && (
             <Button
               type="button"
-              variant="action-link"
+              variant="transparent"
               size="content"
-              actionSize={actionSize}
+              className={actionButtonClassName}
               onClick={onReset}
             >
               All
@@ -91,14 +99,14 @@ export function FilterSection({
       )}
 
       {!collapsible && (
-        <Stack variant={headerVariant} gap="0">
+        <Stack gap="0" className={headerClassName}>
           <span>{title}</span>
           {onReset && (
             <Button
               type="button"
-              variant="action-link"
+              variant="transparent"
               size="content"
-              actionSize={actionSize}
+              className={actionButtonClassName}
               onClick={onReset}
             >
               All
@@ -108,7 +116,7 @@ export function FilterSection({
       )}
 
       {(!collapsible || open) && (
-        <Stack variant="filter-section-body" gap="0">
+        <Stack gap="0" className="space-y-0.5">
           {children}
         </Stack>
       )}

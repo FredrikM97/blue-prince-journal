@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { PenLine } from "lucide-react";
 import { Button } from "@/components/common/Button";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelRight } from "@/components/common/SidePanel";
 import { Stack } from "@/components/common/Stack";
 
 export function PreviewSidePanel({
@@ -43,7 +43,7 @@ export function PreviewSidePanel({
   }
 
   return (
-    <SidePanel.Right
+    <SidePanelRight
       title={title}
       subtitle={subtitle}
       done={done}
@@ -56,6 +56,6 @@ export function PreviewSidePanel({
       <Stack gap="2" variant="dialog-scroll-body">
         {children}
       </Stack>
-    </SidePanel.Right>
+    </SidePanelRight>
   );
 }

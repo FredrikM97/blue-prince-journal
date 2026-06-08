@@ -32,19 +32,16 @@
   }
 
   /* Panel header divider row (title + close/action on the right) */
-  .ui-header-panel,
   .panel-header {
     @apply flex items-start justify-between gap-2 border-b border-border pb-3;
   }
 
   /* Wraps panel title + subtitle stack in panel headers */
-  .ui-header-title-wrap,
   .panel-header-title-wrap {
     @apply min-w-0;
   }
 
   /* Standard panel container with vertical spacing used by sidebars */
-  .ui-shell-panel,
   .side-panel-shell {
     @apply rounded-lg border border-border bg-card p-2.5 text-sm flex flex-col gap-3 sm:p-3;
   }
@@ -93,21 +90,6 @@
   .image-card:hover .image-card-remove,
   .image-card-sm:hover .image-card-remove {
     @apply opacity-100;
-  }
-
-  /* Horizontal scroll strip for attached images in editor/create panels */
-  .image-card-strip {
-    @apply flex gap-2 overflow-x-auto pb-1;
-    scrollbar-width: thin;
-  }
-
-  /* Attached-images block used in note/todo/graph detail surfaces */
-  .note-details-images {
-    @apply space-y-2;
-  }
-
-  .note-details-images-label {
-    @apply text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
   }
 
   /* ─── Dialog primitives ──────────────────────────────────────────────────── */
@@ -249,7 +231,6 @@
   }
 
   /* Flex row for icons/buttons on the right of a panel header */
-  .ui-header-actions,
   .preview-header-actions {
     @apply flex shrink-0 items-start gap-1;
   }
@@ -337,62 +318,6 @@
     @apply inline-flex items-center rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] text-foreground;
   }
 
-  /* ─── Button variants ────────────────────────────────────────────────────── */
-
-  .btn-variant-default {
-    @apply bg-primary text-primary-foreground shadow hover:bg-primary/90;
-  }
-
-  .btn-variant-brass {
-    @apply bg-brass text-brass-foreground shadow hover:bg-brass/90;
-  }
-
-  .btn-variant-destructive {
-    @apply bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90;
-  }
-
-  .btn-variant-outline {
-    @apply border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground;
-  }
-
-  .btn-variant-outline-destructive {
-    @apply border border-destructive/60 bg-background text-destructive shadow-sm hover:bg-destructive/10 hover:text-destructive;
-  }
-
-  .btn-variant-secondary {
-    @apply bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80;
-  }
-
-  .btn-variant-ghost {
-    @apply hover:bg-accent hover:text-accent-foreground;
-  }
-
-  .btn-variant-transparent {
-    @apply bg-transparent hover:opacity-75;
-  }
-
-  .btn-variant-select {
-    @apply h-auto gap-1 rounded-md border px-3 py-1 text-xs font-medium shadow-sm;
-  }
-
-  .btn-variant-filter-toggle {
-    @apply flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card transition-colors hover:border-brass hover:bg-accent;
-  }
-
-  .btn-variant-overlay {
-    @apply fixed inset-x-0 bottom-0 top-14 z-40 rounded-none border-0 bg-black/45 p-0 hover:bg-black/45;
-  }
-
-  /* ─── SelectButton states ────────────────────────────────────────────────── */
-
-  .select-btn-active {
-    @apply border-brass bg-brass text-brass-foreground shadow-sm;
-  }
-
-  .select-btn-inactive {
-    @apply border-border bg-secondary text-foreground hover:border-brass hover:bg-accent;
-  }
-
   /* ─── Dropdown active item ───────────────────────────────────────────────── */
 
   /* Applied to a DropdownMenuItem that represents the current selection */
@@ -442,58 +367,6 @@
     @apply mt-1 pt-1;
   }
 
-  .inline-row {
-    @apply flex;
-  }
-
-  .inline-wrap {
-    @apply flex-wrap;
-  }
-
-  .inline-align-start {
-    @apply items-start;
-  }
-
-  .inline-align-center {
-    @apply items-center;
-  }
-
-  .inline-align-end {
-    @apply items-end;
-  }
-
-  .inline-justify-start {
-    @apply justify-start;
-  }
-
-  .inline-justify-center {
-    @apply justify-center;
-  }
-
-  .inline-justify-between {
-    @apply justify-between;
-  }
-
-  .inline-justify-end {
-    @apply justify-end;
-  }
-
-  .inline-gap-1 {
-    @apply gap-1;
-  }
-
-  .inline-gap-1_5 {
-    @apply gap-1.5;
-  }
-
-  .inline-gap-2 {
-    @apply gap-2;
-  }
-
-  .inline-gap-3 {
-    @apply gap-3;
-  }
-
   .section-block {
     @apply border-t border-border pt-6;
   }
@@ -516,121 +389,6 @@
 
   .content-align-left {
     @apply text-left;
-  }
-
-  /* ─── Filter sections ────────────────────────────────────────────────────── */
-
-  /* Generic compact stack rhythm */
-  .ui-block-tight {
-    @apply space-y-1.5;
-  }
-
-  /* Generic compact body rhythm */
-  .ui-body-tight {
-    @apply space-y-0.5;
-  }
-
-  /* Generic header row layout */
-  .ui-header-row {
-    @apply flex items-center justify-between;
-  }
-
-  .ui-header-text-default {
-    @apply text-[10px] font-medium uppercase tracking-wide text-muted-foreground;
-  }
-
-  .ui-header-text-compact {
-    @apply text-[10px];
-  }
-
-  /* Generic control row behavior */
-  .ui-control-row {
-    @apply flex cursor-pointer select-none items-center justify-between gap-1 hover:text-foreground;
-  }
-
-  .ui-width-fill {
-    @apply min-w-0 flex-1;
-  }
-
-  .ui-width-fit {
-    @apply w-auto;
-  }
-
-  .ui-control-size-default {
-    @apply min-h-6 px-1 py-0.5 text-[8px] font-medium uppercase tracking-wide text-muted-foreground;
-  }
-
-  .ui-control-size-compact {
-    @apply min-h-6 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground;
-  }
-
-  /* Generic link-like action text */
-  .ui-action-link {
-    @apply px-1 py-0.5 normal-case text-brass hover:underline;
-  }
-
-  .ui-action-link-size-default {
-    @apply text-[8px];
-  }
-
-  .ui-action-link-size-compact {
-    @apply text-[10px];
-  }
-
-  /* Generic selectable chip/toggle base */
-  .ui-toggle-chip {
-    @apply flex cursor-pointer items-center rounded-md transition-colors;
-  }
-
-  .ui-toggle-chip-surface {
-    @apply border border-border bg-card text-foreground hover:border-brass hover:bg-accent;
-  }
-
-  .ui-toggle-width-full {
-    @apply w-full;
-  }
-
-  .ui-toggle-width-fit {
-    @apply w-auto;
-  }
-
-  .ui-align-center {
-    @apply justify-center text-center;
-  }
-
-  .ui-align-left {
-    @apply justify-start text-left;
-  }
-
-  .ui-toggle-size-default {
-    @apply px-2 py-1 text-[11px];
-  }
-
-  .ui-toggle-state-on-filled {
-    @apply border-brass bg-brass text-brass-foreground;
-  }
-
-  .ui-toggle-state-on-outline {
-    @apply border-brass bg-card text-foreground;
-  }
-
-  .ui-toggle-state-off {
-    @apply opacity-75;
-  }
-
-  .ui-toggle-size-compact {
-    @apply h-5.5 px-1.5 py-0.5 text-[8px];
-  }
-
-  /* Generic responsive control grid */
-  .ui-grid-auto-fit {
-    @apply grid w-full gap-x-2 gap-y-0.5;
-    grid-template-columns: repeat(auto-fit, minmax(min(6.75rem, 100%), 1fr));
-  }
-
-  /* Generic wrapped controls row */
-  .ui-wrap-controls {
-    @apply flex w-full flex-wrap gap-1.5;
   }
 
   .grid-layout {
@@ -809,22 +567,16 @@
   }
 
   .ui-layout-mobile-drawer .side-panel-shell,
-  .ui-layout-mobile-drawer .ui-shell-panel,
-  .page-layout-mobile-drawer .side-panel-shell,
-  .page-layout-mobile-drawer .ui-shell-panel {
+  .page-layout-mobile-drawer .side-panel-shell {
     @apply w-full rounded-none border-0 bg-background p-0;
   }
 
   .ui-layout-mobile-drawer .panel-header,
-  .ui-layout-mobile-drawer .ui-header-panel,
-  .page-layout-mobile-drawer .panel-header,
-  .page-layout-mobile-drawer .ui-header-panel {
+  .page-layout-mobile-drawer .panel-header {
     @apply sticky top-0 z-10 border-b border-border bg-background pt-3 backdrop-blur-sm;
   }
 
-  .ui-layout-mobile-drawer .ui-header-actions,
   .ui-layout-mobile-drawer .preview-header-actions,
-  .page-layout-mobile-drawer .ui-header-actions,
   .page-layout-mobile-drawer .preview-header-actions {
     @apply items-center gap-1.5;
   }

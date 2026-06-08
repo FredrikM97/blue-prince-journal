@@ -26,15 +26,15 @@
     aspect-ratio: 1 / 1;
   }
 
-  .btn-variant-map-cell[data-map-status="neutral"] {
+  .map-cell[data-map-status="neutral"] {
     @apply bg-card border-border text-muted-foreground;
   }
 
-  .btn-variant-map-cell[data-map-status="cleared"] {
+  .map-cell[data-map-status="cleared"] {
     @apply bg-brass border-brass text-brass-foreground;
   }
 
-  .btn-variant-map-cell[data-map-selected="true"] {
+  .map-cell[data-map-selected="true"] {
     @apply border-ring ring-2 ring-ring ring-inset;
   }
 

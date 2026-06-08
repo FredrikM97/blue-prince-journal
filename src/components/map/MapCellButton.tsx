@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Button } from "@/components/common/Button";
 
 type MapCellStatus = "neutral" | "cleared";
 
@@ -20,16 +19,14 @@ export function MapCellButton({
   }
 
   return (
-    <Button
+    <button
       type="button"
-      variant="map-cell"
-      size="content"
-      direction="column"
+      className="map-cell inline-flex cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
       onClick={onClick}
       data-map-status={status}
       data-map-selected={selectedState}
     >
       {children}
-    </Button>
+    </button>
   );
 }

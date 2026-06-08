@@ -10,15 +10,10 @@ import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery
 import { Button } from "@/components/common/Button";
 import { Stack } from "@/components/common/Stack";
 import { PreviewEditModeActions } from "@/components/common/PreviewEditModeActions";
+import { getTodoPriorityChipVariant } from "@/components/todos/todoPriority";
 import { saveTodo } from "@/data/mutations";
 import { PenLine } from "lucide-react";
 import { toast } from "sonner";
-
-function getPriorityVariant(priority: Todo["priority"]) {
-  if (priority === "high") return "priority-high";
-  if (priority === "low") return "priority-low";
-  return "priority-normal";
-}
 
 export function TodoPreviewContent({ todo }: { todo: Todo }) {
   const body = todo.body;
@@ -28,7 +23,7 @@ export function TodoPreviewContent({ todo }: { todo: Todo }) {
         <Chip variant="solid">{todo.status}</Chip>
       </MetaRow>
       <MetaRow label="Priority">
-        <Chip variant={getPriorityVariant(todo.priority)}>{todo.priority}</Chip>
+        <Chip variant={getTodoPriorityChipVariant(todo.priority)}>{todo.priority}</Chip>
       </MetaRow>
       <MetaRow label="Scope">
         <Chip variant="solid">{todo.scope}</Chip>

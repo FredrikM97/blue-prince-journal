@@ -18,7 +18,7 @@ import { NotesView } from "./NotesView";
 import { useNotesPageUI } from "@/hooks/useNotesPageUI";
 import { TodoRightPanel } from "@/components/todos/TodoRightPanel";
 import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelLeft, SidePanelRight } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
@@ -69,9 +69,9 @@ export function NotesPage({
   });
 
   let rightPanelContent: React.ReactNode = (
-    <SidePanel.Right title="Preview">
+    <SidePanelRight title="Preview">
       <MetaText>Select a note to preview or edit details.</MetaText>
-    </SidePanel.Right>
+    </SidePanelRight>
   );
 
   const hasActiveNote = activeNote !== null;
@@ -146,9 +146,9 @@ export function NotesPage({
     <>
       <PageLayout variant="panel" mobileDrawerOpen={captureOpen} mobileDrawerSide="right">
         <PageLayout.Left>
-          <SidePanel.Left title={title} subtitle={`${filtered.length} ${entryLabel}`}>
+          <SidePanelLeft title={title} subtitle={`${filtered.length} ${entryLabel}`}>
             <NotesFilterPanel filters={filterState} actions={filterActions} />
-          </SidePanel.Left>
+          </SidePanelLeft>
         </PageLayout.Left>
         <PageLayout.Middle>
           <NotesView
@@ -229,7 +229,7 @@ function NotesRightPanel({
 
   if (panelMode === "edit") {
     return (
-      <SidePanel.Right
+      <SidePanelRight
         title="Edit note"
         textSize="h2"
         onClose={onClose}
@@ -248,7 +248,7 @@ function NotesRightPanel({
         }
       >
         <NotesEditorPanel draft={draft ?? activeNote} setDraft={setDraft} onSave={onSave} />
-      </SidePanel.Right>
+      </SidePanelRight>
     );
   }
 

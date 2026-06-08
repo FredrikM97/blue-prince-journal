@@ -4,7 +4,7 @@ import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery
 import { Heading, MetaText, Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/Stack";
 import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelRight } from "@/components/common/SidePanel";
 import type { Note } from "@/lib/types";
 
 /**
@@ -50,19 +50,19 @@ export function GraphRightPanel({
 
   if (!selectedNote) {
     return (
-      <SidePanel.Right title={panelTitle} subtitle={panelSubtitle} onClose={onClose}>
+      <SidePanelRight title={panelTitle} subtitle={panelSubtitle} onClose={onClose}>
         <Stack gap="3">
           {summary}
           <Text size="sm" tone="muted">
             Select a note node to inspect details.
           </Text>
         </Stack>
-      </SidePanel.Right>
+      </SidePanelRight>
     );
   }
 
   return (
-    <SidePanel.Right title={panelTitle} subtitle={panelSubtitle} onClose={onClose}>
+    <SidePanelRight title={panelTitle} subtitle={panelSubtitle} onClose={onClose}>
       <Stack gap="4">
         {summary}
 
@@ -146,6 +146,6 @@ export function GraphRightPanel({
           </Stack>
         </SectionBlock>
       </Stack>
-    </SidePanel.Right>
+    </SidePanelRight>
   );
 }

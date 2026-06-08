@@ -6,7 +6,7 @@ import { PagedNotesList } from "@/components/common/PagedNotesList";
 import { StoredImageView } from "@/components/common/StoredImageView";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/Stack";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelRight } from "@/components/common/SidePanel";
 import { Text } from "@/components/common/Typography";
 import { InputField } from "@/components/common/input/InputField";
 import { ImageZoomDialogContent } from "@/components/common/ImageZoomDialogContent";
@@ -15,7 +15,7 @@ import type { Note, StoredImage } from "@/lib/types";
 // Image styling containers (requires wrapper for CSS styling)
 function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
   return (
-    <Stack variant="images-detail-preview" gap="0">
+    <Stack gap="0" className="images-detail-preview">
       {children}
     </Stack>
   );
@@ -51,13 +51,13 @@ export function ImagesRightPanel({
 }) {
   if (!img) {
     return (
-      <SidePanel.Right title="Image" panelKey="image-empty">
-        <Stack variant="centered-empty-message" gap="0">
+      <SidePanelRight title="Image" panelKey="image-empty">
+        <Stack className="flex items-center justify-center py-8" gap="0">
           <Text tone="muted" size="sm">
             Select an image from the library to view details
           </Text>
         </Stack>
-      </SidePanel.Right>
+      </SidePanelRight>
     );
   }
 
@@ -103,7 +103,7 @@ function ImagesInspectorPanel({
 
   return (
     <>
-      <SidePanel.Right
+      <SidePanelRight
         title={getImageLabel(img) || "Image"}
         subtitle={`${relatedNotes.length} related note${relatedNotes.length === 1 ? "" : "s"}`}
         headerActions={
@@ -173,7 +173,7 @@ function ImagesInspectorPanel({
             cardVariant="default"
           />
         </Stack>
-      </SidePanel.Right>
+      </SidePanelRight>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent variant="expand">

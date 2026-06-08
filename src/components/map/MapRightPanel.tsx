@@ -7,7 +7,7 @@ import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDro
 import { Eraser, Trash2 } from "lucide-react";
 import type { GridCell, Note, Todo } from "@/lib/types";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { SidePanel } from "@/components/common/SidePanel";
+import { SidePanelRight } from "@/components/common/SidePanel";
 import { Stack } from "@/components/common/Stack";
 import { MetaText, Text } from "@/components/common/Typography";
 
@@ -57,7 +57,7 @@ export function MapRightPanel({
   }
 
   return (
-    <SidePanel.Right title={panelTitle} onClose={onClose} panelKey={`map:${coordLabel}`}>
+    <SidePanelRight title={panelTitle} onClose={onClose} panelKey={`map:${coordLabel}`}>
       <Stack gap="4">
         <Stack gap="1">
           <MetaText>Room</MetaText>
@@ -138,7 +138,7 @@ export function MapRightPanel({
         )}
         {activeTodos.length > 0 && <MapRoomTodos todos={activeTodos} />}
       </Stack>
-    </SidePanel.Right>
+    </SidePanelRight>
   );
 }
 
