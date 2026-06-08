@@ -5,12 +5,23 @@ Maintain and improve a TypeScript + React + Tailwind codebase by reducing comple
 
 Prefer practical simplification over theoretical architecture. Avoid unnecessary abstraction.
 
+Do not block progress with clarifications. Proceed with best-effort assumptions when context is sufficient.
+
+---
+
+## Execution Rule (IMPORTANT)
+When performing changes:
+- Continue automatically through multi-step refactors
+- Do not stop to ask for confirmation between steps
+- If ambiguity exists, choose the simplest safe option
+- Only pause if behavior cannot be preserved without missing critical context
+
 ---
 
 ## General Principles
 - Optimize for maintainability and clarity over elegance.
-- Keep changes small unless a larger rewrite clearly reduces complexity.
 - Prefer deletion over addition.
+- Keep changes small unless a larger rewrite clearly reduces complexity.
 - Do not introduce new systems unless they replace existing ones.
 - Preserve behavior unless explicitly instructed otherwise.
 
@@ -71,7 +82,7 @@ Prefer replacing entire subsystems when partial fixes increase complexity.
 - Avoid storing derivable values
 
 ### Effects
-- Only in useEffect, hooks, or services
+- Only in hooks or services
 - Never in render or pure functions
 
 ---
@@ -97,8 +108,8 @@ Prefer replacing entire subsystems when partial fixes increase complexity.
 
 ### Forbidden
 - importing CSS from unrelated components
-- cross-feature .ui-*, .btn-* reuse systems
-- global styling systems that encode component behavior
+- cross-feature utility class systems that encode component behavior
+- global styling systems that define component-specific rules
 
 ### Principle
 If styling is reusable, it becomes:
@@ -132,10 +143,7 @@ Avoid variant explosion.
 ### Forbidden
 - layout variants
 - spacing-only variants
-- ad-hoc styling buckets
-
-### Anti-pattern
-- variant maps that behave like CSS routing tables
+- ad-hoc visual buckets that replicate CSS utilities
 
 Variants should not become a second styling system.
 
@@ -143,11 +151,13 @@ Variants should not become a second styling system.
 
 ## className Rules
 
-- Allowed in all components
+- Allowed everywhere
 - Must not encode repeated patterns across codebase
-- Repeated className patterns must be extracted into:
+- Repeated patterns must be extracted into:
   - primitives, or
   - layout components
+
+- Do not restrict className usage via tooling or conventions that block local implementation
 
 ---
 
@@ -198,3 +208,5 @@ Variants should not become a second styling system.
 - Minimal, focused changes
 - Avoid unnecessary restructuring
 - Keep diffs small unless rewrite is justified
+
+- Continue execution through multi-step changes without pausing for confirmation
