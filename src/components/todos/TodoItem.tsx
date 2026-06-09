@@ -4,7 +4,7 @@ import { CheckCircle2, Circle, Eye, MoreHorizontal, Trash2 } from "lucide-react"
 import { Button } from "@/components/common/Button";
 import { getTodoPriorityChipVariant } from "@/components/todos/todoPriority";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { Text } from "@/components/common/Typography";
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/common/dropdown/DropdownMenu";
+} from "@/components/common/menu/DropdownMenu";
 
 export function TodoItem({
   todo,
@@ -40,11 +40,12 @@ export function TodoItem({
               <Stack gap="0" className="todo-row-title-button-wrap">
                 <Button
                   type="button"
-                  variant="transparent"
+                  variant="ghost"
                   size="content"
                   fullWidth
                   justify="start"
                   textAlign="left"
+                  className="bg-transparent hover:bg-transparent hover:opacity-75"
                   onClick={onOpenPreview}
                 >
                   <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>

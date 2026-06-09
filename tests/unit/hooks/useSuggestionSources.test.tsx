@@ -14,7 +14,7 @@ vi.mock("@/data/store", () => ({
   useStore: (selector: (state: typeof ctx.state) => unknown) => selector(ctx.state),
 }));
 
-vi.mock("@/data/rooms", () => ({
+vi.mock("@/data/rooms/rooms", () => ({
   getRoomCatalog: () => ctx.catalog,
 }));
 

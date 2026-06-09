@@ -1,168 +1,167 @@
-# Agent Instructions (High Efficiency)
+# Agent Instructions
 
 ## Goal
 Maintain and improve a TypeScript + React + Tailwind codebase by reducing complexity, duplication, and maintenance cost.
 
-Avoid unnecessary abstraction. Prefer practical simplification.
+---
 
-## Modes (CRITICAL)
-Refactor / Feature / Bugfix / Minimal
+## Modes
+Refactor / Feature / Bugfix / Minimal  
 Do not mix modes. Default = Minimal.
 
-## Execution (CRITICAL)
-- Continue multi-step changes
-- Do not ask for confirmation
-- Choose simplest safe option
-- Identify all affected files before modifying
-- Only pause if behavior cannot be preserved
+---
 
-## Context (CRITICAL)
-- Use provided code as primary context
-- Modify other files only when clearly required
-- Do not infer unrelated system parts
-- Avoid repetition or speculation
+## Execution
+- continue multi-step changes
+- do not ask for confirmation
+- choose simplest safe solution
+- identify all affected files before modifying
+- stop only if behavior cannot be preserved
 
-## Decisions (CRITICAL)
-- Do not list alternatives
-- Do not explore multiple approaches
-- Choose one solution and proceed
+---
 
-## Output (CRITICAL)
-- Prefer minimal, focused changes
-- Avoid unnecessary code
-- Do not include unrelated parts
-- No explanations unless requested
+## Context
+- use provided code as primary context
+- modify other files only when required
+- do not assume unrelated system parts
 
-## General
-- Prefer deletion over addition
-- Preserve behavior unless instructed
-- Avoid unnecessary abstraction
-- No new systems unless replacing existing
-- Avoid overengineering
-- Follow existing patterns
-- Reuse existing components and logic by default
-- Keep structure consistent across similar components
+---
 
-## Refactor
-Allow rewrites only if:
-- duplication removed
-- concepts reduced
-- system simplified
+## Decisions
+- choose one solution
+- no alternatives or exploration
 
-Do NOT:
-- add abstraction layers
-- expand variants/config
+---
 
-Strategy:
-- identify affected files first
-- apply in one pass
+## Output
+- minimal changes only
+- no unrelated code
+- no explanation unless requested
 
-## Context Isolation (CRITICAL)
-- Changes affect smallest unit possible
-- Prefer hooks, pure functions, services
-- Single responsibility per file
+---
 
-## Multi-file Changes
-- Keep changes minimal and consistent
-- Modify additional files only when required
-- Ensure consistency across all affected files
+## Core Rules
+- prefer deletion over addition
+- avoid abstraction unless clearly required
+- no new systems unless replacing existing
+- reuse existing components before creating new ones
+- keep changes small and consistent
+- group related state and props into single objects when possible
+
+---
 
 ## File Responsibility
-- .tsx -> UI only
-- .ts -> hooks, logic, services, types
-- Hooks must not return JSX
-- Domain logic must be pure
-- Services contain no UI logic
-- Components should not contain heavy business logic
+- .tsx → UI only
+- .ts → hooks, logic, services, types
+- no JSX in hooks
+- domain logic must be pure
+- services contain no UI logic
+- components do not contain heavy business logic
 
-## Reuse & Structure (CRITICAL)
-- One concept = one component
-- Do not create similar components with small differences
-- Reuse existing components before creating new ones
+---
 
-### Shell
-- Use shared shells (Dialog, Panel, Preview)
-- Layout + behavior defined in shell
-- Content via props/children
+## Structure
+- one concept = one component
+- no similar components with small differences
+- shared behavior exists once
+- prefer composition using children over specialized components
+- avoid wrapper components with no unique behavior
 
-### Composition
-- Prefer composition over specialization
-- Pass UI/actions/content via props
+---
 
-### Behavior
-- Shared logic exists once (hooks/flags)
-- No duplicated interaction logic
+## State
+- prefer grouped state over multiple independent fields
+- avoid excessive value/onChange prop pairs
+- pass state as a single object for one concept
+
+---
 
 ## Architecture
-
 UI (.tsx):
-- render + local interaction only
-- no API access
+- rendering and local interaction only
 
 Domain (.ts):
 - pure functions only
 
 State (.ts):
-- hooks manage state/effects
+- hooks manage state and effects
 
 Data (.ts):
-- services for external access only
+- IO and persistence only
 
-## React & Styling (CRITICAL)
-- Functional components only
-- Keep components small
-- Extract complex/reusable logic into hooks
+---
 
-### State
-- Prefer derived values over duplicated state
+## Styling
 
-### Effects
-- Only in hooks
+Component owns its styling.
+
+Order:
+1. inline Tailwind
+2. component reuse
+3. CSS only when required
 
 ### Tailwind
-- Avoid unique styling per usage
-- Prefer existing patterns
-- Reuse layout/spacing systems
+- use inline by default
+- keep styling local and readable
+- do not extract className into constants
+- do not create styling abstraction or variant systems
 
-### Reuse
-- Extract repeated patterns into components or props
-
-### Variants
-- Semantic only
-- No layout/spacing variants
-
-### className
-- Allowed, but no reusable patterns inline
+### Component Reuse
+- extract repeated UI into components, not style constants
 
 ### CSS
-- Component-owned styling
-- No cross-component dependencies
-- Prefer removing CSS over adding
+Use only when:
+- complex selectors required
+- structural or markdown/system styling
+
+Rules:
+- scoped to one component
+- no shared/global CSS
+- prefer deletion over extension
+
+### className
+- inline usage only
+- no reusable style constants or mapping systems
+
+---
+
+## Refactor
+Allowed only if:
+- duplication removed
+- system simplified
+
+Rules:
+- no abstraction layers
+- no expanding variants
+- identify all affected files
+- apply changes in one pass
+
+---
 
 ## TypeScript
-- Avoid any
-- Prefer explicit types
-- Use discriminated unions where useful
-- Prefer narrowing over assertions
+- avoid any
+- prefer explicit types
+- use narrowing over assertions
 
-## Additional Constraint
-- Avoid hidden coupling between components
+---
 
-## Mode Behavior
+## Constraints
+- avoid hidden coupling between components
+
+---
+
+## Modes Behavior
 
 Refactor:
-- Reduce duplication and complexity
-- Consolidate components and logic
+- remove duplication and complexity
 
 Feature:
-- Extend existing components first
-- Use composition instead of duplication
-- Keep feature isolated
+- extend existing components
+- keep changes isolated
 
 Bugfix:
-- Fix root cause
-- Minimal change only
+- fix root cause with minimal change
 
 Minimal:
-- Smallest possible change
-- No restructuring
+- smallest possible change
+- no restructuring

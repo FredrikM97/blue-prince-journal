@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useNotesPageData } from "@/hooks/useNotesPageData";
+import { useNotesPageData } from "@/components/notes/hooks/useNotesPageData";
 import type { Note, Todo } from "@/lib/types";
 
 const notes: Note[] = [
@@ -23,7 +23,7 @@ const todos: Todo[] = [
   {
     id: "t1",
     title: "Check attic",
-    notes: "Search the west shelf",
+    body: "Search the west shelf",
     room: "Attic",
     tags: ["investigate"],
     status: "open",

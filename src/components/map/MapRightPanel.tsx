@@ -3,12 +3,12 @@ import { useNavigate } from "@tanstack/react-router";
 import { PagedNotesList } from "@/components/common/PagedNotesList";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { InputField } from "@/components/common/input/InputField";
-import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
+import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
 import { Eraser, Trash2 } from "lucide-react";
 import type { GridCell, Note, Todo } from "@/lib/types";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { SidePanelRight } from "@/components/common/SidePanel";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { MetaText, Text } from "@/components/common/Typography";
 
 export interface MapRightPanelProps {

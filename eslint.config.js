@@ -1,118 +1,86 @@
-import js from "@eslint/js";
-import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
-import globals from "globals";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
-import tseslint from "typescript-eslint";
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
+import importPlugin from 'eslint-plugin-import';
 
-export default tseslint.config(
-  { ignores: ["dist", ".output", ".vinxi"] },
+export default [
+  js.configs.recommended,
+
+  ...tseslint.configs.recommended,
 
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ["**/*.{ts,tsx}"],
+    files: ['**/*.ts', '**/*.tsx'],
+
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+      },
     },
+
     plugins: {
-      "react-hooks": reactHooks,
-      "react-refresh": reactRefresh,
+      react: reactPlugin,
+      'react-hooks': reactHooks,
+      import: importPlugin,
     },
+
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // ✅ General
+      'no-console': 'warn',
+      'no-duplicate-imports': 'error',
+      eqeqeq: 'error',
 
-      "no-restricted-imports": [
-        "error",
+      // ✅ TypeScript
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['warn'],
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+
+      // ✅ React
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+
+      // ✅ Hooks (IMPORTANT)
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+
+      // ✅ Simplicity / maintainability
+      complexity: ['warn', 10],
+      'max-lines-per-function': ['warn', { max: 80, skipBlankLines: true }],
+      'no-nested-ternary': 'warn',
+
+      // ✅ Imports / structure
+      'import/order': [
+        'error',
         {
-          paths: [
-            {
-              name: "server-only",
-              message:
-                "TanStack Start does not use the Next.js `server-only` package. Rename the module or use @tanstack/react-start/server-only.",
-            },
-          ],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc' },
         },
       ],
-
-      "no-restricted-syntax": [
-        "error",
-
-        {
-          selector:
-            "JSXOpeningElement[name.type='JSXIdentifier'][name.name=/^(button|input|textarea|select|a)$/]",
-          message:
-            "Use shared UI primitives instead of raw HTML elements.",
-        },
-
-        {
-          selector:
-            "JSXOpeningElement[name.type='JSXIdentifier'][name.name=/^[a-z]/] JSXAttribute[name.name='className']",
-          message:
-            "Avoid className on native elements in feature components. Use design system primitives instead.",
-        },
-
-        {
-          selector: "Program > ImportDeclaration:not(:first-child)",
-          message: "Keep all imports at the top of the file.",
-        },
-      ],
-
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true, allowExportNames: ["getRouter"] },
-      ],
-
-      "@typescript-eslint/no-unused-vars": "off",
     },
   },
 
+  // ✅ TS stricter logic (non-UI files)
   {
-    files: ["src/components/**/*.tsx"],
-    ignores: ["src/components/common/Button.tsx"],
+    files: ['**/*.ts'],
     rules: {
-      "no-restricted-syntax": [
-        "error",
-        {
-          selector: "JSXOpeningElement[name.name='button']",
-          message:
-            "Use shared Button primitives from @/components/common/Button instead of raw <button>.",
-        },
-      ],
+      complexity: ['warn', 8],
     },
   },
 
+  // ✅ UI constraints (TSX)
   {
-    files: ["src/components/common/ImageCard.tsx"],
+    files: ['**/*.tsx'],
     rules: {
-      "no-restricted-syntax": "off",
+      'max-lines-per-function': ['warn', { max: 60 }],
     },
   },
-
-  {
-    files: ["src/components/**/*.tsx"],
-    ignores: [
-      "src/components/common/Button.tsx",
-      "src/components/common/Typography.tsx",
-      "src/components/common/LayoutPrimitives.tsx",
-      "src/components/common/Dialog.tsx",
-      "src/components/common/Tabs.tsx",
-      "src/components/common/ImageCard.tsx",
-      "src/components/common/dropdown/**/*.tsx",
-      "src/components/common/input/**/*.tsx",
-    ],
-    rules: {
-      "no-restricted-syntax": [
-        "warn",
-        {
-          selector:
-            "JSXOpeningElement[name.type='JSXIdentifier'][name.name=/^[a-z]/] > JSXAttribute[name.name='className']",
-          message:
-            "Avoid className on native elements in feature components. Use shared primitives instead.",
-        },
-      ],
-    },
-  },
-
-  eslintPluginPrettier,
-);
+];

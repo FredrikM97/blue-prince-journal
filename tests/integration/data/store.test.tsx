@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Note, Todo } from "@/lib/types";
 import { buildNote, buildTodo } from "../../fixtures/domainBuilders";
-import { useStore } from "@/data/store";
+import { useStore } from "@/hooks/useStore";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -9,7 +9,7 @@ import { useStore } from "@/data/store";
 
 const mockScheduleWrite = vi.fn();
 
-vi.mock("@/data/sync", () => ({
+vi.mock("@/data/sync/sync", () => ({
   syncRuntime: {
     scheduleWrite: mockScheduleWrite,
     disconnect: vi.fn(async () => {}),
@@ -74,7 +74,7 @@ vi.mock("@/data/db", () => ({
   applySnapshot: vi.fn(async () => {}),
 }));
 
-vi.mock("@/data/rooms", () => ({
+vi.mock("@/data/rooms/rooms", () => ({
   cellId: (row: number, col: number) => `${row},${col}`,
   clearCustomRooms: vi.fn(),
 }));
@@ -176,7 +176,7 @@ describe("mutations", () => {
   });
 
   it("saveNote writes to db and schedules sync", async () => {
-    const { saveNote } = await import("@/data/mutations");
+    const { saveNote } = await import("@/data/mutations/noteMutations");
     const note = buildNote({ id: "n1", title: "Test" });
     await saveNote(note);
     expect(mockDb.notes.put).toHaveBeenCalled();
@@ -184,7 +184,7 @@ describe("mutations", () => {
   });
 
   it("saveTodo writes to db and schedules sync", async () => {
-    const { saveTodo } = await import("@/data/mutations");
+    const { saveTodo } = await import("@/data/mutations/todoMutations");
     const todo = buildTodo({ id: "t1", title: "Task" });
     await saveTodo(todo);
     expect(mockDb.todos.put).toHaveBeenCalled();
@@ -192,21 +192,21 @@ describe("mutations", () => {
   });
 
   it("removeNote deletes from db and schedules sync", async () => {
-    const { removeNote } = await import("@/data/mutations");
+    const { removeNote } = await import("@/data/mutations/noteMutations");
     await removeNote("n1");
     expect(mockDb.notes.delete).toHaveBeenCalledWith("n1");
     expect(mockScheduleWrite).toHaveBeenCalled();
   });
 
   it("removeTodo deletes from db and schedules sync", async () => {
-    const { removeTodo } = await import("@/data/mutations");
+    const { removeTodo } = await import("@/data/mutations/todoMutations");
     await removeTodo("t1");
     expect(mockDb.todos.delete).toHaveBeenCalledWith("t1");
     expect(mockScheduleWrite).toHaveBeenCalled();
   });
 
   it("toggleTodoStatus updates todo status", async () => {
-    const { toggleTodoStatus } = await import("@/data/mutations");
+    const { toggleTodoStatus } = await import("@/data/mutations/todoMutations");
     const todo = buildTodo({ id: "t1", status: "open" });
     mockDb.todos.get.mockResolvedValueOnce(todo as never);
     await toggleTodoStatus("t1", "done");
@@ -216,7 +216,7 @@ describe("mutations", () => {
   });
 
   it("addImage creates unique-named image in db", async () => {
-    const { addImage } = await import("@/data/mutations");
+    const { addImage } = await import("@/data/mutations/imageMutations");
     mockDb.images.toArray.mockResolvedValueOnce([]);
     const blob = new Blob(["img"], { type: "image/png" });
     const img = await addImage(blob, "original.png");
@@ -225,7 +225,7 @@ describe("mutations", () => {
   });
 
   it("upsertCell writes grid cell to db", async () => {
-    const { upsertCell } = await import("@/data/mutations");
+    const { upsertCell } = await import("@/data/mutations/mapMutations");
     mockDb.grid.get.mockResolvedValueOnce(undefined);
     await upsertCell({ row: 1, col: 2, roomName: "Library" });
     const putArg = (mockDb.grid.put as ReturnType<typeof vi.fn>).mock.calls[0][0];
@@ -234,7 +234,7 @@ describe("mutations", () => {
   });
 
   it("clearCell deletes grid cell from db", async () => {
-    const { clearCell } = await import("@/data/mutations");
+    const { clearCell } = await import("@/data/mutations/mapMutations");
     await clearCell(1, 2);
     expect(mockDb.grid.delete).toHaveBeenCalledWith("1,2");
   });

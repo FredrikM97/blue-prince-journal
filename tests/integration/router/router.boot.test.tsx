@@ -32,17 +32,17 @@ const ctx = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@/data/store", () => {
+vi.mock("@/hooks/useStore", () => {
   const useStore = ((selector: (state: typeof ctx.state) => unknown) =>
-    selector(ctx.state)) as typeof import("@/data/store").useStore;
+    selector(ctx.state)) as typeof import("@/hooks/useStore").useStore;
   useStore.getState = () => ctx.state as never;
   return { useStore };
 });
-vi.mock("@/data/sync", () => ctx.sync);
-vi.mock("@/components/AppHeader", () => ({
+vi.mock("@/data/sync/sync", () => ctx.sync);
+vi.mock("@/components/app-header/AppHeader", () => ({
   AppHeader: () => <div data-testid="app-header" />,
 }));
-vi.mock("@/components/common/Sonner", () => ({
+vi.mock("@/routes/Sonner", () => ({
   Toaster: () => <div data-testid="toaster" />,
 }));
 vi.mock("@/components/notes/NotesPage", () => ({
@@ -69,7 +69,7 @@ vi.mock("@/hooks/useSuggestionSources", () => ({
   },
   useSuggestionSources: () => ({ roomSuggestions: [], tagSuggestions: [] }),
 }));
-vi.mock("@/components/WelcomeScreen", () => ({
+vi.mock("@/components/welcome/WelcomeScreen", () => ({
   WelcomeScreen: ({
     onDone,
     onContinue,

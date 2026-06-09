@@ -1,15 +1,15 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
-import { Toaster } from "@/components/common/Sonner";
+import { ThemeToggle } from "@/components/app-header/ThemeToggle";
+import { Toaster } from "@/routes/Sonner";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-} from "@/components/common/dropdown/DropdownMenu";
+} from "@/components/common/menu/DropdownMenu";
 
 const sonnerSpy = vi.fn<(props: unknown) => ReactElement>((_props) => <div data-testid="sonner" />);
 

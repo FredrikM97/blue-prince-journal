@@ -1,3 +1,5 @@
+@reference "../../../tailwind-reference.css";
+
 @layer components {
   /* ─── Markdown editor ────────────────────────────────────────────────────── */
 
@@ -17,6 +19,44 @@
   /* Preview/edit body below the toolbar */
   .md-editor-body {
     @apply min-h-[6rem] rounded-b-md border border-input bg-background p-3;
+  }
+
+  .md-toolbar-divider {
+    @apply mx-1 h-4 w-px bg-border;
+  }
+
+  .markdown-preview-surface {
+    @apply prose prose-sm max-w-none text-sm leading-relaxed dark:prose-invert;
+  }
+
+  .markdown-preview-surface ul {
+    @apply my-2 list-disc pl-5;
+  }
+
+  .markdown-preview-surface ol {
+    @apply my-2 list-decimal pl-5;
+  }
+
+  .markdown-preview-surface li {
+    @apply my-1;
+  }
+
+  /* Stronger table readability inside markdown preview */
+  .markdown-preview-surface table {
+    @apply my-3 w-full border-collapse overflow-hidden rounded-md border border-border;
+  }
+
+  .markdown-preview-surface thead {
+    @apply bg-muted;
+  }
+
+  .markdown-preview-surface th,
+  .markdown-preview-surface td {
+    @apply border border-border px-2.5 py-1.5 text-left align-top;
+  }
+
+  .markdown-preview-surface tbody tr:nth-child(2n) {
+    @apply bg-secondary;
   }
 
   /* ─── Shortcut help popover ─────────────────────────────────────────────── */
@@ -42,6 +82,20 @@
 
   .md-shortcut-desc {
     @apply whitespace-nowrap;
+  }
+
+  .md-shortcut-wrap {
+    @apply relative;
+  }
+
+  .md-shortcut-popup {
+    @apply fixed z-[9999];
+    top: var(--md-shortcut-top);
+    right: var(--md-shortcut-right);
+  }
+
+  .md-shortcut-key-row {
+    @apply flex flex-wrap gap-1;
   }
 
   /* Key badge (keyboard shortcut pill) */

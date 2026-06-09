@@ -2,6 +2,9 @@
   "name": "Node.js & TypeScript",
   "image": "mcr.microsoft.com/devcontainers/typescript-node",
 
-  // Features to add to the dev container.
-  // "features": {}
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+
+"postCreateCommand": "which rg || (sudo apt-get update && sudo apt-get install -y ripgrep)"
 }

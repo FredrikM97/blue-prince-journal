@@ -5,12 +5,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/c
 import { PagedNotesList } from "@/components/common/PagedNotesList";
 import { StoredImageView } from "@/components/common/StoredImageView";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { SidePanelRight } from "@/components/common/SidePanel";
 import { Text } from "@/components/common/Typography";
 import { InputField } from "@/components/common/input/InputField";
-import { ImageZoomDialogContent } from "@/components/common/ImageZoomDialogContent";
+import { ImageZoomDialogContent } from "@/components/images/ImageZoomDialogContent";
 import type { Note, StoredImage } from "@/lib/types";
+import { getImageLabel } from "@/lib/imageLabel";
 
 // Image styling containers (requires wrapper for CSS styling)
 function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
@@ -19,10 +20,6 @@ function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
       {children}
     </Stack>
   );
-}
-
-function getImageLabel(img: StoredImage): string {
-  return img.caption?.trim() || img.name;
 }
 
 /**

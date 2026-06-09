@@ -62,6 +62,7 @@ describe("smoke panels", () => {
           }}
           coordLabel={(row, col) => `${row},${col}`}
           onOpenCell={onOpenCell}
+          activeCell={null}
         />
       </>,
     );
@@ -77,13 +78,28 @@ describe("smoke panels", () => {
       connected: true,
       folderName: "steam-7656119",
       lastSyncAt: 1_700_000_000_000,
+      deletedImports: [],
       busy: false,
       connect: async () => {},
       syncNow: async () => {},
+      forceReimportAll: async () => {},
       disconnect: async () => {},
+      markDeletedByImageId: async () => {},
+      undeleteImport: async () => null,
+      hardDeleteImport: async () => {},
+      loadDeletedImportPreview: async () => null,
     };
 
-    const { asFragment } = render(<ImagesLeftPanel total={3} steamSync={steamSync} />);
+    const { asFragment } = render(
+      <ImagesLeftPanel
+        total={3}
+        steamSync={steamSync}
+        viewMode="library"
+        sortMode="newest"
+        onChangeViewMode={vi.fn()}
+        onChangeSortMode={vi.fn()}
+      />,
+    );
 
     expect(asFragment()).toMatchSnapshot();
   });

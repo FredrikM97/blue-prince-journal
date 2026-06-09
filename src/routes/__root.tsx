@@ -9,21 +9,21 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
-import { Toaster } from "@/components/common/Sonner";
+import { AppHeader } from "@/components/app-header/AppHeader";
+import { Toaster } from "@/routes/Sonner";
 import { toast } from "sonner";
-import { WelcomeScreen } from "@/components/WelcomeScreen";
+import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
 import { NotesPage } from "@/components/notes/NotesPage";
 import { SettingsPage } from "@/components/settings/SettingsPage";
 import { TodosPage } from "@/components/todos/TodosPage";
 import { MapPage } from "@/components/map/MapPage";
 import { ImagesPage } from "@/components/images/ImagesPage";
 import { GraphPage } from "@/components/graph/GraphPage";
-import { useStore } from "@/data/store";
-import { syncRuntime } from "@/data/sync";
-import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storageHealth";
+import { useStore } from "@/hooks/useStore";
+import { syncRuntime } from "@/data/sync/sync";
+import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storage/storageHealth";
 import { db, ensureBootSeed } from "@/data/db";
-import { cleanupOrphanedImageRefs } from "@/data/mutations";
+import { cleanupOrphanedImageRefs } from "@/data/mutations/imageMutations";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { Note, Todo, SectionDef } from "@/lib/types";
 

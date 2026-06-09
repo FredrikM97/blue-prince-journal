@@ -6,9 +6,9 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import type { StoredImage } from "@/lib/types";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { ImageCard } from "@/components/common/ImageCard";
-import { ImageZoomDialogContent } from "@/components/common/ImageZoomDialogContent";
+import { ImageZoomDialogContent } from "@/components/images/ImageZoomDialogContent";
 
 export function AttachedImagesGallery({
   imageIds,
@@ -102,7 +102,7 @@ export function AttachedImagesGallery({
       </Stack>
 
       {!collapsed && (
-        <Stack gap="0" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
+        <Stack gap="0" className="h-scroll-strip">
           {availableImageIds.map((id) => (
             <ImageCard
               key={id}

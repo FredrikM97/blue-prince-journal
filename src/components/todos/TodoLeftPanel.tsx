@@ -1,5 +1,5 @@
 import { TODO_SCOPE_OPTIONS } from "./Constants";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { SidePanelLeft } from "@/components/common/SidePanel";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";

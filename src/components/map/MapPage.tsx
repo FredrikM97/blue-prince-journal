@@ -3,14 +3,14 @@ import { PageLayout } from "@/components/common/PageLayout";
 import { MapLeftPanel } from "./MapLeftPanel";
 import { MapMiddlePanel } from "./MapMiddlePanel";
 import { MapRightPanel } from "./MapRightPanel";
-import { GRID_ROWS, cellId } from "@/data/rooms";
-import { useStore } from "@/data/store";
+import { GRID_ROWS, cellId } from "@/data/rooms/rooms";
+import { useStore } from "@/hooks/useStore";
 import { db } from "@/data/db";
-import { upsertCell, clearCell } from "@/data/mutations";
+import { upsertCell, clearCell } from "@/data/mutations/mapMutations";
 import type { GridCell, Note, Todo } from "@/lib/types";
 import { MetaText } from "@/components/common/Typography";
 import { SidePanelRight } from "@/components/common/SidePanel";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 
 const COL_LABELS = ["A", "B", "C", "D", "E"] as const;

@@ -6,7 +6,7 @@ type InlineAlign = "start" | "center" | "end";
 type InlineJustify = "start" | "center" | "between" | "end";
 type GridElement = "div" | "section" | "ul";
 type GridGap = "2" | "3" | "4";
-type GridVariant = "default" | "gallery" | "cols-3-md" | "auto-fill-card" | "auto-fit" | "map-grid";
+type GridVariant = "default" | "gallery" | "cols-3-md" | "auto-fill-card";
 
 function inlineGapClass(gap: InlineGap) {
   if (gap === "1") return "gap-1";
@@ -61,10 +61,6 @@ function gridVariantClass(variant: GridVariant) {
   if (variant === "gallery") return "grid-gallery";
   if (variant === "cols-3-md") return "grid-cols-3-md";
   if (variant === "auto-fill-card") return "grid-auto-fill-card";
-  if (variant === "auto-fit") {
-    return "grid w-full gap-x-2 gap-y-0.5 [grid-template-columns:repeat(auto-fit,minmax(min(6.75rem,100%),1fr))]";
-  }
-  if (variant === "map-grid") return "map-grid";
   return "";
 }
 

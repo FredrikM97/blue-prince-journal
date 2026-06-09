@@ -1,45 +1,41 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useStore } from "@/data/store";
+import { useStore } from "@/hooks/useStore";
 import { db } from "@/data/db";
-import { saveNote, saveTodo, createFromCapture } from "@/data/mutations";
+import { createFromCapture } from "@/data/mutations/captureMutations";
+import { saveNote } from "@/data/mutations/noteMutations";
+import { saveTodo } from "@/data/mutations/todoMutations";
 import type { Note, Todo } from "@/lib/types";
 import { Button } from "@/components/common/Button";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
-import { Tabs, TabsList, TabsTrigger } from "@/components/common/Tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/notes/Tabs";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { toast } from "sonner";
 import { usePasteImages } from "@/hooks/usePasteImages";
-import { ChevronLeft, ChevronRight, ImagePlus, Save, X } from "lucide-react";
+import { ImagePlus, Save } from "lucide-react";
 import type { NoteType, Priority } from "@/lib/types";
 import { NOTE_TYPES } from "@/lib/noteMetadata";
-import { ImageCard } from "@/components/common/ImageCard";
-import { PendingImageList } from "@/components/common/input/PendingImageList";
+import { PendingImageList } from "@/components/notes/PendingImageList";
 import { InputField } from "@/components/common/input/InputField";
-import { SuggestionsDropdown } from "@/components/common/dropdown/SuggestionsDropdown";
+import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
 import { SidePanelRight } from "@/components/common/SidePanel";
 import { MetaText, Text } from "@/components/common/Typography";
-import { Grid, Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
-import { Dialog, DialogContent, DialogTitle } from "@/components/common/Dialog";
-import { Chip } from "@/components/common/Chip";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { Stack } from "@/components/common/general/Stack";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
+import { SelectExistingImagesDialog } from "@/components/notes/SelectExistingImagesDialog";
+import { getImageLabel } from "@/lib/imageLabel";
+import { parseTagInput } from "@/domain/notesPage";
+import { buildCapturePanelKey } from "@/components/notes/capturePanelKey";
+import { NoteMetadataFields } from "@/components/notes/NoteMetadataFields";
+import { NoteImageAttachments } from "@/components/notes/NoteImageAttachments";
 
 const NOTE_PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
   { value: "med", label: "Medium" },
   { value: "low", label: "Low" },
 ];
-
-const IMAGE_SORT_OPTIONS = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "name-asc", label: "Name A-Z" },
-  { value: "name-desc", label: "Name Z-A" },
-];
-
-type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";
 
 type NotesStoreSlice = ReturnType<typeof useNotesStoreSlice>;
 type NotesFormState = ReturnType<typeof useNotesFormState>;
@@ -167,28 +163,6 @@ function NotesRoomField({
   );
 }
 
-function NotesTypeField({
-  type,
-  setType,
-}: {
-  type: NoteType;
-  setType: React.Dispatch<React.SetStateAction<NoteType>>;
-}) {
-  return (
-    <Stack as="div" gap="1">
-      <MetaText as="p" size="xs" weight="medium" normalCase>
-        Type / category
-      </MetaText>
-      <DropdownSelect
-        value={type}
-        onValueChange={(v) => setType(v as NoteType)}
-        options={NOTE_TYPES}
-        triggerWidth="fit"
-      />
-    </Stack>
-  );
-}
-
 function NotesPriorityField({
   priority,
   setPriority,
@@ -259,25 +233,17 @@ function NotesMetaFields({
 }) {
   if (mode === "note") {
     return (
-      <Stack gap="2">
-        <Inline gap="2" wrap align="start">
-          <NotesTypeField type={type} setType={setType} />
-          <NotesRoomField room={room} setRoom={setRoom} />
-        </Inline>
-        <Inline gap="2" wrap align="start">
-          <NotesTagsField tagsInput={tagsInput} setTagsInput={setTagsInput} />
-          <Stack as="div" gap="1">
-            <InputField
-              label="Date"
-              value={dateInput}
-              onChange={setDateInput}
-              placeholder="Spring 1, Day 3"
-              size="sm"
-              width="compact"
-            />
-          </Stack>
-        </Inline>
-      </Stack>
+      <NoteMetadataFields
+        typeValue={type}
+        onTypeChange={(value) => setType(value as NoteType)}
+        typeOptions={NOTE_TYPES}
+        roomValue={room}
+        onRoomChange={setRoom}
+        tagsValue={tagsInput}
+        onTagsChange={setTagsInput}
+        dateValue={dateInput}
+        onDateChange={setDateInput}
+      />
     );
   }
 
@@ -386,13 +352,6 @@ function useNotesGlobalEffects({
   });
 }
 
-function parseTags(tagsInput: string) {
-  return tagsInput
-    .split(/[\s,]+/)
-    .map((token) => token.replace(/^#/, "").trim().toLowerCase())
-    .filter(Boolean);
-}
-
 // ── Todo submit ────────────────────────────────────────────────────────────
 function useTodoSubmit({
   saveTodo,
@@ -426,7 +385,7 @@ function useTodoSubmit({
       toast.error("Add a title before saving.");
       return;
     }
-    const tags = parseTags(tagsInput);
+    const tags = parseTagInput(tagsInput);
 
     if (editTodoId) {
       const existing = existingTodos.find((t) => t.id === editTodoId);
@@ -500,7 +459,7 @@ function useNoteSubmit({
       toast.error("Add a title or attach an image before saving.");
       return;
     }
-    const tags = parseTags(tagsInput);
+    const tags = parseTagInput(tagsInput);
 
     if (editNoteId) {
       const existing = existingNotes.find((n) => n.id === editNoteId);
@@ -626,16 +585,13 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     panelTitle = "Edit todo";
   }
 
-  let panelKey = "capture:new:note";
-  if (form.mode === "todo") {
-    panelKey = "capture:new:todo";
-  }
-  if (store.editNoteId) {
-    panelKey = `capture:edit-note:${store.editNoteId}`;
-  }
-  if (store.editTodoId) {
-    panelKey = `capture:edit-todo:${store.editTodoId}`;
-  }
+  const panelKey = buildCapturePanelKey({
+    captureDefault: store.kind,
+    capturePrefill: store.prefill,
+    captureEditNoteId: store.editNoteId,
+    captureEditTodoId: store.editTodoId,
+    modeOverride: form.mode,
+  });
 
   let showHeaderSaveForCreate = false;
   if (!isEditing) {
@@ -722,29 +678,17 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
           onRemove={(index) => form.setPendingImages((p) => p.filter((_, j) => j !== index))}
         />
 
-        <Stack gap="1">
-          <MetaText>Selected existing images: {form.selectedImageIds.length}</MetaText>
-          {form.selectedImageIds.length > 0 && (
-            <Stack gap="0" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
-              {form.selectedImageIds.map((id) => {
-                const img = store.images.find((item) => item.id === id);
-                if (!img) return null;
-                return (
-                  <ImageCard
-                    key={id}
-                    id={id}
-                    label={getImageLabel(img)}
-                    size="sm"
-                    onRemove={(e) => {
-                      e.stopPropagation();
-                      form.setSelectedImageIds((prev) => prev.filter((imageId) => imageId !== id));
-                    }}
-                  />
-                );
-              })}
-            </Stack>
-          )}
-        </Stack>
+        <NoteImageAttachments
+          imageIds={form.selectedImageIds}
+          countPrefix="Selected existing images:"
+          resolveLabel={(id) => {
+            const img = store.images.find((item) => item.id === id);
+            return img ? getImageLabel(img) : "Image";
+          }}
+          onRemove={(id) => {
+            form.setSelectedImageIds((prev) => prev.filter((imageId) => imageId !== id));
+          }}
+        />
       </Stack>
 
       <SelectExistingImagesDialog
@@ -752,7 +696,12 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
         onOpenChange={setImagePickerOpen}
         images={store.images}
         selectedImageIds={form.selectedImageIds}
-        setSelectedImageIds={form.setSelectedImageIds}
+        onToggleImageId={(id, currentlySelected) => {
+          form.setSelectedImageIds((prev) => {
+            if (currentlySelected) return prev.filter((imageId) => imageId !== id);
+            return Array.from(new Set([...prev, id]));
+          });
+        }}
       />
 
       <NotesFooterActions
@@ -767,7 +716,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
 
   if (!store.open) {
     return (
-      <Stack className="page-layout-panel" gap="2">
+      <Stack className="ui-surface-panel" gap="2">
         <Text size="sm" tone="muted">
           Press N or use the add button to create a note.
         </Text>
@@ -788,125 +737,3 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   );
 }
 
-function getImageLabel(img: { name: string; caption?: string }): string {
-  return img.caption?.trim() || img.name;
-}
-
-function SelectExistingImagesDialog({
-  open,
-  onOpenChange,
-  images,
-  selectedImageIds,
-  setSelectedImageIds,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  images: Array<{ id: string; name: string; caption?: string; createdAt: number }>;
-  selectedImageIds: string[];
-  setSelectedImageIds: React.Dispatch<React.SetStateAction<string[]>>;
-}) {
-  const [imageSort, setImageSort] = useState<ImageSort>("newest");
-  const [page, setPage] = useState(0);
-  const PAGE_SIZE = 12;
-
-  const selectedSet = useMemo(() => new Set(selectedImageIds), [selectedImageIds]);
-  const sortedImages = useMemo(() => {
-    if (!open) return [];
-    const next = [...images];
-    next.sort((a, b) => {
-      if (imageSort === "newest") return b.createdAt - a.createdAt;
-      if (imageSort === "oldest") return a.createdAt - b.createdAt;
-      if (imageSort === "name-asc") return a.name.localeCompare(b.name);
-      return b.name.localeCompare(a.name);
-    });
-    return next;
-  }, [open, images, imageSort]);
-
-  const totalPages = Math.max(1, Math.ceil(sortedImages.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages - 1);
-  const pageImages = sortedImages.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
-
-  function handleSortChange(value: ImageSort) {
-    setImageSort(value);
-    setPage(0);
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant="wide" showClose={false}>
-        <Inline gap="3" justify="between" align="center">
-          <DialogTitle>Attach existing image</DialogTitle>
-          <Inline gap="2" align="center">
-            <Inline gap="1" align="center">
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon-h2"
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={safePage === 0}
-                aria-label="Previous page"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <MetaText size="xs">
-                {safePage + 1} / {totalPages}
-              </MetaText>
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon-h2"
-                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                disabled={safePage === totalPages - 1}
-                aria-label="Next page"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Inline>
-            <DropdownSelect
-              value={imageSort}
-              onValueChange={(value) => handleSortChange(value as ImageSort)}
-              options={IMAGE_SORT_OPTIONS}
-            />
-            <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-              <X className="h-3.5 w-3.5" />
-              Close
-            </Button>
-          </Inline>
-        </Inline>
-        <MetaText>
-          Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
-        </MetaText>
-
-        <Stack variant="dialog-scroll-body-tall" gap="0">
-          {sortedImages.length > 0 ? (
-            <Grid variant="auto-fill-card" gap="3">
-              {pageImages.map((img) => {
-                const selected = selectedSet.has(img.id);
-                return (
-                  <ImageCard
-                    key={img.id}
-                    id={img.id}
-                    label={getImageLabel(img)}
-                    selected={selected}
-                    badge={selected ? <Chip variant="solid">Selected</Chip> : null}
-                    onClick={() => {
-                      setSelectedImageIds((prev) => {
-                        if (selected) return prev.filter((id) => id !== img.id);
-                        return Array.from(new Set([...prev, img.id]));
-                      });
-                      toast.success(selected ? "Image detached" : "Image attached");
-                    }}
-                  />
-                );
-              })}
-            </Grid>
-          ) : (
-            <MetaText size="sm">
-              No available images to attach. Upload or paste a new image first.
-            </MetaText>
-          )}
-        </Stack>
-      </DialogContent>
-    </Dialog>
-  );
-}

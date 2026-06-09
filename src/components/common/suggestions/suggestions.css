@@ -1,0 +1,32 @@
+@reference "../../../tailwind-reference.css";
+
+@layer components {
+  /* Capture suggestion dropdown in notes editor */
+  .capture-suggestion-field {
+    @apply relative;
+  }
+
+  .capture-suggestion-dropdown {
+    @apply absolute z-40 max-h-44 min-w-44 max-w-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md;
+  }
+
+  .capture-suggestion-item {
+    @apply rounded;
+  }
+
+  .capture-suggestion-item > button {
+    @apply w-full rounded px-2 py-1.5 text-left text-xs text-popover-foreground hover:bg-muted;
+  }
+
+  .capture-suggestion-item-active {
+    @apply bg-muted;
+  }
+
+  .capture-suggestion-item-active > button {
+    @apply bg-muted;
+  }
+
+  .capture-suggestion-hint {
+    @apply rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground;
+  }
+}

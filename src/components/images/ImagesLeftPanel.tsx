@@ -1,9 +1,9 @@
 import { Button } from "@/components/common/Button";
 import { Heading, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { SidePanelLeft } from "@/components/common/SidePanel";
-import type { SteamDeletedImportEntry } from "@/data/steamImport";
+import type { SteamDeletedImportEntry } from "@/data/import/steamImport";
 import type { StoredImage } from "@/lib/types";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 

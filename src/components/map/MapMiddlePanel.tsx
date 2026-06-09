@@ -1,6 +1,6 @@
-import { GRID_COLS, GRID_ROWS, cellId } from "@/data/rooms";
+import { GRID_COLS, GRID_ROWS, cellId } from "@/data/rooms/rooms";
 import { Grid } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { Text } from "@/components/common/Typography";
 import { MapCellButton } from "./MapCellButton";
 import type { GridCell } from "@/lib/types";
@@ -23,7 +23,7 @@ export function MapMiddlePanel({
 }: MapMiddlePanelProps) {
   return (
     <Stack className="map-layout-main" gap="0">
-      <Grid as="div" variant="map-grid" gap="2">
+      <Grid as="div" gap="2" className="map-grid">
         {Array.from({ length: GRID_ROWS }).flatMap((_, row) =>
           Array.from({ length: GRID_COLS }).map((__, col) => {
             const cell = byId.get(cellId(row, col));
@@ -39,18 +39,18 @@ export function MapMiddlePanel({
             }
 
             let cellBody = (
-              <Text as="span" variant="map-cell-coord" size="xs">
+              <Text as="span" className="map-cell-coord" size="xs">
                 {coordLabel(row, col)}
               </Text>
             );
             if (cell?.roomName) {
               cellBody = (
                 <>
-                  <Text as="span" variant="map-cell-room-name" size="xs" leading="tight">
+                  <Text as="span" className="map-cell-room-name" size="xs" leading="tight">
                     {roomDisplayName}
                   </Text>
                   {(cell.comment || roomNoteCount > 0) && (
-                    <Text as="span" variant="map-cell-meta" size="xs">
+                    <Text as="span" className="map-cell-meta" size="xs">
                       {cell.comment && "💬"}
                       {roomNoteCount > 0 && ` 📝${roomNoteCount}`}
                     </Text>

@@ -1,7 +1,7 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import { useStore } from "@/data/store";
+import { useStore } from "@/hooks/useStore";
 import { db } from "@/data/db";
-import { addImage, removeImage, updateImage } from "@/data/mutations";
+import { addImage, removeImage, updateImage } from "@/data/mutations/imageMutations";
 import type { StoredImage, Note } from "@/lib/types";
 import { PageLayout } from "@/components/common/PageLayout";
 import {
@@ -10,35 +10,27 @@ import {
   type SteamSyncPanelModel,
 } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
-import { ImageThumbButton } from "@/components/common/ImageThumbButton";
-import { DeletedImportThumbCard } from "../common/DeletedImportThumbCard";
+import { ImageThumbButton } from "@/components/images/ImageThumbButton";
+import { DeletedImportThumbCard } from "@/components/images/DeletedImportThumbCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Grid } from "@/components/common/LayoutPrimitives";
 import { Text } from "@/components/common/Typography";
 import { toast } from "sonner";
 import {
-  connectSteamImportFolder,
-  disconnectSteamImportFolder,
   getActiveSteamFolderName,
-  isSteamFolderSyncSupported,
   loadSteamImportSourceBlob,
   loadSteamDeletedImports,
-  loadSteamImportStatus,
   markSteamImportedImageDeleted,
   getSteamImportedImageIdsForSource,
-  restoreSteamImportFolder,
   restoreDeletedSteamImportImage,
   permanentlyDeleteSteamImport,
-  syncConnectedSteamFolder,
   type SteamDeletedImportEntry,
-} from "@/data/steamImport";
-import { syncRuntime } from "@/data/sync";
-import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storageHealth";
+} from "@/data/import/steamImport";
+import { syncRuntime } from "@/data/sync/sync";
+import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storage/storageHealth";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
-
-function getImageLabel(img: StoredImage): string {
-  return img.caption?.trim() || img.name;
-}
+import { getImageLabel } from "@/lib/imageLabel";
+import { useSteamFolderSync } from "@/hooks/useSteamFolderSync";
 
 export function ImagesPage() {
   const images: StoredImage[] = useLiveQueryArray(() => db.images.toArray());
@@ -299,11 +291,14 @@ function DeletedImportsList({
 function useSteamSyncPanel(
   addImage: (blob: Blob, name?: string, caption?: string) => Promise<StoredImage>,
 ) {
-  const [connected, setConnected] = useState(false);
-  const [folderName, setFolderName] = useState<string | null>(null);
-  const [lastSyncAt, setLastSyncAt] = useState<number | null>(null);
-  const [busy, setBusy] = useState(false);
   const [deletedImports, setDeletedImports] = useState<SteamDeletedImportEntry[]>([]);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const steamFolderSync = useSteamFolderSync({
+    addImage,
+    syncOnConnect: true,
+    flushSyncRuntimeOnImport: true,
+    syncEmptyMessage: "No new Steam screenshots found in connected folder",
+  });
 
   async function refreshDeletedImports() {
     const entries = await loadSteamDeletedImports();
@@ -311,94 +306,8 @@ function useSteamSyncPanel(
   }
 
   useEffect(() => {
-    void loadSteamImportStatus().then((s) => setLastSyncAt(s.lastRefreshAt));
     void loadSteamDeletedImports().then((entries) => setDeletedImports(entries));
-    void restoreSteamImportFolder().then((handle) => {
-      if (!handle) return;
-      setConnected(true);
-      setFolderName(handle.name);
-    });
   }, []);
-
-  async function connect() {
-    setBusy(true);
-    try {
-      const handle = await connectSteamImportFolder();
-      if (!handle) return;
-      setConnected(true);
-      setFolderName(handle.name);
-      toast.success(`Connected Steam folder: ${handle.name}`);
-      await syncNow();
-    } catch {
-      toast.error("Could not connect Steam folder");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function syncNow() {
-    setBusy(true);
-    try {
-      const result = await syncConnectedSteamFolder(addImage);
-      if (result === null) {
-        toast.error("No Steam folder connected");
-        return;
-      }
-      setLastSyncAt(Date.now());
-      if (result.imported > 0) {
-        toast.success(`Imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`);
-        // Immediately flush to the sync folder so images are safe on disk right away.
-        void syncRuntime.saveNow();
-      }
-      if (result.imported === 0) {
-        toast.success("No new Steam screenshots found in connected folder");
-      }
-    } catch {
-      toast.error("Could not sync Steam screenshots");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function forceReimportAll() {
-    setBusy(true);
-    try {
-      const result = await syncConnectedSteamFolder(addImage, { force: true });
-      if (result === null) {
-        toast.error("No Steam folder connected");
-        return;
-      }
-      setLastSyncAt(Date.now());
-      if (result.imported > 0) {
-        toast.success(
-          `Force re-imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`,
-        );
-        // Immediately flush to the sync folder so images are safe on disk right away.
-        void syncRuntime.saveNow();
-      }
-      if (result.imported === 0) {
-        toast.success("No Steam screenshots found in connected folder");
-      }
-    } catch {
-      toast.error("Could not force re-import Steam screenshots");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function disconnect() {
-    setBusy(true);
-    try {
-      await disconnectSteamImportFolder();
-      setConnected(false);
-      setFolderName(null);
-      toast.success("Disconnected Steam folder sync");
-    } catch {
-      toast.error("Could not disconnect Steam folder sync");
-    } finally {
-      setBusy(false);
-    }
-  }
 
   async function markDeletedByImageId(imageId: string, fileName: string) {
     await markSteamImportedImageDeleted(imageId, fileName);
@@ -412,7 +321,8 @@ function useSteamSyncPanel(
   }
 
   async function hardDeleteImport(sourceKey: string) {
-    setBusy(true);
+    if (steamFolderSync.busy || deleteBusy) return;
+    setDeleteBusy(true);
     try {
       const imageIds = await getSteamImportedImageIdsForSource(sourceKey);
       for (const imageId of imageIds) {
@@ -421,7 +331,7 @@ function useSteamSyncPanel(
       await permanentlyDeleteSteamImport(sourceKey);
       await refreshDeletedImports();
     } finally {
-      setBusy(false);
+      setDeleteBusy(false);
     }
   }
 
@@ -430,16 +340,16 @@ function useSteamSyncPanel(
   }
 
   const steamSync: SteamSyncPanelModel = {
-    supported: isSteamFolderSyncSupported(),
-    connected,
-    folderName: folderName ?? getActiveSteamFolderName(),
-    lastSyncAt,
+    supported: steamFolderSync.supported,
+    connected: steamFolderSync.connected,
+    folderName: steamFolderSync.folderName ?? getActiveSteamFolderName(),
+    lastSyncAt: steamFolderSync.lastRefreshAt,
     deletedImports,
-    busy,
-    connect,
-    syncNow,
-    forceReimportAll,
-    disconnect,
+    busy: steamFolderSync.busy || deleteBusy,
+    connect: steamFolderSync.connect,
+    syncNow: steamFolderSync.syncNow,
+    forceReimportAll: steamFolderSync.forceReimportAll,
+    disconnect: steamFolderSync.disconnect,
     markDeletedByImageId,
     undeleteImport,
     hardDeleteImport,

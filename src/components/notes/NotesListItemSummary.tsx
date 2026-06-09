@@ -4,7 +4,7 @@ import { Lightbulb } from "lucide-react";
 import { TYPE_ICON, TYPE_LABEL, relTime } from "@/lib/noteMetadata";
 import { Chip } from "@/components/common/Chip";
 import { Text } from "@/components/common/Typography";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 
 const TYPE_ICON_VARIANT: Record<
   Note["type"],

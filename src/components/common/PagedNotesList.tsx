@@ -15,7 +15,7 @@ import { Chip } from "@/components/common/Chip";
 import { Inline, SectionHeader, SectionHeaderActions } from "@/components/common/LayoutPrimitives";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import type { Note } from "@/lib/types";
 
 export function PagedNotesList({
@@ -30,6 +30,7 @@ export function PagedNotesList({
   cardVariant?: "panel-card" | "default";
 }) {
   const [index, setIndex] = useState(0);
+  const cardClassName = cardVariant === "panel-card" ? "panel-card" : "";
   const total = notes.length;
   const safeIndex = total === 0 ? 0 : ((index % total) + total) % total;
   const note = notes[safeIndex] ?? null;
@@ -66,7 +67,7 @@ export function PagedNotesList({
       </SectionHeader>
 
       {note ? (
-        <Text as="div" size="sm" variant={cardVariant}>
+        <Text as="div" size="sm" className={cardClassName}>
           <Stack gap="1.5">
             <Text weight="medium">{note.title}</Text>
             {note.body.trim() && <MarkdownPreview>{note.body}</MarkdownPreview>}

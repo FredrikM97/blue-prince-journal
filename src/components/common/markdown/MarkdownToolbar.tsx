@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Eye, EyeOff, Maximize2, MoreHorizontal, WandSparkles } from "lucide-react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { Eye, EyeOff, HelpCircle, Maximize2, MoreHorizontal, WandSparkles } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/common/dropdown/DropdownMenu";
-import { MarkdownShortcutHelp } from "@/components/common/markdown/MarkdownShortcutHelp";
-import { Stack } from "@/components/common/Stack";
+} from "@/components/common/menu/DropdownMenu";
+import { MetaText } from "@/components/common/Typography";
+import { getViewportWidth } from "@/hooks/useMediaQuery";
 
 export type MarkdownToolbarAction = {
   key: string;
@@ -16,6 +17,99 @@ export type MarkdownToolbarAction = {
   icon: ReactNode;
   onSelect: () => void;
 };
+
+const SHORTCUTS: { tokens: string[]; desc: string }[] = [
+  { tokens: ["#tag"], desc: "add a tag" },
+  { tokens: ["@room"], desc: "set room" },
+  { tokens: ["^note-title"], desc: "link to note" },
+  { tokens: [">2025-05-28"], desc: "set date" },
+];
+
+function MarkdownShortcutHelp() {
+  const [open, setOpen] = useState(false);
+  const [popupPos, setPopupPos] = useState<{ top: number; right: number } | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (wrapperRef.current?.contains(target)) return;
+      if (popupRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  function handleToggle() {
+    if (!open && wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
+      setPopupPos({
+        top: rect.bottom + 6,
+        right: getViewportWidth() - rect.right,
+      });
+    }
+    setOpen((value) => !value);
+  }
+
+  return (
+    <div ref={wrapperRef} className="md-shortcut-wrap">
+      <Button
+        variant="outline"
+        size="icon"
+        aria-label="Toggle shortcut help"
+        title="Shortcuts"
+        className="md-shortcut-trigger"
+        onClick={handleToggle}
+      >
+        <HelpCircle className="h-3.5 w-3.5" />
+      </Button>
+
+      {open &&
+        popupPos &&
+        createPortal(
+          <div
+            ref={popupRef}
+            className="md-shortcut-popover md-shortcut-popup"
+            style={{
+              "--md-shortcut-top": `${popupPos.top}px`,
+              "--md-shortcut-right": `${popupPos.right}px`,
+            } as CSSProperties}
+          >
+            <p className="md-shortcut-title">Token shortcuts</p>
+            <div className="md-shortcut-grid">
+              {SHORTCUTS.map(({ tokens, desc }) => (
+                <Fragment key={desc}>
+                  <div className="md-shortcut-key-row">
+                    {tokens.map((token) => (
+                      <kbd key={token} className="md-shortcut-key">
+                        {token}
+                      </kbd>
+                    ))}
+                  </div>
+                  <span className="md-shortcut-desc">
+                    <MetaText as="span" size="sm" leading="tight">
+                      {desc}
+                    </MetaText>
+                  </span>
+                </Fragment>
+              ))}
+            </div>
+          </div>,
+          document.body,
+        )}
+    </div>
+  );
+}
 
 export function MarkdownToolbar({
   primaryActions,
@@ -71,7 +165,7 @@ export function MarkdownToolbar({
 
   return (
     <div ref={toolbarContainerRef}>
-      <Stack as="div" gap="0" variant="md-toolbar" role="toolbar" ariaLabel="Formatting tools">
+      <div className="md-toolbar" role="toolbar" aria-label="Formatting tools">
         {primaryActions.map((action) => (
           <Button
             variant="ghost"
@@ -149,9 +243,9 @@ export function MarkdownToolbar({
           </DropdownMenu>
         )}
 
-        <Stack as="span" gap="0" variant="md-toolbar-divider" />
+        <span className="md-toolbar-divider" />
         <MarkdownShortcutHelp />
-        <Stack as="span" gap="0" variant="md-toolbar-divider" />
+        <span className="md-toolbar-divider" />
 
         <Button
           variant="ghost"
@@ -166,7 +260,7 @@ export function MarkdownToolbar({
 
         {allowExpand && (
           <>
-            <Stack as="span" gap="0" variant="md-toolbar-divider" />
+            <span className="md-toolbar-divider" />
             <Button
               variant="ghost"
               size="icon-h2"
@@ -178,7 +272,7 @@ export function MarkdownToolbar({
             </Button>
           </>
         )}
-      </Stack>
+      </div>
     </div>
   );
 }

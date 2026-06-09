@@ -1,3 +1,5 @@
+@reference "../../tailwind-reference.css";
+
 @layer components {
   .todos-sidebar-label {
     @apply mb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground;
