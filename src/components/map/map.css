@@ -1,3 +1,5 @@
+@reference "../../tailwind-reference.css";
+
 @layer components {
   /* Keep map centered in the middle content region */
   .map-layout-main {

@@ -9,13 +9,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/common/dropdown/DropdownMenu";
-import { DropdownTriggerButton } from "@/components/common/dropdown/SelectTriggerButton";
-
-export interface DropdownSelectOption {
-  value: string;
-  label: string;
-}
+} from "@/components/common/menu/DropdownMenu";
+import { DropdownTriggerButton } from "@/components/common/dropdown/DropdownTriggerButton";
+import type { SelectOption } from "@/components/common/dropdown/selectOption";
 
 export function DropdownSelectComponent({
   value,
@@ -27,7 +23,7 @@ export function DropdownSelectComponent({
 }: {
   value: string;
   onValueChange: (next: string) => void;
-  options: DropdownSelectOption[];
+  options: SelectOption[];
   placeholder?: string;
   triggerWidth?: "full" | "fit";
   triggerVariant?: "default" | "room" | "flat";

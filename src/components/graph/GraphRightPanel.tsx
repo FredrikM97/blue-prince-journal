@@ -2,7 +2,7 @@ import { Chip } from "@/components/common/Chip";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
 import { SidePanelRight } from "@/components/common/SidePanel";
 import type { Note } from "@/lib/types";
@@ -78,7 +78,7 @@ export function GraphRightPanel({
                   size="xs"
                   tone="muted"
                   weight="medium"
-                  variant="preview-field-label"
+                  className="preview-field-label"
                 >
                   Type
                 </Text>
@@ -92,7 +92,7 @@ export function GraphRightPanel({
                     size="xs"
                     tone="muted"
                     weight="medium"
-                    variant="preview-field-label"
+                    className="preview-field-label"
                   >
                     Room
                   </Text>
@@ -107,7 +107,7 @@ export function GraphRightPanel({
                     size="xs"
                     tone="muted"
                     weight="medium"
-                    variant="preview-field-label"
+                    className="preview-field-label"
                   >
                     Tags
                   </Text>

@@ -10,20 +10,7 @@ type TextIntent = "default" | "warning";
 type TextDecoration = "none" | "line-through";
 type TextVariant =
   | "default"
-  | "sr-only"
-  | "panel-card"
-  | "panel-row"
-  | "preview-field-label"
-  | "preview-field-value"
-  | "app-brand-badge"
-  | "app-brand-title"
-  | "sync-folder-name"
-  | "feedback-build-code"
-  | "graph-toolbar-hint"
-  | "graph-legend-label"
-  | "map-cell-room-name"
-  | "map-cell-meta"
-  | "map-cell-coord";
+  | "sr-only";
 
 const TEXT_SIZE_CLASS: Record<TextSize, string> = {
   xs: "text-xs",
@@ -64,19 +51,6 @@ const TEXT_INTENT_CLASS: Record<TextIntent, string> = {
 const TEXT_VARIANT_CLASS: Record<TextVariant, string> = {
   default: "",
   "sr-only": "sr-only",
-  "panel-card": "panel-card",
-  "panel-row": "panel-row",
-  "preview-field-label": "preview-field-label",
-  "preview-field-value": "preview-field-value",
-  "app-brand-badge": "app-brand-badge",
-  "app-brand-title": "app-brand-title",
-  "sync-folder-name": "sync-folder-name",
-  "feedback-build-code": "feedback-build-code",
-  "graph-toolbar-hint": "graph-toolbar-hint",
-  "graph-legend-label": "graph-legend-label",
-  "map-cell-room-name": "map-cell-room-name",
-  "map-cell-meta": "map-cell-meta",
-  "map-cell-coord": "map-cell-coord",
 };
 
 type HeadingElement = "h1" | "h2" | "h3";
@@ -117,6 +91,7 @@ export function Text({
   tabular = false,
   minWidthZero = false,
   capitalize = false,
+  className = "",
   title,
   children,
 }: {
@@ -133,10 +108,11 @@ export function Text({
   tabular?: boolean;
   minWidthZero?: boolean;
   capitalize?: boolean;
+  className?: string;
   title?: string;
   children: ReactNode;
 }) {
-  let baseClass = `${TEXT_SIZE_CLASS[size]} ${TEXT_TONE_CLASS[tone]} ${TEXT_WEIGHT_CLASS[weight]} ${TEXT_MARGIN_TOP_CLASS[marginTop]} ${TEXT_LEADING_CLASS[leading]} ${TEXT_INTENT_CLASS[intent]} ${TEXT_VARIANT_CLASS[variant]}`;
+  let baseClass = `${TEXT_SIZE_CLASS[size]} ${TEXT_TONE_CLASS[tone]} ${TEXT_WEIGHT_CLASS[weight]} ${TEXT_MARGIN_TOP_CLASS[marginTop]} ${TEXT_LEADING_CLASS[leading]} ${TEXT_INTENT_CLASS[intent]} ${TEXT_VARIANT_CLASS[variant]} ${className}`;
   if (decoration === "line-through") baseClass = `${baseClass} line-through`;
   if (truncate) baseClass = `${baseClass} truncate`;
   if (tabular) baseClass = `${baseClass} tabular-nums`;
@@ -178,6 +154,7 @@ export function MetaText({
   opacity = "100",
   leading = "normal",
   variant = "default",
+  className = "",
   title,
   children,
 }: {
@@ -192,6 +169,7 @@ export function MetaText({
   opacity?: "100" | "70";
   leading?: TextLeading;
   variant?: TextVariant;
+  className?: string;
   title?: string;
   children: ReactNode;
 }) {
@@ -211,6 +189,7 @@ export function MetaText({
       capitalize={capitalize}
       leading={leading}
       variant={variant}
+      className={className}
       title={title}
     >
       {textClass ? <span className={textClass}>{children}</span> : children}

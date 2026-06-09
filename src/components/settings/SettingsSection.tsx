@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Heading } from "@/components/common/Typography";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 
 export function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
   return (

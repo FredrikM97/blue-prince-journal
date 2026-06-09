@@ -1,8 +1,9 @@
 import { useEffect, useRef, type ReactNode } from "react";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Heading, MetaText } from "@/components/common/Typography";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
+import { TitleActionHeader } from "@/components/common/TitleActionHeader";
 import {
   usePageLayoutMobileDrawerControls,
   type MobileDrawerSide,
@@ -58,11 +59,6 @@ export function PanelHeader({
     titleMuted = true;
   }
 
-  let titleDecoration: "none" | "line-through" = "none";
-  if (done) {
-    titleDecoration = "line-through";
-  }
-
   let shouldShowClose = false;
   if (showCloseOnDesktop || forceShowClose) {
     shouldShowClose = true;
@@ -76,40 +72,37 @@ export function PanelHeader({
     headingSize = "base";
   }
 
-  return (
-    <Stack gap="0" className="panel-header">
-      <Stack gap="0" className="panel-header-title-wrap">
-        <Heading as="h2" size={headingSize} leading="snug" muted={titleMuted}>
-          <span style={{ textDecoration: titleDecoration }}>{title}</span>
-        </Heading>
-        {subtitle && (
-          <MetaText as="p" size="xs" capitalize>
-            {subtitle}
-          </MetaText>
-        )}
-      </Stack>
-      {(headerActions || onExpand || onClose) && (
-        <Stack gap="0" className="preview-header-actions">
-          {headerActions}
-          {onExpand && (
-            <Button variant="ghost" size="icon" onClick={onExpand} title="Expand preview">
-              <Maximize2 className="icon-md" />
-            </Button>
-          )}
-          {onClose && shouldShowClose && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              title="Close"
-              aria-label="Close panel"
-            >
-              <X className="icon-md" />
-            </Button>
-          )}
-        </Stack>
+  const titleNode = (
+    <Heading as="h2" size={headingSize} leading="snug" muted={titleMuted}>
+      <span className={done ? "line-through" : undefined}>{title}</span>
+    </Heading>
+  );
+
+  const subtitleNode = subtitle ? (
+    <MetaText as="p" size="xs" capitalize>
+      {subtitle}
+    </MetaText>
+  ) : undefined;
+
+  const actionsNode = (
+    <>
+      {headerActions}
+      {onExpand && (
+        <Button variant="ghost" size="icon" onClick={onExpand} title="Expand preview">
+          <Maximize2 className="icon-md" />
+        </Button>
       )}
-    </Stack>
+    </>
+  );
+
+  return (
+    <TitleActionHeader
+      title={titleNode}
+      subtitle={subtitleNode}
+      actions={actionsNode}
+      showClose={shouldShowClose}
+      onClose={onClose}
+    />
   );
 }
 

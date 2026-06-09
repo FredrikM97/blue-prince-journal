@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader } from "@/components/app-header/AppHeader";
 
 const mockNavigate = vi.fn();
 const hoisted = vi.hoisted(() => ({
@@ -41,11 +41,11 @@ vi.mock("@tanstack/react-router", () => ({
     select({ location: { pathname: mockState.pathname } }),
 }));
 
-vi.mock("@/data/store", () => ({
+vi.mock("@/hooks/useStore", () => ({
   useStore: (selector: (state: typeof mockState) => unknown) => selector(mockState),
 }));
 
-vi.mock("@/data/io", () => ({
+vi.mock("@/data/storage/backup", () => ({
   exportAll: hoisted.mockExportAll,
   importAll: hoisted.mockImportAll,
 }));
@@ -61,11 +61,11 @@ vi.mock("sonner", () => ({
   },
 }));
 
-vi.mock("@/components/common/ThemeToggle", () => ({
+vi.mock("@/components/app-header/ThemeToggle", () => ({
   ThemeToggle: () => <button type="button">theme-toggle</button>,
 }));
 
-vi.mock("@/components/common/dropdown/DropdownMenu", () => ({
+vi.mock("@/components/common/menu/DropdownMenu", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

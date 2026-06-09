@@ -39,4 +39,4 @@ blob-report
 !.dev.vars.example
 .env*
 !.env.example
-todo.md
+docs/todo-architecture.md

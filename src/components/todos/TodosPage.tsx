@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { useStore } from "@/data/store";
+import { useStore } from "@/hooks/useStore";
 import { db } from "@/data/db";
-import { toggleTodoStatus, removeTodo } from "@/data/mutations";
+import { toggleTodoStatus, removeTodo } from "@/data/mutations/todoMutations";
 import type { Todo } from "@/lib/types";
 import { groupTodosByStatus } from "@/components/todos/Constants";
 import { PageLayout } from "@/components/common/PageLayout";

@@ -30,20 +30,29 @@ export function ImageCard({
   onClick?: () => void;
   onRemove?: (e: React.MouseEvent) => void;
 }) {
-  let cardClass = size === "sm" ? "image-card image-card-sm" : "image-card";
-  if (selected) cardClass = `${cardClass} image-card-selected`;
+  let cardClass =
+    "group relative aspect-square w-full overflow-hidden rounded-md border border-border bg-muted cursor-pointer transition-colors hover:border-brass";
+  if (size === "sm") {
+    cardClass = `${cardClass} h-16 w-16 shrink-0 [aspect-ratio:unset]`;
+  }
+  if (selected) {
+    cardClass = `${cardClass} border-brass bg-brass ring-1 ring-brass text-brass-foreground`;
+  }
 
   const inner = (
     <>
-      <StoredImageView id={id} className="image-card-thumb" alt={label} mode="thumb" />
-      <span className="image-card-label" title={label}>
-        <span className="image-card-label-text">{label}</span>
+      <StoredImageView id={id} className="absolute inset-0 h-full w-full object-cover" alt={label} mode="thumb" />
+      <span
+        className="absolute bottom-0 left-0 right-0 flex items-center gap-1 bg-background px-1.5 py-0.5"
+        title={label}
+      >
+        <span className="min-w-0 flex-1 truncate text-[10px] leading-tight text-foreground">{label}</span>
         {badge}
       </span>
       {onRemove && (
         <button
           type="button"
-          className="image-card-remove"
+          className="absolute right-1 top-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-foreground opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
           aria-label="Remove image"
           onClick={onRemove}
         >

@@ -4,13 +4,10 @@ type Variant =
   | "default"
   | "brass"
   | "ghost"
-  | "transparent"
   | "outline"
   | "outline-destructive"
   | "destructive"
-  | "secondary"
-  | "select"
-  | "overlay";
+  | "secondary";
 type Size = "default" | "sm" | "lg" | "h1" | "h2" | "icon" | "icon-h2" | "content";
 type GhostTone = "default" | "muted" | "destructive";
 type GhostSurface = "default" | "mobile-toggle";
@@ -33,16 +30,7 @@ const VARIANT: Record<Variant, string> = {
     "border border-destructive/60 bg-background text-destructive shadow-sm hover:bg-destructive/10 hover:text-destructive",
   secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
   ghost: "hover:bg-accent hover:text-accent-foreground",
-  transparent: "bg-transparent hover:opacity-75",
-  select: "h-auto gap-1 rounded-md border px-3 py-1 text-xs font-medium shadow-sm",
-  overlay:
-    "fixed inset-x-0 bottom-0 top-14 z-40 rounded-none border-0 bg-black/45 p-0 hover:bg-black/45",
 };
-
-const SELECT_STATE_CLASS = {
-  active: "border-brass bg-brass text-brass-foreground shadow-sm",
-  inactive: "border-border bg-secondary text-foreground hover:border-brass hover:bg-accent",
-} as const;
 
 const SIZE_SMALL = "h-8 rounded-md px-3 text-xs";
 const SIZE_LARGE = "h-10 rounded-md px-8";
@@ -56,19 +44,6 @@ const SIZE: Record<Size, string> = {
   icon: "h-9 w-9",
   "icon-h2": "h-7 w-7",
   content: "h-auto p-0",
-};
-
-const NON_SIZED_VARIANTS: Record<Variant, boolean> = {
-  default: false,
-  brass: false,
-  ghost: false,
-  transparent: false,
-  outline: false,
-  "outline-destructive": false,
-  destructive: false,
-  secondary: false,
-  select: true,
-  overlay: true,
 };
 
 const GHOST_TONE: Record<GhostTone, string> = {
@@ -130,10 +105,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   iconSize?: ButtonIconSize;
 }
 
-function getVariantClass(variant: Variant, active: boolean) {
-  if (variant === "select") {
-    return active ? SELECT_STATE_CLASS.active : SELECT_STATE_CLASS.inactive;
-  }
+function getVariantClass(variant: Variant) {
   return VARIANT[variant];
 }
 
@@ -167,8 +139,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   ref,
 ) {
   const baseClass = BASE;
-  const variantClass = getVariantClass(variant, active);
-  const sizeClass = NON_SIZED_VARIANTS[variant] ? "" : SIZE[size];
+  const variantClass = getVariantClass(variant);
+  const sizeClass = SIZE[size];
   const variantExtras = getVariantExtras(variant, { active, tone, surface });
   const layoutClass = [
     BUTTON_WIDTH[fullWidth ? "full" : "auto"],

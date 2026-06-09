@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
-import { Stack } from "@/components/common/Stack";
-import { getRoomCatalog, ROOM_GROUPS } from "@/data/rooms";
+import { Stack } from "@/components/common/general/Stack";
+import { getRoomCatalog, ROOM_GROUPS } from "@/data/rooms/rooms";
 
 interface GroupedRooms {
   name: string;

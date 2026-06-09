@@ -4,7 +4,7 @@
  * Typing in the search box flattens results across all groups.
  */
 
-import { memo, useMemo, useRef, useState } from "react";
+import { memo, useRef } from "react";
 import { Plus } from "lucide-react";
 import {
   DropdownMenu,
@@ -14,14 +14,11 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/common/dropdown/DropdownMenu";
-import { addCustomRoom, getAllRoomGroups, getGroupedRoomCatalog } from "@/data/rooms";
+} from "@/components/common/menu/DropdownMenu";
 import { MetaText } from "@/components/common/Typography";
-import { DropdownTriggerButton } from "@/components/common/dropdown/SelectTriggerButton";
-
-function toTitleCase(s: string) {
-  return s.toLowerCase().replace(/(?:^|\s)\S/g, (c) => c.toUpperCase());
-}
+import { DropdownTriggerButton } from "@/components/common/dropdown/DropdownTriggerButton";
+import type { SelectOption } from "@/components/common/dropdown/selectOption";
+import { useRoomDropdownData } from "@/hooks/useRoomDropdownData";
 
 function RoomDropdownComponent({
   value,
@@ -36,71 +33,28 @@ function RoomDropdownComponent({
   clearLabel?: string;
   triggerWidth?: "full" | "fit";
 }) {
-  const [query, setQuery] = useState("");
-  const [catalogVersion, setCatalogVersion] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
-  const { groupedRooms, allGroups } = useMemo(() => {
-    // catalogVersion is intentionally used to bust the module-level cache after
-    // addCustomRoom mutates localStorage (the functions read fresh data each call).
-    void catalogVersion;
-    return { groupedRooms: getGroupedRoomCatalog(), allGroups: getAllRoomGroups() };
-  }, [catalogVersion]);
-  const roomCategoryByName = useMemo(() => {
-    const map = new Map<string, string>();
-    allGroups.forEach((group) => {
-      groupedRooms[group]?.forEach((room) => {
-        if (!map.has(room.name)) map.set(room.name, group);
-      });
-    });
-    return map;
-  }, [groupedRooms, allGroups]);
-
-  const activeRoom = value?.trim() ? value.trim() : "";
-  const activeCategory = activeRoom ? (roomCategoryByName.get(activeRoom) ?? null) : null;
-
-  // Slash syntax: "group/room" scopes the search and sets the target group for new rooms.
-  const slashIdx = query.indexOf("/");
-  const hasSlash = slashIdx !== -1;
-  const groupRaw = hasSlash ? query.slice(0, slashIdx).trim() : "";
-  const roomRaw = hasSlash ? query.slice(slashIdx + 1).trim() : query.trim();
-  const groupQuery = groupRaw.toLowerCase();
-  const roomQuery = roomRaw.toLowerCase();
-  const normalizedQuery = query.trim().toLowerCase();
-
-  const searchResults: Array<{ name: string; category: string }> = [];
-  if (normalizedQuery) {
-    allGroups.forEach((group) => {
-      if (hasSlash && groupQuery && !group.toLowerCase().includes(groupQuery)) return;
-      const term = hasSlash ? roomQuery : normalizedQuery;
-      groupedRooms[group]?.forEach((room) => {
-        if (!term || room.name.toLowerCase().includes(term)) {
-          searchResults.push({ name: room.name, category: group });
-        }
-      });
-    });
-  }
-
-  const targetGroup = hasSlash ? toTitleCase(groupRaw) || "Custom Rooms" : "Custom Rooms";
-  const targetRoom = roomRaw;
-  const exactMatchExists = targetRoom
-    ? allGroups.some((g) =>
-        groupedRooms[g]?.some((r) => r.name.toLowerCase() === targetRoom.toLowerCase()),
-      )
-    : true;
-  const showAddOption = targetRoom.length > 0 && !exactMatchExists;
-
-  function handleAddCustomRoom() {
-    if (!targetRoom) return;
-    addCustomRoom(targetRoom, targetGroup);
-    setCatalogVersion((v) => v + 1);
-    onValueChange(targetRoom);
-  }
+  const {
+    query,
+    setQuery,
+    resetQuery,
+    groupedRooms,
+    allGroups,
+    activeRoom,
+    activeCategory,
+    normalizedQuery,
+    searchResults,
+    showAddOption,
+    targetRoom,
+    targetGroup,
+    handleAddCustomRoom,
+  } = useRoomDropdownData({ value, onValueChange });
 
   return (
     <DropdownMenu
       modal={false}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) setQuery("");
+        if (!nextOpen) resetQuery();
         if (nextOpen) requestAnimationFrame(() => searchRef.current?.focus());
       }}
     >
@@ -127,11 +81,12 @@ function RoomDropdownComponent({
         </div>
 
         {(() => {
+          const clearOption: SelectOption = { value: "", label: clearLabel };
           let clearTone: "default" | "active" = "default";
           if (!activeRoom) clearTone = "active";
           return (
-            <DropdownMenuItem tone={clearTone} onSelect={() => onValueChange("")}>
-              {clearLabel}
+            <DropdownMenuItem tone={clearTone} onSelect={() => onValueChange(clearOption.value)}>
+              {clearOption.label}
             </DropdownMenuItem>
           );
         })()}

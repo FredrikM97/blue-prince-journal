@@ -1,3 +1,5 @@
+@reference "../../../tailwind-reference.css";
+
 @layer components {
   /* ─── DropdownMenu primitives ────────────────────────────────────────────── */
 
@@ -16,6 +18,11 @@
   /* Clickable menu item */
   .dropdown-item {
     @apply relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50;
+  }
+
+  /* Applied to a DropdownMenuItem that represents the current selection */
+  .menu-item-active {
+    @apply bg-accent;
   }
 
   /* Horizontal divider */
@@ -62,7 +69,7 @@
 
   /* When the trigger has a selected value, show label in foreground colour */
   .dropdown-trigger[data-has-value="true"] .dropdown-trigger-label {
-    @apply text-muted-foreground;
+    @apply text-foreground;
   }
 
   /* Search input inside the dropdown */

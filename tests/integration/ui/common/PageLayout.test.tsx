@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { PageLayout, usePageLayoutMobileDrawerControls } from "@/components/common/PageLayout";
+import { PageLayout } from "@/components/common/PageLayout";
+import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
 
 function MobileDrawerTrigger() {
   const controls = usePageLayoutMobileDrawerControls();

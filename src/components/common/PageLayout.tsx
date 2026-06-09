@@ -22,7 +22,7 @@ import {
 import {
   useIsPageLayoutMobile,
   useOnPageLayoutMobileChange,
-} from "@/components/common/usePageLayoutMobile";
+} from "@/hooks/usePageLayoutMobile";
 import { PanelLeft, PanelRight } from "lucide-react";
 import {
   PageLayoutMobileDrawerProvider,

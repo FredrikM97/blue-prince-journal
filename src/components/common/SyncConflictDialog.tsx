@@ -7,9 +7,9 @@ import {
 } from "@/components/common/Dialog";
 import { Button } from "@/components/common/Button";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { Text } from "@/components/common/Typography";
-import type { SyncConflictChoice } from "@/data/sync";
+import type { SyncConflictChoice } from "@/data/sync/sync";
 
 export type { SyncConflictChoice };
 

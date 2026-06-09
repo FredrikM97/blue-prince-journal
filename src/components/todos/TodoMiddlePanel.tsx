@@ -2,7 +2,7 @@ import { TODO_STATUS_COLUMNS } from "./Constants";
 import { TodoItem } from "./TodoItem";
 import type { Todo, TodoStatus } from "@/lib/types";
 import { Grid } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { Heading, MetaText } from "@/components/common/Typography";
 
 function TodoColumn({
@@ -21,16 +21,16 @@ function TodoColumn({
   onOpenPreview: (t: Todo) => void;
 }) {
   return (
-    <Stack as="section" variant="todos-column" gap="0">
-      <Stack as="header" variant="todos-column-header" gap="0">
+    <Stack as="section" className="todos-column" gap="0">
+      <Stack as="header" className="todos-column-header" gap="0">
         <Heading as="h2" size="base" variant="section-label">
           {label}
         </Heading>
         <MetaText as="span">{todos.length}</MetaText>
       </Stack>
-      <Stack as="ul" variant="todos-column-list" gap="0">
+      <Stack as="ul" className="todos-column-list" gap="0">
         {todos.length === 0 && (
-          <Stack as="li" variant="todos-column-empty" gap="0">
+          <Stack as="li" className="todos-column-empty" gap="0">
             {value === "open" ? "Press N to add a todo" : "Empty"}
           </Stack>
         )}

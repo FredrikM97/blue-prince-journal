@@ -1,0 +1,36 @@
+@reference "../../../tailwind-reference.css";
+
+@layer components {
+  .filter-section {
+    @apply space-y-1.5;
+  }
+
+  .filter-section-header {
+    @apply flex items-center justify-between text-[10px] font-medium uppercase tracking-wide text-muted-foreground;
+  }
+
+  .filter-section-control {
+    @apply flex min-h-6 cursor-pointer select-none items-center justify-between gap-1 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring;
+  }
+
+  .filter-section-action {
+    @apply px-1 py-0.5 text-[10px] normal-case text-brass hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring;
+  }
+
+  .filter-section-badge {
+    @apply ml-1 text-amber-500;
+  }
+
+  .filter-section-content {
+    @apply space-y-0.5;
+  }
+
+  .filter-section-chevron {
+    @apply h-2.5 w-2.5;
+  }
+
+  .filter-toggle-dot {
+    @apply h-2 w-2 shrink-0 rounded-full;
+    background: var(--filter-dot-color);
+  }
+}

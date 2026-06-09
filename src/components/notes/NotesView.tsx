@@ -5,7 +5,7 @@ import { NotesListItemSummary } from "./NotesListItemSummary";
 import { ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Text } from "@/components/common/Typography";
 import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 
 export function NotesView({
   emptyHint,
@@ -79,14 +79,15 @@ const NotesListRow = memo(function NotesListRow({
   return (
     <Stack gap="0" className="note-row-item">
       <Stack gap="0" className="note-row-inner">
-        <Stack variant="item-title" gap="0">
+        <Stack className="item-title" gap="0">
           <Button
             type="button"
-            variant="transparent"
+            variant="ghost"
             size="content"
             fullWidth
             justify="start"
             textAlign="left"
+            className="bg-transparent hover:bg-transparent hover:opacity-75"
             onClick={(e) => {
               e.stopPropagation();
               onOpenPreview(note);

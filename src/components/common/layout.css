@@ -1,3 +1,5 @@
+@reference "../../tailwind-reference.css";
+
 @layer components {
   /* ─── Root shell ────────────────────────────────────────────────────────── */
 
@@ -46,147 +48,13 @@
     @apply rounded-lg border border-border bg-card p-2.5 text-sm flex flex-col gap-3 sm:p-3;
   }
 
-  /* Scrollable body inside a flex-column dialog or panel */
-  .dialog-scroll-body {
-    @apply min-h-0 flex-1 overflow-y-auto;
+  .h-scroll-strip {
+    @apply flex gap-2 overflow-x-auto pb-1;
+    scrollbar-width: thin;
   }
 
-  /* ─── Shared image card ───────────────────────────────────────────────────── */
-
-  /* Square card that fills its grid cell — used in galleries */
-  .image-card {
-    @apply relative aspect-square w-full overflow-hidden rounded-md border border-border bg-muted cursor-pointer transition-colors hover:border-brass;
-  }
-
-  /* Small fixed-size variant — used in the editor attached-images strip */
-  .image-card-sm {
-    @apply h-16 w-16 shrink-0;
-    aspect-ratio: unset;
-    width: 4rem;
-  }
-
-  /* Image fills the card */
-  .image-card-thumb {
-    @apply absolute inset-0 h-full w-full object-cover;
-  }
-
-  /* Label overlay pinned to the bottom */
-  .image-card-label {
-    @apply absolute bottom-0 left-0 right-0 flex items-center gap-1 bg-background px-1.5 py-0.5;
-  }
-  .image-card-label-text {
-    @apply min-w-0 flex-1 truncate text-[10px] leading-tight text-foreground;
-  }
-
-  /* Selection state (for picker use) */
-  .image-card-selected {
-    @apply border-brass bg-brass ring-1 ring-brass text-brass-foreground;
-  }
-
-  /* Remove button — top-right corner, visible on hover */
-  .image-card-remove {
-    @apply absolute right-1 top-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-foreground opacity-0 transition-opacity hover:bg-accent;
-  }
-  .image-card:hover .image-card-remove,
-  .image-card-sm:hover .image-card-remove {
-    @apply opacity-100;
-  }
-
-  /* ─── Dialog primitives ──────────────────────────────────────────────────── */
-
-  /* Backdrop — shown behind every dialog */
-  .dialog-overlay {
-    @apply fixed inset-0 z-50 bg-background/35 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0;
-  }
-
-  .dialog-overlay-subtle {
-    @apply bg-background/25 backdrop-blur-[2px];
-  }
-
-  /* Shared positioning + animation — applied directly to all dialog content variants */
-  .dialog-content-default,
-  .dialog-content-compact,
-  .dialog-content-preview,
-  .dialog-content-expand,
-  .dialog-content-wide,
-  .dialog-content-fullscreen,
-  .dialog-content-editor {
-    @apply fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95;
-  }
-
-  /* Standard modal (≤ lg) */
-  .dialog-content-default {
-    @apply grid w-full max-w-lg gap-4 p-6;
-  }
-
-  .dialog-content-compact {
-    @apply grid w-full max-w-md gap-4 p-6;
-  }
-
-  /* Standard preview/note dialog: tall, wide, flex-col */
-  .dialog-content-preview {
-    @apply flex h-[calc(100dvh-2rem)] max-h-[calc(100dvh-2rem)] w-[96vw] max-w-5xl flex-col gap-4 overflow-hidden p-6;
-  }
-
-  /* Expand dialog (4xl wide, used by PreviewExpandDialog) */
-  .dialog-content-expand {
-    @apply flex max-h-[calc(100dvh-2rem)] w-[90vw] max-w-4xl flex-col gap-3 overflow-hidden p-6;
-  }
-
-  /* Wide dialog (5xl, used for markdown expand) */
-  .dialog-content-wide {
-    @apply flex h-[calc(100dvh-2rem)] max-h-[calc(100dvh-2rem)] w-[90vw] max-w-5xl flex-col gap-3 overflow-hidden p-4;
-  }
-
-  .dialog-content-wide .dialog-scroll-body {
-    @apply flex-col min-h-0 overflow-y-auto;
-  }
-
-  /* Full-screen-ish dialog (graph fullscreen, leaves 1rem margin) */
-  .dialog-content-fullscreen {
-    @apply flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col gap-0 p-3 pr-10;
-  }
-
-  /* Editor dialog — close button hidden, managed by caller */
-  .dialog-content-editor {
-    @apply max-h-[80vh] max-w-2xl overflow-hidden p-0;
-  }
-
-  /* Close button inside DialogContent */
-  .dialog-close-btn {
-    @apply absolute right-4 top-4 cursor-pointer rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground;
-  }
-
-  .dialog-content-preview .dialog-close-btn {
-    @apply top-6;
-  }
-
-  /* Dialog header: title + optional description stacked */
-  .dialog-header {
-    @apply flex flex-col gap-1.5;
-  }
-
-  .preview-dialog-title-row {
-    @apply pr-0;
-  }
-
-  .preview-dialog-title-actions {
-    @apply ml-auto shrink-0 -mr-2;
-  }
-
-  /* Dialog footer: actions row */
-  .dialog-footer {
-    @apply flex flex-col-reverse gap-2 sm:flex-row sm:justify-end;
-  }
-
-  /* Dialog title element */
-  .dialog-title-elem {
-    @apply text-lg font-semibold leading-none tracking-tight;
-  }
-
-  /* Dialog description element */
-  .dialog-description-elem {
-    @apply text-sm text-muted-foreground;
+  .section-compact {
+    @apply space-y-1.5;
   }
 
   .input-base {
@@ -318,13 +186,6 @@
     @apply inline-flex items-center rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] text-foreground;
   }
 
-  /* ─── Dropdown active item ───────────────────────────────────────────────── */
-
-  /* Applied to a DropdownMenuItem that represents the current selection */
-  .menu-item-active {
-    @apply bg-accent;
-  }
-
   /* ─── Panel cards ────────────────────────────────────────────────────────── */
 
   /* General-purpose bordered content card (info boxes, lists, snippets) */
@@ -419,166 +280,9 @@
     grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
   }
 
-  /* ─── Page layout ───────────────────────────────────────────────────────── */
-
-  /* Outer wrapper — centers content, limits max width */
-  .ui-layout-frame,
-  .page-layout {
-    @apply mx-auto h-full min-h-0 w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-6;
-  }
-
-  /* Layout variants */
-  .ui-layout-cols-3,
-  .page-layout-three-column {
-    @apply grid items-start gap-3 sm:gap-6 grid-cols-[240px_minmax(0,1fr)_420px];
-    min-height: 100%;
-  }
-
-  .ui-layout-cols-2-left,
-  .page-layout-two-column-left {
-    @apply grid items-start gap-3 sm:gap-6 grid-cols-[240px_minmax(0,1fr)];
-    min-height: 100%;
-  }
-
-  .ui-layout-cols-2-right,
-  .page-layout-two-column-right {
-    @apply grid items-start gap-3 sm:gap-6 grid-cols-[minmax(0,1fr)_420px];
-    min-height: 100%;
-  }
-
-  /* Left sticky sidebar column */
-  .ui-layout-sidebar-left,
-  .page-layout-sidebar {
-    @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-r border-border bg-transparent;
-    overscroll-behavior: contain;
-    height: calc(100dvh - 5.5rem);
-    max-height: calc(100dvh - 5.5rem);
-    top: 0;
-  }
-
-  /* Main content area ("middle") */
-  .ui-layout-content,
-  .page-layout-content {
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-
-  .ui-layout-mobile-drawer,
-  .page-layout-mobile-drawer {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .ui-layout-mobile-drawer::-webkit-scrollbar,
-  .page-layout-mobile-drawer::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
-  }
-
-  .ui-surface-panel,
-  .page-layout-panel {
-    @apply rounded-lg bg-card p-2.5 text-sm sm:p-3;
-  }
-
-  /* Right sticky sidebar column */
-  .ui-layout-sidebar-right,
-  .page-layout-rightbar {
-    @apply sticky self-start min-h-0 overflow-y-auto rounded-l-lg border-l border-border bg-transparent;
-    overscroll-behavior: contain;
-    height: calc(100dvh - 5.5rem);
-    max-height: calc(100dvh - 5.5rem);
-    top: 0;
-  }
-
-  .ui-layout-mobile-controls,
-  .page-layout-mobile-controls {
-    @apply fixed inset-x-0 bottom-2 z-30 mx-auto flex w-fit items-center gap-2 rounded-full bg-background px-2 py-1.5 shadow-lg backdrop-blur;
-  }
-
-  .page-layout-mobile-toggle {
-    @apply shrink-0 rounded-full;
-  }
-
-  .page-layout-mobile-toggle-active {
-    @apply bg-brass text-brass-foreground;
-  }
-
-  .ui-layout-mobile-drawer,
-  .page-layout-mobile-drawer {
-    width: min(94vw, 24rem);
-    max-width: min(94vw, 24rem);
-    height: 100dvh;
-    max-height: 100dvh;
-    @apply fixed bottom-0 top-0 z-50 overflow-y-auto rounded-none border border-border bg-background px-3 pb-3 shadow-xl;
-  }
-
-  .ui-layout-mobile-drawer-left,
-  .page-layout-mobile-drawer-left {
-    @apply left-0 border-r;
-    margin-left: 0;
-  }
-
-  .ui-layout-mobile-drawer-right,
-  .page-layout-mobile-drawer-right {
-    @apply right-0 border-l;
-    margin-right: 0;
-  }
-
-  .ui-layout-variant-panel .ui-layout-content,
-  .ui-layout-variant-panel .ui-layout-sidebar-left,
-  .ui-layout-variant-panel .ui-layout-sidebar-right,
-  .ui-layout-variant-panel .ui-layout-mobile-drawer,
-  .page-layout-variant-panel .page-layout-content,
-  .page-layout-variant-panel .page-layout-sidebar,
-  .page-layout-variant-panel .page-layout-rightbar,
-  .page-layout-variant-panel .page-layout-mobile-drawer {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .ui-layout-variant-panel .ui-layout-content::-webkit-scrollbar,
-  .ui-layout-variant-panel .ui-layout-sidebar-left::-webkit-scrollbar,
-  .ui-layout-variant-panel .ui-layout-sidebar-right::-webkit-scrollbar,
-  .ui-layout-variant-panel .ui-layout-mobile-drawer::-webkit-scrollbar,
-  .page-layout-variant-panel .page-layout-content::-webkit-scrollbar,
-  .page-layout-variant-panel .page-layout-sidebar::-webkit-scrollbar,
-  .page-layout-variant-panel .page-layout-rightbar::-webkit-scrollbar,
-  .page-layout-variant-panel .page-layout-mobile-drawer::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
-  }
-
-  .ui-layout-variant-panel .ui-layout-sidebar-left,
-  .ui-layout-variant-panel .ui-layout-sidebar-right,
-  .ui-layout-variant-panel .ui-layout-mobile-drawer,
-  .ui-layout-variant-panel .ui-layout-mobile-drawer-left,
-  .ui-layout-variant-panel .ui-layout-mobile-drawer-right,
-  .page-layout-variant-panel .page-layout-sidebar,
-  .page-layout-variant-panel .page-layout-rightbar,
-  .page-layout-variant-panel .page-layout-mobile-drawer,
-  .page-layout-variant-panel .page-layout-mobile-drawer-left,
-  .page-layout-variant-panel .page-layout-mobile-drawer-right {
-    @apply border-0;
-  }
-
-  .ui-layout-mobile-drawer .side-panel-shell,
-  .page-layout-mobile-drawer .side-panel-shell {
-    @apply w-full rounded-none border-0 bg-background p-0;
-  }
-
-  .ui-layout-mobile-drawer .panel-header,
-  .page-layout-mobile-drawer .panel-header {
-    @apply sticky top-0 z-10 border-b border-border bg-background pt-3 backdrop-blur-sm;
-  }
-
-  .ui-layout-mobile-drawer .preview-header-actions,
-  .page-layout-mobile-drawer .preview-header-actions {
-    @apply items-center gap-1.5;
+  .grid-auto-fit {
+    @apply w-full gap-x-2 gap-y-0.5;
+    grid-template-columns: repeat(auto-fit, minmax(min(6.75rem, 100%), 1fr));
   }
 
   /* SidebarPanel — fixed right overlay, slides in from the right edge */
@@ -590,50 +294,5 @@
     .sidebar-panel-content {
       width: var(--sidebar-panel-width);
     }
-  }
-
-  .ui-layout-single-scroll,
-  .page-layout-single-column-scroll {
-    @apply flex flex-col;
-  }
-
-  .ui-layout-single-scroll .ui-layout-content,
-  .ui-layout-single-scroll .page-layout-content,
-  .page-layout-single-column-scroll .ui-layout-content,
-  .page-layout-single-column-scroll .page-layout-content {
-    flex: 1 1 auto;
-  }
-
-  .ui-layout-mode-desktop .ui-layout-sidebar-right,
-  .ui-layout-mode-desktop .page-layout-rightbar,
-  .page-layout-mode-desktop .ui-layout-sidebar-right,
-  .page-layout-mode-desktop .page-layout-rightbar {
-    margin-right: -1rem;
-    border-right: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .ui-layout-mode-mobile .ui-layout-content,
-  .ui-layout-mode-mobile .page-layout-content,
-  .page-layout-mode-mobile .ui-layout-content,
-  .page-layout-mode-mobile .page-layout-content {
-    height: auto;
-    overflow-y: visible;
-  }
-
-  .ui-layout-variant-panel.ui-layout-mode-mobile .ui-layout-mobile-drawer,
-  .page-layout-variant-panel.page-layout-mode-mobile .page-layout-mobile-drawer {
-    @apply border border-border shadow-xl;
-  }
-
-  .ui-layout-variant-panel.ui-layout-mode-mobile .ui-layout-mobile-drawer-right,
-  .page-layout-variant-panel.page-layout-mode-mobile .page-layout-mobile-drawer-right {
-    @apply border-l border-r-0;
-  }
-
-  .ui-layout-variant-panel.ui-layout-mode-mobile .ui-layout-mobile-drawer-left,
-  .page-layout-variant-panel.page-layout-mode-mobile .page-layout-mobile-drawer-left {
-    @apply border-r border-l-0;
   }
 }

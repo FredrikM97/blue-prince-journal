@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { WelcomeScreen } from "@/components/WelcomeScreen";
+import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
 
 const hoisted = vi.hoisted(() => ({
   mockImportAll: vi.fn(async () => {}),
@@ -28,7 +28,7 @@ vi.mock("@/data/io", () => ({
   importAll: hoisted.mockImportAll,
 }));
 
-vi.mock("@/data/sync", () => ({
+vi.mock("@/data/sync/sync", () => ({
   pickSyncFolder: hoisted.mockPickSyncFolder,
   readFromSyncFolder: hoisted.mockReadFromSyncFolder,
   importSyncManifest: hoisted.mockImportSyncManifest,

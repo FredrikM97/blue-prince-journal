@@ -1,6 +1,9 @@
-import { useStore } from "@/data/store";
+import { useState } from "react";
+import { PenLine, Save } from "lucide-react";
+import { useStore } from "@/hooks/useStore";
 import { db } from "@/data/db";
-import { saveNote, removeNote, removeTodo } from "@/data/mutations";
+import { saveNote, removeNote } from "@/data/mutations/noteMutations";
+import { removeTodo } from "@/data/mutations/todoMutations";
 import type { Note, NoteType, Todo } from "@/lib/types";
 import { PageLayout } from "@/components/common/PageLayout";
 import { Button } from "@/components/common/Button";
@@ -15,15 +18,15 @@ import { NotesCreatePanel } from "./NotesCreatePanel";
 import { NotesEditorPanel } from "./NotesEditorPanel";
 import { NotesFilterPanel } from "./NotesFilterPanel";
 import { NotesView } from "./NotesView";
-import { useNotesPageUI } from "@/hooks/useNotesPageUI";
+import { useNotesPageUI } from "@/components/notes/hooks/useNotesPageUI";
 import { TodoRightPanel } from "@/components/todos/TodoRightPanel";
 import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
 import { SidePanelLeft, SidePanelRight } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { Stack } from "@/components/common/general/Stack";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
-import { Save } from "lucide-react";
-import { PreviewSidePanel } from "@/components/common/PreviewSidePanel";
+import { buildCapturePanelKey } from "@/components/notes/capturePanelKey";
 
 export function NotesPage({
   filterType,
@@ -57,6 +60,7 @@ export function NotesPage({
     openEditFromList,
     openPreviewFromList,
     deleteFromList,
+    executePendingDelete,
     filterState,
     filterActions,
   } = useNotesPageUI({
@@ -66,6 +70,8 @@ export function NotesPage({
     filterType,
     openCapture,
     closeCapture,
+    onDeleteNote: removeNote,
+    onDeleteTodo: removeTodo,
   });
 
   let rightPanelContent: React.ReactNode = (
@@ -112,13 +118,12 @@ export function NotesPage({
   }
 
   if (captureOpen) {
-    let capturePanelKey = `capture:new:${captureDefault}:${capturePrefill}`;
-    if (captureEditNoteId) {
-      capturePanelKey = `capture:edit-note:${captureEditNoteId}`;
-    }
-    if (captureEditTodoId) {
-      capturePanelKey = `capture:edit-todo:${captureEditTodoId}`;
-    }
+    const capturePanelKey = buildCapturePanelKey({
+      captureDefault,
+      capturePrefill,
+      captureEditNoteId,
+      captureEditTodoId,
+    });
 
     rightPanelContent = <NotesCreatePanel key={capturePanelKey} defaultNoteType={filterType} />;
   }
@@ -178,23 +183,8 @@ export function NotesPage({
             </Button>
             <Button
               variant="destructive"
-              onClick={async () => {
-                const pendingDelete = uiState.pendingDelete;
-                if (!pendingDelete) return;
-
-                if (pendingDelete.id.startsWith("todo:")) {
-                  const todoId = pendingDelete.id.slice(5);
-                  if (todoId) {
-                    await removeTodo(todoId);
-                  }
-                }
-
-                if (!pendingDelete.id.startsWith("todo:")) {
-                  await removeNote(pendingDelete.id);
-                }
-
-                uiActions.clearDeletedIfActive(pendingDelete.id);
-                uiActions.setPendingDelete(null);
+              onClick={() => {
+                void executePendingDelete();
               }}
             >
               Delete
@@ -223,6 +213,8 @@ function NotesRightPanel({
   onSave: () => Promise<void>;
   onClose: () => void;
 }) {
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+
   if (!activeNote) {
     return null;
   }
@@ -260,19 +252,33 @@ function NotesRightPanel({
     .filter(Boolean)
     .join(" · ");
 
+  const previewHeaderActions = (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onStartEdit}
+      title="Edit note"
+      aria-label="Edit note"
+    >
+      <PenLine className="h-4 w-4" />
+    </Button>
+  );
+
   return (
-    <PreviewSidePanel
+    <SidePanelRight
       title={activeNote.title}
       subtitle={subtitle}
       panelKey={`note-preview:${activeNote.id}`}
       onClose={onClose}
-      onEdit={onStartEdit}
-      editAriaLabel="Edit note"
-      renderExpandDialog={(open, onOpenChange) => (
-        <NotePreviewDialog note={activeNote} open={open} onOpenChange={onOpenChange} />
-      )}
+      onExpand={() => setPreviewExpanded(true)}
+      headerActions={previewHeaderActions}
+      expandDialog={
+        <NotePreviewDialog note={activeNote} open={previewExpanded} onOpenChange={setPreviewExpanded} />
+      }
     >
-      <NotePreviewContent note={activeNote} />
-    </PreviewSidePanel>
+      <Stack gap="2" variant="dialog-scroll-body">
+        <NotePreviewContent note={activeNote} />
+      </Stack>
+    </SidePanelRight>
   );
 }

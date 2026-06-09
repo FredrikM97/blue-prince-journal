@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Grid, Inline } from "@/components/common/LayoutPrimitives";
 
 type FilterToggleItem = {
@@ -17,7 +17,8 @@ function getToggleButtonClass(options: {
   activeStyle: "filled" | "outline";
 }) {
   const alignClass = options.leftAligned ? "justify-start text-left" : "justify-center text-center";
-  const sizeClass = options.size === "compact" ? "h-5.5 px-1.5 py-0.5 text-[8px]" : "px-2 py-1 text-[11px]";
+  const sizeClass =
+    options.size === "compact" ? "h-5.5 px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-[11px]";
   const widthClass = options.width === "fit" ? "w-auto" : "w-full";
 
   let stateClass = "opacity-75";
@@ -52,7 +53,7 @@ export function FilterToggleGrid({
   width?: "full" | "fit";
   activeStyle?: "filled" | "outline";
 }) {
-  const dotClassName = "h-2 w-2 shrink-0 rounded-full";
+  const dotClassName = "filter-toggle-dot";
   const labelClassName = "overflow-hidden text-ellipsis whitespace-nowrap";
 
   if (layout === "wrap") {
@@ -75,7 +76,10 @@ export function FilterToggleGrid({
               onClick={item.onToggle}
             >
               {item.dotColor && (
-                <span className={dotClassName} style={{ background: item.dotColor }} />
+                <span
+                  className={dotClassName}
+                  style={{ "--filter-dot-color": item.dotColor } as CSSProperties}
+                />
               )}
               <span className={labelClassName}>{item.label}</span>
             </button>
@@ -86,7 +90,7 @@ export function FilterToggleGrid({
   }
 
   return (
-    <Grid variant="auto-fit" gap="2">
+    <Grid gap="2" className="grid-auto-fit">
       {items.map((item) => {
         const buttonClassName = getToggleButtonClass({
           active: item.active,
@@ -104,7 +108,10 @@ export function FilterToggleGrid({
             onClick={item.onToggle}
           >
             {item.dotColor && (
-              <span className={dotClassName} style={{ background: item.dotColor }} />
+              <span
+                className={dotClassName}
+                style={{ "--filter-dot-color": item.dotColor } as CSSProperties}
+              />
             )}
             <span className={labelClassName}>{item.label}</span>
           </button>

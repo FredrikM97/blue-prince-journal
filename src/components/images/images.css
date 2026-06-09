@@ -1,3 +1,5 @@
+@reference "../../tailwind-reference.css";
+
 @layer components {
   .images-page-header {
     @apply mb-4 flex items-baseline justify-between;
@@ -57,6 +59,10 @@
 
   .deleted-import-thumb-stage {
     @apply relative aspect-square overflow-hidden rounded border border-border bg-card hover:border-brass;
+  }
+
+  .deleted-import-thumb-image {
+    @apply h-full w-full object-cover;
   }
 
   .deleted-import-thumb-action {
