@@ -54,7 +54,7 @@ const GHOST_TONE: Record<GhostTone, string> = {
 
 const GHOST_SURFACE: Record<GhostSurface, string> = {
   default: "",
-  "mobile-toggle": "shrink-0 rounded-full",
+  "mobile-toggle": "shrink-0 !rounded-full",
 };
 
 const GHOST_SURFACE_ACTIVE: Record<GhostSurface, string> = {

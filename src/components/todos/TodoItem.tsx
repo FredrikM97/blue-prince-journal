@@ -33,36 +33,25 @@ export function TodoItem({
 
   return (
     <li>
-      <Stack gap="0" className="rounded-lg border border-border bg-card px-3 py-2 hover:bg-muted">
+      <div className="cursor-pointer rounded-lg border border-border bg-card px-3 py-2 hover:bg-muted" onClick={onOpenPreview}>
         <Stack gap="0" className="min-w-0 space-y-1">
           <Stack gap="0" className="flex min-w-0 items-center justify-between gap-2">
             <Stack gap="0" className="min-w-0 flex-1 overflow-hidden">
               <Stack gap="0">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="content"
-                  fullWidth
-                  justify="start"
-                  textAlign="left"
-                  className="w-full min-w-0 overflow-hidden whitespace-normal break-words bg-transparent py-0.5 hover:bg-transparent hover:opacity-75"
-                  onClick={onOpenPreview}
+                <Text
+                  as="span"
+                  size="sm"
+                  tone={titleTone}
+                  decoration={titleDecoration}
+                  className="line-clamp-2 whitespace-normal break-words py-0.5"
                 >
-                  <Text
-                    as="span"
-                    size="sm"
-                    tone={titleTone}
-                    decoration={titleDecoration}
-                    className="line-clamp-2"
-                  >
-                    {todo.title}
-                  </Text>
-                </Button>
+                  {todo.title}
+                </Text>
               </Stack>
             </Stack>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon-h2" aria-label="Todo actions">
+                <Button variant="ghost" size="icon-h2" aria-label="Todo actions" onClick={(e) => e.stopPropagation()}>
                   <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
@@ -128,7 +117,7 @@ export function TodoItem({
             </Inline>
           </Stack>
         </Stack>
-      </Stack>
+      </div>
     </li>
   );
 }

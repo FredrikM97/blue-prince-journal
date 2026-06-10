@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Todo } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
@@ -70,6 +71,8 @@ export function TodoPreviewDialog({
 }) {
   if (!todo) return null;
   const activeTodo = todo;
+  const [optimisticBody, setOptimisticBody] = useState<string | undefined>(activeTodo.body);
+  const displayTodo = optimisticBody !== activeTodo.body ? { ...activeTodo, body: optimisticBody } : activeTodo;
   return (
     <EditablePreviewDialog
       open={open}
@@ -86,10 +89,11 @@ export function TodoPreviewDialog({
           ...activeTodo,
           body: nextDraft || undefined,
         };
+        setOptimisticBody(next.body);
         await saveTodo(next);
       }}
     >
-      <TodoPreviewContent todo={activeTodo} />
+      <TodoPreviewContent todo={displayTodo} />
     </EditablePreviewDialog>
   );
 }
