@@ -2,7 +2,7 @@ import { memo } from "react";
 import type { Note } from "@/lib/types";
 import { Button } from "@/components/common/Button";
 import { NotesListItemSummary } from "./NotesListItemSummary";
-import { ChevronRight, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
 
@@ -111,17 +111,6 @@ const NotesListRow = memo(function NotesListRow({
           aria-label="Delete note"
         >
           <Trash2 className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenPreview(note);
-          }}
-          aria-label="Preview note"
-        >
-          <ChevronRight className="h-4 w-4" />
         </Button>
       </Stack>
     </div>

@@ -173,7 +173,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
         gap="0"
       >
         <Stack
-          className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-3 py-2 sm:px-4 md:flex-nowrap lg:px-6"
+          className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-3 py-2 sm:px-4 lg:flex-nowrap lg:px-6"
           gap="0"
         >
           <Link
@@ -203,7 +203,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
             <>
               <Stack
                 as="nav"
-                className="order-3 flex basis-full min-w-0 flex-nowrap items-center gap-1 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:order-none md:basis-auto md:flex-1 md:flex-wrap md:overflow-visible md:pb-0"
+                className="order-3 flex basis-full min-w-0 flex-nowrap items-center gap-1 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:order-none lg:basis-auto lg:flex-1 lg:flex-wrap lg:overflow-visible lg:pb-0"
                 gap="0"
               >
                 {sections
@@ -225,7 +225,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
               </Stack>
 
               <Stack
-                className="app-header-controls order-2 ml-auto flex shrink-0 items-center gap-1.5 md:order-none [&>*]:shrink-0"
+                className="app-header-controls order-2 ml-auto flex shrink-0 items-center gap-1.5 lg:order-none [&>*]:shrink-0"
                 gap="0"
               >
                 <ThemeToggle />

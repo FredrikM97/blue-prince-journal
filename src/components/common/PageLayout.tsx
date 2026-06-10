@@ -43,13 +43,13 @@ function PageLayoutRight({ children }: PageLayoutSlotProps) {
 
 function getColumnLayoutClass(hasLeft: boolean, hasRight: boolean): string {
   if (hasLeft && hasRight) {
-    return "grid-cols-[var(--sidebar-width)_minmax(0,1fr)_var(--sidebar-width)] max-[899.98px]:flex max-[899.98px]:flex-col";
+    return "grid-cols-[var(--sidebar-width)_minmax(0,1fr)_var(--sidebar-width)] max-[1023.98px]:flex max-[1023.98px]:flex-col";
   }
   if (hasLeft) {
-    return "grid-cols-[var(--sidebar-width)_minmax(0,1fr)] max-[899.98px]:flex max-[899.98px]:flex-col";
+    return "grid-cols-[var(--sidebar-width)_minmax(0,1fr)] max-[1023.98px]:flex max-[1023.98px]:flex-col";
   }
   if (hasRight) {
-    return "grid-cols-[minmax(0,1fr)_var(--sidebar-width)] max-[899.98px]:flex max-[899.98px]:flex-col";
+    return "grid-cols-[minmax(0,1fr)_var(--sidebar-width)] max-[1023.98px]:flex max-[1023.98px]:flex-col";
   }
   return "flex flex-col";
 }
@@ -71,7 +71,7 @@ function getSidebarClass(side: MobileDrawerSide, variant: PageLayoutVariant): st
 
 function getContentClass(hasLeft: boolean, hasRight: boolean, variant: PageLayoutVariant): string {
   let className =
-    "min-h-0 min-w-0 h-full overflow-y-auto [overscroll-behavior:contain] max-[899.98px]:flex-1 max-[899.98px]:h-auto max-[899.98px]:overflow-y-visible max-[899.98px]:[overscroll-behavior:auto]";
+    "min-h-0 min-w-0 h-full overflow-y-auto [overscroll-behavior:contain] max-[1023.98px]:flex-1 max-[1023.98px]:h-auto max-[1023.98px]:overflow-y-visible max-[1023.98px]:[overscroll-behavior:auto]";
   if (!hasLeft && !hasRight) {
     className = `${className} flex-1`;
   }
@@ -332,7 +332,7 @@ function PageLayoutComponent({
     openMobileDrawer,
   ]);
 
-  let layoutClass = `mx-auto grid h-full min-h-0 w-full max-w-7xl items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 max-[899.98px]:h-auto ${columnClass}`;
+  let layoutClass = `mx-auto grid h-full min-h-0 w-full max-w-7xl items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 max-[1023.98px]:h-auto ${columnClass}`;
   if (className) {
     layoutClass = `${layoutClass} ${className}`;
   }
