@@ -6,10 +6,12 @@ import {
   HeadContent,
   Link,
   Outlet,
+  useRouterState,
   useRouter,
 } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { AppHeader } from "@/components/app-header/AppHeader";
+import { ThemeToggle } from "@/components/app-header/ThemeToggle";
 import { Toaster } from "@/routes/Sonner";
 import { toast } from "sonner";
 import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
@@ -21,11 +23,10 @@ import { ImagesPage } from "@/components/images/ImagesPage";
 import { GraphPage } from "@/components/graph/GraphPage";
 import { useStore } from "@/hooks/useStore";
 import { syncRuntime } from "@/data/sync/sync";
-import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storage/storageHealth";
-import { db, ensureBootSeed } from "@/data/db";
-import { cleanupOrphanedImageRefs } from "@/data/mutations/imageMutations";
+import { db } from "@/data/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { Note, Todo, SectionDef } from "@/lib/types";
+import { useAppFrameInit } from "@/hooks/useAppFrameInit";
 
 type RouterContext = {
   queryClient: QueryClient;
@@ -35,63 +36,39 @@ export function RootShellView({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function WelcomeHeaderShell() {
+  return (
+    <header className="sticky top-0 z-40 border-b border-border bg-background px-3 backdrop-blur lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-3 py-2 sm:px-4 lg:px-6">
+        <Link
+          to="/"
+          className="mr-2 inline-flex shrink-0 items-center gap-2 rounded-md px-1.5 py-1 hover:bg-accent"
+        >
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded bg-brass text-xs font-semibold text-brass-foreground">
+            B
+          </span>
+          <span className="max-w-40 truncate whitespace-nowrap text-base sm:max-w-none">
+            Blue Prince Journal
+          </span>
+        </Link>
+        <div className="order-2 ml-auto flex shrink-0 items-center gap-1.5 [&>*]:shrink-0">
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+  );
+}
+
 function AppFrame({ children }: { children: React.ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const loaded = useStore((s) => s.loaded);
-  const setLoaded = useStore((s) => s.setLoaded);
-  const setSyncFolderName = useStore((s) => s.setSyncFolderName);
   const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
   const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
 
-  const [initState, setInitState] = useState<"checking" | "welcome" | "ready">("checking");
-  const [welcomeSource, setWelcomeSource] = useState<"auto" | "manual" | null>(null);
-
-  useEffect(() => {
-    async function init() {
-      try {
-        await ensureBootSeed();
-        await cleanupOrphanedImageRefs();
-        setLoaded(true);
-
-        const noteCount = await db.notes.count();
-        const todoCount = await db.todos.count();
-        const localIsEmpty = noteCount === 0 && todoCount === 0;
-        const { folderName } = await syncRuntime.boot(localIsEmpty);
-        if (folderName) setSyncFolderName(folderName);
-        // If folder data was applied, useLiveQuery will reactively update
-
-        const welcomed = getLocalStorageFlag("bp-welcomed");
-        const hasData = (await db.notes.count()) > 0 || (await db.todos.count()) > 0;
-        const hasSyncFolder = Boolean(syncRuntime.getActiveFolderName());
-
-        if (!welcomed && !hasData && !hasSyncFolder) {
-          setWelcomeSource("auto");
-          setInitState("welcome");
-          return;
-        }
-
-        setLocalStorageFlag("bp-welcomed");
-        setWelcomeSource(null);
-        setInitState("ready");
-      } catch {
-        setInitState("ready");
-        toast.error(
-          "Browser storage access is limited. Recent changes may not persist after refresh.",
-        );
-      }
-    }
-
-    void init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    function showWelcome() {
-      setWelcomeSource("manual");
-      setInitState("welcome");
-    }
-    window.addEventListener("bp:show-welcome", showWelcome);
-    return () => window.removeEventListener("bp:show-welcome", showWelcome);
-  }, []);
+  const { effectiveInitState, continueWelcome, completeWelcome } = useAppFrameInit({
+    noteCount: notes.length,
+    todoCount: todos.length,
+  });
 
   // When a new version of the app is deployed, chunk URLs change. Instead of
   // crashing or silently breaking, show a persistent notification so users can
@@ -108,20 +85,18 @@ function AppFrame({ children }: { children: React.ReactNode }) {
     window.addEventListener("vite:preloadError", onPreloadError);
     return () => window.removeEventListener("vite:preloadError", onPreloadError);
   }, []);
+  const isSettingsRoute = pathname === "/settings" || pathname === "/section/settings";
 
-  const shouldAutoDismissWelcome =
-    initState === "welcome" && welcomeSource === "auto" && (notes.length > 0 || todos.length > 0);
-
-  useEffect(() => {
-    if (!shouldAutoDismissWelcome) return;
-    setLocalStorageFlag("bp-welcomed");
-  }, [shouldAutoDismissWelcome]);
-
-  const effectiveInitState = shouldAutoDismissWelcome ? "ready" : initState;
+  let appContentClass =
+    "min-h-0 flex-1 overflow-x-hidden overflow-y-hidden px-3 max-[899.98px]:overflow-y-auto lg:px-6";
+  if (isSettingsRoute) {
+    appContentClass =
+      "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 max-[899.98px]:overflow-y-auto lg:px-6";
+  }
 
   if (!loaded && effectiveInitState === "checking") {
     return (
-      <div className="app-shell">
+      <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
         <AppHeader />
         <Toaster />
       </div>
@@ -133,21 +108,13 @@ function AppFrame({ children }: { children: React.ReactNode }) {
       notes.length > 0 || todos.length > 0 || Boolean(syncRuntime.getActiveFolderName());
 
     return (
-      <div className="app-shell">
-        <AppHeader />
-        <div className="min-h-0 flex-1 overflow-auto">
+      <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
+        <WelcomeHeaderShell />
+        <div className={appContentClass}>
           <WelcomeScreen
             showContinueSuggestion={hasExistingConfiguration}
-            onContinue={() => {
-              setWelcomeSource(null);
-              setInitState("ready");
-            }}
-            onDone={(folderName) => {
-              if (folderName) setSyncFolderName(folderName);
-              setLocalStorageFlag("bp-welcomed");
-              setWelcomeSource(null);
-              setInitState("ready");
-            }}
+            onContinue={continueWelcome}
+            onDone={completeWelcome}
           />
         </div>
         <Toaster />
@@ -156,10 +123,12 @@ function AppFrame({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="app-shell">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
       <HeadContent />
       <AppHeader />
-      <div className="app-page-container">{children}</div>
+      <div className={appContentClass}>
+        {children}
+      </div>
       <Toaster />
     </div>
   );
@@ -177,7 +146,7 @@ export function RootLayoutView({ queryClient }: { queryClient: QueryClient }) {
 
 export function NotFoundView() {
   return (
-    <div className="page-center">
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl text-brass">404</h1>
         <h2 className="mt-4 text-xl">A door that doesn't open</h2>
@@ -201,7 +170,7 @@ export function ErrorView({ error, reset }: { error: Error; reset: () => void })
   console.error(error);
   const router = useRouter();
   return (
-    <div className="page-center">
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl">Something went wrong</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>

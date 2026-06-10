@@ -13,7 +13,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/hooks/useStore";
 import { exportAll, importAll } from "@/data/storage/backup";
 import { submitFeedback } from "@/data/feedback";
-import { useSections } from "@/hooks/useSections";
+import { useSections } from "./useSections";
 import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/input/InputField";
 import { FeedbackDialog } from "@/components/app-header/FeedbackDialog";
@@ -31,7 +31,7 @@ import { Stack } from "@/components/common/general/Stack";
 import { KeyboardKey } from "@/components/common/KeyboardKey";
 import { Text } from "@/components/common/Typography";
 
-export function AppHeader() {
+export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
   const buyMeACoffeeUrl = "https://buymeacoffee.com/fredrikm97";
   const sections = useSections();
   const search = useStore((s) => s.search);
@@ -63,6 +63,8 @@ export function AppHeader() {
     (pathname.startsWith("/section/") && (!activeSection || !activeSection.builtin));
 
   const defaultCaptureNoteType = activeSection?.filter?.type;
+  const showMainControls = !welcomeMode;
+  const hasSearchText = searchInput.trim().length > 0;
 
   useEffect(() => {
     if (deferredSearchInput !== search) {
@@ -165,150 +167,197 @@ export function AppHeader() {
         }}
       />
 
-      <Stack as="header" className="app-header" gap="0">
-        <Stack className="app-header-inner" gap="0">
-          <Link to="/" className="app-brand-link" onClick={openWelcomeScreen}>
-            <Text as="span" className="app-brand-badge" size="xs" tone="default">
+      <Stack
+        as="header"
+        className="sticky top-0 z-40 border-b border-border bg-background px-3 backdrop-blur lg:px-6"
+        gap="0"
+      >
+        <Stack
+          className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-3 py-2 sm:px-4 md:flex-nowrap lg:px-6"
+          gap="0"
+        >
+          <Link
+            to="/"
+            className="mr-2 inline-flex shrink-0 items-center gap-2 rounded-md px-1.5 py-1 hover:bg-accent"
+            onClick={openWelcomeScreen}
+          >
+            <Text
+              as="span"
+              className="inline-flex h-7 w-7 items-center justify-center rounded bg-brass text-xs font-semibold text-brass-foreground"
+              size="xs"
+              tone="default"
+            >
               B
             </Text>
-            <Text as="span" className="app-brand-title" size="base" tone="default">
+            <Text
+              as="span"
+              className="max-w-40 truncate whitespace-nowrap text-base sm:max-w-none"
+              size="base"
+              tone="default"
+            >
               Blue Prince Journal
             </Text>
           </Link>
 
-          <Stack as="nav" className="app-nav" gap="0">
-            {sections
-              .filter((s) => !s.hidden && (Boolean(s.builtin) || s.id === "books"))
-              .map((s) => {
-                const href = hrefFor(s);
-                const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
-                let linkClass = "app-nav-link";
-                if (isActive) {
-                  linkClass = "app-nav-link app-nav-link-active";
-                }
-                return (
-                  <Link key={s.id} to={href} className={linkClass}>
-                    {s.label}
-                  </Link>
-                );
-              })}
-          </Stack>
-
-          <Stack className="app-header-controls" gap="0">
-            {syncFolderName && (
-              <Link
-                to="/settings"
-                title={`Syncing to "${syncFolderName}"`}
-                className="header-sync-status"
+          {showMainControls && (
+            <>
+              <Stack
+                as="nav"
+                className="order-3 flex basis-full min-w-0 flex-nowrap items-center gap-1 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:order-none md:basis-auto md:flex-1 md:flex-wrap md:overflow-visible md:pb-0"
+                gap="0"
               >
-                <FolderSync className="h-3.5 w-3.5" />
-                <Text as="span" className="sync-folder-name" size="xs" tone="default" truncate>
-                  {syncFolderName}
-                </Text>
-              </Link>
-            )}
-            <ThemeToggle />
-            <Stack className="app-search-wrap" gap="0">
-              <Search className="app-search-icon" />
-              <SuggestionsDropdown
-                showSuggestionHint={false}
-                displayMode="plain"
-                includeTypeSuggestions={false}
-                includeDateSuggestions={false}
-                dropdownAlign="left"
-                preservePrefixesInPlainMode={["@", "#", "^"]}
-              >
-                <InputField
-                  label="Search"
-                  hideLabel
-                  inputRef={searchInputRef}
-                  value={searchInput}
-                  onChange={setSearchInput}
-                  onKeyDown={(event) => {
-                    if (event.key === "Escape") {
-                      setSearchInput("");
-                      searchInputRef.current?.blur();
+                {sections
+                  .filter((s) => !s.hidden && (Boolean(s.builtin) || s.id === "books"))
+                  .map((s) => {
+                    const href = hrefFor(s);
+                    const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+                    let linkClass =
+                      "rounded px-2 py-1 text-sm text-muted-foreground hover:bg-accent hover:text-foreground";
+                    if (isActive) {
+                      linkClass = `${linkClass} bg-secondary text-foreground`;
                     }
-                  }}
-                  placeholder=" "
-                  size="sm"
-                />
-              </SuggestionsDropdown>
-            </Stack>
-            <Button
-              size="sm"
-              onClick={() => {
-                if (!canCreateInPlace) {
-                  void navigate({ to: "/" });
-                }
-                openCapture({
-                  kind: "note",
-                  noteType: defaultCaptureNoteType,
-                  returnTo: canCreateInPlace ? undefined : pathname,
-                });
-              }}
-              className="app-add-button"
-            >
-              <Plus className="app-add-icon" />
-              <span>Add note</span>
-              <KeyboardKey variant="shortcut" className="app-add-shortcut">
-                N
-              </KeyboardKey>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="app-icon-button"
-                  aria-label="Settings"
-                >
-                  <SettingsIcon className="app-icon-sm" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onSelect={() => exportAll().then(() => toast.success("Exported"))}
-                >
-                  <Download className="app-menu-icon" /> Export all (ZIP)
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => fileRef.current?.click()}>
-                  <Upload className="app-menu-icon" /> Import…
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setFeedbackOpen(true)}>
-                  <MessageSquareText className="app-menu-icon" /> Send feedback
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <a href={buyMeACoffeeUrl} target="_blank" rel="noreferrer">
-                    <Coffee className="app-menu-icon" /> Buy me a coffee
-                  </a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/settings">
-                    <SettingsIcon className="app-menu-icon" /> Settings
+                    return (
+                      <Link key={s.id} to={href} className={linkClass}>
+                        {s.label}
+                      </Link>
+                    );
+                  })}
+              </Stack>
+
+              <Stack
+                className="app-header-controls order-2 ml-auto flex shrink-0 items-center gap-1.5 md:order-none [&>*]:shrink-0"
+                gap="0"
+              >
+                <ThemeToggle />
+                {syncFolderName && (
+                  <Link
+                    to="/settings"
+                    title={`Syncing to "${syncFolderName}"`}
+                    className="flex items-center gap-1.5 text-xs text-green-500"
+                  >
+                    <FolderSync className="h-3.5 w-3.5" />
+                    <Text
+                      as="span"
+                      className="hidden max-w-[10rem] truncate xl:block"
+                      size="xs"
+                      tone="default"
+                      truncate
+                    >
+                      {syncFolderName}
+                    </Text>
                   </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".zip,application/zip,application/json,.json"
-              hidden
-              onChange={async (e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                try {
-                  await importAll(f, "merge");
-                  toast.success("Imported");
-                } catch (err) {
-                  toast.error((err as Error).message);
-                }
-                e.target.value = "";
-              }}
-            />
-          </Stack>
+                )}
+                <Stack
+                  className={`relative w-28 [&_.capture-suggestion-field]:relative [&_.capture-suggestion-dropdown]:left-0 [&_.capture-suggestion-dropdown]:right-auto [&_.capture-suggestion-dropdown]:top-[calc(100%+0.25rem)] [&_.capture-suggestion-dropdown]:min-w-56 [&_.capture-suggestion-dropdown]:max-w-80 [&_.input-base]:h-8 [&_.input-base]:w-full sm:w-36 lg:w-auto lg:[&_.input-base]:w-44 ${hasSearchText ? "[&_.input-base]:pl-3" : "[&_.input-base]:pl-8"}`}
+                  gap="0"
+                >
+                  <Search
+                    className={`pointer-events-none absolute left-2.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground ${hasSearchText ? "hidden" : ""}`}
+                  />
+                  <SuggestionsDropdown
+                    showSuggestionHint={false}
+                    displayMode="plain"
+                    includeTypeSuggestions={false}
+                    includeDateSuggestions={false}
+                    dropdownAlign="left"
+                    preservePrefixesInPlainMode={["@", "#", "^"]}
+                  >
+                    <InputField
+                      label="Search"
+                      hideLabel
+                      inputRef={searchInputRef}
+                      value={searchInput}
+                      onChange={setSearchInput}
+                      onKeyDown={(event) => {
+                        if (event.key === "Escape") {
+                          setSearchInput("");
+                          searchInputRef.current?.blur();
+                        }
+                      }}
+                      placeholder=" "
+                      size="sm"
+                    />
+                  </SuggestionsDropdown>
+                </Stack>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (!canCreateInPlace) {
+                      void navigate({ to: "/" });
+                    }
+                    openCapture({
+                      kind: "note",
+                      noteType: defaultCaptureNoteType,
+                      returnTo: canCreateInPlace ? undefined : pathname,
+                    });
+                  }}
+                  className="bg-brass px-2 text-brass-foreground hover:bg-brass max-sm:h-8 max-sm:w-8 max-sm:justify-center max-sm:p-0"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="max-sm:hidden">Add note</span>
+                  <KeyboardKey
+                    variant="shortcut"
+                    className="rounded border border-border bg-background px-1 py-0 text-[10px] font-semibold leading-4 text-foreground opacity-100 max-sm:hidden"
+                  >
+                    N
+                  </KeyboardKey>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      aria-label="Settings"
+                    >
+                      <SettingsIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onSelect={() => exportAll().then(() => toast.success("Exported"))}
+                    >
+                      <Download className="mr-1 h-4 w-4" /> Export all (ZIP)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => fileRef.current?.click()}>
+                      <Upload className="mr-1 h-4 w-4" /> Import…
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => setFeedbackOpen(true)}>
+                      <MessageSquareText className="mr-1 h-4 w-4" /> Send feedback
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <a href={buyMeACoffeeUrl} target="_blank" rel="noreferrer">
+                        <Coffee className="mr-1 h-4 w-4" /> Buy me a coffee
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings">
+                        <SettingsIcon className="mr-1 h-4 w-4" /> Settings
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".zip,application/zip,application/json,.json"
+                  hidden
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    try {
+                      await importAll(f, "merge");
+                      toast.success("Imported");
+                    } catch (err) {
+                      toast.error((err as Error).message);
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </Stack>
+            </>
+          )}
         </Stack>
       </Stack>
     </>

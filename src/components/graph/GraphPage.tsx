@@ -11,7 +11,7 @@ import { MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
 import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
 import { db } from "@/data/db";
-import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
+import { GraphPreviewContent } from "@/components/graph/GraphRightPanel";
 import type { Note, Todo } from "@/lib/types";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 import {
@@ -30,6 +30,7 @@ import {
   summarizeWheelZoomEvents,
   useNonPassiveWheel,
 } from "@/hooks/useNonPassiveWheel";
+import { themeVars } from "@/components/graph/themeVars";
 
 const ALL_NOTE_TYPES = ["clue", "code", "observation", "theory", "story", "task"] as const;
 
@@ -42,12 +43,12 @@ const MAX_ZOOM = 3.0;
 const NODE_ICON_SIZE = 12;
 
 const TYPE_COLOR: Record<Note["type"], string> = {
-  clue: "#f7c56e",
-  code: "#8cc8ff",
-  observation: "#9de6b0",
-  theory: "#d8b3ff",
-  story: "#f4a7a7",
-  task: "#f0e68c",
+  clue: themeVars.graphNode.clue,
+  code: themeVars.graphNode.code,
+  observation: themeVars.graphNode.observation,
+  theory: themeVars.graphNode.theory,
+  story: themeVars.graphNode.story,
+  task: themeVars.graphNode.task,
 };
 
 const TYPE_ICON: Record<
@@ -70,6 +71,7 @@ export function GraphPage() {
   const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set());
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
   const [hideIsolated, setHideIsolated] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const graphEntries = useMemo(() => toGraphEntries(notes, todos), [notes, todos]);
 
@@ -143,6 +145,14 @@ export function GraphPage() {
     ? edges.filter((edge) => edge.from === selectedNode.id).length
     : 0;
 
+  useEffect(() => {
+    if (!selectedNode) {
+      setPreviewOpen(false);
+      return;
+    }
+    setPreviewOpen(true);
+  }, [selectedNode]);
+
   // Isolated node count — for showing the badge on the toggle
   const isolatedCount = nodes.length - connectedNodeIds.size;
 
@@ -188,10 +198,7 @@ export function GraphPage() {
   return (
     <>
       <PageLayout
-        className="graph-page-layout"
         variant="panel"
-        mobileDrawerOpen={Boolean(selectedNodeId)}
-        mobileDrawerSide="right"
       >
         <PageLayout.Left>
           <SidePanelLeft
@@ -256,7 +263,7 @@ export function GraphPage() {
           </SidePanelLeft>
         </PageLayout.Left>
         <PageLayout.Middle>
-          <Stack className="graph-page-middle" gap="0">
+          <Stack className="flex h-full min-h-0 flex-col overflow-hidden h-[calc(100dvh-5.5rem)]" gap="0">
             {nodes.length === 0 && (
               <EmptyState>
                 No notes or todos yet. Add entries to build your connection graph.
@@ -275,17 +282,28 @@ export function GraphPage() {
             )}
           </Stack>
         </PageLayout.Middle>
-        <PageLayout.Right>
-          <GraphRightPanel
+      </PageLayout>
+
+      <Dialog
+        open={previewOpen && Boolean(selectedNode)}
+        onOpenChange={(open) => {
+          setPreviewOpen(open);
+          if (!open) setSelectedNoteId(null);
+        }}
+      >
+        <DialogContent variant="wide">
+          <DialogHeader>
+            <DialogTitle>{selectedNode ? selectedNode.note.title : "Graph entry"}</DialogTitle>
+          </DialogHeader>
+          <GraphPreviewContent
             noteCount={displayNodes.length}
             edgeCount={edges.length}
             selectedNote={selectedNode?.note ?? null}
             incomingCount={incomingCount}
             outgoingCount={outgoingCount}
-            onClose={() => setSelectedNoteId(null)}
           />
-        </PageLayout.Right>
-      </PageLayout>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={fullscreenOpen} onOpenChange={setFullscreenOpen}>
         <DialogContent variant="fullscreen">
@@ -433,25 +451,26 @@ function GraphCanvas({
     },
   );
 
-  let frameClassName = "graph-canvas-frame";
-  if (plain) frameClassName = "graph-canvas-frame-plain";
+  let frameClassName = "flex flex-col gap-2 overflow-hidden rounded-lg border border-border bg-card p-2";
+  if (plain) frameClassName = "flex flex-col gap-2 overflow-hidden rounded-lg p-2";
 
-  let svgClassName = "graph-canvas-svg graph-canvas-svg-grab";
-  if (isDragging) svgClassName = "graph-canvas-svg graph-canvas-svg-grabbing";
+  let svgClassName = "min-h-0 flex-1 touch-none cursor-grab";
+  if (isDragging) svgClassName = "min-h-0 flex-1 touch-none cursor-grabbing";
 
   return (
     <Stack className={frameClassName} gap="0">
-      <Stack className="graph-toolbar" gap="0">
-        <MetaText as="p" size="xs" className="graph-toolbar-hint">
+      <Stack className="flex shrink-0 items-center justify-between text-sm text-muted-foreground" gap="0">
+        <MetaText as="p" size="xs" className="hidden text-xs sm:block">
           Drag to pan · scroll to zoom.
         </MetaText>
-        <Stack className="graph-toolbar-controls" gap="0">
+        <Stack className="flex items-center gap-1.5" gap="0">
           {actions}
           <Stack gap="0" className="flex items-center">
-            <Stack gap="0" className="graph-zoom-btn graph-zoom-btn-minus">
+            <Stack gap="0" className="">
               <Button
                 variant="outline"
                 size="sm"
+                className="rounded-r-none border-r-0 px-2"
                 onClick={() => {
                   const cx = GRAPH_VB_W / 2;
                   const cy = GRAPH_VB_H / 2;
@@ -467,10 +486,11 @@ function GraphCanvas({
                 −
               </Button>
             </Stack>
-            <Stack gap="0" className="graph-zoom-btn graph-zoom-btn-plus">
+            <Stack gap="0" className="">
               <Button
                 variant="outline"
                 size="sm"
+                className="rounded-l-none px-2"
                 onClick={() => {
                   const cx = GRAPH_VB_W / 2;
                   const cy = GRAPH_VB_H / 2;
@@ -509,10 +529,10 @@ function GraphCanvas({
         <defs>
           {(
             [
-              { id: "room", fill: "rgba(224, 150, 40, 0.85)" },
-              { id: "tag", fill: "rgba(70, 150, 210, 0.85)" },
-              { id: "both", fill: "rgba(140, 100, 210, 0.85)" },
-              { id: "note", fill: "rgba(50, 190, 100, 0.85)" },
+              { id: "room", fill: themeVars.graphLink.room },
+              { id: "tag", fill: themeVars.graphLink.tag },
+              { id: "both", fill: themeVars.graphLink.both },
+              { id: "note", fill: themeVars.graphLink.note },
             ] as const
           ).map(({ id, fill }) => (
             <marker
@@ -561,17 +581,17 @@ function GraphCanvas({
         </g>
       </svg>
 
-      <Stack className="graph-legend-row" gap="0">
-        <MetaText as="span" className="graph-legend-label">
+      <Stack className="flex shrink-0 flex-wrap items-center gap-4 text-[10px] text-muted-foreground" gap="0">
+        <MetaText as="span" className="font-medium uppercase tracking-wide">
           Links:
         </MetaText>
         {[
-          { color: "rgba(224,150,40,0.85)", label: "room" },
-          { color: "rgba(70,150,210,0.85)", label: "tag" },
-          { color: "rgba(140,100,210,0.85)", label: "room + tag" },
-          { color: "rgba(50,190,100,0.85)", label: "note" },
+          { color: themeVars.graphLink.room, label: "room" },
+          { color: themeVars.graphLink.tag, label: "tag" },
+          { color: themeVars.graphLink.both, label: "room + tag" },
+          { color: themeVars.graphLink.note, label: "note" },
         ].map(({ color, label }) => (
-          <Stack key={label} as="span" className="graph-legend-item" gap="0">
+          <Stack key={label} as="span" className="flex items-center gap-1.5 uppercase tracking-wide" gap="0">
             <span
               style={{
                 background: color,
@@ -600,7 +620,7 @@ function renderNode(
   },
 ) {
   const Icon = TYPE_ICON[node.note.type];
-  const stroke = selected ? "var(--color-ring)" : "var(--color-foreground)";
+  const stroke = selected ? themeVars.ring : themeVars.foreground;
   const strokeWidth = selected ? 2.2 : 1.1;
   const labelScale = 1;
 
@@ -609,7 +629,7 @@ function renderNode(
       key={node.id}
       role="button"
       tabIndex={0}
-      className="graph-node-hit"
+      className="cursor-pointer"
       onMouseDown={(event) => event.preventDefault()}
       onClick={onSelect}
       onKeyDown={(event) => {
@@ -635,7 +655,7 @@ function renderNode(
       </g>
 
       <g transform={`translate(${node.x + 18} ${node.y + 5}) scale(${labelScale})`}>
-        <text fill="var(--color-foreground)" fontSize="14" fontWeight="500" opacity="0.92">
+        <text fill={themeVars.foreground} fontSize="14" fontWeight="500" opacity="0.92">
           {trim(node.note.title, 22)}
         </text>
       </g>
@@ -650,9 +670,9 @@ function renderCluster(cluster: GraphCluster) {
         cx={cluster.cx}
         cy={cluster.cy}
         r={cluster.r}
-        fill="var(--color-foreground)"
+        fill={themeVars.foreground}
         fillOpacity="0.03"
-        stroke="var(--color-foreground)"
+        stroke={themeVars.foreground}
         strokeOpacity="0.14"
         strokeWidth="1"
         strokeDasharray="5 3"
@@ -660,7 +680,7 @@ function renderCluster(cluster: GraphCluster) {
       <text
         x={cluster.cx}
         y={cluster.cy + cluster.r + 13}
-        fill="var(--color-foreground)"
+        fill={themeVars.foreground}
         fillOpacity="0.45"
         fontSize="10"
         textAnchor="middle"

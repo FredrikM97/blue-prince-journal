@@ -1,0 +1,21 @@
+export type MobilePanelLabels = {
+  left?: string;
+  right?: string;
+};
+
+const DEFAULT_MOBILE_PANEL_LABELS: MobilePanelLabels = {
+  left: "Left panel",
+  right: "Right panel",
+};
+
+const MOBILE_PANEL_LABELS_BY_PATH: Record<string, MobilePanelLabels> = {
+  "/": { left: "Filters", right: "Preview" },
+  "/section/graph": { left: "Filters", right: "Details" },
+  "/section/map": { left: "Filters", right: "Details" },
+  "/section/images": { left: "Library", right: "Details" },
+  "/section/todos": { left: "Filters" },
+};
+
+export function resolveMobilePanelLabels(pathname: string): MobilePanelLabels {
+  return MOBILE_PANEL_LABELS_BY_PATH[pathname] ?? DEFAULT_MOBILE_PANEL_LABELS;
+}

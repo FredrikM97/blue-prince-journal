@@ -7,7 +7,7 @@ import { buildSuggestionSources, type SuggestionSources } from "@/domain/suggest
 
 /**
  * Reads room and tag suggestions from the full app state (notes, todos, map rooms, catalog).
- * Memoized — only recomputes when underlying data changes.
+ * Memoized - only recomputes when underlying data changes.
  */
 export function useSuggestionSources(): SuggestionSources {
   const liveNotes = useLiveQuery(() => db.notes.toArray());

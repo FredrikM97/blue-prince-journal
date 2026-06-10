@@ -1,6 +1,11 @@
-@reference "../../../tailwind-reference.css";
+
+@reference "../../../styles.css";
 
 @layer components {
+  .ui-layout-mobile-drawer .preview-header-actions {
+    @apply items-center gap-1.5;
+  }
+
   .dialog-content-preview .dialog-close-btn {
     @apply top-6;
   }
@@ -11,17 +16,5 @@
 
   .preview-dialog-title-actions {
     @apply ml-auto shrink-0 -mr-2;
-  }
-
-  .ui-layout-mobile-drawer .side-panel-shell {
-    @apply w-full rounded-none border-0 bg-background p-3;
-  }
-
-  .ui-layout-mobile-drawer .panel-header {
-    @apply sticky top-0 z-10 border-b border-border bg-background pt-3 backdrop-blur-sm;
-  }
-
-  .ui-layout-mobile-drawer .preview-header-actions {
-    @apply items-center gap-1.5;
   }
 }

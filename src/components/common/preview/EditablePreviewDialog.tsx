@@ -64,12 +64,12 @@ export function EditablePreviewDialog({
       headerActions={
         isEditingCurrentEntity ? (
           <Inline gap="2" align="center" justify="end">
-            <Button variant="ghost" size="sm" onClick={closeEditDetails}>
+            <Button variant="ghost" size="default" onClick={closeEditDetails}>
               Cancel
             </Button>
             <Button
               variant="brass"
-              size="sm"
+              size="default"
               onClick={() => {
                 void (async () => {
                   await onSaveDraft(detailsDraft);

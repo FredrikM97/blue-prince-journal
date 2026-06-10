@@ -1,6 +1,6 @@
 import { Button } from "@/components/common/Button";
 import { useNavigate } from "@tanstack/react-router";
-import { PagedNotesList } from "@/components/common/PagedNotesList";
+import { PagedNotesList } from "@/components/map/PagedNotesList";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";

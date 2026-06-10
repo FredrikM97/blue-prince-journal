@@ -13,13 +13,6 @@ import type { ReactNode } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/common/Button";
 import {
-  PageLayoutContent,
-  PageLayoutFrame,
-  PageLayoutMobileControls,
-  PageLayoutMobileDrawer,
-  PageLayoutSidebar,
-} from "@/components/common/LayoutPrimitives";
-import {
   useIsPageLayoutMobile,
   useOnPageLayoutMobileChange,
 } from "@/hooks/usePageLayoutMobile";
@@ -28,47 +21,7 @@ import {
   PageLayoutMobileDrawerProvider,
   type MobileDrawerSide,
 } from "@/hooks/usePageLayoutMobileDrawer";
-
-type MobilePanelLabelKey = "default" | "graph" | "map" | "notes" | "images" | "todos";
-
-function getMobilePanelLabels(key: MobilePanelLabelKey): {
-  left?: string;
-  right?: string;
-} {
-  if (key === "map") {
-    return {
-      left: "Filters",
-      right: "Details",
-    };
-  }
-  if (key === "graph") {
-    return {
-      left: "Filters",
-      right: "Details",
-    };
-  }
-  if (key === "notes") {
-    return {
-      left: "Filters",
-      right: "Preview",
-    };
-  }
-  if (key === "images") {
-    return {
-      left: "Library",
-      right: "Details",
-    };
-  }
-  if (key === "todos") {
-    return {
-      left: "Filters",
-    };
-  }
-  return {
-    left: "Left panel",
-    right: "Right panel",
-  };
-}
+import { resolveMobilePanelLabels, type MobilePanelLabels } from "@/routes/mobilePanelLabels";
 
 type PageLayoutSlotProps = {
   children: ReactNode;
@@ -88,30 +41,44 @@ function PageLayoutRight({ children }: PageLayoutSlotProps) {
   return <Fragment>{children}</Fragment>;
 }
 
-function getColumnLayoutClass(
-  hasLeft: boolean,
-  hasRight: boolean,
-  isPageLayoutMobile: boolean,
-): string {
-  if (isPageLayoutMobile) return "ui-layout-single-scroll";
-  if (hasLeft && hasRight) return "ui-layout-cols-3";
-  if (hasLeft) return "ui-layout-cols-2-left";
-  if (hasRight) return "ui-layout-cols-2-right";
-  return "ui-layout-single-scroll";
+function getColumnLayoutClass(hasLeft: boolean, hasRight: boolean): string {
+  if (hasLeft && hasRight) {
+    return "grid-cols-[var(--sidebar-width)_minmax(0,1fr)_var(--sidebar-width)] max-[899.98px]:flex max-[899.98px]:flex-col";
+  }
+  if (hasLeft) {
+    return "grid-cols-[var(--sidebar-width)_minmax(0,1fr)] max-[899.98px]:flex max-[899.98px]:flex-col";
+  }
+  if (hasRight) {
+    return "grid-cols-[minmax(0,1fr)_var(--sidebar-width)] max-[899.98px]:flex max-[899.98px]:flex-col";
+  }
+  return "flex flex-col";
 }
 
-function getVariantClass(variant: PageLayoutVariant): string {
-  if (variant === "panel") return "ui-layout-variant-panel";
-  return "";
+function getSidebarClass(side: MobileDrawerSide, variant: PageLayoutVariant): string {
+  let className =
+    "sticky top-0 min-h-0 h-full max-h-full self-start overflow-y-auto bg-card [overscroll-behavior:contain]";
+  if (side === "left") {
+    className = `${className} rounded-l-lg border-r border-border`;
+  }
+  if (side === "right") {
+    className = `${className} rounded-r-lg border-l border-border`;
+  }
+  if (variant === "panel") {
+    className = `${className} rounded-lg border border-border bg-card [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden`;
+  }
+  return className;
 }
 
-function resolveMobileLabelKeyFromPathname(pathname: string): MobilePanelLabelKey {
-  if (pathname.includes("/section/map")) return "map";
-  if (pathname.includes("/section/graph")) return "graph";
-  if (pathname.includes("/section/notes")) return "notes";
-  if (pathname.includes("/section/images")) return "images";
-  if (pathname.includes("/section/todos")) return "todos";
-  return "default";
+function getContentClass(hasLeft: boolean, hasRight: boolean, variant: PageLayoutVariant): string {
+  let className =
+    "min-h-0 min-w-0 h-full overflow-y-auto [overscroll-behavior:contain] max-[899.98px]:flex-1 max-[899.98px]:h-auto max-[899.98px]:overflow-y-visible max-[899.98px]:[overscroll-behavior:auto]";
+  if (!hasLeft && !hasRight) {
+    className = `${className} flex-1`;
+  }
+  if (variant === "panel") {
+    className = `${className} [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden`;
+  }
+  return className;
 }
 
 function isPageLayoutSlot(
@@ -195,15 +162,6 @@ function useMobilePageLayoutDrawersState({
     [hasLeft, hasRight],
   );
 
-  useEffect(() => {
-    if (!mobileLeftOpen && !mobileRightOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [mobileLeftOpen, mobileRightOpen]);
-
   useOnPageLayoutMobileChange((nextIsMobile) => {
     if (nextIsMobile) return;
     closeMobileDrawer();
@@ -249,7 +207,7 @@ function PageLayoutMobileDrawers({
   return (
     <>
       {(hasLeft || hasRight) && (
-        <PageLayoutMobileControls>
+        <div className="fixed inset-x-0 bottom-2 z-30 mx-auto flex w-fit items-center gap-2 rounded-full bg-background px-2 py-1.5 shadow-lg backdrop-blur">
           {hasLeft && (
             <Button
               variant="ghost"
@@ -258,7 +216,7 @@ function PageLayoutMobileDrawers({
               active={mobileLeftOpen}
               onClick={() => openMobileDrawer("left")}
             >
-              <PanelLeft className="icon-sm" />
+              <PanelLeft className="h-3.5 w-3.5" />
               {leftLabel}
             </Button>
           )}
@@ -270,19 +228,23 @@ function PageLayoutMobileDrawers({
               active={mobileRightOpen}
               onClick={() => openMobileDrawer("right")}
             >
-              <PanelRight className="icon-sm" />
+              <PanelRight className="h-3.5 w-3.5" />
               {rightLabel}
             </Button>
           )}
-        </PageLayoutMobileControls>
+        </div>
       )}
 
       {mobileLeftOpen && hasLeft && (
-        <PageLayoutMobileDrawer side="left">{resolvedPanels.left}</PageLayoutMobileDrawer>
+        <aside className="fixed bottom-0 top-0 left-0 z-50 h-dvh max-h-dvh w-[min(94vw,28rem)] max-w-[min(94vw,28rem)] overflow-y-auto rounded-none border border-r border-border bg-background px-3 pb-3 shadow-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {resolvedPanels.left}
+        </aside>
       )}
 
       {mobileRightOpen && hasRight && (
-        <PageLayoutMobileDrawer side="right">{resolvedPanels.right}</PageLayoutMobileDrawer>
+        <aside className="fixed bottom-0 top-0 right-0 z-50 h-dvh max-h-dvh w-[min(94vw,28rem)] max-w-[min(94vw,28rem)] overflow-y-auto rounded-none border border-l border-border bg-background px-3 pb-3 shadow-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {resolvedPanels.right}
+        </aside>
       )}
     </>
   );
@@ -303,6 +265,7 @@ function PageLayoutComponent({
   mobileDrawerOpen,
   mobileDrawerSide = "right",
   mobileDrawerCloseWhenClosed = true,
+  mobilePanelLabels,
 }: {
   children?: ReactNode;
   className?: string;
@@ -310,6 +273,7 @@ function PageLayoutComponent({
   mobileDrawerOpen?: boolean;
   mobileDrawerSide?: MobileDrawerSide;
   mobileDrawerCloseWhenClosed?: boolean;
+  mobilePanelLabels?: MobilePanelLabels;
 }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isPageLayoutMobile = useIsPageLayoutMobile();
@@ -328,11 +292,9 @@ function PageLayoutComponent({
 
   const hasLeft = resolvedLeft !== undefined && resolvedLeft !== null;
   const hasRight = resolvedRight !== undefined && resolvedRight !== null;
-  const columnClass = getColumnLayoutClass(hasLeft, hasRight, isPageLayoutMobile);
+  const columnClass = getColumnLayoutClass(hasLeft, hasRight);
   const mobileDrawerState = useMobilePageLayoutDrawersState({ hasLeft, hasRight });
-  const mobileLabelKey = resolveMobileLabelKeyFromPathname(pathname);
-
-  const labels = getMobilePanelLabels(mobileLabelKey);
+  const labels = mobilePanelLabels ?? resolveMobilePanelLabels(pathname);
   let leftLabel = "Left panel";
   let rightLabel = "Right panel";
   if (labels.left) leftLabel = labels.left;
@@ -370,19 +332,18 @@ function PageLayoutComponent({
     openMobileDrawer,
   ]);
 
-  let layoutClass = `ui-layout-frame ${columnClass}`;
-  const variantClass = getVariantClass(variant);
-  if (variantClass) {
-    layoutClass = `${layoutClass} ${variantClass}`;
-  }
+  let layoutClass = `mx-auto grid h-full min-h-0 w-full max-w-7xl items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 max-[899.98px]:h-auto ${columnClass}`;
   if (className) {
     layoutClass = `${layoutClass} ${className}`;
   }
-  layoutClass = `${layoutClass} ${isPageLayoutMobile ? "ui-layout-mode-mobile" : "ui-layout-mode-desktop"}`;
+
+  const contentClass = getContentClass(hasLeft, hasRight, variant);
+  const leftSidebarClass = getSidebarClass("left", variant);
+  const rightSidebarClass = getSidebarClass("right", variant);
 
   return (
     <PageLayoutMobileDrawerProvider value={mobileDrawerControls}>
-      <PageLayoutFrame className={layoutClass}>
+      <div className={layoutClass}>
         <PageLayoutMobileDrawers
           isPageLayoutMobile={isPageLayoutMobile}
           hasLeft={hasLeft}
@@ -399,13 +360,13 @@ function PageLayoutComponent({
         />
 
         {!isPageLayoutMobile && hasLeft && (
-          <PageLayoutSidebar side="left">{resolvedLeft}</PageLayoutSidebar>
+          <aside className={leftSidebarClass}>{resolvedLeft}</aside>
         )}
-        <PageLayoutContent>{resolvedMiddle}</PageLayoutContent>
+        <main className={contentClass}>{resolvedMiddle}</main>
         {!isPageLayoutMobile && hasRight && (
-          <PageLayoutSidebar side="right">{resolvedRight}</PageLayoutSidebar>
+          <aside className={rightSidebarClass}>{resolvedRight}</aside>
         )}
-      </PageLayoutFrame>
+      </div>
     </PageLayoutMobileDrawerProvider>
   );
 }

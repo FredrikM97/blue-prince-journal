@@ -89,7 +89,7 @@ export function PanelHeader({
       {headerActions}
       {onExpand && (
         <Button variant="ghost" size="icon" onClick={onExpand} title="Expand preview">
-          <Maximize2 className="icon-md" />
+          <Maximize2 className="h-4 w-4" />
         </Button>
       )}
     </>
@@ -148,7 +148,7 @@ function SidePanelComponent({
   }, [mobileDrawerControls, mobileDrawerKey, mobileDrawerSide]);
 
   return (
-    <Stack gap="0" className="side-panel-shell">
+    <Stack gap="0" className="flex flex-col gap-3 rounded-lg p-2.5 text-sm sm:p-3">
       <PanelHeader
         title={title}
         textSize={textSize}

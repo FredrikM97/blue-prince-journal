@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { db } from "../db";
 import { syncRuntime } from "../sync/sync";
 import { addImage } from "./imageMutations";
-import { parseCapture } from "@/lib/parse";
+import { parseCapture } from "./parseCapture";
 import type {
   Note,
   Todo,

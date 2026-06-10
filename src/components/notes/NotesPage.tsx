@@ -117,16 +117,26 @@ export function NotesPage({
     );
   }
 
-  if (captureOpen) {
-    const capturePanelKey = buildCapturePanelKey({
-      captureDefault,
-      capturePrefill,
-      captureEditNoteId,
-      captureEditTodoId,
-    });
+    if (captureOpen) {
+      const capturePanelKey = buildCapturePanelKey({
+        captureDefault,
+        capturePrefill,
+        captureEditNoteId,
+        captureEditTodoId,
+      });
 
-    rightPanelContent = <NotesCreatePanel key={capturePanelKey} defaultNoteType={filterType} />;
-  }
+      rightPanelContent = (
+        <NotesCreatePanel
+          key={capturePanelKey}
+          defaultNoteType={filterType}
+          onEditSaved={(savedNote) => {
+            closeCapture();
+            setPreviewTodo(null);
+            uiActions.openPreview(savedNote);
+          }}
+        />
+      );
+    }
 
   let deleteDescription = "Delete this item?";
   let deleteTitle = "Delete item";

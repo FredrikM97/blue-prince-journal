@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import "./map.css";
 import { PageLayout } from "@/components/common/PageLayout";
 import { MapLeftPanel } from "./MapLeftPanel";
 import { MapMiddlePanel } from "./MapMiddlePanel";

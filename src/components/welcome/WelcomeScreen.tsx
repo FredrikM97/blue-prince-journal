@@ -7,7 +7,7 @@ import { Stack } from "@/components/common/general/Stack";
 import {
   SyncConflictDialog,
 } from "@/components/common/SyncConflictDialog";
-import { useWelcomeScreenActions } from "@/hooks/useWelcomeScreenActions";
+import { useWelcomeScreenActions } from "./useWelcomeScreenActions";
 
 function WelcomeCard({
   icon: Icon,
@@ -23,7 +23,7 @@ function WelcomeCard({
   disabled?: boolean;
 }) {
   return (
-    <Stack className="welcome-card" gap="0">
+    <Stack className="w-full max-w-sm" gap="0">
       <Button
         type="button"
         variant="ghost"
@@ -35,6 +35,7 @@ function WelcomeCard({
         direction="column"
         justify="start"
         textAlign="center"
+        className="flex w-full max-w-sm flex-col items-center justify-start gap-3 rounded-xl border border-border bg-card px-4 py-4 text-center whitespace-normal shadow-sm transition-colors hover:border-brass hover:bg-card disabled:pointer-events-none disabled:opacity-50 sm:min-h-[8rem] sm:w-[18rem]"
       >
         <Icon className="text-brass" />
         <Stack gap="1" variant="default">
@@ -70,10 +71,18 @@ export function WelcomeScreen({
   } = useWelcomeScreenActions({ onDone });
 
   return (
-    <Stack as="section" className="welcome-shell" gap="0">
+    <Stack
+      as="section"
+      className="flex h-full flex-col items-center justify-center px-4 py-12 max-[47.99rem]:justify-start max-[47.99rem]:pt-16"
+      gap="0"
+    >
       <CenteredContent max="6xl" align="center">
         <Stack gap="2">
-          <Stack as="div" className="welcome-icon" gap="0">
+          <Stack
+            as="div"
+            className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-brass text-brass-foreground"
+            gap="0"
+          >
             <Text as="span" size="3xl" weight="semibold">
               B
             </Text>

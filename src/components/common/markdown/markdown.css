@@ -1,14 +1,17 @@
-@reference "../../../tailwind-reference.css";
+
+@reference "../../../styles.css";
 
 @layer components {
   /* ─── Markdown editor ────────────────────────────────────────────────────── */
 
   .md-editor-shell {
-    @apply flex min-h-0 flex-1 flex-col;
+    @apply flex flex-1 flex-col;
+    min-height: 0;
   }
 
   .md-editor-shell > textarea {
-    @apply flex min-h-0 flex-1 w-full rounded-t-none rounded-b-md border border-input border-t-0 bg-card px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono text-[13px] leading-6 md:text-sm [font-variant-numeric:tabular-nums];
+    @apply flex flex-1 w-full rounded-t-none rounded-b-md border border-input border-t-0 bg-card px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono text-[13px] leading-6 md:text-sm [font-variant-numeric:tabular-nums];
+    min-height: 0;
   }
 
   /* Formatting toolbar strip at the top of the editor */
@@ -26,7 +29,11 @@
   }
 
   .markdown-preview-surface {
-    @apply prose prose-sm max-w-none text-sm leading-relaxed dark:prose-invert;
+    @apply prose prose-sm max-w-none text-sm leading-relaxed;
+  }
+
+  .markdown-preview-surface > :where(* + *) {
+    @apply mt-3;
   }
 
   .markdown-preview-surface ul {
@@ -57,6 +64,30 @@
 
   .markdown-preview-surface tbody tr:nth-child(2n) {
     @apply bg-secondary;
+  }
+
+  .md-token {
+    @apply bg-transparent font-mono text-[0.83em] font-semibold;
+  }
+
+  .md-token-room {
+    @apply text-brass;
+  }
+
+  .md-token-tag {
+    @apply text-chart-2;
+  }
+
+  .md-token-note {
+    @apply text-chart-4;
+  }
+
+  .md-token-date {
+    @apply text-chart-5;
+  }
+
+  .md-token-type {
+    @apply text-chart-3;
   }
 
   /* ─── Shortcut help popover ─────────────────────────────────────────────── */

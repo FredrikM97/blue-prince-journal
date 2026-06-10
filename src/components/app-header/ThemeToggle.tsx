@@ -45,12 +45,12 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggle}
-      className="app-icon-button"
+      className="h-8 w-8"
       aria-label={ariaLabel}
       title={title}
     >
-      {theme === "dark" && <Sun className="app-icon-sm" />}
-      {theme === "light" && <Moon className="app-icon-sm" />}
+      {theme === "dark" && <Sun className="h-4 w-4" />}
+      {theme === "light" && <Moon className="h-4 w-4" />}
     </Button>
   );
 }

@@ -6,103 +6,137 @@ agent: agent
 
 Use docs/todo-architecture.md.
 
+---
+
 ## Step 1 — Load ONE Task
 
-- read the first valid task only
-- ignore completed or invalid tasks
-- if no tasks remain → proceed to final validation
+- select the FIRST non-completed `[ ]` task
+- ignore completed `[x]` tasks
+- do NOT group by tags or type
+- if no tasks remain → proceed to optional final validation
 
 ---
 
 ## Step 2 — Context Isolation (CRITICAL)
 
-Before executing:
-
-- treat this task as a fresh execution
-- do NOT rely on previous task context
-- do NOT assume file state
-- re-evaluate affected files for this task only
+- treat task as independent
+- do NOT rely on previous tasks
+- re-evaluate only necessary files for THIS task
 
 ---
 
 ## Step 3 — Execute Task
 
-Extract:
+Extract from task:
 
-- type (bug | refactor | compose | minimal)
-- action (merge | extract | move | delete | simplify)
+- type
 - scope
+- tags
 
-Execute using:
+Execute:
 
 /<type>
 
-Apply rules:
+---
+
+## Execution Rules (CRITICAL)
 
 - minimal change only
-- preserve behavior
+- preserve existing behavior
 - do NOT expand scope
-- identify affected files fresh for THIS task
+- do NOT introduce new patterns
+- do NOT refactor beyond task scope
 - complete task fully
+- do NOT describe execution
+
+If task is blocked:
+
+- apply smallest valid partial change
+- ensure forward progress
 
 ---
 
-## Step 4 — Update TODO
+## Step 4 — Update TODO (CRITICAL)
 
-- mark task as done or remove it
-- remove obsolete tasks
-- merge tasks if they became redundant
-- keep file minimal and clean
+- mark task as completed: `[x]`
+
+Remove ONLY if:
+- duplicate
+- obsolete
+- invalid
+
+Validation:
+
+- total `[ ]` tasks MUST decrease
+
+If not:
+- fix TODO before continuing
 
 ---
 
-## Step 5 — Repeat (CRITICAL)
+## Step 5 — Repeat
 
-This is a loop:
+Loop:
 
 WHILE tasks remain:
 
 1. reload docs/todo-architecture.md
-2. load next valid task
-3. execute task (Steps 2–4)
+2. select next `[ ]` task
+3. execute Steps 2–4
 
-When no tasks remain → proceed to final validation.
-
----
-
-## Step 6 — Final Validation (CRITICAL)
-
-After all tasks are complete:
-
-Run a validation command:
-
-- prefer `npx tsc --noEmit`
-- or `npm run build` if available
-
-If the command fails:
-
-- identify the cause from the output
-- fix issues using minimal changes
-- do NOT introduce new systems or abstraction
-- prefer removing or simplifying invalid code
-
-Ensure the project builds or typechecks successfully before finishing.
+Stop when:
+- no `[ ]` tasks remain, OR
+- execution is interrupted
 
 ---
 
-## Output (MINIMAL)
+## Step 6 — Optional Cleanup Phase
 
-apply: yes
+If many `[x]` tasks:
+
+- remove completed tasks
+- keep TODO compact
+- retain unfinished tasks
+
+---
+
+## Step 7 — Optional Final Validation
+
+Run ONLY if explicitly required or at the very end:
+
+- `npx tsc --noEmit`
+- or `npm run build`
+
+If failing:
+
+- fix with minimal changes
+- prefer:
+  - simplify
+  - delete invalid code
+
+DO NOT introduce new systems.
+
+---
+
+## Output (ERROR ONLY)
+
+Output ONLY if:
+
+- task execution fails
+- TODO cannot be updated
+- validation explicitly fails
+
+Keep output minimal.
 
 ---
 
 ## Rules
 
 - process ONE task at a time
-- do NOT pre-load all tasks
-- do NOT carry context between tasks
+- do NOT preload tasks
 - do NOT re-analyze
-- do NOT introduce new tasks
+- do NOT create new tasks
 - do NOT expand scope
-- do NOT stop between tasks
+- do NOT stop unless interrupted
 - do NOT output explanations
+- do NOT print progress

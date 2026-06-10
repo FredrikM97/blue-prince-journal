@@ -1,7 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeToggle } from "@/components/app-header/ThemeToggle";
+import { CenteredContent } from "@/components/common/LayoutPrimitives";
 import { Toaster } from "@/routes/Sonner";
 import {
   DropdownMenuContent,
@@ -143,5 +146,25 @@ describe("DropdownMenu wrappers", () => {
 
     expect(screen.getByTestId("sub-trigger")).toBeTruthy();
     expect(screen.getByTestId("sub-content")).toBeTruthy();
+  });
+});
+
+describe("CenteredContent", () => {
+  it("keeps alignment styles on the component without relying on shared utility CSS", () => {
+    const { container } = render(
+      <CenteredContent max="2xl" align="left">
+        <div>Body</div>
+      </CenteredContent>,
+    );
+
+    const wrapper = container.firstElementChild as HTMLElement;
+    expect(wrapper.className).toContain("text-left");
+
+    const mainSource = readFileSync(
+      resolve(process.cwd(), "src/main.tsx"),
+      "utf8",
+    );
+
+    expect(mainSource).toContain('import "./styles.css";');
   });
 });

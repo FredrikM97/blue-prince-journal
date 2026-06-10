@@ -453,7 +453,7 @@ export function MarkdownEditor({
   }
 
   return (
-    <Stack as="div" gap="0" className="md-editor-shell">
+    <Stack as="div" gap="0" className="flex min-h-0 flex-1 flex-col">
       <MarkdownToolbar
         primaryActions={primaryToolbarActions}
         overflowActions={overflowToolbarActions}
@@ -465,7 +465,7 @@ export function MarkdownEditor({
       />
 
       {preview && (
-        <Stack as="div" gap="0" className="md-editor-body">
+        <Stack as="div" gap="0" className="min-h-[6rem] rounded-b-md border border-input bg-background p-3">
           <MarkdownPreview>{value}</MarkdownPreview>
         </Stack>
       )}
@@ -514,6 +514,7 @@ export function MarkdownEditor({
           }}
           placeholder={placeholder}
           rows={rows}
+          className="flex min-h-0 w-full flex-1 rounded-b-md rounded-t-none border border-input border-t-0 bg-card px-3 py-2 font-mono text-[13px] leading-6 shadow-sm placeholder:text-muted-foreground [font-variant-numeric:tabular-nums] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
         />
       )}
       {allowExpand && (

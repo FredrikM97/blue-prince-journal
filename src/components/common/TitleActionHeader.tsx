@@ -9,9 +9,9 @@ export function TitleActionHeader({
   showClose = true,
   onClose,
   closeSlot,
-  rowClassName = "panel-header",
-  titleWrapClassName = "panel-header-title-wrap",
-  actionsClassName = "preview-header-actions",
+  rowClassName = "flex items-start justify-between gap-2 border-b border-border pb-3",
+  titleWrapClassName = "min-w-0",
+  actionsClassName = "flex shrink-0 items-start gap-1",
 }: {
   title: ReactNode;
   subtitle?: ReactNode;
@@ -37,7 +37,7 @@ export function TitleActionHeader({
           {showClose && closeSlot}
           {showClose && !closeSlot && onClose && (
             <Button variant="ghost" size="icon" onClick={onClose} title="Close" aria-label="Close panel">
-              <X className="icon-md" />
+              <X className="h-4 w-4" />
             </Button>
           )}
         </div>

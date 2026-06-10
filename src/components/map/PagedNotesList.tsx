@@ -30,7 +30,8 @@ export function PagedNotesList({
   cardVariant?: "panel-card" | "default";
 }) {
   const [index, setIndex] = useState(0);
-  const cardClassName = cardVariant === "panel-card" ? "panel-card" : "";
+  const cardClassName =
+    cardVariant === "panel-card" ? "rounded-md border border-border bg-card p-3" : "";
   const total = notes.length;
   const safeIndex = total === 0 ? 0 : ((index % total) + total) % total;
   const note = notes[safeIndex] ?? null;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCapture } from "@/lib/parse";
+import { parseCapture } from "@/data/mutations/parseCapture";
 
 describe("parseCapture", () => {
   it("parses tags, room, date, type and title", () => {

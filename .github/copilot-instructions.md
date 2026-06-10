@@ -29,14 +29,15 @@ Do not mix modes. Default = Minimal.
 
 ## Decisions
 - choose one solution
-- no alternatives or exploration
+- no alternatives
+- avoid exploration
 
 ---
 
 ## Output
 - minimal changes only
 - no unrelated code
-- no explanation unless requested
+- no explanations unless requested
 
 ---
 
@@ -46,106 +47,181 @@ Do not mix modes. Default = Minimal.
 - no new systems unless replacing existing
 - reuse existing components before creating new ones
 - keep changes small and consistent
-- group related state and props into single objects when possible
 
 ---
 
 ## File Responsibility
 - .tsx → UI only
-- .ts → hooks, logic, services, types
+- .ts → logic, hooks, services, types
+
+Rules:
 - no JSX in hooks
 - domain logic must be pure
 - services contain no UI logic
-- components do not contain heavy business logic
+- components must not contain heavy business logic
 
 ---
 
 ## Structure
 - one concept = one component
 - no similar components with small differences
-- shared behavior exists once
-- prefer composition using children over specialized components
-- avoid wrapper components with no unique behavior
+- shared behavior must exist in one place
+- prefer composition (children) over specialization
+- avoid wrapper components without unique behavior
 
 ---
 
 ## State
-- prefer grouped state over multiple independent fields
-- avoid excessive value/onChange prop pairs
-- pass state as a single object for one concept
+- group related state into objects
+- avoid many independent state fields
+- avoid value/onChange prop duplication
 
 ---
 
 ## Architecture
+
 UI (.tsx):
-- rendering and local interaction only
+- rendering + interaction only
 
 Domain (.ts):
-- pure functions only
+- pure functions
 
 State (.ts):
-- hooks manage state and effects
+- hooks and effects
 
 Data (.ts):
-- IO and persistence only
+- IO only
 
 ---
 
 ## Styling
 
-Component owns its styling.
+### Ownership (CRITICAL)
 
-Order:
-1. inline Tailwind
-2. component reuse
-3. CSS only when required
+- Each component MUST own its styling
+- Styling MUST be defined inside the component using className
+- Components MUST NOT depend on global CSS for layout or structure
 
-### Tailwind
-- use inline by default
-- keep styling local and readable
-- do not extract className into constants
-- do not create styling abstraction or variant systems
+---
 
-### Component Reuse
-- extract repeated UI into components, not style constants
+### Primary Approach (Tailwind First)
 
-### CSS
-Use only when:
-- complex selectors required
-- structural or markdown/system styling
+- use Tailwind directly in className
+- layout, spacing, and alignment MUST be defined inline
+- styling MUST be visible in the component
+
+---
+
+### Forbidden Patterns
+
+- shared CSS files
+- global component styling
+- CSS controlling layout across components
+- CSS import chains
+- reference layers or style hubs
+- Tailwind abstraction layers
+- variant systems or config-driven styling
+
+---
+
+### CSS Usage (LIMITED)
+
+Use CSS ONLY when:
+
+- complex selectors are required
+- cannot be expressed using Tailwind
+- defining tokens or base styles
 
 Rules:
-- scoped to one component
-- no shared/global CSS
-- prefer deletion over extension
 
-### className
-- inline usage only
-- no reusable style constants or mapping systems
+- scoped to one component
+- imported ONLY by that component
+- MUST NOT affect other components
+
+---
+
+### Theme / Tokens
+
+- tokens must have a single source (e.g. :root and .dark)
+- components consume tokens only
+
+Rules:
+
+- use tokens directly (var(--background))
+- Tailwind may map tokens (bg-background, text-foreground)
+- keep token system flat
+
+Forbidden:
+
+- multi-layer token mapping
+- duplicated token systems
+- inline theme systems
+
+---
+
+### Global Styles (STRICTLY LIMITED)
+
+Allowed ONLY for:
+
+- html/body background and color
+- typography defaults
+- reset/normalization
+
+MUST NOT:
+
+- control layout
+- affect spacing or alignment
+- modify width, overflow, or centering
+- influence component structure
+
+---
+
+### CSS Dependency Safety (CRITICAL)
+
+- component CSS MUST NOT import another component CSS
+- no indirect chains (A → B → C)
+- no shared CSS hubs
+- styles.css MUST NOT import component CSS
+
+Goal:
+
+- each component must render correctly in isolation
+- removing a component MUST NOT break another
+
+---
+
+### Principles
+
+- explicit over implicit
+- local over global
+- duplication over hidden coupling
+- if styling is not visible in the component, it is a problem
 
 ---
 
 ## Refactor
+
 Allowed only if:
-- duplication removed
+- duplication reduced
 - system simplified
 
 Rules:
 - no abstraction layers
 - no expanding variants
-- identify all affected files
-- apply changes in one pass
+- update all affected files in one pass
 
 ---
 
 ## TypeScript
+
 - avoid any
 - prefer explicit types
-- use narrowing over assertions
+- prefer narrowing over assertions
 
 ---
 
 ## Constraints
+
 - avoid hidden coupling between components
 
 ---
@@ -153,7 +229,7 @@ Rules:
 ## Modes Behavior
 
 Refactor:
-- remove duplication and complexity
+- reduce complexity and duplication
 
 Feature:
 - extend existing components

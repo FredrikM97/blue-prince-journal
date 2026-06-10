@@ -37,7 +37,7 @@ export function SteamImportSection() {
 
       {!steamSync.folderName && (
         <Button variant="brass" size="sm" onClick={steamSync.connect} disabled={steamSync.busy}>
-          <FolderOpen className="icon-sm" />
+          <FolderOpen className="h-3.5 w-3.5" />
           Connect folder...
         </Button>
       )}
@@ -46,7 +46,7 @@ export function SteamImportSection() {
         <Stack gap="1.5">
           <Inline gap="2" wrap align="center">
             <Button variant="brass" size="sm" onClick={steamSync.syncNow} disabled={steamSync.busy}>
-              <FolderSync className="icon-sm" />
+              <FolderSync className="h-3.5 w-3.5" />
               Sync now
             </Button>
             <Button
@@ -55,7 +55,7 @@ export function SteamImportSection() {
               onClick={steamSync.disconnect}
               disabled={steamSync.busy}
             >
-              <Unlink className="icon-sm" />
+              <Unlink className="h-3.5 w-3.5" />
               Disconnect
             </Button>
           </Inline>

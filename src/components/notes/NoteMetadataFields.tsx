@@ -53,7 +53,7 @@ export function NoteMetadataFields({
           <MetaText as="p" size="xs" weight="medium" normalCase>
             {typeLabel}
           </MetaText>
-          <DropdownSelect value={typeValue} onValueChange={onTypeChange} options={typeOptions} triggerWidth="fit" />
+          <DropdownSelect value={typeValue} onValueChange={onTypeChange} options={typeOptions} />
         </Stack>
 
         <Stack as="div" gap="1">
@@ -64,7 +64,6 @@ export function NoteMetadataFields({
             value={roomValue}
             onValueChange={onRoomChange}
             clearLabel={roomClearLabel}
-            triggerWidth="fit"
           />
         </Stack>
 

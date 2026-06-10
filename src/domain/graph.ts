@@ -575,16 +575,16 @@ export function buildRenderedEdges(
     if (!fromNode || !toNode) continue;
 
     const isDirectRef = edge.relations.includes("note");
-    const fromCluster = isDirectRef ? null : clusterByNoteId.get(edge.from);
-    const toCluster = isDirectRef ? null : clusterByNoteId.get(edge.to);
+    const isRoomRef = edge.relations.includes("room");
+    const toCluster = isDirectRef || isRoomRef ? null : clusterByNoteId.get(edge.to);
 
-    const fromKey = fromCluster ? `cluster:${fromCluster.room}` : edge.from;
+    const fromKey = edge.from;
     const toKey = toCluster ? `cluster:${toCluster.room}` : edge.to;
 
     if (fromKey === toKey) continue;
 
-    const fromX = fromCluster ? fromCluster.cx : fromNode.x;
-    const fromY = fromCluster ? fromCluster.cy : fromNode.y;
+    const fromX = fromNode.x;
+    const fromY = fromNode.y;
     const toX = toCluster ? toCluster.cx : toNode.x;
     const toY = toCluster ? toCluster.cy : toNode.y;
 
@@ -592,7 +592,7 @@ export function buildRenderedEdges(
     const dy = toY - fromY;
     const dist = Math.hypot(dx, dy) || 1;
 
-    const fromPad = fromCluster ? fromCluster.r : EDGE_NODE_PADDING;
+    const fromPad = EDGE_NODE_PADDING;
     const toPad = toCluster ? toCluster.r : EDGE_NODE_PADDING;
 
     const x1 = fromX + (dx / dist) * fromPad;
