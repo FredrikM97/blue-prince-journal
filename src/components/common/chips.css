@@ -1,0 +1,25 @@
+@reference "../../styles.css";
+
+/* Chip and tag pill styles */
+
+@layer components {
+  /* Default: muted border + muted text (metadata tags) */
+  .chip {
+    @apply inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground;
+  }
+
+  /* Solid: full border + foreground text (prominent chips in lists) */
+  .chip-solid {
+    @apply inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] text-foreground;
+  }
+
+  /* Room: brass-tinted for @room references */
+  .chip-room {
+    @apply inline-flex items-center rounded border border-brass px-1.5 py-0.5 text-[10px] text-brass;
+  }
+
+  /* Tag: secondary bg + foreground text (for #tag pills) */
+  .chip-tag {
+    @apply inline-flex items-center rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] text-foreground;
+  }
+}

@@ -5,7 +5,7 @@
  */
 
 import { memo, useRef } from "react";
-import { Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +15,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/common/menu/DropdownMenu";
+import { Button } from "@/components/common/Button";
 import { MetaText } from "@/components/common/Typography";
-import { DropdownTriggerButton } from "@/components/common/dropdown/DropdownTriggerButton";
-import type { SelectOption } from "@/components/common/dropdown/selectOption";
-import { useRoomDropdownData } from "@/hooks/useRoomDropdownData";
+import { useRoomDropdownData } from "./useRoomDropdownData";
 
 function RoomDropdownComponent({
   value,
@@ -59,13 +58,18 @@ function RoomDropdownComponent({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <DropdownTriggerButton
-          valueLabel={activeRoom || undefined}
-          placeholder={placeholder}
-          hasValue={!!activeRoom}
-          variant="room"
-          triggerWidth={triggerWidth}
-        />
+        <div className={triggerWidth === "fit" ? "w-auto min-w-40" : "w-full"} data-has-value={!!activeRoom}>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:bg-secondary"
+          >
+            <span className={activeRoom ? "text-foreground" : "text-muted-foreground"}>
+              {activeRoom || placeholder}
+            </span>
+            <ChevronDown className="h-4 w-4 opacity-50" />
+          </Button>
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" variant="select">
@@ -76,12 +80,12 @@ function RoomDropdownComponent({
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => event.stopPropagation()}
             placeholder="Search rooms..."
-            className="room-dropdown-search"
+            className="h-8 w-full rounded border border-input bg-card px-2 text-sm outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
 
         {(() => {
-          const clearOption: SelectOption = { value: "", label: clearLabel };
+          const clearOption: { value: string; label: string } = { value: "", label: clearLabel };
           let clearTone: "default" | "active" = "default";
           if (!activeRoom) clearTone = "active";
           return (
@@ -113,14 +117,14 @@ function RoomDropdownComponent({
             })}
             {showAddOption && (
               <DropdownMenuItem onSelect={handleAddCustomRoom}>
-                <Plus className="icon-md shrink-0" />
+                <Plus className="h-4 w-4 shrink-0" />
                 <MetaText as="span" size="sm">
                   Add "{targetRoom}" to {targetGroup}
                 </MetaText>
               </DropdownMenuItem>
             )}
             {!showAddOption && searchResults.length === 0 && (
-              <div className="room-dropdown-empty">No matching rooms</div>
+              <div className="px-2 py-1.5 text-sm text-muted-foreground">No matching rooms</div>
             )}
           </>
         )}
@@ -141,7 +145,7 @@ function RoomDropdownComponent({
                   </div>
                 </DropdownMenuSubTrigger>
 
-                <DropdownMenuSubContent className="room-submenu-content">
+                <DropdownMenuSubContent className="max-h-72 min-w-56">
                   {groupedRooms[group]?.map((room) => {
                     let itemTone: "default" | "active" = "default";
                     if (room.name === activeRoom) itemTone = "active";

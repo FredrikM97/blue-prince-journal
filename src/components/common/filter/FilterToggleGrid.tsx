@@ -18,19 +18,19 @@ function getToggleButtonClass(options: {
 }) {
   const alignClass = options.leftAligned ? "justify-start text-left" : "justify-center text-center";
   const sizeClass =
-    options.size === "compact" ? "h-5.5 px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-[11px]";
+    options.size === "compact" ? "h-5 px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-[11px]";
   const widthClass = options.width === "fit" ? "w-auto" : "w-full";
 
   let stateClass = "opacity-75";
   if (options.active && options.activeStyle === "filled") {
-    stateClass = "border-brass bg-brass text-brass-foreground opacity-100";
+    stateClass = "border-primary bg-primary text-primary-foreground opacity-100";
   }
   if (options.active && options.activeStyle === "outline") {
-    stateClass = "border-brass bg-card text-foreground opacity-100";
+    stateClass = "border-primary bg-card text-foreground opacity-100";
   }
 
   return [
-    "flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card text-foreground transition-colors hover:border-brass hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+    "flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card text-foreground transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
     alignClass,
     sizeClass,
     widthClass,
@@ -53,7 +53,7 @@ export function FilterToggleGrid({
   width?: "full" | "fit";
   activeStyle?: "filled" | "outline";
 }) {
-  const dotClassName = "filter-toggle-dot";
+  const dotClassName = "h-2 w-2 shrink-0 rounded-full";
   const labelClassName = "overflow-hidden text-ellipsis whitespace-nowrap";
 
   if (layout === "wrap") {
@@ -78,7 +78,7 @@ export function FilterToggleGrid({
               {item.dotColor && (
                 <span
                   className={dotClassName}
-                  style={{ "--filter-dot-color": item.dotColor } as CSSProperties}
+                  style={{ background: item.dotColor } as CSSProperties}
                 />
               )}
               <span className={labelClassName}>{item.label}</span>
@@ -90,7 +90,9 @@ export function FilterToggleGrid({
   }
 
   return (
-    <Grid gap="2" className="grid-auto-fit">
+    <Grid
+      className="w-full gap-x-2 gap-y-0.5 [grid-template-columns:repeat(auto-fit,minmax(min(6.75rem,100%),1fr))]"
+    >
       {items.map((item) => {
         const buttonClassName = getToggleButtonClass({
           active: item.active,
@@ -110,7 +112,7 @@ export function FilterToggleGrid({
             {item.dotColor && (
               <span
                 className={dotClassName}
-                style={{ "--filter-dot-color": item.dotColor } as CSSProperties}
+                style={{ background: item.dotColor } as CSSProperties}
               />
             )}
             <span className={labelClassName}>{item.label}</span>

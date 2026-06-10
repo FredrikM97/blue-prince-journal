@@ -7,31 +7,21 @@ import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
 import { SidePanelRight } from "@/components/common/SidePanel";
 import type { Note } from "@/lib/types";
 
-/**
- * Right-side inspector panel for graph summary and selected entry details.
- */
-export function GraphRightPanel({
-  noteCount,
-  edgeCount,
-  selectedNote,
-  incomingCount,
-  outgoingCount,
-  onClose,
-}: {
+type GraphPreviewContentProps = {
   noteCount: number;
   edgeCount: number;
   selectedNote: Note | null;
   incomingCount: number;
   outgoingCount: number;
-  onClose: () => void;
-}) {
-  let panelTitle = "Preview";
-  let panelSubtitle = `${noteCount} entries · ${edgeCount} links`;
-  if (selectedNote) {
-    panelTitle = selectedNote.title;
-    panelSubtitle = `${selectedNote.type} · ${outgoingCount} out · ${incomingCount} in`;
-  }
+};
 
+export function GraphPreviewContent({
+  noteCount,
+  edgeCount,
+  selectedNote,
+  incomingCount,
+  outgoingCount,
+}: GraphPreviewContentProps) {
   const summary = (
     <Stack gap="3">
       <Text size="sm" tone="muted">
@@ -50,102 +40,131 @@ export function GraphRightPanel({
 
   if (!selectedNote) {
     return (
-      <SidePanelRight title={panelTitle} subtitle={panelSubtitle} onClose={onClose}>
-        <Stack gap="3">
-          {summary}
-          <Text size="sm" tone="muted">
-            Select a note node to inspect details.
-          </Text>
-        </Stack>
-      </SidePanelRight>
+      <Stack gap="3">
+        {summary}
+        <Text size="sm" tone="muted">
+          Select a note node to inspect details.
+        </Text>
+      </Stack>
     );
   }
 
   return (
-    <SidePanelRight title={panelTitle} subtitle={panelSubtitle} onClose={onClose}>
-      <Stack gap="4">
-        {summary}
+    <Stack gap="4">
+      {summary}
 
-        <Stack gap="2" variant="panel-card">
-          <Heading as="h3" size="base" variant="section-label">
-            Info
-          </Heading>
-          <Text as="div" size="base">
-            <Stack gap="2">
+      <Stack gap="2" variant="panel-card">
+        <Heading as="h3" size="base" variant="section-label">
+          Info
+        </Heading>
+        <Text as="div" size="base">
+          <Stack gap="2">
+            <Inline gap="2">
+              <Text
+                as="span"
+                size="xs"
+                tone="muted"
+                weight="medium"
+                className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+              >
+                Type
+              </Text>
+              <Chip>{selectedNote.type}</Chip>
+            </Inline>
+
+            {selectedNote.room && (
               <Inline gap="2">
                 <Text
                   as="span"
                   size="xs"
                   tone="muted"
                   weight="medium"
-                  className="preview-field-label"
+                  className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
                 >
-                  Type
+                  Room
                 </Text>
-                <Chip>{selectedNote.type}</Chip>
+                <Chip variant="room">@{selectedNote.room}</Chip>
               </Inline>
-
-              {selectedNote.room && (
-                <Inline gap="2">
-                  <Text
-                    as="span"
-                    size="xs"
-                    tone="muted"
-                    weight="medium"
-                    className="preview-field-label"
-                  >
-                    Room
-                  </Text>
-                  <Chip variant="room">@{selectedNote.room}</Chip>
-                </Inline>
-              )}
-
-              {selectedNote.tags.length > 0 && (
-                <Inline align="start" gap="2">
-                  <Text
-                    as="span"
-                    size="xs"
-                    tone="muted"
-                    weight="medium"
-                    className="preview-field-label"
-                  >
-                    Tags
-                  </Text>
-                  <Inline gap="1.5" wrap>
-                    {selectedNote.tags.map((tag) => (
-                      <Chip key={tag}>#{tag}</Chip>
-                    ))}
-                  </Inline>
-                </Inline>
-              )}
-
-              <Inline gap="3">
-                <MetaText as="span" size="sm">
-                  Outgoing: {outgoingCount}
-                </MetaText>
-                <MetaText as="span" size="sm">
-                  Incoming: {incomingCount}
-                </MetaText>
-              </Inline>
-            </Stack>
-          </Text>
-        </Stack>
-
-        <SectionBlock>
-          <Stack gap="1">
-            <Heading as="h3" size="base" variant="section-label">
-              Note body
-            </Heading>
-            {selectedNote.body.trim() ? (
-              <MarkdownPreview>{selectedNote.body}</MarkdownPreview>
-            ) : (
-              <MetaText>No details written for this note yet.</MetaText>
             )}
 
-            <AttachedImagesGallery imageIds={selectedNote.imageIds} compact />
+            {selectedNote.tags.length > 0 && (
+              <Inline align="start" gap="2">
+                <Text
+                  as="span"
+                  size="xs"
+                  tone="muted"
+                  weight="medium"
+                  className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                >
+                  Tags
+                </Text>
+                <Inline gap="1.5" wrap>
+                  {selectedNote.tags.map((tag) => (
+                    <Chip key={tag}>#{tag}</Chip>
+                  ))}
+                </Inline>
+              </Inline>
+            )}
+
+            <Inline gap="3">
+              <MetaText as="span" size="sm">
+                Outgoing: {outgoingCount}
+              </MetaText>
+              <MetaText as="span" size="sm">
+                Incoming: {incomingCount}
+              </MetaText>
+            </Inline>
           </Stack>
-        </SectionBlock>
+        </Text>
       </Stack>
+
+      <SectionBlock>
+        <Stack gap="1">
+          <Heading as="h3" size="base" variant="section-label">
+            Note body
+          </Heading>
+          {selectedNote.body.trim() ? (
+            <MarkdownPreview>{selectedNote.body}</MarkdownPreview>
+          ) : (
+            <MetaText>No details written for this note yet.</MetaText>
+          )}
+
+          <AttachedImagesGallery imageIds={selectedNote.imageIds} compact />
+        </Stack>
+      </SectionBlock>
+    </Stack>
+  );
+}
+
+/**
+ * Right-side inspector panel for graph summary and selected entry details.
+ */
+export function GraphRightPanel({
+  noteCount,
+  edgeCount,
+  selectedNote,
+  incomingCount,
+  outgoingCount,
+  onClose,
+}: GraphPreviewContentProps & {
+  onClose: () => void;
+}) {
+  let panelTitle = "Preview";
+  let panelSubtitle = `${noteCount} entries · ${edgeCount} links`;
+  if (selectedNote) {
+    panelTitle = selectedNote.title;
+    panelSubtitle = `${selectedNote.type} · ${outgoingCount} out · ${incomingCount} in`;
+  }
+
+  return (
+    <SidePanelRight title={panelTitle} subtitle={panelSubtitle} onClose={onClose}>
+      <GraphPreviewContent
+        noteCount={noteCount}
+        edgeCount={edgeCount}
+        selectedNote={selectedNote}
+        incomingCount={incomingCount}
+        outgoingCount={outgoingCount}
+      />
     </SidePanelRight>
   );
 }

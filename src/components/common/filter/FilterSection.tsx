@@ -33,16 +33,18 @@ export function FilterSection({
   void variant;
   const [open, setOpen] = useState(defaultOpen);
   const ChevronIcon = open ? ChevronDown : ChevronRight;
-  const chevronIconClassName = "filter-section-chevron";
-  const headerClassName = "filter-section-header";
+  const chevronIconClassName = "h-2.5 w-2.5";
+  const headerClassName =
+    "flex items-center justify-between text-[10px] font-medium uppercase tracking-wide text-muted-foreground";
   const controlButtonClassName = [
-    "filter-section-control",
+    "flex min-h-6 cursor-pointer select-none items-center justify-between gap-1 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
     CONTROL_WIDTH_CLASS_BY_VARIANT[width],
   ].join(" ");
-  const actionButtonClassName = "filter-section-action";
+  const actionButtonClassName =
+    "px-1 py-0.5 text-[10px] normal-case text-brass hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
   return (
-    <Stack gap="0" className="section-compact filter-section">
+    <Stack gap="0" className="space-y-1.5">
       {collapsible && (
         <Stack gap="0" className={headerClassName}>
           <Button
@@ -56,7 +58,7 @@ export function FilterSection({
               {title}
               {!open && badge && (
                 <MetaText as="span" size="xs" marginTop="0" normalCase>
-                  <span className="filter-section-badge">{badge}</span>
+                  <span className="ml-1 text-chart-3">{badge}</span>
                 </MetaText>
               )}
             </span>
@@ -94,7 +96,7 @@ export function FilterSection({
       )}
 
       {(!collapsible || open) && (
-        <Stack gap="0" className="filter-section-content">
+        <Stack gap="0" className="space-y-0.5">
           {children}
         </Stack>
       )}

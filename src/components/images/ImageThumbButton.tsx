@@ -15,8 +15,12 @@ export function ImageThumbButton({
   selected: boolean;
   onClick: () => void;
 }) {
-  let thumbClass = "group images-thumb";
-  if (selected) thumbClass = "group images-thumb images-thumb-selected";
+  let thumbClass =
+    "group relative aspect-square overflow-hidden rounded border border-border bg-card hover:border-brass";
+  if (selected) {
+    thumbClass =
+      "group relative aspect-square overflow-hidden rounded border border-brass bg-card ring-1 ring-brass/40";
+  }
 
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const [visible, setVisible] = useState(false);
@@ -42,11 +46,11 @@ export function ImageThumbButton({
       <StoredImageView
         id={imageId}
         alt={imageName}
-        className="images-thumb-image"
+        className="h-full w-full object-cover"
         mode="thumb"
         lazy={!visible}
       />
-      <div className="images-thumb-overlay">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background to-transparent p-2 text-left">
         <Text as="div" size="xs" tone="default" variant="default" truncate>
           {label}
         </Text>

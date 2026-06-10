@@ -30,7 +30,7 @@ const STACK_GAP_CLASS: Record<StackGap, string> = {
 
 const STACK_VARIANT_CLASS: Record<StackVariant, string> = {
   default: "",
-  "panel-card": "panel-card",
+  "panel-card": "rounded-md border border-border bg-card p-3",
   "dialog-scroll-body": "dialog-scroll-body",
 };
 

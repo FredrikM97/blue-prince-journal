@@ -31,9 +31,11 @@ export function ImageCard({
   onRemove?: (e: React.MouseEvent) => void;
 }) {
   let cardClass =
-    "group relative aspect-square w-full overflow-hidden rounded-md border border-border bg-muted cursor-pointer transition-colors hover:border-brass";
+    "group relative overflow-hidden rounded-md border border-border bg-muted cursor-pointer transition-colors hover:border-brass";
   if (size === "sm") {
-    cardClass = `${cardClass} h-16 w-16 shrink-0 [aspect-ratio:unset]`;
+    cardClass = `${cardClass} h-16 w-16 shrink-0`;
+  } else {
+    cardClass = `${cardClass} aspect-square w-full`;
   }
   if (selected) {
     cardClass = `${cardClass} border-brass bg-brass ring-1 ring-brass text-brass-foreground`;

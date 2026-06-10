@@ -18,7 +18,7 @@ vi.mock("@/data/rooms/rooms", () => ({
   getRoomCatalog: () => ctx.catalog,
 }));
 
-import { useSuggestionSources } from "@/hooks/useSuggestionSources";
+import { useSuggestionSources } from "@/components/common/suggestions/useSuggestionSources";
 
 describe("useSuggestionSources", () => {
   beforeEach(() => {

@@ -23,7 +23,6 @@ import { MetaText, Text } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
 import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
-import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
 import { SelectExistingImagesDialog } from "@/components/notes/SelectExistingImagesDialog";
 import { getImageLabel } from "@/lib/imageLabel";
 import { parseTagInput } from "@/domain/notesPage";
@@ -429,6 +428,7 @@ function useNoteSubmit({
   editNoteId,
   existingNotes,
   closeWithReturn,
+  onEditSaved,
   title,
   pendingImages,
   selectedImageIds,
@@ -444,6 +444,7 @@ function useNoteSubmit({
   editNoteId: NotesStoreSlice["editNoteId"];
   existingNotes: NotesStoreSlice["notes"];
   closeWithReturn: () => Promise<void>;
+  onEditSaved?: (note: Note) => void | Promise<void>;
   title: NotesFormState["title"];
   pendingImages: NotesFormState["pendingImages"];
   selectedImageIds: NotesFormState["selectedImageIds"];
@@ -464,7 +465,7 @@ function useNoteSubmit({
     if (editNoteId) {
       const existing = existingNotes.find((n) => n.id === editNoteId);
       if (existing) {
-        await saveNote({
+        const savedNote: Note = {
           ...existing,
           title: title.trim() || "Untitled",
           body: body.trim(),
@@ -473,8 +474,16 @@ function useNoteSubmit({
           tags,
           date: dateInput || existing.date,
           imageIds: selectedImageIds,
-        });
+        };
+
+        await saveNote(savedNote);
         toast.success("Note updated");
+
+        if (onEditSaved) {
+          await onEditSaved(savedNote);
+          return;
+        }
+
         await closeWithReturn();
         return;
       }
@@ -501,9 +510,14 @@ function useNoteSubmit({
   };
 }
 
-export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteType }) {
+export function NotesCreatePanel({
+  defaultNoteType,
+  onEditSaved,
+}: {
+  defaultNoteType?: NoteType;
+  onEditSaved?: (note: Note) => void | Promise<void>;
+}) {
   const navigate = useNavigate();
-  const mobileDrawerControls = usePageLayoutMobileDrawerControls();
   const store = useNotesStoreSlice();
   const form = useNotesFormState({
     kind: store.kind,
@@ -532,9 +546,6 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
   };
 
   const closeCapturePanel = () => {
-    if (mobileDrawerControls?.isPageLayoutMobile) {
-      mobileDrawerControls.closeMobileDrawer();
-    }
     void closeWithReturn();
   };
 
@@ -559,6 +570,7 @@ export function NotesCreatePanel({ defaultNoteType }: { defaultNoteType?: NoteTy
     editNoteId: store.editNoteId,
     existingNotes: store.notes,
     closeWithReturn,
+    onEditSaved,
     title: form.title,
     pendingImages: form.pendingImages,
     selectedImageIds: form.selectedImageIds,

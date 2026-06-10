@@ -31,3 +31,24 @@ test("notes smoke: create, edit, delete", async ({ page }) => {
 
   budgets.assert();
 });
+
+test("welcome header: only theme toggle is visible before first action", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.removeItem("bp-welcomed");
+    indexedDB.deleteDatabase("blue-prince-notes");
+  });
+
+  await page.goto("/");
+
+  await expect(page.getByRole("heading", { name: "Welcome to Blue Prince Journal" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Switch to (dark|light) theme/i })).toBeVisible();
+
+  await expect(page.getByRole("button", { name: /Add note/i })).toHaveCount(0);
+  await expect(page.getByLabel("Search")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Settings" })).toHaveCount(0);
+  await expect(page.locator(".app-nav-link")).toHaveCount(0);
+  await expect(page.locator(".header-sync-status")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Start fresh" }).click();
+  await expect(page.getByRole("button", { name: /Add note/i })).toBeVisible();
+});

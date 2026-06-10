@@ -4,14 +4,20 @@
  */
 
 import { memo } from "react";
+import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/common/Button";
+import { MetaText, Text } from "@/components/common/Typography";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/common/menu/DropdownMenu";
-import { DropdownTriggerButton } from "@/components/common/dropdown/DropdownTriggerButton";
-import type { SelectOption } from "@/components/common/dropdown/selectOption";
+
+type SelectOption = {
+  value: string;
+  label: string;
+};
 
 export function DropdownSelectComponent({
   value,
@@ -33,16 +39,40 @@ export function DropdownSelectComponent({
   let activeLabel: string | undefined;
   if (activeOption) activeLabel = activeOption.label;
 
+  const isFlat = triggerVariant === "flat";
+  const isFit = triggerWidth === "fit";
+  const buttonVariant: "outline" | "ghost" = isFlat ? "ghost" : "outline";
+
+  let triggerWrapperClassName = "w-full";
+  if (isFit) triggerWrapperClassName = "w-auto min-w-40";
+
+  let triggerButtonClassName = "h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:bg-secondary";
+  if (isFit) {
+    triggerButtonClassName = `${triggerButtonClassName} w-auto min-w-40`;
+  }
+  if (isFlat) {
+    triggerButtonClassName = "h-9 w-full justify-between border-transparent bg-transparent px-3 py-2 text-sm font-normal shadow-none hover:bg-transparent";
+  }
+
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <DropdownTriggerButton
-          valueLabel={activeLabel}
-          placeholder={placeholder}
-          hasValue={hasValue}
-          triggerWidth={triggerWidth}
-          variant={triggerVariant}
-        />
+        <div className={triggerWrapperClassName} data-has-value={hasValue}>
+          <Button type="button" variant={buttonVariant} className={triggerButtonClassName}>
+            <span className={hasValue ? "text-foreground" : "text-muted-foreground"}>
+              {hasValue && activeLabel ? (
+                <Text as="span" size="sm">
+                  {activeLabel}
+                </Text>
+              ) : (
+                <MetaText as="span" size="sm">
+                  {placeholder}
+                </MetaText>
+              )}
+            </span>
+            <ChevronDown className="h-4 w-4 opacity-50" />
+          </Button>
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" variant="select">

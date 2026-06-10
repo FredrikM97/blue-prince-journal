@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import "./markdown.css";
 import { createPortal } from "react-dom";
 import { Eye, EyeOff, HelpCircle, Maximize2, MoreHorizontal, WandSparkles } from "lucide-react";
 import { Button } from "@/components/common/Button";
@@ -254,8 +255,8 @@ export function MarkdownToolbar({
           title={previewToggleLabel}
           onClick={onTogglePreview}
         >
-          {preview && <EyeOff className="icon-sm" />}
-          {!preview && <Eye className="icon-sm" />}
+          {preview && <EyeOff className="h-3.5 w-3.5" />}
+          {!preview && <Eye className="h-3.5 w-3.5" />}
         </Button>
 
         {allowExpand && (

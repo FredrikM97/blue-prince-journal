@@ -16,11 +16,21 @@
  *     </DropdownMenuContent>
  *   </DropdownMenu>
  *
- * All visual styles are defined in dropdown.css — do not pass className.
+ * All visual styles are co-located in this module.
  */
 
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { ChevronRight } from "lucide-react";
+
+const DROPDOWN_CONTENT_CLASS =
+  "z-50 min-w-[8rem] max-h-[var(--radix-dropdown-menu-content-available-height)] origin-[var(--radix-dropdown-menu-content-transform-origin)] overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md [scrollbar-gutter:stable] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2";
+const DROPDOWN_SUB_TRIGGER_CLASS =
+  "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent";
+const DROPDOWN_ITEM_CLASS =
+  "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
+const DROPDOWN_ACTIVE_ITEM_CLASS = "bg-accent";
+const DROPDOWN_SEPARATOR_CLASS = "-mx-1 my-1 h-px bg-muted";
+const DROPDOWN_SELECT_CONTENT_CLASS = "w-[var(--radix-dropdown-menu-trigger-width)]";
 
 type DropdownMenuContentVariant = "default" | "select";
 type DropdownMenuItemTone = "default" | "active";
@@ -44,13 +54,13 @@ export function DropdownMenuContent({
   variant?: DropdownMenuContentVariant;
 }) {
   let variantClass = "";
-  if (variant === "select") variantClass = "dropdown-select-content";
+  if (variant === "select") variantClass = DROPDOWN_SELECT_CONTENT_CLASS;
 
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
-        className={`dropdown-content ${variantClass} ${className}`.trim()}
+        className={`${DROPDOWN_CONTENT_CLASS} ${variantClass} ${className}`.trim()}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -63,9 +73,9 @@ export function DropdownMenuSubTrigger({
   ...props
 }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger>) {
   return (
-    <DropdownMenuPrimitive.SubTrigger className="dropdown-sub-trigger" {...props}>
+    <DropdownMenuPrimitive.SubTrigger className={DROPDOWN_SUB_TRIGGER_CLASS} {...props}>
       {children}
-      <ChevronRight className="ml-auto icon-sm" />
+      <ChevronRight className="ml-auto h-3.5 w-3.5" />
     </DropdownMenuPrimitive.SubTrigger>
   );
 }
@@ -77,7 +87,7 @@ export function DropdownMenuSubContent({
 }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>) {
   return (
     <DropdownMenuPrimitive.SubContent
-      className={`dropdown-content ${className}`.trim()}
+      className={`${DROPDOWN_CONTENT_CLASS} ${className}`.trim()}
       {...props}
     />
   );
@@ -92,11 +102,11 @@ export function DropdownMenuItem({
   tone?: DropdownMenuItemTone;
 }) {
   let toneClass = "";
-  if (tone === "active") toneClass = "menu-item-active";
+  if (tone === "active") toneClass = DROPDOWN_ACTIVE_ITEM_CLASS;
 
   return (
     <DropdownMenuPrimitive.Item
-      className={`dropdown-item ${toneClass} ${className}`.trim()}
+      className={`${DROPDOWN_ITEM_CLASS} ${toneClass} ${className}`.trim()}
       {...props}
     />
   );
@@ -106,5 +116,5 @@ export function DropdownMenuItem({
 export function DropdownMenuSeparator(
   props: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>,
 ) {
-  return <DropdownMenuPrimitive.Separator className="dropdown-separator" {...props} />;
+  return <DropdownMenuPrimitive.Separator className={DROPDOWN_SEPARATOR_CLASS} {...props} />;
 }

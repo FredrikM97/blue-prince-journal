@@ -51,7 +51,12 @@ export function FeedbackDialog({
           </DialogDescription>
           <MetaText as="p" size="xs">
             Build:{" "}
-            <Text as="code" className="feedback-build-code" size="xs" tone="default">
+            <Text
+              as="code"
+              className="rounded bg-muted px-1 py-0.5 text-[0.8em]"
+              size="xs"
+              tone="default"
+            >
               {buildHash}
             </Text>{" "}
           </MetaText>
@@ -86,7 +91,7 @@ export function FeedbackDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={submitting || message.trim().length === 0}>
-                <Send className="app-menu-icon" />
+                <Send className="mr-1 h-4 w-4" />
                 {submitLabel}
               </Button>
             </Inline>

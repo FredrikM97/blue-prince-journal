@@ -22,8 +22,15 @@ export function MapMiddlePanel({
   activeCell,
 }: MapMiddlePanelProps) {
   return (
-    <Stack className="map-layout-main" gap="0">
-      <Grid as="div" gap="2" className="map-grid">
+    <Stack
+      className="flex h-full min-h-0 flex-col items-center justify-start pt-0 max-[63.99rem]:justify-center max-[63.99rem]:pb-[4.5rem]"
+      gap="0"
+    >
+      <Grid
+        as="div"
+        gap="2"
+        className="mx-auto grid grid-cols-5 gap-2.5 w-[min(100%,calc((100dvh-var(--map-grid-height-offset))*5/9))] max-[63.99rem]:gap-2 max-[40rem]:gap-1.5 [--map-grid-height-offset:7.5rem] max-[63.99rem]:[--map-grid-height-offset:12rem] max-[40rem]:[--map-grid-height-offset:12.5rem]"
+      >
         {Array.from({ length: GRID_ROWS }).flatMap((_, row) =>
           Array.from({ length: GRID_COLS }).map((__, col) => {
             const cell = byId.get(cellId(row, col));
@@ -39,18 +46,27 @@ export function MapMiddlePanel({
             }
 
             let cellBody = (
-              <Text as="span" className="map-cell-coord" size="xs">
+              <Text as="span" className="text-[9px] opacity-50 sm:text-[10px] max-[40rem]:text-[9px]" size="xs">
                 {coordLabel(row, col)}
               </Text>
             );
             if (cell?.roomName) {
               cellBody = (
                 <>
-                  <Text as="span" className="map-cell-room-name" size="xs" leading="tight">
+                  <Text
+                    as="span"
+                    className="block w-full overflow-hidden whitespace-pre-line break-normal text-[9px] leading-tight [hyphens:none] [overflow-wrap:normal] [word-break:normal] sm:text-[10px] max-[40rem]:text-[9px] max-[40rem]:leading-[1.15]"
+                    size="xs"
+                    leading="tight"
+                  >
                     {roomDisplayName}
                   </Text>
                   {(cell.comment || roomNoteCount > 0) && (
-                    <Text as="span" className="map-cell-meta" size="xs">
+                    <Text
+                      as="span"
+                      className="inline-flex items-center gap-0.5 whitespace-nowrap text-[8px] leading-tight opacity-80 sm:text-[9px] max-[40rem]:text-[9px]"
+                      size="xs"
+                    >
                       {cell.comment && "💬"}
                       {roomNoteCount > 0 && ` 📝${roomNoteCount}`}
                     </Text>

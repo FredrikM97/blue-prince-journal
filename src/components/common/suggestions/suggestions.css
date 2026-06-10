@@ -1,4 +1,5 @@
-@reference "../../../tailwind-reference.css";
+
+@reference "../../../styles.css";
 
 @layer components {
   /* Capture suggestion dropdown in notes editor */

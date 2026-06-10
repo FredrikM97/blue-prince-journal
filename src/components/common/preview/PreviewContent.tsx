@@ -8,10 +8,10 @@ import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
 export function MetaRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <Inline align="start" gap="2">
-      <MetaText as="span" className="preview-field-label">
+      <MetaText as="span" className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
         {label}
       </MetaText>
-      <Text as="div" size="sm" className="preview-field-value" minWidthZero>
+      <Text as="div" size="sm" className="min-w-0 flex-1" minWidthZero>
         {children}
       </Text>
     </Inline>

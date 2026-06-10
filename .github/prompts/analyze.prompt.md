@@ -1,122 +1,164 @@
 ---
 name: analyze
-description: Analyze codebase and maintain a clean, executable TODO.
+description: Analyze codebase and maintain a clean TODO.
 agent: agent
 ---
 
 Treat /src as primary context.
 
-## Step 1 — Minimal Overview
+---
 
-Understand only enough to detect improvements:
+## Mode (CRITICAL)
 
-- duplicated concepts (same idea implemented more than once)
-- repeated behavior across files
-- misplaced logic (UI vs .ts responsibility)
-- overcomplex components or hooks
-- unused or duplicate files
-- inconsistent structure or responsibility
+Analysis only.
 
-Do NOT perform a full audit.
-Do NOT explore broadly.
+- DO NOT modify source files
+- DO NOT execute changes
+- DO NOT simulate edits
+- ONLY update docs/todo-architecture.md
 
 ---
 
-## Step 2 — Identify Issues
+## Silent Operation (CRITICAL)
 
-Detect ALL meaningful high-impact issues:
+- NO chat output
+- NO explanations or summaries
+- ONLY side-effect: update TODO file
 
-- reduce duplication
-- simplify structure
-- fix responsibility boundaries
-- remove dead code
-
-Do NOT limit number of issues.
-
----
-
-## Step 3 — Convert Issues to Tasks (CRITICAL)
-
-Each issue must be split into atomic tasks.
-
-### Task Rules
-
-Each task MUST:
-
-- represent ONE action only
-- be directly executable
-- have clear or inferable scope
-- not combine multiple changes
-
-If an issue requires multiple steps:
-- split it into multiple tasks
+Output ONLY if:
+- TODO update fails
+- invalid task format
+- file error
 
 ---
 
-## Step 4 — Task Definition
+## Step 0 — Intent
 
-Each task must be written as:
+If input is short, map to:
 
-- <intent> (type: X, action: X, scope: X)
+- UI/layout → layout, spacing, alignment
+- hooks → duplication, misuse
+- dropdown/dialog → composition issues
+- CSS → leakage, conflicts
+- naming → inconsistency
+- structure → ownership
+- responsive → CSS vs JS conflicts
 
-Where:
-
-type:
-- refactor | compose | minimal | bug
-
-action:
-- merge | extract | move | delete | simplify
-
-scope:
-- explicit files if possible
-- otherwise: meaningful grouping (NOT just "multi")
+Else → default scan.
 
 ---
 
-## Step 5 — TODO Maintenance (CRITICAL)
+## Step 1 — Detect
 
-Create or update:
+Detect:
 
-docs/todo-architecture.md
+- duplication, dead code, unused files
+- misplaced logic (.tsx vs .ts)
+- complex components/hooks
+- structure/responsibility issues
+- CSS leakage, UI regressions
+- responsive conflicts (CSS vs JS)
+- scroll/overflow problems
 
-Before writing:
+No full audit.
 
-- remove completed tasks
-- remove obsolete tasks
-- merge duplicate or overlapping tasks
-- simplify wording
-- remove low-value tasks
+---
 
-Then append new tasks if not already covered.
+## Step 2 — Tasks (CRITICAL)
 
-### Structure
+Create atomic tasks:
+
+Requirements:
+
+- minimal scope (prefer 1 file)
+- no combined operations (no move+rename+logic)
+- no redesigns or large refactors
+
+Prefer:
+
+- small local fixes
+- sequential decomposition
+
+---
+
+## Task Format (CRITICAL)
+
+- [ ] <description> (type: X, scope: X, tags: [tag1, tag2])
+
+### type
+
+- bug | refactor | compose | minimal | feature
+
+### tags (1–3 REQUIRED)
+
+- layout, responsive, scroll, structure
+- css, state, cleanup, duplication, bug, feature
+
+---
+
+## Feature-Safe
+
+Allow ONLY if:
+
+- local (≤2 files)
+- obvious improvement
+- no new system
+
+---
+
+## TODO Structure
 
 # TODO
 
-## Tasks
+- [ ] <task>
+- [ ] <task>
 
-- <task 1>
-- <task 2>
-- ...
-
-Keep minimal. No explanations.
+(no grouping)
 
 ---
 
-## Step 6 — Output (MINIMAL)
+## Step 3 — Maintain (CRITICAL)
 
-updated: docs/todo-architecture.md
+Update TODO:
+
+### Remove ONLY if:
+- exact duplicate
+- clearly invalid
+- completed `[x]`
+- directly replaced
+
+### NEVER remove `[ ]` tasks because:
+- partially fixed
+- “seems outdated”
+- code has changed
+
+---
+
+### Merge ONLY if:
+- same intent
+- same scope
+
+---
+
+### Always:
+- simplify wording (no meaning change)
+- append new findings
+- keep list flat and minimal
+
+---
+
+## Hard Rule
+
+- suppress ALL non-error output
+- behave like background processor
 
 ---
 
 ## Rules
 
-- generate ALL useful tasks (no artificial limit)
-- tasks must be atomic and executable
-- do NOT output task list
-- do NOT output high-level architecture explanation
-- do NOT output execution prompts
-- do NOT output ordering or "next step"
-- prefer deletion > modification > addition
-- avoid unnecessary abstraction
-- align with copilot-instructions.md
+- generate useful, atomic tasks
+- prefer delete > simplify > add
+- always include tags
+
+If instruction implies code change:
+→ convert to task

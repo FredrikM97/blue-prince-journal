@@ -102,7 +102,7 @@ export function AttachedImagesGallery({
       </Stack>
 
       {!collapsed && (
-        <Stack gap="0" className="h-scroll-strip">
+        <Stack gap="0" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
           {availableImageIds.map((id) => (
             <ImageCard
               key={id}

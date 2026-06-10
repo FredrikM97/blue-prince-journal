@@ -33,11 +33,11 @@ export function TodoItem({
 
   return (
     <li>
-      <Stack gap="0" className="todo-row-item">
-        <Stack gap="0" className="todo-row-main">
-          <Stack gap="0" className="todo-row-title-line">
-            <Stack gap="0" className="todo-row-title-wrap">
-              <Stack gap="0" className="todo-row-title-button-wrap">
+      <Stack gap="0" className="rounded-lg border border-border bg-card px-3 py-2 hover:bg-muted">
+        <Stack gap="0" className="min-w-0 space-y-1">
+          <Stack gap="0" className="flex min-w-0 items-center justify-between gap-2">
+            <Stack gap="0" className="min-w-0 flex-1 overflow-hidden">
+              <Stack gap="0">
                 <Button
                   type="button"
                   variant="ghost"
@@ -45,10 +45,16 @@ export function TodoItem({
                   fullWidth
                   justify="start"
                   textAlign="left"
-                  className="bg-transparent hover:bg-transparent hover:opacity-75"
+                  className="w-full min-w-0 overflow-hidden whitespace-normal break-words bg-transparent py-0.5 hover:bg-transparent hover:opacity-75"
                   onClick={onOpenPreview}
                 >
-                  <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
+                  <Text
+                    as="span"
+                    size="sm"
+                    tone={titleTone}
+                    decoration={titleDecoration}
+                    className="line-clamp-2"
+                  >
                     {todo.title}
                   </Text>
                 </Button>
@@ -62,7 +68,7 @@ export function TodoItem({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" variant="select">
                 <DropdownMenuItem onSelect={() => onOpenPreview()}>
-                  <Eye className="icon-sm" />
+                  <Eye className="h-3.5 w-3.5" />
                   <Text as="span" size="sm">
                     Preview
                   </Text>
@@ -71,26 +77,26 @@ export function TodoItem({
 
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
-                    <Circle className="icon-sm" />
+                    <Circle className="h-3.5 w-3.5" />
                     <Text as="span" size="sm">
                       Set status
                     </Text>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuItem onSelect={() => onToggle("open" as TodoStatus)}>
-                      <Circle className="icon-sm" />
+                      <Circle className="h-3.5 w-3.5" />
                       <Text as="span" size="sm">
                         Open
                       </Text>
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => onToggle("in-progress" as TodoStatus)}>
-                      <Circle className="icon-sm" />
+                      <Circle className="h-3.5 w-3.5" />
                       <Text as="span" size="sm">
                         In progress
                       </Text>
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => onToggle("done" as TodoStatus)}>
-                      <CheckCircle2 className="icon-sm" />
+                      <CheckCircle2 className="h-3.5 w-3.5" />
                       <Text as="span" size="sm">
                         Done
                       </Text>
@@ -100,7 +106,7 @@ export function TodoItem({
 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem tone="active" onSelect={() => onDelete()}>
-                  <Trash2 className="icon-sm" />
+                  <Trash2 className="h-3.5 w-3.5" />
                   <Text as="span" size="sm">
                     Delete
                   </Text>
@@ -109,7 +115,7 @@ export function TodoItem({
             </DropdownMenu>
           </Stack>
 
-          <Stack gap="0" className="todo-row-tags-line">
+          <Stack gap="0" className="mt-1 pt-1">
             <Inline as="div" gap="1" align="center" wrap>
               <Chip variant={getTodoPriorityChipVariant(todo.priority)}>{todo.priority}</Chip>
               <Chip variant="solid">{todo.scope}</Chip>

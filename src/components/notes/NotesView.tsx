@@ -4,7 +4,6 @@ import { Button } from "@/components/common/Button";
 import { NotesListItemSummary } from "./NotesListItemSummary";
 import { ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Text } from "@/components/common/Typography";
-import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
 import { Stack } from "@/components/common/general/Stack";
 
 export function NotesView({
@@ -22,17 +21,10 @@ export function NotesView({
   onOpenPreview: (note: Note) => void;
   onDelete: (note: Note) => void;
 }) {
-  const mobileDrawerControls = usePageLayoutMobileDrawerControls();
-
-  function openRightDrawerIfMobile() {
-    if (!mobileDrawerControls?.isPageLayoutMobile) return;
-    mobileDrawerControls.openMobileDrawer("right");
-  }
-
   return (
-    <Stack as="section" className="space-y-2" gap="2">
+    <Stack as="section" gap="2">
       {filtered.length === 0 ? (
-        <Stack className="notes-view-empty" gap="2">
+        <Stack className="rounded-lg border border-dashed border-border p-10 text-center" gap="2">
           <Text size="sm" tone="muted">
             {emptyHint ?? "No notes yet. Press N to add one."}
           </Text>
@@ -43,18 +35,16 @@ export function NotesView({
           </Stack>
         </Stack>
       ) : (
-        <Stack className="notes-view-list" gap="2">
+        <Stack gap="2">
           {filtered.map((n) => (
             <NotesListRow
               key={n.id}
               note={n}
               onOpenEdit={(note) => {
                 onOpenEdit(note);
-                openRightDrawerIfMobile();
               }}
               onOpenPreview={(note) => {
                 onOpenPreview(note);
-                openRightDrawerIfMobile();
               }}
               onDelete={onDelete}
             />
@@ -77,9 +67,12 @@ const NotesListRow = memo(function NotesListRow({
   onDelete: (note: Note) => void;
 }) {
   return (
-    <Stack gap="0" className="note-row-item">
-      <Stack gap="0" className="note-row-inner">
-        <Stack className="item-title" gap="0">
+    <div
+      className="group cursor-pointer overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent"
+      onClick={() => onOpenPreview(note)}
+    >
+      <Stack gap="0" className="flex items-center gap-3 px-4 py-3">
+        <Stack className="min-w-0 flex-1 overflow-hidden" gap="0">
           <Button
             type="button"
             variant="ghost"
@@ -87,7 +80,7 @@ const NotesListRow = memo(function NotesListRow({
             fullWidth
             justify="start"
             textAlign="left"
-            className="bg-transparent hover:bg-transparent hover:opacity-75"
+            className="flex min-w-0 flex-1 items-start gap-0 rounded-sm bg-transparent hover:bg-transparent hover:opacity-75 focus-visible:ring-0"
             onClick={(e) => {
               e.stopPropagation();
               onOpenPreview(note);
@@ -131,6 +124,6 @@ const NotesListRow = memo(function NotesListRow({
           <ChevronRight className="h-4 w-4" />
         </Button>
       </Stack>
-    </Stack>
+    </div>
   );
 });

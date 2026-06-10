@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
-import { PagedNotesList } from "@/components/common/PagedNotesList";
+import { PagedNotesList } from "@/components/map/PagedNotesList";
 import { StoredImageView } from "@/components/common/StoredImageView";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
@@ -16,7 +16,7 @@ import { getImageLabel } from "@/lib/imageLabel";
 // Image styling containers (requires wrapper for CSS styling)
 function ImagePreviewContainer({ children }: { children: React.ReactNode }) {
   return (
-    <Stack gap="0" className="images-detail-preview">
+    <Stack gap="0" className="mx-auto aspect-square w-full max-w-[24rem] overflow-hidden rounded bg-background">
       {children}
     </Stack>
   );
@@ -128,7 +128,7 @@ function ImagesInspectorPanel({
       >
         <Stack gap="2">
           <ImagePreviewContainer>
-            <StoredImageView id={img.id} alt={img.name} className="images-detail-preview-image" />
+            <StoredImageView id={img.id} alt={img.name} className="h-full w-full object-cover" />
           </ImagePreviewContainer>
         </Stack>
 

@@ -21,7 +21,7 @@
  */
 
 import { useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { useSuggestionSources } from "@/hooks/useSuggestionSources";
+import { useSuggestionSources } from "./useSuggestionSources";
 import { Button } from "@/components/common/Button";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -423,7 +423,7 @@ function SuggestionItems({
   if (!isOpen || suggestions.length === 0) return null;
   return (
     <div
-      className="capture-suggestion-dropdown"
+      className="absolute z-40 max-h-44 min-w-44 max-w-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md"
       role="listbox"
       aria-label="Token suggestions"
       style={style}
@@ -434,9 +434,12 @@ function SuggestionItems({
           displayValue = suggestion.plainValue ?? suggestion.value.replace(/^[@#^!>]/, "");
         }
 
-        let itemClass = "capture-suggestion-item";
+        let itemClass = "rounded";
+        let buttonClassName =
+          "w-full rounded px-2 py-1.5 text-left text-xs text-popover-foreground hover:bg-muted";
         if (index === activeIndex) {
-          itemClass = "capture-suggestion-item capture-suggestion-item-active";
+          itemClass = "rounded bg-muted";
+          buttonClassName = `${buttonClassName} bg-muted`;
         }
         return (
           <div key={suggestion.value} className={itemClass}>
@@ -448,6 +451,7 @@ function SuggestionItems({
               justify={showHint ? "between" : "start"}
               textAlign="left"
               aria-selected={index === activeIndex}
+              className={buttonClassName}
               onMouseEnter={() => onHover(index)}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -455,7 +459,11 @@ function SuggestionItems({
               }}
             >
               <span>{displayValue}</span>
-              {showHint && <span className="capture-suggestion-hint">{suggestion.hint}</span>}
+              {showHint && (
+                <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                  {suggestion.hint}
+                </span>
+              )}
             </Button>
           </div>
         );
@@ -555,7 +563,7 @@ export function SuggestionsDropdown({
 
   return (
     <div
-      className="capture-suggestion-field"
+      className="relative"
       onChange={(e) => syncFromEl(e.target)} // value+cursor in one update → fixes @ lag
       onKeyUp={(e) => syncFromEl(e.target)} // catches cursor moves (arrow keys)
       onClick={(e) => syncFromEl(e.target)} // catches click-to-reposition cursor

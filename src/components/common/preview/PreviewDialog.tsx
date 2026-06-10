@@ -6,7 +6,6 @@ import type { DialogVariant } from "@/components/common/Dialog";
 import { MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
 import { TitleActionHeader } from "@/components/common/TitleActionHeader";
-import "./preview-dialog.css";
 
 export function PreviewDialog({
   open,
@@ -56,17 +55,19 @@ export function PreviewDialog({
             closeSlot={
               <DialogClose asChild>
                 <Button variant="ghost" size="icon" aria-label="Close" title="Close">
-                  <X className="icon-md" />
+                  <X className="h-4 w-4" />
                 </Button>
               </DialogClose>
             }
-            rowClassName="preview-dialog-title-row"
-            actionsClassName="preview-dialog-title-actions"
+            rowClassName="flex items-center justify-between gap-2 pr-0"
+            actionsClassName="ml-auto -mr-2 shrink-0 items-center gap-1.5"
           />
         </DialogHeader>
-        <Stack gap="2" className={bodyClassName}>
-          {children}
-        </Stack>
+        <div className="preview-wrapper">
+          <Stack gap="2" className={bodyClassName}>
+            {children}
+          </Stack>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -52,15 +52,17 @@ export function Inline({
 }
 
 function gridGapClass(gap: GridGap) {
-  if (gap === "2") return "grid-gap-2";
-  if (gap === "4") return "grid-gap-4";
-  return "grid-gap-3";
+  if (gap === "2") return "gap-2";
+  if (gap === "4") return "gap-4";
+  return "gap-3";
 }
 
 function gridVariantClass(variant: GridVariant) {
-  if (variant === "gallery") return "grid-gallery";
-  if (variant === "cols-3-md") return "grid-cols-3-md";
-  if (variant === "auto-fill-card") return "grid-auto-fill-card";
+  if (variant === "gallery") return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+  if (variant === "cols-3-md") return "md:grid-cols-3";
+  if (variant === "auto-fill-card") {
+    return "[grid-template-columns:repeat(auto-fill,minmax(8rem,1fr))]";
+  }
   return "";
 }
 
@@ -77,13 +79,13 @@ export function Grid({
   className?: string;
   children: ReactNode;
 }) {
-  let classes = `grid-layout ${gridGapClass(gap)} ${gridVariantClass(variant)}`;
+  let classes = `grid ${gridGapClass(gap)} ${gridVariantClass(variant)}`;
   if (className) classes = `${classes} ${className}`;
   return createElement(as, { className: classes.trim() }, children);
 }
 
 export function SectionBlock({ children }: { children: ReactNode }) {
-  return <section className="section-block">{children}</section>;
+  return <section className="border-t border-border pt-6">{children}</section>;
 }
 
 export function SectionHeader({
@@ -93,9 +95,9 @@ export function SectionHeader({
   density?: "default" | "compact";
   children: ReactNode;
 }) {
-  let className = "section-header-row";
+  let className = "mb-2 flex items-center justify-between gap-2";
   if (density === "compact") {
-    className = `${className} section-header-row-compact`;
+    className = "mb-1.5 flex items-center justify-between gap-1.5";
   }
   return <header className={className}>{children}</header>;
 }
@@ -107,9 +109,9 @@ export function SectionHeaderActions({
   density?: "default" | "compact";
   children: ReactNode;
 }) {
-  let className = "section-actions";
+  let className = "flex items-center gap-1";
   if (density === "compact") {
-    className = `${className} section-actions-compact`;
+    className = "flex items-center gap-1";
   }
   return (
     <Inline as="div" gap="1" align="center" className={className}>
@@ -117,55 +119,13 @@ export function SectionHeaderActions({
     </Inline>
   );
 }
-
-type PageLayoutMobileDrawerSide = "left" | "right";
-type PageLayoutSidebarSide = "left" | "right";
-
-export function PageLayoutFrame({
-  className,
-  children,
-}: {
-  className: string;
-  children: ReactNode;
-}) {
-  return <div className={className}>{children}</div>;
-}
-
-export function PageLayoutMobileControls({ children }: { children: ReactNode }) {
-  return <div className="ui-layout-mobile-controls">{children}</div>;
-}
-
-export function PageLayoutMobileDrawer({
-  side,
-  children,
-}: {
-  side: PageLayoutMobileDrawerSide;
-  children: ReactNode;
-}) {
-  let className = "ui-layout-mobile-drawer ui-layout-mobile-drawer-left";
-  if (side === "right") {
-    className = "ui-layout-mobile-drawer ui-layout-mobile-drawer-right";
-  }
-  return <aside className={className}>{children}</aside>;
-}
-
-export function PageLayoutSidebar({
-  side,
-  children,
-}: {
-  side: PageLayoutSidebarSide;
-  children: ReactNode;
-}) {
-  let className = "ui-layout-sidebar-left";
-  if (side === "right") {
-    className = "ui-layout-sidebar-right";
-  }
-  return <aside className={className}>{children}</aside>;
-}
-
-export function PageLayoutContent({ children }: { children: ReactNode }) {
-  return <main className="ui-layout-content">{children}</main>;
-}
+export {
+  PageLayoutFrame,
+  PageLayoutMobileControls,
+  PageLayoutMobileDrawer,
+  PageLayoutSidebar,
+  PageLayoutContent,
+} from "./pageLayoutPrimitives";
 
 export function CenteredContent({
   max = "6xl",
@@ -176,9 +136,9 @@ export function CenteredContent({
   align?: "center" | "left";
   children: ReactNode;
 }) {
-  let maxClass = "content-max-6xl";
-  if (max === "2xl") maxClass = "content-max-2xl";
-  let alignClass = "content-align-center";
-  if (align === "left") alignClass = "content-align-left";
-  return <div className={`content-stack ${maxClass} ${alignClass}`}>{children}</div>;
+  let maxClass = "max-w-6xl";
+  if (max === "2xl") maxClass = "max-w-2xl";
+  let alignClass = "text-center";
+  if (align === "left") alignClass = "text-left";
+  return <div className={`w-full space-y-8 ${maxClass} ${alignClass}`}>{children}</div>;
 }

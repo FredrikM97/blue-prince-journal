@@ -21,16 +21,16 @@ function TodoColumn({
   onOpenPreview: (t: Todo) => void;
 }) {
   return (
-    <Stack as="section" className="todos-column" gap="0">
-      <Stack as="header" className="todos-column-header" gap="0">
+    <Stack as="section" className="rounded-lg border border-border bg-card" gap="0">
+      <Stack as="header" className="flex items-center justify-between border-b border-border px-3 py-2" gap="0">
         <Heading as="h2" size="base" variant="section-label">
           {label}
         </Heading>
         <MetaText as="span">{todos.length}</MetaText>
       </Stack>
-      <Stack as="ul" className="todos-column-list" gap="0">
+      <Stack as="ul" className="divide-y divide-border" gap="0">
         {todos.length === 0 && (
-          <Stack as="li" className="todos-column-empty" gap="0">
+          <Stack as="li" className="px-3 py-6 text-center text-xs text-muted-foreground" gap="0">
             {value === "open" ? "Press N to add a todo" : "Empty"}
           </Stack>
         )}

@@ -45,7 +45,7 @@ const TEXT_LEADING_CLASS: Record<TextLeading, string> = {
 
 const TEXT_INTENT_CLASS: Record<TextIntent, string> = {
   default: "",
-  warning: "text-amber-600 dark:text-amber-400",
+  warning: "text-chart-3",
 };
 
 const TEXT_VARIANT_CLASS: Record<TextVariant, string> = {
@@ -73,8 +73,8 @@ const HEADING_LEADING_CLASS: Record<HeadingLeading, string> = {
 
 const HEADING_VARIANT_CLASS: Record<HeadingVariant, string> = {
   default: "",
-  "section-label": "section-label",
-  "section-title-h1": "section-title-h1",
+  "section-label": "text-xs font-medium uppercase tracking-wider text-muted-foreground",
+  "section-title-h1": "flex items-center gap-3 text-xl leading-tight",
 };
 
 export function Text({

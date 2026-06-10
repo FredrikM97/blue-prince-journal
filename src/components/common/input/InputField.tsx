@@ -23,19 +23,20 @@ function getInputClass({
   grow: boolean;
   width: InputFieldWidth;
 }) {
-  let className = "input-base";
-  if (width === "fit") className = `${className} input-width-fit`;
-  if (width === "compact") className = `${className} input-width-compact`;
-  if (size === "sm") className = `${className} input-field-h2`;
-  if (size === "lg") className = `${className} input-field-h1`;
+  let className =
+    "flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
+  if (width === "fit") className = `${className} w-auto min-w-40`;
+  if (width === "compact") className = `${className} !w-40 w-40 min-w-40 max-w-40`;
+  if (size === "sm") className = `${className} h-8`;
+  if (size === "lg") className = `${className} h-10`;
   if (grow) className = `${className} flex-1`;
   return className;
 }
 
 function getLabelClass({ size, hideLabel }: { size: InputFieldSize; hideLabel: boolean }) {
-  let className = "input-label";
-  if (size === "sm") className = `${className} input-label-h2`;
-  if (size === "lg") className = `${className} input-label-h1`;
+  let className = "mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
+  if (size === "sm") className = `${className} text-[10px]`;
+  if (size === "lg") className = `${className} text-xs`;
   if (hideLabel) className = `${className} sr-only`;
   return className;
 }

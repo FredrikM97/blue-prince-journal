@@ -194,17 +194,17 @@ export function ImageZoomDialogContent({
 
   const zoomPercent = Math.round(zoom * 100);
 
-  let cursorClass = "image-zoom-stage-can-zoom";
+  let cursorClass = "cursor-zoom-in";
   if (zoom > 1) {
-    cursorClass = "image-zoom-stage-can-pan";
+    cursorClass = "cursor-grab";
   }
   if (dragging) {
-    cursorClass = "image-zoom-stage-panning";
+    cursorClass = "cursor-grabbing";
   }
 
   return (
-    <Stack className="image-zoom-dialog-shell" gap="0">
-      <Stack className="image-zoom-toolbar" gap="0">
+    <Stack className="flex w-full min-h-0 flex-1 flex-col gap-2" gap="0">
+      <Stack className="px-1 py-0.5" gap="0">
         <Inline gap="2" align="center" justify="between">
           <Inline gap="1" align="center">
             <Button
@@ -215,7 +215,7 @@ export function ImageZoomDialogContent({
               onClick={() => applyZoom(zoom - ZOOM_STEP)}
               disabled={zoom <= MIN_ZOOM}
             >
-              <ZoomOut className="icon-sm" />
+              <ZoomOut className="h-3.5 w-3.5" />
             </Button>
             <Button
               type="button"
@@ -225,19 +225,19 @@ export function ImageZoomDialogContent({
               onClick={() => applyZoom(zoom + ZOOM_STEP)}
               disabled={zoom >= MAX_ZOOM}
             >
-              <ZoomIn className="icon-sm" />
+              <ZoomIn className="h-3.5 w-3.5" />
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={resetView}>
-              <RotateCcw className="icon-sm" />
+              <RotateCcw className="h-3.5 w-3.5" />
               Reset
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button type="button" variant="outline" size="icon" aria-label="Zoom controls help">
-                  <HelpCircle className="icon-sm" />
+                  <HelpCircle className="h-3.5 w-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="image-zoom-help-menu">
+              <DropdownMenuContent align="start" className="max-w-xs space-y-1 p-2">
                 <Text as="p" size="xs" tone="muted">
                   Mouse: wheel to zoom, drag while zoomed.
                 </Text>
@@ -256,7 +256,7 @@ export function ImageZoomDialogContent({
                   title="Previous image"
                   onClick={onPreviousImage}
                 >
-                  <ChevronLeft className="icon-sm" />
+                  <ChevronLeft className="h-3.5 w-3.5" />
                 </Button>
                 <Button
                   type="button"
@@ -266,7 +266,7 @@ export function ImageZoomDialogContent({
                   title="Next image"
                   onClick={onNextImage}
                 >
-                  <ChevronRight className="icon-sm" />
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
               </>
             )}
@@ -278,7 +278,7 @@ export function ImageZoomDialogContent({
       </Stack>
 
       <div
-        className={`image-zoom-stage ${cursorClass}`}
+        className={`relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden rounded-md border border-border/40 bg-background [touch-action:none] ${cursorClass}`}
         ref={stageRef}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -287,10 +287,14 @@ export function ImageZoomDialogContent({
         onDoubleClick={onDoubleClick}
       >
         <div
-          className="image-zoom-stage-transform"
+          className="transition-transform duration-100 ease-out [will-change:transform]"
           style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}
         >
-          <StoredImageView id={imageId} alt={alt} className="image-zoom-stage-image" />
+          <StoredImageView
+            id={imageId}
+            alt={alt}
+            className="h-auto max-h-full w-auto max-w-full select-none object-contain [-webkit-user-drag:none]"
+          />
         </div>
       </div>
     </Stack>

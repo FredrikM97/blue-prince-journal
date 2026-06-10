@@ -26,13 +26,13 @@ export interface ParsedCapture {
 
 /**
  * Quick-capture syntax:
- *   #tag                → adds tag
- *   room:Parlor / @Parlor → sets room
+ *   #tag                -> adds tag
+ *   room:Parlor / @Parlor -> sets room
  *   !clue !code !todo (!task also works) !theory !book !observation
- *   high / med / low    → priority (todos)
- *   cross / cross-run   → scope cross-run
- *   ? (suffix)          → status open question (default open anyway)
- *   done:               → status solved
+ *   high / med / low    -> priority (todos)
+ *   cross / cross-run   -> scope cross-run
+ *   ? (suffix)          -> status open question (default open anyway)
+ *   done:               -> status solved
  */
 export function parseCapture(input: string): ParsedCapture {
   const normalizeTokenValue = (value: string) =>

@@ -38,7 +38,7 @@ export function NoteImageAttachments({
       {countPrefix && <MetaText>{countPrefix} {imageIds.length}</MetaText>}
 
       {imageIds.length > 0 ? (
-        <Stack gap="0" className="h-scroll-strip">
+        <Stack gap="0" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
           {imageIds.map((id) => (
             <ImageCard
               key={id}

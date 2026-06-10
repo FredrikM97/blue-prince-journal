@@ -171,7 +171,11 @@ export function SyncFolderSection() {
   if (syncFolderName) {
     return (
       <Stack gap="3">
-        <Text as="div" size="sm" className="panel-row">
+        <Text
+          as="div"
+          size="sm"
+          className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
+        >
           <Inline gap="2" justify="between" align="center">
             <Inline gap="2" align="center">
               <FolderSync className="h-4 w-4 shrink-0 text-green-500" />
