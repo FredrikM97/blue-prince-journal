@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { Send } from "lucide-react";
 import { submitFeedback } from "@/data/feedback";
 import { toast } from "sonner";
@@ -13,9 +13,9 @@ import {
 } from "@/components/common/Dialog";
 import { InputField } from "@/components/common/input/InputField";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/Stack";
+import { Stack } from "@/components/common/general/Stack";
 import { Text, MetaText } from "@/components/common/Typography";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./common/dropdown/DropdownMenu";
+import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 
 type Props = {
   open: boolean;
@@ -26,6 +26,12 @@ export function FeedbackDialog({ open, onOpenChange }: Props) {
   const [message, setMessage] = useState("");
   const [contact, setContact] = useState("");
   const [type, setType] = useState<"bug" | "feature" | "general">("general");
+
+  const typeOptions = [
+    { value: "bug", label: "Bug" },
+    { value: "feature", label: "Feature" },
+    { value: "general", label: "General" },
+  ];
   const [submitting, setSubmitting] = useState(false);
 
   async function send() {
@@ -84,21 +90,12 @@ export function FeedbackDialog({ open, onOpenChange }: Props) {
                 Type
               </Text>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="select">
-                    {type === "bug" ? "Bug" : type === "feature" ? "Feature" : "General"}
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem onSelect={() => setType("bug")}>Bug</DropdownMenuItem>
-
-                  <DropdownMenuItem onSelect={() => setType("feature")}>Feature</DropdownMenuItem>
-
-                  <DropdownMenuItem onSelect={() => setType("general")}>General</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <DropdownSelect
+                value={type}
+                onValueChange={(v) => setType(v as "bug" | "feature" | "general")}
+                options={typeOptions}
+                triggerWidth="fit"
+              />
             </Stack>
 
             <InputField

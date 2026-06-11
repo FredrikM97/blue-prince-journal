@@ -8,20 +8,14 @@ export const queue = async (batch: QueueBatch<FeedbackJob>, env: Env): Promise<v
 
 async function handle(job: FeedbackJob, env: Env): Promise<void> {
   const row = await env.DB.prepare(
-    `SELECT id, message, contact, version, created_at, type
+    `SELECT id, message, contact, version, created_at, type, identifier, github_issue_number
      FROM feedback
-     WHERE id = ?`,
+     WHERE id = ? AND github_issue_number IS NULL`,
   )
     .bind(job.id)
     .first<FeedbackRow>();
 
   if (!row) return;
-
-  const existing = await env.DB.prepare(`SELECT github_issue_number FROM feedback WHERE id = ?`)
-    .bind(job.id)
-    .first<{ github_issue_number: number | null }>();
-
-  if (existing?.github_issue_number) return;
 
   const issue = await createIssue(row, env);
 
@@ -67,6 +61,7 @@ function formatBody(row: FeedbackRow): string {
 **Version:** ${row.version ?? "unknown"}
 **Contact:** ${row.contact ?? "none"}
 **Created:** ${row.created_at}
+**Identifier:** ${row.identifier}
 
 ---
 

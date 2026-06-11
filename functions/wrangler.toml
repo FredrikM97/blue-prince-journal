@@ -12,3 +12,5 @@ queue = "feedback-queue"
 
 [[queues.consumers]]
 queue = "feedback-queue"
+max_batch_size = 10
+max_retries = 3

@@ -6,6 +6,7 @@ type FeedbackPayload = {
   contact?: unknown;
   appVersion?: unknown;
   type?: unknown;
+  turnstileToken?: unknown;
 };
 
 export async function onRequestPost(context: { request: Request; env: Env }) {
@@ -39,7 +40,51 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   const ip = request.headers.get("CF-Connecting-IP") ?? "";
   const ua = request.headers.get("User-Agent") ?? "";
 
+  const token = typeof body.turnstileToken === "string" ? body.turnstileToken : "";
+  if (!token) {
+    return Response.json({ error: "Missing verification token" }, { status: 400 });
+  }
+
+  const verifyForm = new URLSearchParams({ secret: context.env.TURNSTILE_SECRET, response: token });
+  const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    body: verifyForm,
+  });
+  const verifyData = (await verifyRes.json()) as { success: boolean };
+  if (!verifyData.success) {
+    return Response.json({ error: "Verification failed" }, { status: 403 });
+  }
+
   const identifier = await createIdentifier(ip, ua, context.env.SECRET_SALT);
+
+  const blocked = await context.env.DB.prepare(
+    `SELECT 1 FROM blocked_users WHERE identifier = ?`,
+  )
+    .bind(identifier)
+    .first();
+  if (blocked) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  const [countHour, countDay] = await Promise.all([
+    context.env.DB.prepare(
+      `SELECT COUNT(*) as n FROM feedback WHERE identifier = ? AND created_at > ?`,
+    )
+      .bind(identifier, hourAgo)
+      .first<{ n: number }>(),
+    context.env.DB.prepare(
+      `SELECT COUNT(*) as n FROM feedback WHERE identifier = ? AND created_at > ?`,
+    )
+      .bind(identifier, dayAgo)
+      .first<{ n: number }>(),
+  ]);
+
+  if ((countHour?.n ?? 0) >= 5 || (countDay?.n ?? 0) >= 20) {
+    return Response.json({ error: "Too many requests" }, { status: 429 });
+  }
 
   const createdAt = new Date().toISOString();
 

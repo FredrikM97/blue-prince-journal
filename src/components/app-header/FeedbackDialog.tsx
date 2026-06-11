@@ -12,6 +12,15 @@ import { InputField } from "@/components/common/input/InputField";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
 import { MetaText, Text } from "@/components/common/Typography";
+import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
+
+const FEEDBACK_TYPE_OPTIONS = [
+  { value: "bug", label: "Bug" },
+  { value: "feature", label: "Feature" },
+  { value: "general", label: "General" },
+];
+
+type FeedbackType = "bug" | "feature" | "general";
 
 type FeedbackDialogProps = {
   open: boolean;
@@ -20,6 +29,8 @@ type FeedbackDialogProps = {
   onMessageChange: (value: string) => void;
   contact: string;
   onContactChange: (value: string) => void;
+  type: FeedbackType;
+  onTypeChange: (type: FeedbackType) => void;
   submitting: boolean;
   buildHash: string;
   onSubmit: () => void;
@@ -32,6 +43,8 @@ export function FeedbackDialog({
   onMessageChange,
   contact,
   onContactChange,
+  type,
+  onTypeChange,
   submitting,
   buildHash,
   onSubmit,
@@ -69,6 +82,13 @@ export function FeedbackDialog({
           }}
         >
           <Stack gap="3">
+            <DropdownSelect
+              value={type}
+              onValueChange={(v) => onTypeChange(v as FeedbackType)}
+              options={FEEDBACK_TYPE_OPTIONS}
+              triggerWidth="fit"
+            />
+
             <InputField
               label="Message"
               autoFocus

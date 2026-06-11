@@ -12,6 +12,9 @@ export type FeedbackRow = {
   contact: string | null;
   version: string | null;
   type: FeedbackType;
+  status: "pending" | "synced";
+  github_issue_number: number | null;
+  identifier: string;
   created_at: string;
 };
 
@@ -22,6 +25,7 @@ export type Env = {
   GH_OWNER: string;
   GH_REPO: string;
   SECRET_SALT: string;
+  TURNSTILE_SECRET: string;
 };
 
 export type QueueMessage<T> = {
