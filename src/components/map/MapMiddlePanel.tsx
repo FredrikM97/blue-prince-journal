@@ -3,6 +3,7 @@ import { Grid } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
 import { Text } from "@/components/common/Typography";
 import { MapCellButton } from "./MapCellButton";
+import { useIsPageLayoutMobile } from "@/hooks/usePageLayoutMobile";
 import type { GridCell } from "@/lib/types";
 
 interface MapMiddlePanelProps {
@@ -21,16 +22,17 @@ export function MapMiddlePanel({
   onOpenCell,
   activeCell,
 }: MapMiddlePanelProps) {
+  const isPageLayoutMobile = useIsPageLayoutMobile();
+  const panelClassName = isPageLayoutMobile
+    ? "flex h-full min-h-0 flex-col items-center justify-center pt-0 pb-[4.5rem]"
+    : "flex h-full min-h-0 flex-col items-center justify-start pt-0";
+  const gridClassName = isPageLayoutMobile
+    ? "mx-auto grid w-[min(100%,calc((100dvh-12rem)*5/9))] grid-cols-5 gap-2 max-[40rem]:w-[min(100%,calc((100dvh-12.5rem)*5/9))] max-[40rem]:gap-1.5"
+    : "mx-auto grid w-[min(100%,calc((100dvh-7.5rem)*5/9))] grid-cols-5 gap-2.5";
+
   return (
-    <Stack
-      className="flex h-full min-h-0 flex-col items-center justify-start pt-0 max-[63.99rem]:justify-center max-[63.99rem]:pb-[4.5rem]"
-      gap="0"
-    >
-      <Grid
-        as="div"
-        gap="2"
-        className="mx-auto grid grid-cols-5 gap-2.5 w-[min(100%,calc((100dvh-var(--map-grid-height-offset))*5/9))] max-[63.99rem]:gap-2 max-[40rem]:gap-1.5 [--map-grid-height-offset:7.5rem] max-[63.99rem]:[--map-grid-height-offset:12rem] max-[40rem]:[--map-grid-height-offset:12.5rem]"
-      >
+    <Stack className={panelClassName} gap="0">
+      <Grid as="div" gap="2" className={gridClassName}>
         {Array.from({ length: GRID_ROWS }).flatMap((_, row) =>
           Array.from({ length: GRID_COLS }).map((__, col) => {
             const cell = byId.get(cellId(row, col));

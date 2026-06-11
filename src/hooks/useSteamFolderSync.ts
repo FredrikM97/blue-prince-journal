@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { syncRuntime } from "@/data/sync/sync";
 import {
@@ -19,6 +19,7 @@ type SyncResult = {
 type SteamFolderSyncOptions = {
   addImage: (blob: Blob, name?: string, caption?: string) => Promise<StoredImage>;
   syncOnConnect?: boolean;
+  autoSyncIntervalMs?: number;
   flushSyncRuntimeOnImport?: boolean;
   onFolderNameChange?: (name: string | null) => void;
   connectSuccessMessage?: (name: string) => string;
@@ -29,6 +30,7 @@ type SteamFolderSyncOptions = {
 export function useSteamFolderSync({
   addImage,
   syncOnConnect = false,
+  autoSyncIntervalMs = 60000,
   flushSyncRuntimeOnImport = false,
   onFolderNameChange,
   connectSuccessMessage,
@@ -40,6 +42,7 @@ export function useSteamFolderSync({
   const [lastImported, setLastImported] = useState(0);
   const [lastSkipped, setLastSkipped] = useState(0);
   const [busy, setBusy] = useState(false);
+  const autoSyncInFlightRef = useRef(false);
   const supported = isSteamFolderSyncSupported();
 
   const updateFolderName = useCallback(
@@ -64,11 +67,21 @@ export function useSteamFolderSync({
   }, [supported, updateFolderName]);
 
   const runSync = useCallback(
-    async ({ force = false }: { force?: boolean } = {}): Promise<SyncResult | null> => {
+    async ({
+      force = false,
+      silent = false,
+      notifyMissingConnection = true,
+    }: {
+      force?: boolean;
+      silent?: boolean;
+      notifyMissingConnection?: boolean;
+    } = {}): Promise<SyncResult | null> => {
       try {
         const result = await syncConnectedSteamFolder(addImage, force ? { force: true } : undefined);
         if (result === null) {
-          toast.error("No Steam folder connected");
+          if (notifyMissingConnection && !silent) {
+            toast.error("No Steam folder connected");
+          }
           return null;
         }
 
@@ -81,12 +94,15 @@ export function useSteamFolderSync({
           if (flushSyncRuntimeOnImport) {
             void syncRuntime.saveNow();
           }
-        } else {
+        } else if (!silent) {
           toast.success(syncEmptyMessage);
         }
 
         return result;
       } catch {
+        if (silent) {
+          return null;
+        }
         if (force) {
           toast.error("Could not force re-import Steam screenshots");
         } else {
@@ -97,6 +113,43 @@ export function useSteamFolderSync({
     },
     [addImage, flushSyncRuntimeOnImport, syncEmptyMessage],
   );
+
+  useEffect(() => {
+    if (!supported || !folderName) return;
+    if (autoSyncIntervalMs <= 0) return;
+
+    const runAutoSync = async () => {
+      if (autoSyncInFlightRef.current) return;
+      autoSyncInFlightRef.current = true;
+      try {
+        await runSync({ silent: true, notifyMissingConnection: false });
+      } finally {
+        autoSyncInFlightRef.current = false;
+      }
+    };
+
+    void runAutoSync();
+    const intervalId = window.setInterval(() => {
+      void runAutoSync();
+    }, autoSyncIntervalMs);
+
+    const handleWindowFocus = () => {
+      void runAutoSync();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      void runAutoSync();
+    };
+
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [autoSyncIntervalMs, folderName, runSync, supported]);
 
   const syncNow = useCallback(async () => {
     setBusy(true);

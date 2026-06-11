@@ -6,31 +6,105 @@ import {
   HeadContent,
   Link,
   Outlet,
-  useRouterState,
   useRouter,
 } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { lazy, useEffect, useMemo, useState } from "react";
 import { AppHeader } from "@/components/app-header/AppHeader";
 import { ThemeToggle } from "@/components/app-header/ThemeToggle";
 import { Toaster } from "@/routes/Sonner";
 import { toast } from "sonner";
-import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
-import { NotesPage } from "@/components/notes/NotesPage";
-import { SettingsPage } from "@/components/settings/SettingsPage";
-import { TodosPage } from "@/components/todos/TodosPage";
-import { MapPage } from "@/components/map/MapPage";
-import { ImagesPage } from "@/components/images/ImagesPage";
-import { GraphPage } from "@/components/graph/GraphPage";
-import { useStore } from "@/hooks/useStore";
+import { AppDataProvider, useAppData, fetchAppSnapshot } from "@/hooks/useAppData";
 import { syncRuntime } from "@/data/sync/sync";
-import { db } from "@/data/db";
-import { useLiveQuery } from "dexie-react-hooks";
-import type { Note, Todo, SectionDef } from "@/lib/types";
 import { useAppFrameInit } from "@/hooks/useAppFrameInit";
+import {
+  getPageLayoutResponsiveClassNames,
+  useIsPageLayoutMobile,
+} from "@/hooks/usePageLayoutMobile";
 
 type RouterContext = {
   queryClient: QueryClient;
 };
+
+function RouteSuspenseFallback() {
+  return (
+    <div className="flex min-h-96 items-center justify-center">
+      <div className="text-center">
+        <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-foreground" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+function loadWelcomeScreenRoute() {
+  return import("@/components/welcome/WelcomeScreen");
+}
+
+function loadNotesPageRoute() {
+  return import("@/components/notes/NotesPage");
+}
+
+function loadSettingsPageRoute() {
+  return import("@/components/settings/SettingsPage");
+}
+
+function loadTodosPageRoute() {
+  return import("@/components/todos/TodosPage");
+}
+
+function loadMapPageRoute() {
+  return import("@/components/map/MapPage");
+}
+
+function loadImagesPageRoute() {
+  return import("@/components/images/ImagesPage");
+}
+
+function loadGraphPageRoute() {
+  return import("@/components/graph/GraphPage");
+}
+
+const WelcomeScreenRoute = lazy(() =>
+  loadWelcomeScreenRoute().then((module) => ({
+    default: module.WelcomeScreen,
+  })),
+);
+
+const NotesPageRoute = lazy(() =>
+  loadNotesPageRoute().then((module) => ({
+    default: module.NotesPage,
+  })),
+);
+
+const SettingsPageRoute = lazy(() =>
+  loadSettingsPageRoute().then((module) => ({
+    default: module.SettingsPage,
+  })),
+);
+
+const TodosPageRoute = lazy(() =>
+  loadTodosPageRoute().then((module) => ({
+    default: module.TodosPage,
+  })),
+);
+
+const MapPageRoute = lazy(() =>
+  loadMapPageRoute().then((module) => ({
+    default: module.MapPage,
+  })),
+);
+
+const ImagesPageRoute = lazy(() =>
+  loadImagesPageRoute().then((module) => ({
+    default: module.ImagesPage,
+  })),
+);
+
+const GraphPageRoute = lazy(() =>
+  loadGraphPageRoute().then((module) => ({
+    default: module.GraphPage,
+  })),
+);
 
 export function RootShellView({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
@@ -38,8 +112,8 @@ export function RootShellView({ children }: { children: React.ReactNode }) {
 
 function WelcomeHeaderShell() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background px-3 backdrop-blur lg:px-6">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-3 py-2 sm:px-4 lg:px-6">
+    <header className="sticky top-0 z-40 border-b border-border bg-background px-3 backdrop-blur lg:px-6 flex justify-center">
+      <div className="mx-auto flex w-full max-w-[104rem] items-center justify-between gap-2 px-3 py-2 sm:px-4 lg:px-6">
         <Link
           to="/"
           className="mr-2 inline-flex shrink-0 items-center gap-2 rounded-md px-1.5 py-1 hover:bg-accent"
@@ -59,16 +133,51 @@ function WelcomeHeaderShell() {
   );
 }
 
+function getAppFrameShellClass(isPageLayoutMobile: boolean) {
+  const responsiveOverflow = getPageLayoutResponsiveClassNames({
+    mobile: "overflow-auto",
+    desktop: "overflow-hidden",
+  });
+
+  return [
+    "flex h-dvh w-full flex-col",
+    isPageLayoutMobile ? "overflow-auto" : "overflow-hidden",
+    responsiveOverflow,
+    "bg-background text-foreground",
+  ].join(" ");
+}
+
 function AppFrame({ children }: { children: React.ReactNode }) {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const loaded = useStore((s) => s.loaded);
-  const notes: Note[] = useLiveQuery(() => db.notes.toArray()) ?? [];
-  const todos: Todo[] = useLiveQuery(() => db.todos.toArray()) ?? [];
+  const [routesPreloaded, setRoutesPreloaded] = useState(false);
+
+  // Call all hooks unconditionally FIRST
+  const { notes, todos } = useAppData();
+  const noteCount = notes.length;
+  const todoCount = todos.length;
+  const isPageLayoutMobile = useIsPageLayoutMobile();
 
   const { effectiveInitState, continueWelcome, completeWelcome } = useAppFrameInit({
-    noteCount: notes.length,
-    todoCount: todos.length,
+    noteCount,
+    todoCount,
   });
+
+  useEffect(() => {
+    async function preloadAllRoutes() {
+      await Promise.allSettled([
+        loadWelcomeScreenRoute(),
+        loadNotesPageRoute(),
+        loadSettingsPageRoute(),
+        loadTodosPageRoute(),
+        loadMapPageRoute(),
+        loadImagesPageRoute(),
+        loadGraphPageRoute(),
+        fetchAppSnapshot(), // fetch first 50 notes/todos in parallel with routes
+      ]);
+      setRoutesPreloaded(true);
+    }
+
+    void preloadAllRoutes();
+  }, []);
 
   // When a new version of the app is deployed, chunk URLs change. Instead of
   // crashing or silently breaking, show a persistent notification so users can
@@ -85,33 +194,34 @@ function AppFrame({ children }: { children: React.ReactNode }) {
     window.addEventListener("vite:preloadError", onPreloadError);
     return () => window.removeEventListener("vite:preloadError", onPreloadError);
   }, []);
-  const isSettingsRoute = pathname === "/settings" || pathname === "/section/settings";
 
   let appContentClass =
-    "min-h-0 flex-1 overflow-x-hidden overflow-y-hidden px-3 max-[899.98px]:overflow-y-auto lg:px-6";
-  if (isSettingsRoute) {
-    appContentClass =
-      "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 max-[899.98px]:overflow-y-auto lg:px-6";
-  }
+    "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 lg:px-6 flex justify-center";
+  const appFrameShellClass = getAppFrameShellClass(isPageLayoutMobile);
 
-  if (!loaded && effectiveInitState === "checking") {
+  // Show loading screen only while routes are preloading
+  // Once routes are ready, show page structure immediately (data populates in background)
+  if (!routesPreloaded) {
     return (
-      <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
-        <AppHeader />
-        <Toaster />
+      <div className={appFrameShellClass}>
+        <WelcomeHeaderShell />
+        <div className={appContentClass}>
+          <RouteSuspenseFallback />
+        </div>
       </div>
     );
   }
 
+  // Routes are preloaded, now decide what to show
   if (effectiveInitState === "welcome") {
     const hasExistingConfiguration =
-      notes.length > 0 || todos.length > 0 || Boolean(syncRuntime.getActiveFolderName());
+      noteCount > 0 || todoCount > 0 || Boolean(syncRuntime.getActiveFolderName());
 
     return (
-      <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
+      <div className={appFrameShellClass}>
         <WelcomeHeaderShell />
         <div className={appContentClass}>
-          <WelcomeScreen
+          <WelcomeScreenRoute
             showContinueSuggestion={hasExistingConfiguration}
             onContinue={continueWelcome}
             onDone={completeWelcome}
@@ -122,8 +232,9 @@ function AppFrame({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Main app: show page immediately with empty states while data loads
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
+    <div className={appFrameShellClass}>
       <HeadContent />
       <AppHeader />
       <div className={appContentClass}>
@@ -137,9 +248,11 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 export function RootLayoutView({ queryClient }: { queryClient: QueryClient }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppFrame>
-        <Outlet />
-      </AppFrame>
+      <AppDataProvider>
+        <AppFrame>
+          <Outlet />
+        </AppFrame>
+      </AppDataProvider>
     </QueryClientProvider>
   );
 }
@@ -191,11 +304,13 @@ export function ErrorView({ error, reset }: { error: Error; reset: () => void })
 }
 
 export function NotesIndexView() {
-  return <NotesPage title="Notes" emptyHint="No notes yet. Press N anywhere to add one." />;
+  return (
+    <NotesPageRoute title="Notes" emptyHint="No notes yet. Press N anywhere to add one." />
+  );
 }
 
 export function SectionView({ id }: { id: string }) {
-  const sections: SectionDef[] = useLiveQuery(() => db.sections.toArray()) ?? [];
+  const { sections } = useAppData();
   const section = useMemo(() => sections.find((s) => s.id === id), [sections, id]);
 
   if (!section) {
@@ -206,13 +321,35 @@ export function SectionView({ id }: { id: string }) {
     );
   }
 
-  if (section.builtin === "todos") return <TodosPage />;
-  if (section.builtin === "map") return <MapPage />;
-  if (section.builtin === "graph") return <GraphPage />;
-  if (section.builtin === "images") return <ImagesPage />;
-  if (section.id === "settings") return <SettingsPage />;
+  if (section.builtin === "todos") {
+    return (
+      <TodosPageRoute />
+    );
+  }
+  if (section.builtin === "map") {
+    return (
+      <MapPageRoute />
+    );
+  }
+  if (section.builtin === "graph") {
+    return (
+      <GraphPageRoute />
+    );
+  }
+  if (section.builtin === "images") {
+    return (
+      <ImagesPageRoute />
+    );
+  }
+  if (section.id === "settings") {
+    return (
+      <SettingsPageRoute />
+    );
+  }
 
-  return <NotesPage filterType={section.filter?.type} title={section.label} />;
+  return (
+    <NotesPageRoute filterType={section.filter?.type} title={section.label} />
+  );
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
@@ -248,7 +385,9 @@ const indexRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "settings",
-  component: SettingsPage,
+  component: () => (
+    <SettingsPageRoute />
+  ),
   head: () => ({ meta: [{ title: "Settings - Blue Prince Journal" }] }),
 });
 

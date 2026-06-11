@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { Note, StoredImage } from "@/lib/types";
 import { Button } from "@/components/common/Button";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
@@ -6,7 +6,7 @@ import { db } from "@/data/db";
 import { addImage } from "@/data/mutations/imageMutations";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ImagePlus } from "lucide-react";
-import { TYPE_LABEL } from "@/lib/noteMetadata";
+import { NOTE_TYPE_OPTIONS } from "@/lib/noteMetadata";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
 import { toast } from "sonner";
@@ -25,8 +25,6 @@ const NOTE_STATUS_OPTIONS = [
   { value: "solved", label: "solved" },
   { value: "stale", label: "stale" },
 ];
-
-const NOTE_TYPE_OPTIONS = Object.entries(TYPE_LABEL).map(([value, label]) => ({ value, label }));
 
 export function NotesEditorPanel({
   draft,
@@ -47,6 +45,30 @@ export function NotesEditorPanel({
   const tagsInput = isTagsFocused ? tagsInputDraft : draft.tags.join(", ");
   const existingLabel = "Existing";
   const attachLabel = "Attach";
+
+  const handleTypeChange = useCallback(
+    (value: string) => setDraft((prev) => ({ ...prev, type: value as Note["type"] })),
+    [setDraft],
+  );
+  const handleRoomChange = useCallback(
+    (next: string) => setDraft((prev) => ({ ...prev, room: next || undefined })),
+    [setDraft],
+  );
+  const handleDateChange = useCallback(
+    (value: string) => setDraft((prev) => ({ ...prev, date: value })),
+    [setDraft],
+  );
+  const handleStatusChange = useCallback(
+    (value: string) => setDraft((prev) => ({ ...prev, status: value as Note["status"] })),
+    [setDraft],
+  );
+  const handleTagsChange = useCallback(
+    (next: string) => {
+      setTagsInputDraft(next);
+      setDraft((prev) => ({ ...prev, tags: parseTagInput(next) }));
+    },
+    [setDraft],
+  );
 
   usePasteImages({
     onImages: (files) => {
@@ -93,10 +115,10 @@ export function NotesEditorPanel({
       <NoteMetadataFields
         typeLabel="Type"
         typeValue={draft.type}
-        onTypeChange={(value) => setDraft({ ...draft, type: value as Note["type"] })}
+        onTypeChange={handleTypeChange}
         typeOptions={NOTE_TYPE_OPTIONS}
         roomValue={draft.room ?? ""}
-        onRoomChange={(next) => setDraft({ ...draft, room: next || undefined })}
+        onRoomChange={handleRoomChange}
         roomClearLabel="No room"
         tagsValue={tagsInput}
         onTagsFocus={() => {
@@ -104,12 +126,9 @@ export function NotesEditorPanel({
           setIsTagsFocused(true);
         }}
         onTagsBlur={() => setIsTagsFocused(false)}
-        onTagsChange={(next) => {
-          setTagsInputDraft(next);
-          setDraft({ ...draft, tags: parseTagInput(next) });
-        }}
+        onTagsChange={handleTagsChange}
         dateValue={draft.date ?? ""}
-        onDateChange={(value) => setDraft({ ...draft, date: value })}
+        onDateChange={handleDateChange}
         extraField={
           <Stack as="div" gap="1">
             <MetaText as="p" size="xs" weight="medium" normalCase>
@@ -117,7 +136,7 @@ export function NotesEditorPanel({
             </MetaText>
             <DropdownSelect
               value={draft.status}
-              onValueChange={(value) => setDraft({ ...draft, status: value as Note["status"] })}
+              onValueChange={handleStatusChange}
               options={NOTE_STATUS_OPTIONS}
               triggerWidth="fit"
             />

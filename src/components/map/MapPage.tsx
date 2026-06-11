@@ -1,18 +1,17 @@
 import { useMemo, useState } from "react";
-import "./map.css";
 import { PageLayout } from "@/components/common/PageLayout";
 import { MapLeftPanel } from "./MapLeftPanel";
 import { MapMiddlePanel } from "./MapMiddlePanel";
 import { MapRightPanel } from "./MapRightPanel";
 import { GRID_ROWS, cellId } from "@/data/rooms/rooms";
 import { useStore } from "@/hooks/useStore";
-import { db } from "@/data/db";
 import { upsertCell, clearCell } from "@/data/mutations/mapMutations";
-import type { GridCell, Note, Todo } from "@/lib/types";
 import { MetaText } from "@/components/common/Typography";
 import { SidePanelRight } from "@/components/common/SidePanel";
 import { Stack } from "@/components/common/general/Stack";
-import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
+import { useMobileAwarePanel } from "@/hooks/useMobileAwarePanel";
+import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
+import { useAppData } from "@/hooks/useAppData";
 
 const COL_LABELS = ["A", "B", "C", "D", "E"] as const;
 
@@ -23,16 +22,23 @@ function coordLabel(row: number, col: number) {
 type ActiveCellCoord = { row: number; col: number };
 
 export function MapPage() {
-  const gridCells: GridCell[] = useLiveQueryArray(() => db.grid.toArray());
-  const notes: Note[] = useLiveQueryArray(() => db.notes.toArray());
-  const todos: Todo[] = useLiveQueryArray(() => db.todos.toArray());
+  const {
+    gridCells,
+    notes,
+    todos,
+  } = useAppData();
   const openCapture = useStore((s) => s.openCapture);
-  const [active, setActive] = useState<ActiveCellCoord | null>(null);
+  const {
+    panelValue: active,
+    openPanel: openActiveCell,
+    closePanel: closeActiveCell,
+    mobileDrawerOpen,
+  } = useMobileAwarePanel<ActiveCellCoord>({
+    getSignal: ({ row, col }) => `${row}:${col}`,
+  });
 
   const byId = useMemo(() => {
-    const m = new Map<string, GridCell>();
-    gridCells.forEach((c) => m.set(c.id, c));
-    return m;
+    return new Map(gridCells.map((c) => [c.id, c]));
   }, [gridCells]);
 
   const activeCell = active ? byId.get(cellId(active.row, active.col)) : undefined;
@@ -50,15 +56,16 @@ export function MapPage() {
   }, [notes]);
 
   const [commentDraft, setCommentDraft] = useState("");
+  const mobileDrawerProps = usePageLayoutMobileDrawerProps({ mobileDrawerOpen });
 
   function openCell(row: number, col: number) {
-    setActive({ row, col });
+    openActiveCell({ row, col });
     const c = byId.get(cellId(row, col));
     setCommentDraft(c?.comment ?? "");
   }
 
   let rightSidebar = (
-    <SidePanelRight title="Preview" onClose={() => setActive(null)}>
+    <SidePanelRight title="Preview" onClose={closeActiveCell}>
       <Stack gap="4">
         <MetaText>Select a map cell to edit room details, notes, and todos.</MetaText>
       </Stack>
@@ -75,9 +82,7 @@ export function MapPage() {
         activeTodos={activeTodos}
         commentDraft={commentDraft}
         setCommentDraft={setCommentDraft}
-        onClose={() => {
-          setActive(null);
-        }}
+        onClose={closeActiveCell}
         upsertCell={upsertCell}
         clearCell={clearCell}
         openCapture={openCapture}
@@ -86,7 +91,7 @@ export function MapPage() {
   }
 
   return (
-    <PageLayout variant="panel" mobileDrawerOpen={Boolean(active)} mobileDrawerSide="right">
+    <PageLayout variant="panel" {...mobileDrawerProps}>
       <PageLayout.Left>
         <MapLeftPanel />
       </PageLayout.Left>

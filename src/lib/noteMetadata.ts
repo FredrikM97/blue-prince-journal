@@ -1,32 +1,40 @@
 import type { NoteType } from "@/lib/types";
-import { BookOpen, Eye, Key, Lightbulb, ListTodo, Sparkles } from "lucide-react";
+import {
+  BookOpen,
+  Eye,
+  Key,
+  Lightbulb,
+  ListTodo,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 
 // eslint-disable-next-line react-refresh/only-export-components -- shared metadata constants, not a React component module
-export const NOTE_TYPES: { value: NoteType; label: string }[] = [
-  { value: "observation", label: "Observation" },
-  { value: "clue", label: "Clue" },
-  { value: "code", label: "Code" },
-  { value: "theory", label: "Theory" },
-  { value: "story", label: "Story" },
+export const NOTE_TYPE_ORDER: NoteType[] = [
+  "observation",
+  "clue",
+  "code",
+  "theory",
+  "story",
+  "task",
 ];
 
-export const TYPE_ICON = {
-  clue: Lightbulb,
-  code: Key,
-  observation: Eye,
-  theory: Sparkles,
-  story: BookOpen,
-  task: ListTodo,
-} as const;
+export const NOTE_TYPE_META: Record<
+  NoteType,
+  { label: string; pluralLabel: string; icon: LucideIcon }
+> = {
+  observation: { label: "Observation", pluralLabel: "Observations", icon: Eye },
+  clue: { label: "Clue", pluralLabel: "Clues", icon: Lightbulb },
+  code: { label: "Code", pluralLabel: "Codes", icon: Key },
+  theory: { label: "Theory", pluralLabel: "Theories", icon: Sparkles },
+  story: { label: "Story", pluralLabel: "Stories", icon: BookOpen },
+  task: { label: "Todo", pluralLabel: "Todos", icon: ListTodo },
+};
 
-export const TYPE_LABEL = {
-  clue: "Clue",
-  code: "Code",
-  observation: "Observation",
-  theory: "Theory",
-  story: "Story",
-  task: "Todo",
-} as const;
+export const NOTE_TYPE_OPTIONS = NOTE_TYPE_ORDER.map((value) => ({
+  value,
+  label: NOTE_TYPE_META[value].label,
+}));
 
 /**
  * Formats a timestamp into a short relative string for note rows.

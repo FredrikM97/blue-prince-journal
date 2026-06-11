@@ -129,10 +129,10 @@ function SidePanelComponent({
 }: SidePanelInternalProps) {
   const mobileDrawerControls = usePageLayoutMobileDrawerControls();
   const lastOpenedKeyRef = useRef<string | null>(null);
-  const forceShowClose = mobileDrawerControls?.isPageLayoutMobile ?? false;
+  const forceShowClose = mobileDrawerControls?.pageLayoutMode === "mobile";
 
   function handleClose() {
-    if (mobileDrawerControls?.isPageLayoutMobile && mobileDrawerSide) {
+    if (mobileDrawerControls?.pageLayoutMode === "mobile" && mobileDrawerSide) {
       mobileDrawerControls.closeMobileDrawer();
     }
     onClose?.();
@@ -140,7 +140,7 @@ function SidePanelComponent({
 
   useEffect(() => {
     if (!mobileDrawerControls || !mobileDrawerSide || !mobileDrawerKey) return;
-    if (!mobileDrawerControls.isPageLayoutMobile) return;
+    if (mobileDrawerControls.pageLayoutMode !== "mobile") return;
     if (lastOpenedKeyRef.current === mobileDrawerKey) return;
 
     lastOpenedKeyRef.current = mobileDrawerKey;

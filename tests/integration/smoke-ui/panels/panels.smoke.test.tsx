@@ -30,6 +30,7 @@ describe("smoke panels", () => {
   it("matches snapshot for notes list row and actions", () => {
     const onOpenEdit = vi.fn();
     const onOpenPreview = vi.fn();
+    const onOpenExpand = vi.fn();
     const onDelete = vi.fn();
     const { asFragment } = render(
       <NotesView
@@ -37,12 +38,15 @@ describe("smoke panels", () => {
         openCapture={vi.fn()}
         onOpenEdit={onOpenEdit}
         onOpenPreview={onOpenPreview}
+        onOpenExpand={onOpenExpand}
         onDelete={onDelete}
       />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Edit note" }));
     expect(onOpenEdit).toHaveBeenCalledWith(baseNote);
+    fireEvent.click(screen.getByRole("button", { name: "Expand note preview" }));
+    expect(onOpenExpand).toHaveBeenCalledWith(baseNote);
     expect(asFragment()).toMatchSnapshot();
   });
 

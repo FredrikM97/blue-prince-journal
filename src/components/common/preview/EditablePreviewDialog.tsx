@@ -18,6 +18,7 @@ export function EditablePreviewDialog({
   initialDraft,
   saveSuccessMessage,
   onSaveDraft,
+  viewDialogVariant = "preview",
   children,
 }: {
   open: boolean;
@@ -30,6 +31,7 @@ export function EditablePreviewDialog({
   initialDraft: string;
   saveSuccessMessage: string;
   onSaveDraft: (nextDraft: string) => Promise<void>;
+  viewDialogVariant?: "preview" | "expand";
   children: ReactNode;
 }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -58,9 +60,9 @@ export function EditablePreviewDialog({
         }
         onOpenChange(nextOpen);
       }}
-      title={isEditingCurrentEntity ? "Edit details" : title}
-      subtitle={isEditingCurrentEntity ? undefined : subtitle}
-      strikeTitle={isEditingCurrentEntity ? false : strikeTitle}
+      title={title}
+      subtitle={subtitle}
+      strikeTitle={strikeTitle}
       headerActions={
         isEditingCurrentEntity ? (
           <Inline gap="2" align="center" justify="end">
@@ -94,8 +96,8 @@ export function EditablePreviewDialog({
           </Button>
         )
       }
-      showHeaderClose={!isEditingCurrentEntity}
-      dialogVariant={isEditingCurrentEntity ? "wide" : "preview"}
+      showHeaderClose
+      dialogVariant={isEditingCurrentEntity ? "expand" : viewDialogVariant}
       bodyVariant={isEditingCurrentEntity ? "dialog-scroll-body-tall" : "dialog-scroll-body"}
     >
       {isEditingCurrentEntity ? (

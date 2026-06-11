@@ -10,6 +10,36 @@ import { Stack } from "@/components/common/general/Stack";
 import { ImageCard } from "@/components/common/ImageCard";
 import { ImageZoomDialogContent } from "@/components/images/ImageZoomDialogContent";
 
+function useImageZoom(availableImageIds: string[]) {
+  const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
+
+  const zoomedImageIndex = zoomedImageId ? availableImageIds.indexOf(zoomedImageId) : -1;
+  const hasZoomedImage = zoomedImageIndex >= 0;
+  const hasMultipleImages = availableImageIds.length > 1;
+
+  function showPreviousImage() {
+    if (!hasZoomedImage) return;
+    const nextIndex = (zoomedImageIndex - 1 + availableImageIds.length) % availableImageIds.length;
+    setZoomedImageId(availableImageIds[nextIndex]);
+  }
+
+  function showNextImage() {
+    if (!hasZoomedImage) return;
+    const nextIndex = (zoomedImageIndex + 1) % availableImageIds.length;
+    setZoomedImageId(availableImageIds[nextIndex]);
+  }
+
+  return {
+    zoomedImageId,
+    setZoomedImageId,
+    zoomedImageIndex,
+    hasZoomedImage,
+    hasMultipleImages,
+    showPreviousImage,
+    showNextImage,
+  };
+}
+
 export function AttachedImagesGallery({
   imageIds,
   title = "Images",
@@ -28,13 +58,13 @@ export function AttachedImagesGallery({
 }) {
   const rawImages = useLiveQuery(() => db.images.toArray());
   const images: StoredImage[] = useMemo(() => rawImages ?? [], [rawImages]);
-  const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const imageById = useMemo(() => new Map(images.map((img) => [img.id, img])), [images]);
   const availableImageIds = useMemo(
     () => imageIds.filter((id) => imageById.has(id)),
     [imageIds, imageById],
   );
+  const zoom = useImageZoom(availableImageIds);
   const collapseButtonSize = compact ? "icon-h2" : "icon";
 
   if (availableImageIds.length === 0) return null;
@@ -45,36 +75,15 @@ export function AttachedImagesGallery({
     return img.caption?.trim() || img.name;
   };
 
-  const zoomedImageIndex = zoomedImageId ? availableImageIds.indexOf(zoomedImageId) : -1;
-  const hasZoomedImage = zoomedImageIndex >= 0;
-  const hasMultipleImages = availableImageIds.length > 1;
+  const zoomedTitle = zoom.hasZoomedImage
+    ? getImageLabel(availableImageIds[zoom.zoomedImageIndex])
+    : "Image preview";
 
-  function showPreviousImage() {
-    if (!hasZoomedImage) return;
-    const nextIndex = (zoomedImageIndex - 1 + availableImageIds.length) % availableImageIds.length;
-    setZoomedImageId(availableImageIds[nextIndex]);
-  }
+  const zoomedCounterText = zoom.hasZoomedImage
+    ? `${zoom.zoomedImageIndex + 1} / ${availableImageIds.length}`
+    : "";
 
-  function showNextImage() {
-    if (!hasZoomedImage) return;
-    const nextIndex = (zoomedImageIndex + 1) % availableImageIds.length;
-    setZoomedImageId(availableImageIds[nextIndex]);
-  }
-
-  let zoomedTitle = "Image preview";
-  if (hasZoomedImage) {
-    zoomedTitle = getImageLabel(availableImageIds[zoomedImageIndex]);
-  }
-
-  let zoomedCounterText = "";
-  if (hasZoomedImage) {
-    zoomedCounterText = `${zoomedImageIndex + 1} / ${availableImageIds.length}`;
-  }
-
-  let headerSuffix = "";
-  if (hasZoomedImage && hasMultipleImages) {
-    headerSuffix = ` (${zoomedCounterText})`;
-  }
+  const headerSuffix = zoom.hasZoomedImage && zoom.hasMultipleImages ? ` (${zoomedCounterText})` : "";
 
   return (
     <Stack as="section" gap="0" className="space-y-2">
@@ -109,29 +118,29 @@ export function AttachedImagesGallery({
               id={id}
               label={getImageLabel(id)}
               size="sm"
-              onClick={() => setZoomedImageId(id)}
+              onClick={() => zoom.setZoomedImageId(id)}
             />
           ))}
         </Stack>
       )}
 
       <Dialog
-        open={!!zoomedImageId}
+        open={!!zoom.zoomedImageId}
         onOpenChange={(open) => {
-          if (!open) setZoomedImageId(null);
+          if (!open) zoom.setZoomedImageId(null);
         }}
       >
         <DialogContent variant="expand">
           <DialogHeader>
             <DialogTitle>{`${zoomedTitle}${headerSuffix}`}</DialogTitle>
           </DialogHeader>
-          {zoomedImageId && (
+          {zoom.zoomedImageId && (
             <ImageZoomDialogContent
-              key={zoomedImageId}
-              imageId={zoomedImageId}
+              key={zoom.zoomedImageId}
+              imageId={zoom.zoomedImageId}
               alt="Enlarged note image"
-              onPreviousImage={hasMultipleImages ? showPreviousImage : undefined}
-              onNextImage={hasMultipleImages ? showNextImage : undefined}
+              onPreviousImage={zoom.hasMultipleImages ? zoom.showPreviousImage : undefined}
+              onNextImage={zoom.hasMultipleImages ? zoom.showNextImage : undefined}
             />
           )}
         </DialogContent>

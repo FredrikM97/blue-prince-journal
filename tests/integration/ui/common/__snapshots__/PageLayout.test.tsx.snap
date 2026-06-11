@@ -1,12 +1,12 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PageLayout > matches snapshot for single-column middle-scroll mode 1`] = `
+exports[`PageLayout > matches snapshot for single-column layout 1`] = `
 <DocumentFragment>
   <div
-    class="page-layout page-layout-single-column-scroll page-layout-middle-scroll-priority"
+    class="mx-auto grid h-full min-h-0 w-full items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 flex flex-col"
   >
     <main
-      class="page-layout-content"
+      class="min-h-0 min-w-0 overflow-y-auto [overscroll-behavior:contain] h-full flex-1"
     >
       <div>
         settings-like-content
@@ -19,86 +19,24 @@ exports[`PageLayout > matches snapshot for single-column middle-scroll mode 1`] 
 exports[`PageLayout > matches snapshot for three-column layout 1`] = `
 <DocumentFragment>
   <div
-    class="page-layout page-layout-three-column"
+    class="mx-auto grid h-full min-h-0 w-full items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 grid-cols-[var(--sidebar-width)_minmax(0,1fr)_var(--sidebar-width)]"
   >
-    <div
-      class="page-layout-mobile-controls lg:hidden"
-    >
-      <button
-        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs page-layout-mobile-toggle"
-      >
-        <svg
-          aria-hidden="true"
-          class="lucide lucide-panel-left h-3.5 w-3.5"
-          fill="none"
-          height="24"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect
-            height="18"
-            rx="2"
-            width="18"
-            x="3"
-            y="3"
-          />
-          <path
-            d="M9 3v18"
-          />
-        </svg>
-        Left panel
-      </button>
-      <button
-        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs page-layout-mobile-toggle"
-      >
-        <svg
-          aria-hidden="true"
-          class="lucide lucide-panel-right h-3.5 w-3.5"
-          fill="none"
-          height="24"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect
-            height="18"
-            rx="2"
-            width="18"
-            x="3"
-            y="3"
-          />
-          <path
-            d="M15 3v18"
-          />
-        </svg>
-        Right panel
-      </button>
-    </div>
     <aside
-      class="page-layout-sidebar page-layout-sidebar-desktop"
+      class="sticky top-0 min-h-0 self-start overflow-y-auto bg-card [overscroll-behavior:contain] rounded-l-lg border-r border-border"
     >
       <div>
         left
       </div>
     </aside>
     <main
-      class="page-layout-content"
+      class="min-h-0 min-w-0 overflow-y-auto [overscroll-behavior:contain] h-full"
     >
       <div>
         middle
       </div>
     </main>
     <aside
-      class="page-layout-rightbar page-layout-rightbar-desktop"
+      class="sticky top-0 min-h-0 self-start overflow-y-auto bg-card [overscroll-behavior:contain] rounded-r-lg border-l border-border"
     >
       <div>
         right

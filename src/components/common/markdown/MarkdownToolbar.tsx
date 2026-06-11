@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import "./markdown.css";
 import { createPortal } from "react-dom";
 import { Eye, EyeOff, HelpCircle, Maximize2, MoreHorizontal, WandSparkles } from "lucide-react";
 import { Button } from "@/components/common/Button";
@@ -63,13 +62,13 @@ function MarkdownShortcutHelp() {
   }
 
   return (
-    <div ref={wrapperRef} className="md-shortcut-wrap">
+    <div ref={wrapperRef} className="relative">
       <Button
         variant="outline"
         size="icon"
         aria-label="Toggle shortcut help"
         title="Shortcuts"
-        className="md-shortcut-trigger"
+        className="h-7 w-7 border-border bg-card text-foreground hover:bg-card"
         onClick={handleToggle}
       >
         <HelpCircle className="h-3.5 w-3.5" />
@@ -80,24 +79,31 @@ function MarkdownShortcutHelp() {
         createPortal(
           <div
             ref={popupRef}
-            className="md-shortcut-popover md-shortcut-popup"
+            className="fixed z-[9999] w-80 rounded-md border border-border bg-card p-3 text-[11px] shadow-lg"
             style={{
               "--md-shortcut-top": `${popupPos.top}px`,
               "--md-shortcut-right": `${popupPos.right}px`,
+              top: "var(--md-shortcut-top)",
+              right: "var(--md-shortcut-right)",
             } as CSSProperties}
           >
-            <p className="md-shortcut-title">Token shortcuts</p>
-            <div className="md-shortcut-grid">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Token shortcuts
+            </p>
+            <div className="grid grid-cols-[max-content_1fr] items-center gap-x-2 gap-y-1.5">
               {SHORTCUTS.map(({ tokens, desc }) => (
                 <Fragment key={desc}>
-                  <div className="md-shortcut-key-row">
+                  <div className="flex flex-wrap gap-1">
                     {tokens.map((token) => (
-                      <kbd key={token} className="md-shortcut-key">
+                      <kbd
+                        key={token}
+                        className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-foreground"
+                      >
                         {token}
                       </kbd>
                     ))}
                   </div>
-                  <span className="md-shortcut-desc">
+                  <span className="whitespace-nowrap">
                     <MetaText as="span" size="sm" leading="tight">
                       {desc}
                     </MetaText>
@@ -166,7 +172,11 @@ export function MarkdownToolbar({
 
   return (
     <div ref={toolbarContainerRef}>
-      <div className="md-toolbar" role="toolbar" aria-label="Formatting tools">
+      <div
+        className="flex flex-nowrap items-center gap-0.5 overflow-x-auto rounded-t-md border border-b-0 border-input bg-muted px-1.5 py-1"
+        role="toolbar"
+        aria-label="Formatting tools"
+      >
         {primaryActions.map((action) => (
           <Button
             variant="ghost"
@@ -244,9 +254,9 @@ export function MarkdownToolbar({
           </DropdownMenu>
         )}
 
-        <span className="md-toolbar-divider" />
+        <span className="mx-1 h-4 w-px bg-border" />
         <MarkdownShortcutHelp />
-        <span className="md-toolbar-divider" />
+        <span className="mx-1 h-4 w-px bg-border" />
 
         <Button
           variant="ghost"
@@ -261,7 +271,7 @@ export function MarkdownToolbar({
 
         {allowExpand && (
           <>
-            <span className="md-toolbar-divider" />
+            <span className="mx-1 h-4 w-px bg-border" />
             <Button
               variant="ghost"
               size="icon-h2"

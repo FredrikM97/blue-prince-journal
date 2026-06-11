@@ -1,15 +1,13 @@
 import type { NoteType } from "@/lib/types";
+import { NOTE_TYPE_META, NOTE_TYPE_ORDER } from "@/lib/noteMetadata";
 import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { GroupedRoomFilterSection } from "@/components/common/filter/GroupedRoomFilterSection";
 
-const TYPE_OPTIONS: { value: NoteType; label: string }[] = [
-  { value: "observation", label: "Observations" },
-  { value: "clue", label: "Clues" },
-  { value: "code", label: "Codes" },
-  { value: "theory", label: "Theories" },
-  { value: "story", label: "Stories" },
-];
+const TYPE_OPTIONS: { value: NoteType; label: string }[] = NOTE_TYPE_ORDER.map((value) => ({
+  value,
+  label: NOTE_TYPE_META[value].pluralLabel,
+}));
 
 const STATUS_OPTIONS = [
   { value: "open", label: "Open" },

@@ -1,108 +1,106 @@
 ---
 name: analyze
-description: Analyze codebase and maintain a clean TODO.
+description: Analyze codebase and create a clean TODO queue.
 agent: agent
 ---
 
-Treat /src as primary context.
+## Mode
 
----
-
-## Mode (CRITICAL)
-
-Analysis only.
-
+- analysis only
 - DO NOT modify source files
-- DO NOT execute changes
-- DO NOT simulate edits
-- ONLY update docs/todo-architecture.md
+- ONLY write docs/todo-architecture.md
 
 ---
 
-## Silent Operation (CRITICAL)
+## Silent Operation
 
-- NO chat output
-- NO explanations or summaries
-- ONLY side-effect: update TODO file
+- no output
+- only update TODO file
 
 Output ONLY if:
 - TODO update fails
-- invalid task format
 - file error
+- no valid tasks found
 
 ---
 
-## Step 0 — Intent
+## Goal
 
-If input is short, map to:
+Create a clean, minimal, high-impact TODO queue.
 
-- UI/layout → layout, spacing, alignment
-- hooks → duplication, misuse
-- dropdown/dialog → composition issues
-- CSS → leakage, conflicts
-- naming → inconsistency
-- structure → ownership
-- responsive → CSS vs JS conflicts
-
-Else → default scan.
+- prioritize important issues
+- avoid full system analysis
+- prefer small, actionable tasks
 
 ---
 
-## Step 1 — Detect
+## Scope
 
-Detect:
+Focus on:
 
-- duplication, dead code, unused files
+- layout issues
+- CSS problems
+- structure issues
+- obvious bugs
+
+Avoid:
+- full codebase audit unless required
+
+---
+
+## Task Limit
+
+- MAX 10 tasks
+- highest impact only
+
+---
+
+## Detect
+
+Look for:
+
+- layout and alignment issues
+- CSS leakage or conflicts
+- duplication or dead code
+- structural problems
+- scroll or overflow issues
 - misplaced logic (.tsx vs .ts)
-- complex components/hooks
-- structure/responsibility issues
-- CSS leakage, UI regressions
-- responsive conflicts (CSS vs JS)
-- scroll/overflow problems
-
-No full audit.
 
 ---
 
-## Step 2 — Tasks (CRITICAL)
+## Tasks
 
 Create atomic tasks:
 
-Requirements:
-
 - minimal scope (prefer 1 file)
-- no combined operations (no move+rename+logic)
-- no redesigns or large refactors
-
-Prefer:
-
-- small local fixes
-- sequential decomposition
+- no combined operations
+- safe incremental changes
 
 ---
 
-## Task Format (CRITICAL)
+## Task Format
 
-- [ ] <description> (type: X, scope: X, tags: [tag1, tag2])
+- <description> (type: X, scope: X, tags: [tag1, tag2])
 
-### type
-
+type:
 - bug | refactor | compose | minimal | feature
 
-### tags (1–3 REQUIRED)
-
+tags (1–3):
 - layout, responsive, scroll, structure
 - css, state, cleanup, duplication, bug, feature
 
 ---
 
-## Feature-Safe
+## Escalation
 
-Allow ONLY if:
+If unclear:
 
-- local (≤2 files)
-- obvious improvement
-- no new system
+- create investigation task
+- do NOT guess
+
+Examples:
+- "Investigate CSS dependency graph"
+- "Analyze layout alignment issue"
 
 ---
 
@@ -110,55 +108,33 @@ Allow ONLY if:
 
 # TODO
 
-- [ ] <task>
-- [ ] <task>
+- <task>
+- <task>
 
-(no grouping)
-
----
-
-## Step 3 — Maintain (CRITICAL)
-
-Update TODO:
-
-### Remove ONLY if:
-- exact duplicate
-- clearly invalid
-- completed `[x]`
-- directly replaced
-
-### NEVER remove `[ ]` tasks because:
-- partially fixed
-- “seems outdated”
-- code has changed
+(queue of remaining work only)
 
 ---
 
-### Merge ONLY if:
-- same intent
-- same scope
+## Maintain (CRITICAL)
 
----
+- ALWAYS rewrite docs/todo-architecture.md completely
+- output a clean list of tasks only
 
-### Always:
-- simplify wording (no meaning change)
-- append new findings
-- keep list flat and minimal
+Remove:
 
----
+- duplicates
+- invalid tasks
+- low-value tasks
 
-## Hard Rule
-
-- suppress ALL non-error output
-- behave like background processor
+Replace tasks if better understanding is found
 
 ---
 
 ## Rules
 
-- generate useful, atomic tasks
 - prefer delete > simplify > add
-- always include tags
+- generate atomic tasks
+- keep TODO minimal and clear
 
-If instruction implies code change:
+If input implies code change:
 → convert to task

@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Blue Prince Journal icon">
-  <rect width="64" height="64" rx="12" fill="#11253f" />
-  <rect x="14" y="10" width="36" height="44" rx="6" fill="#f6f3ea" />
-  <path d="M20 22h24M20 30h24M20 38h16" stroke="#b08a3b" stroke-width="4" stroke-linecap="round" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Blue Prince Journal">
+  <rect x="8" y="8" width="48" height="48" rx="10" fill="#8a6a3c" />
+  <text
+    x="32"
+    y="42"
+    text-anchor="middle"
+    font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
+    font-size="30"
+    font-weight="700"
+    fill="#f5efe2"
+  >
+    B
+  </text>
 </svg>

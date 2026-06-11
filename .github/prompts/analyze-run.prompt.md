@@ -1,6 +1,6 @@
 ---
 name: analyze-run
-description: Execute TODO tasks sequentially with strict isolation.
+description: Execute TODO tasks with grouping and minimal safe refactoring.
 agent: agent
 ---
 
@@ -8,135 +8,148 @@ Use docs/todo-architecture.md.
 
 ---
 
-## Step 1 — Load ONE Task
+## Mode
 
-- select the FIRST non-completed `[ ]` task
-- ignore completed `[x]` tasks
-- do NOT group by tags or type
-- if no tasks remain → proceed to optional final validation
-
----
-
-## Step 2 — Context Isolation (CRITICAL)
-
-- treat task as independent
-- do NOT rely on previous tasks
-- re-evaluate only necessary files for THIS task
+- process up to 10 tasks
+- allow stopping anytime
+- prefer grouped execution over strict sequencing
 
 ---
 
-## Step 3 — Execute Task
+## Step 1 — Load TODO
 
-Extract from task:
+- reload docs/todo-architecture.md
+- remove duplicates
+- remove invalid tasks
 
+If no tasks:
+→ Final Validation
+
+---
+
+## Step 2 — Group Tasks
+
+Group tasks if ANY of these match:
+
+- same file (scope)
+- overlapping responsibility (e.g. css cleanup, layout)
+- shared tags
+
+Rules:
+
+- grouped tasks MUST be executable together safely
+- DO NOT merge unrelated scopes
+- prefer grouping over strict one-by-one execution
+
+Result:
+
+- select FIRST group (not just first task)
+
+---
+
+## Step 3 — Execute Group
+
+For all tasks in the group:
+
+Extract:
 - type
 - scope
-- tags
+- intent
 
-Execute:
+Then:
 
-/<type>
-
----
-
-## Execution Rules (CRITICAL)
-
-- minimal change only
-- preserve existing behavior
-- do NOT expand scope
-- do NOT introduce new patterns
-- do NOT refactor beyond task scope
-- complete task fully
-- do NOT describe execution
-
-If task is blocked:
-
-- apply smallest valid partial change
-- ensure forward progress
+- execute changes together in ONE cohesive pass
 
 ---
 
-## Step 4 — Update TODO (CRITICAL)
+## Execution Rules
 
-- mark task as completed: `[x]`
+- minimal change
+- preserve behavior
+- no scope expansion outside the group
+- no new patterns
+- resolve dependencies within group
 
-Remove ONLY if:
-- duplicate
-- obsolete
-- invalid
+If blocked:
 
-Validation:
-
-- total `[ ]` tasks MUST decrease
-
-If not:
-- fix TODO before continuing
+- apply smallest possible fix
+- continue group execution
 
 ---
 
-## Step 5 — Repeat
+## Step 4 — Update TODO
 
-Loop:
+- MUST rewrite docs/todo-architecture.md
 
-WHILE tasks remain:
+Remove:
 
-1. reload docs/todo-architecture.md
-2. select next `[ ]` task
-3. execute Steps 2–4
-
-Stop when:
-- no `[ ]` tasks remain, OR
-- execution is interrupted
+- all executed tasks in the group
+- duplicates
+- invalid tasks
+- tasks made obsolete by execution
 
 ---
 
-## Step 6 — Optional Cleanup Phase
+## Step 5 — Validate State
 
-If many `[x]` tasks:
+- reload TODO
+- task count MUST decrease
 
-- remove completed tasks
-- keep TODO compact
-- retain unfinished tasks
+Also verify:
 
----
+- no broken references
+- no partial removals
+- no inconsistent state
 
-## Step 7 — Optional Final Validation
+If issues:
 
-Run ONLY if explicitly required or at the very end:
-
-- `npx tsc --noEmit`
-- or `npm run build`
-
-If failing:
-
-- fix with minimal changes
-- prefer:
-  - simplify
-  - delete invalid code
-
-DO NOT introduce new systems.
+- fix immediately with minimal change
 
 ---
 
-## Output (ERROR ONLY)
+## Step 6 — Continue
 
-Output ONLY if:
+If:
 
-- task execution fails
-- TODO cannot be updated
-- validation explicitly fails
+- tasks remain
+- limit not reached
 
-Keep output minimal.
+→ repeat from Step 1
+
+Else STOP
 
 ---
 
-## Rules
+## Final Validation
 
-- process ONE task at a time
-- do NOT preload tasks
-- do NOT re-analyze
-- do NOT create new tasks
-- do NOT expand scope
-- do NOT stop unless interrupted
-- do NOT output explanations
-- do NOT print progress
+Run ONLY if:
+
+- requested OR no tasks remain
+
+Commands:
+
+- npm run build
+- npx tsc --noEmit
+
+Fix minimally if failing
+
+---
+
+## Output
+
+ONLY if:
+
+- execution fails
+- TODO update fails
+
+---
+
+## Hard Rules
+
+- prefer grouping over strict sequencing
+- never leave partial refactors
+- always remove fully completed concerns
+- allow local re-evaluation after each group
+- no new tasks
+- no global re-analysis
+- no explanations

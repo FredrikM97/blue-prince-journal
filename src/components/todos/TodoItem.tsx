@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Todo, TodoStatus } from "@/lib/types";
 import { Chip } from "@/components/common/Chip";
 import { CheckCircle2, Circle, Eye, MoreHorizontal, Trash2 } from "lucide-react";
@@ -17,23 +18,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/common/menu/DropdownMenu";
 
-export function TodoItem({
+export const TodoItem = memo(function TodoItem({
   todo,
   onToggle,
   onDelete,
   onOpenPreview,
 }: {
   todo: Todo;
-  onToggle: (s: TodoStatus) => void;
-  onDelete: () => void;
-  onOpenPreview: () => void;
+  onToggle: (id: string, status: TodoStatus) => void;
+  onDelete: (id: string) => void;
+  onOpenPreview: (todo: Todo) => void;
 }) {
   const titleTone = todo.status === "done" ? "muted" : "default";
   const titleDecoration = todo.status === "done" ? "line-through" : "none";
 
   return (
     <li>
-      <div className="cursor-pointer rounded-lg border border-border bg-card px-3 py-2 hover:bg-muted" onClick={onOpenPreview}>
+      <div
+        className="cursor-pointer rounded-lg border border-border bg-card px-3 py-2 hover:bg-muted"
+        onClick={() => onOpenPreview(todo)}
+      >
         <Stack gap="0" className="min-w-0 space-y-1">
           <Stack gap="0" className="flex min-w-0 items-center justify-between gap-2">
             <Stack gap="0" className="min-w-0 flex-1 overflow-hidden">
@@ -56,7 +60,7 @@ export function TodoItem({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" variant="select">
-                <DropdownMenuItem onSelect={() => onOpenPreview()}>
+                <DropdownMenuItem onSelect={() => onOpenPreview(todo)}>
                   <Eye className="h-3.5 w-3.5" />
                   <Text as="span" size="sm">
                     Preview
@@ -72,19 +76,19 @@ export function TodoItem({
                     </Text>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
-                    <DropdownMenuItem onSelect={() => onToggle("open" as TodoStatus)}>
+                    <DropdownMenuItem onSelect={() => onToggle(todo.id, "open" as TodoStatus)}>
                       <Circle className="h-3.5 w-3.5" />
                       <Text as="span" size="sm">
                         Open
                       </Text>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => onToggle("in-progress" as TodoStatus)}>
+                    <DropdownMenuItem onSelect={() => onToggle(todo.id, "in-progress" as TodoStatus)}>
                       <Circle className="h-3.5 w-3.5" />
                       <Text as="span" size="sm">
                         In progress
                       </Text>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => onToggle("done" as TodoStatus)}>
+                    <DropdownMenuItem onSelect={() => onToggle(todo.id, "done" as TodoStatus)}>
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <Text as="span" size="sm">
                         Done
@@ -94,7 +98,7 @@ export function TodoItem({
                 </DropdownMenuSub>
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem tone="active" onSelect={() => onDelete()}>
+                <DropdownMenuItem tone="active" onSelect={() => onDelete(todo.id)}>
                   <Trash2 className="h-3.5 w-3.5" />
                   <Text as="span" size="sm">
                     Delete
@@ -120,4 +124,4 @@ export function TodoItem({
       </div>
     </li>
   );
-}
+});

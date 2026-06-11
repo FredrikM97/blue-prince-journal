@@ -23,7 +23,7 @@ const CHIP_CLASS: Record<ChipVariant, string> = {
     "inline-flex items-center rounded border border-transparent bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground",
 };
 
-/** Small inline label chip. Variants map to named CSS classes in layout.css. */
+/** Small inline label chip. */
 export function Chip({
   children,
   variant = "default",

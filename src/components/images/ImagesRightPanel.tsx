@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
@@ -59,26 +59,38 @@ export function ImagesRightPanel({
   }
 
   return (
-    <ImagesInspectorPanel
-      key={img.id}
-      img={img}
-      relatedNotes={relatedNotes}
-      previewOpen={previewOpen}
-      setPreviewOpen={setPreviewOpen}
-      onPrev={onPrev}
-      onNext={onNext}
-      onClose={onClose}
-      onDelete={onDelete}
-      onSaveLabel={onSaveLabel}
-    />
+    <>
+      <ImagesInspectorPanel
+        img={img}
+        relatedNotes={relatedNotes}
+        onExpand={() => setPreviewOpen(true)}
+        onPrev={onPrev}
+        onNext={onNext}
+        onClose={onClose}
+        onDelete={onDelete}
+        onSaveLabel={onSaveLabel}
+      />
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent variant="expand">
+          <DialogHeader>
+            <DialogTitle>{getImageLabel(img)}</DialogTitle>
+          </DialogHeader>
+          <ImageZoomDialogContent
+            imageId={img.id}
+            alt={img.name}
+            onPreviousImage={onPrev}
+            onNextImage={onNext}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
 function ImagesInspectorPanel({
   img,
   relatedNotes,
-  previewOpen,
-  setPreviewOpen,
+  onExpand,
   onPrev,
   onNext,
   onClose,
@@ -87,8 +99,7 @@ function ImagesInspectorPanel({
 }: {
   img: StoredImage;
   relatedNotes: Note[];
-  previewOpen: boolean;
-  setPreviewOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onExpand: () => void;
   onPrev: () => void;
   onNext: () => void;
   onClose: () => void;
@@ -98,10 +109,13 @@ function ImagesInspectorPanel({
   const [labelInput, setLabelInput] = useState(getImageLabel(img));
   const [savingLabel, setSavingLabel] = useState(false);
 
+  useEffect(() => {
+    setLabelInput(getImageLabel(img));
+  }, [img.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <>
-      <SidePanelRight
-        title={getImageLabel(img) || "Image"}
+    <SidePanelRight
+      title={getImageLabel(img) || "Image"}
         subtitle={`${relatedNotes.length} related note${relatedNotes.length === 1 ? "" : "s"}`}
         headerActions={
           <Inline gap="1" align="center">
@@ -123,7 +137,7 @@ function ImagesInspectorPanel({
           </Inline>
         }
         onClose={onClose}
-        onExpand={() => setPreviewOpen(true)}
+        onExpand={onExpand}
         panelKey={`image:${img.id}`}
       >
         <Stack gap="2">
@@ -171,15 +185,5 @@ function ImagesInspectorPanel({
           />
         </Stack>
       </SidePanelRight>
-
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent variant="expand">
-          <DialogHeader>
-            <DialogTitle>{getImageLabel(img)}</DialogTitle>
-          </DialogHeader>
-          <ImageZoomDialogContent key={img.id} imageId={img.id} alt={img.name} />
-        </DialogContent>
-      </Dialog>
-    </>
   );
 }

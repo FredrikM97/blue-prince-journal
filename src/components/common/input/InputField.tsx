@@ -59,6 +59,7 @@ export function InputField({
   size = "default",
   grow = false,
   width = "full",
+  inputClassName,
 }: {
   label?: string;
   value: string;
@@ -76,8 +77,12 @@ export function InputField({
   size?: InputFieldSize;
   grow?: boolean;
   width?: InputFieldWidth;
+  inputClassName?: string;
 }) {
   const inputId = useId();
+
+  let inputClass = getInputClass({ size, grow, width });
+  if (inputClassName) inputClass = `${inputClass} ${inputClassName}`;
 
   let field = (
     <input
@@ -90,7 +95,7 @@ export function InputField({
       ref={inputRef as RefObject<HTMLInputElement | null>}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className={getInputClass({ size, grow, width })}
+      className={inputClass}
     />
   );
 
