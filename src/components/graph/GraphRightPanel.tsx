@@ -3,7 +3,8 @@ import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
-import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { MetaRow, PreviewSection } from "@/components/common/preview/PreviewContent";
 import { SidePanelRight } from "@/components/common/SidePanel";
 import type { Note } from "@/lib/types";
 
@@ -53,60 +54,36 @@ export function GraphPreviewContent({
     <Stack gap="4">
       {summary}
 
-      <Stack gap="2" variant="panel-card">
-        <Heading as="h3" size="base" variant="section-label">
-          Info
-        </Heading>
-        <Text as="div" size="base">
-          <Stack gap="2">
-            <Inline gap="2">
-              <Text
-                as="span"
-                size="xs"
-                tone="muted"
-                weight="medium"
-                className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
-              >
-                Type
-              </Text>
-              <Chip>{selectedNote.type}</Chip>
-            </Inline>
+      <PreviewSection>
+        <Stack gap="2">
+          <Heading as="h3" size="base" variant="section-label">
+            Info
+          </Heading>
 
-            {selectedNote.room && (
-              <Inline gap="2">
-                <Text
-                  as="span"
-                  size="xs"
-                  tone="muted"
-                  weight="medium"
-                  className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
-                >
-                  Room
-                </Text>
-                <Chip variant="room">@{selectedNote.room}</Chip>
+          <MetaRow label="Type">
+            <Chip variant="solid">{selectedNote.type}</Chip>
+          </MetaRow>
+
+          {selectedNote.room && (
+            <MetaRow label="Room">
+              <Chip variant="room">@{selectedNote.room}</Chip>
+            </MetaRow>
+          )}
+
+          {selectedNote.tags.length > 0 && (
+            <MetaRow label="Tags">
+              <Inline as="div" gap="1" wrap align="start">
+                {selectedNote.tags.map((tag) => (
+                  <Chip key={tag} variant="tag">
+                    #{tag}
+                  </Chip>
+                ))}
               </Inline>
-            )}
+            </MetaRow>
+          )}
 
-            {selectedNote.tags.length > 0 && (
-              <Inline align="start" gap="2">
-                <Text
-                  as="span"
-                  size="xs"
-                  tone="muted"
-                  weight="medium"
-                  className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
-                >
-                  Tags
-                </Text>
-                <Inline gap="1.5" wrap>
-                  {selectedNote.tags.map((tag) => (
-                    <Chip key={tag}>#{tag}</Chip>
-                  ))}
-                </Inline>
-              </Inline>
-            )}
-
-            <Inline gap="3">
+          <MetaRow label="Links">
+            <Inline as="div" gap="3" align="start">
               <MetaText as="span" size="sm">
                 Outgoing: {outgoingCount}
               </MetaText>
@@ -114,11 +91,11 @@ export function GraphPreviewContent({
                 Incoming: {incomingCount}
               </MetaText>
             </Inline>
-          </Stack>
-        </Text>
-      </Stack>
+          </MetaRow>
+        </Stack>
+      </PreviewSection>
 
-      <SectionBlock>
+      <PreviewSection>
         <Stack gap="1">
           <Heading as="h3" size="base" variant="section-label">
             Note body
@@ -131,7 +108,7 @@ export function GraphPreviewContent({
 
           <AttachedImagesGallery imageIds={selectedNote.imageIds} compact />
         </Stack>
-      </SectionBlock>
+      </PreviewSection>
     </Stack>
   );
 }

@@ -46,7 +46,7 @@ export function DropdownSelectComponent({
   let triggerWrapperClassName = "w-full";
   if (isFit) triggerWrapperClassName = "w-auto min-w-40";
 
-  let triggerButtonClassName = "h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:bg-secondary";
+  let triggerButtonClassName = "h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:border-input hover:bg-secondary";
   if (isFit) {
     triggerButtonClassName = `${triggerButtonClassName} w-auto min-w-40`;
   }
@@ -57,22 +57,25 @@ export function DropdownSelectComponent({
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <div className={triggerWrapperClassName} data-has-value={hasValue}>
-          <Button type="button" variant={buttonVariant} className={triggerButtonClassName}>
-            <span className={hasValue ? "text-foreground" : "text-muted-foreground"}>
-              {hasValue && activeLabel ? (
-                <Text as="span" size="sm">
-                  {activeLabel}
-                </Text>
-              ) : (
-                <MetaText as="span" size="sm">
-                  {placeholder}
-                </MetaText>
-              )}
-            </span>
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant={buttonVariant}
+          className={`${triggerButtonClassName} ${triggerWrapperClassName}`.trim()}
+          data-has-value={hasValue}
+        >
+          <span className={hasValue ? "text-foreground" : "text-muted-foreground"}>
+            {hasValue && activeLabel ? (
+              <Text as="span" size="sm">
+                {activeLabel}
+              </Text>
+            ) : (
+              <MetaText as="span" size="sm">
+                {placeholder}
+              </MetaText>
+            )}
+          </span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" variant="select">

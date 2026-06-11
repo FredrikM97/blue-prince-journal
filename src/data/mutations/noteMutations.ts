@@ -12,3 +12,13 @@ export async function removeNote(id: string): Promise<void> {
   await db.notes.delete(id);
   syncRuntime.scheduleWrite();
 }
+
+export async function hideNote(id: string): Promise<void> {
+  await db.notes.update(id, { hidden: true, updatedAt: Date.now() });
+  syncRuntime.scheduleWrite();
+}
+
+export async function unhideNote(id: string): Promise<void> {
+  await db.notes.update(id, { hidden: false, updatedAt: Date.now() });
+  syncRuntime.scheduleWrite();
+}

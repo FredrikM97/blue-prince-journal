@@ -169,7 +169,10 @@ export function ImagesPage() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement | null;
-      const typing = target && /input|textarea|select|button/i.test(target.tagName);
+      const typing =
+        target &&
+        (/input|textarea|select/i.test(target.tagName) ||
+          (target as HTMLElement).isContentEditable);
       if (typing) return;
 
       if (e.key === "ArrowLeft") {

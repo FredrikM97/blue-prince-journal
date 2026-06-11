@@ -1,7 +1,7 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PenLine, Save } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
-import { saveNote, removeNote } from "@/data/mutations/noteMutations";
+import { hideNote, saveNote, removeNote, unhideNote } from "@/data/mutations/noteMutations";
 import { removeTodo } from "@/data/mutations/todoMutations";
 import type { Note, NoteType, Todo } from "@/lib/types";
 import { PageLayout } from "@/components/common/PageLayout";
@@ -116,16 +116,35 @@ export function NotesPage({
     onDeleteTodo: removeTodo,
   });
 
+  const latestDraftRef = useRef<Note | null>(null);
+
+  useEffect(() => {
+    latestDraftRef.current = currentDraft;
+  }, [currentDraft]);
+
   const handleStartEditActiveNote = useCallback(() => {
     if (!activeNote) return;
     uiActions.openEdit(activeNote);
   }, [activeNote, uiActions]);
 
   const handleSaveActiveNote = useCallback(async () => {
-    if (!currentDraft) return;
-    await saveNote(currentDraft);
-    uiActions.openPreview(currentDraft);
-  }, [currentDraft, uiActions]);
+    const draftToSave = latestDraftRef.current;
+    if (!draftToSave) return;
+    await saveNote(draftToSave);
+    uiActions.openPreview(draftToSave);
+  }, [uiActions]);
+
+  const handleHideActiveNote = useCallback(async () => {
+    if (!activeNote || activeNote.id.startsWith("todo:")) return;
+    await hideNote(activeNote.id);
+    uiActions.clearSelection();
+    closeCapture();
+  }, [activeNote, closeCapture, uiActions]);
+
+  const handleUnhideActiveNote = useCallback(async () => {
+    if (!activeNote || activeNote.id.startsWith("todo:")) return;
+    await unhideNote(activeNote.id);
+  }, [activeNote]);
 
   const handleCloseActivePanel = useCallback(() => {
     uiActions.clearSelection();
@@ -185,12 +204,10 @@ export function NotesPage({
         target &&
         (/input|textarea|select/i.test(target.tagName) || (target as HTMLElement).isContentEditable);
 
-      // Cmd/Ctrl+S — save active note (works from any context)
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
-        if (currentDraft) {
-          e.preventDefault();
-          void handleSaveActiveNote();
-        }
+      // Ctrl+S — save active note (works from any context)
+      if (e.ctrlKey && !e.metaKey && !e.altKey && e.code === "KeyS") {
+        e.preventDefault();
+        void handleSaveActiveNote();
         return;
       }
 
@@ -212,9 +229,9 @@ export function NotesPage({
       }
     }
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeNote, captureOpen, currentDraft, filtered, handleSaveActiveNote, openPreviewFromList]);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [activeNote, captureOpen, filtered, handleSaveActiveNote, openPreviewFromList]);
 
   let rightPanelContent: React.ReactNode = (
     <SidePanelRight title="Preview">
@@ -232,6 +249,8 @@ export function NotesPage({
         setDraft={setEditorDraft}
         onStartEdit={handleStartEditActiveNote}
         onSave={handleSaveActiveNote}
+        onHide={handleHideActiveNote}
+        onUnhide={handleUnhideActiveNote}
         onClose={handleCloseActivePanel}
         onExpandPreview={handleExpandPreview}
       />
@@ -387,6 +406,8 @@ const NotesRightPanel = memo(function NotesRightPanel({
   setDraft,
   onStartEdit,
   onSave,
+  onHide,
+  onUnhide,
   onClose,
   onExpandPreview,
 }: {
@@ -396,6 +417,8 @@ const NotesRightPanel = memo(function NotesRightPanel({
   setDraft: React.Dispatch<React.SetStateAction<Note>>;
   onStartEdit: () => void;
   onSave: () => Promise<void>;
+  onHide: () => Promise<void>;
+  onUnhide: () => Promise<void>;
   onClose: () => void;
   onExpandPreview: (note: Note) => void;
 }) {
@@ -411,16 +434,40 @@ const NotesRightPanel = memo(function NotesRightPanel({
         onClose={onClose}
         panelKey={`note-edit:${activeNote.id}`}
         headerActions={
-          <Button
-            variant="brass"
-            size="sm"
-            onClick={() => {
-              void onSave();
-            }}
-          >
-            <Save className="h-3.5 w-3.5" />
-            Save
-          </Button>
+          <Inline gap="2" align="center" justify="end">
+            {activeNote.hidden ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  void onUnhide();
+                }}
+              >
+                Unhide
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  void onHide();
+                }}
+              >
+                Hide
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="brass"
+              size="sm"
+              onClick={() => {
+                void onSave();
+              }}
+            >
+              <Save className="h-3.5 w-3.5" />
+              Save
+            </Button>
+          </Inline>
         }
       >
         <NotesEditorPanel draft={draft ?? activeNote} setDraft={setDraft} onSave={onSave} />

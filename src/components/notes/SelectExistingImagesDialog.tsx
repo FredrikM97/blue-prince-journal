@@ -10,6 +10,7 @@ import { Grid, Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
 import { MetaText } from "@/components/common/Typography";
 import { getImageLabel } from "@/lib/imageLabel";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 type ImageSort = "newest" | "oldest" | "name-asc" | "name-desc";
 
@@ -42,7 +43,8 @@ export function SelectExistingImagesDialog({
 }) {
   const [imageSort, setImageSort] = useState<ImageSort>("newest");
   const [page, setPage] = useState(0);
-  const PAGE_SIZE = 12;
+  const isDesktop = useMediaQuery("(min-width: 1024px)", false);
+  const PAGE_SIZE = isDesktop ? 36 : 12;
 
   const selectedSet = useMemo(() => new Set(selectedImageIds), [selectedImageIds]);
   const sortedImages = useMemo(() => {

@@ -1,4 +1,4 @@
-import { useCallback, useDeferredValue, useMemo, useReducer } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useReducer, useRef } from "react";
 import type { Note, NoteType, Todo } from "@/lib/types";
 import { buildNoteListItems, buildRooms, buildTags, filterNotesList } from "@/domain/notesPage";
 
@@ -7,6 +7,7 @@ interface NotesPageUiState {
   roomFilters: string[];
   tagFilter: string | null;
   statusFilter: "open" | "solved" | null;
+  showHiddenFilter: boolean;
   activeNoteId: string | null;
   previewTodoId: string | null;
   panelMode: "edit" | "preview";
@@ -19,6 +20,7 @@ type NotesPageAction =
   | { type: "setRoomFilters"; value: string[] }
   | { type: "setTagFilter"; value: string | null }
   | { type: "setStatusFilter"; value: "open" | "solved" | null }
+  | { type: "setShowHiddenFilter"; value: boolean }
   | { type: "setPreviewTodoId"; value: string | null }
   | { type: "openEdit"; note: Note }
   | { type: "openPreview"; note: Note }
@@ -32,6 +34,7 @@ const INITIAL_UI_STATE: NotesPageUiState = {
   roomFilters: [],
   tagFilter: null,
   statusFilter: "open",
+  showHiddenFilter: false,
   activeNoteId: null,
   previewTodoId: null,
   panelMode: "edit",
@@ -54,6 +57,10 @@ function notesPageReducer(state: NotesPageUiState, action: NotesPageAction): Not
       return state.tagFilter === action.value ? state : { ...state, tagFilter: action.value };
     case "setStatusFilter":
       return state.statusFilter === action.value ? state : { ...state, statusFilter: action.value };
+    case "setShowHiddenFilter":
+      return state.showHiddenFilter === action.value
+        ? state
+        : { ...state, showHiddenFilter: action.value };
     case "setPreviewTodoId":
       return state.previewTodoId === action.value ? state : { ...state, previewTodoId: action.value };
     case "openEdit":
@@ -120,6 +127,10 @@ function useNotesPageState() {
     (value: "open" | "solved" | null) => dispatch({ type: "setStatusFilter", value }),
     [],
   );
+  const setShowHiddenFilter = useCallback(
+    (value: boolean) => dispatch({ type: "setShowHiddenFilter", value }),
+    [],
+  );
   const setPreviewTodoId = useCallback(
     (value: string | null) => dispatch({ type: "setPreviewTodoId", value }),
     [],
@@ -143,6 +154,7 @@ function useNotesPageState() {
       setRoomFilters,
       setTagFilter,
       setStatusFilter,
+      setShowHiddenFilter,
       setPreviewTodoId,
       openEdit,
       openPreview,
@@ -156,6 +168,7 @@ function useNotesPageState() {
       setRoomFilters,
       setTagFilter,
       setStatusFilter,
+      setShowHiddenFilter,
       setPreviewTodoId,
       openEdit,
       openPreview,
@@ -173,6 +186,7 @@ export type NotesFilterState = {
   filterType?: NoteType;
   typeFilter: NoteType | null;
   statusFilter: "open" | "solved" | null;
+  showHiddenFilter: boolean;
   roomFilters: string[];
   tagFilter: string | null;
   rooms: string[];
@@ -182,6 +196,7 @@ export type NotesFilterState = {
 export type NotesFilterActions = {
   setTypeFilter: (value: NoteType | null) => void;
   setStatusFilter: (value: "open" | "solved" | null) => void;
+  setShowHiddenFilter: (value: boolean) => void;
   setRoomFilters: (value: string[]) => void;
   setTagFilter: (value: string | null) => void;
 };
@@ -266,11 +281,13 @@ export function useNotesPageUI({
       roomFilters: uiState.roomFilters,
       tagFilter: uiState.tagFilter,
       statusFilter: uiState.statusFilter,
+      showHidden: uiState.showHiddenFilter,
     });
   }, [
     deferredSearch,
     effectiveType,
     noteListItems,
+    uiState.showHiddenFilter,
     uiState.roomFilters,
     uiState.statusFilter,
     uiState.tagFilter,
@@ -292,12 +309,22 @@ export function useNotesPageUI({
     return activeNote;
   }, [activeNote, uiState.draft]);
 
-  const setEditorDraft: React.Dispatch<React.SetStateAction<Note>> = (next) => {
-    const base = uiState.draft ?? activeNote;
-    if (!base) return;
-    const resolved = typeof next === "function" ? next(base) : next;
-    uiActions.setDraft(resolved);
-  };
+  const draftRef = useRef<Note | null>(null);
+
+  useEffect(() => {
+    draftRef.current = currentDraft;
+  }, [currentDraft]);
+
+  const setEditorDraft = useCallback<React.Dispatch<React.SetStateAction<Note>>>(
+    (next) => {
+      const base = draftRef.current;
+      if (!base) return;
+      const resolved = typeof next === "function" ? next(base) : next;
+      draftRef.current = resolved;
+      uiActions.setDraft(resolved);
+    },
+    [uiActions],
+  );
 
   const openCaptureForNotes = useCallback(() => {
     uiActions.clearSelection();
@@ -374,6 +401,7 @@ export function useNotesPageUI({
     filterType,
     typeFilter: uiState.typeFilter,
     statusFilter: uiState.statusFilter,
+    showHiddenFilter: uiState.showHiddenFilter,
     roomFilters: uiState.roomFilters,
     tagFilter: uiState.tagFilter,
     rooms,
@@ -383,6 +411,7 @@ export function useNotesPageUI({
   const filterActions: NotesFilterActions = {
     setTypeFilter: uiActions.setTypeFilter,
     setStatusFilter: uiActions.setStatusFilter,
+    setShowHiddenFilter: uiActions.setShowHiddenFilter,
     setRoomFilters: uiActions.setRoomFilters,
     setTagFilter: uiActions.setTagFilter,
   };

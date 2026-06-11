@@ -58,18 +58,17 @@ function RoomDropdownComponent({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <div className={triggerWidth === "fit" ? "w-auto min-w-40" : "w-full"} data-has-value={!!activeRoom}>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:bg-secondary"
-          >
-            <span className={activeRoom ? "text-foreground" : "text-muted-foreground"}>
-              {activeRoom || placeholder}
-            </span>
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className={`h-9 justify-between border-border/60 bg-secondary px-3 py-2 text-sm font-normal hover:border-border hover:bg-secondary ${triggerWidth === "fit" ? "w-auto min-w-40" : "w-full"}`}
+          data-has-value={!!activeRoom}
+        >
+          <span className={activeRoom ? "text-foreground" : "text-muted-foreground"}>
+            {activeRoom || placeholder}
+          </span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" variant="select">
@@ -80,7 +79,7 @@ function RoomDropdownComponent({
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => event.stopPropagation()}
             placeholder="Search rooms..."
-            className="h-8 w-full rounded border border-input bg-card px-2 text-sm outline-none focus:ring-1 focus:ring-ring"
+            className="h-8 w-full rounded border border-border/60 bg-card px-2 text-sm outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
 

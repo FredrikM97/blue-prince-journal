@@ -14,6 +14,10 @@ const STATUS_OPTIONS = [
   { value: "solved", label: "Solved" },
 ];
 
+const HIDDEN_OPTIONS: { value: "show-hidden"; label: string }[] = [
+  { value: "show-hidden", label: "Show hidden" },
+];
+
 export function NotesFilterPanel({
   filters,
   actions,
@@ -22,6 +26,7 @@ export function NotesFilterPanel({
     filterType?: NoteType;
     typeFilter: NoteType | null;
     statusFilter: "open" | "solved" | null;
+    showHiddenFilter: boolean;
     roomFilters: string[];
     tagFilter: string | null;
     rooms: string[];
@@ -30,12 +35,13 @@ export function NotesFilterPanel({
   actions: {
     setTypeFilter: (value: NoteType | null) => void;
     setStatusFilter: (value: "open" | "solved" | null) => void;
+    setShowHiddenFilter: (value: boolean) => void;
     setRoomFilters: (value: string[]) => void;
     setTagFilter: (value: string | null) => void;
   };
 }) {
-  const { filterType, typeFilter, statusFilter, roomFilters, tagFilter, rooms, tags } = filters;
-  const { setTypeFilter, setStatusFilter, setRoomFilters, setTagFilter } = actions;
+  const { filterType, typeFilter, statusFilter, showHiddenFilter, roomFilters, tagFilter, rooms, tags } = filters;
+  const { setTypeFilter, setStatusFilter, setShowHiddenFilter, setRoomFilters, setTagFilter } = actions;
 
   const typeOptions = TYPE_OPTIONS;
   const statusOptions = STATUS_OPTIONS;
@@ -59,6 +65,13 @@ export function NotesFilterPanel({
             }
             setStatusFilter(next as "open" | "solved");
           }}
+        />
+      </FilterSection>
+      <FilterSection title="Visibility" collapsible defaultOpen width="fit" variant="compact">
+        <FilterButtonGroup
+          value={showHiddenFilter ? "show-hidden" : null}
+          options={HIDDEN_OPTIONS}
+          onChange={(next) => setShowHiddenFilter(next === "show-hidden")}
         />
       </FilterSection>
       {rooms.length > 0 && (
