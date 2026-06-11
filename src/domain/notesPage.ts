@@ -32,6 +32,7 @@ export function filterNotesList({
   roomFilters,
   tagFilter,
   statusFilter,
+  showHidden = false,
 }: {
   noteListItems: Note[];
   search: string;
@@ -39,9 +40,11 @@ export function filterNotesList({
   roomFilters: string[];
   tagFilter: string | null;
   statusFilter: "open" | "solved" | null;
+  showHidden?: boolean;
 }): Note[] {
   const query = parseSearchQuery(search);
   return noteListItems.filter((note) => {
+    if (!showHidden && note.hidden) return false;
     if (filterType && note.type !== filterType) return false;
     if (roomFilters.length > 0 && !roomFilters.includes(note.room ?? "")) return false;
     if (tagFilter && !note.tags.includes(tagFilter)) return false;

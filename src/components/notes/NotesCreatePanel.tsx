@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useStore } from "@/hooks/useStore";
 import { db } from "@/data/db";
@@ -596,6 +596,19 @@ export function NotesCreatePanel({
   });
 
   const submit = form.mode === "todo" ? submitTodo : submitNote;
+
+  useEffect(() => {
+    if (!store.open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey && !event.metaKey && !event.altKey && event.code === "KeyS")) return;
+      event.preventDefault();
+      void submit(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [store.open, submit]);
 
   const isEditing = Boolean(store.editNoteId ?? store.editTodoId);
 

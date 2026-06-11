@@ -13,6 +13,7 @@ export interface Note {
   date?: string;
   status: NoteStatus;
   scope: RunScope;
+  hidden?: boolean;
   imageIds: string[];
   createdAt: number;
   updatedAt: number;

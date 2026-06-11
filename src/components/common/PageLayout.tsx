@@ -6,7 +6,6 @@ import {
   isValidElement,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactElement,
 } from "react";
@@ -338,7 +337,7 @@ function PageLayoutMobileDrawers({
 
       {mobileRightOpen && hasRight && (
         <aside
-          className={`fixed bottom-0 top-0 right-0 z-50 ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerHeight} overflow-y-auto rounded-none border border-l border-border bg-background pl-3 pr-0 pb-3 shadow-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerWidth}`}
+          className={`fixed bottom-0 top-0 right-0 z-50 ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerHeight} overflow-y-auto rounded-none border border-l border-border bg-background pl-3 pr-3 pb-3 shadow-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerWidth}`}
         >
           {resolvedPanels.right}
         </aside>
@@ -412,36 +411,19 @@ function PageLayoutComponent({
   );
   const closeMobileDrawer = mobileDrawerState.closeMobileDrawer;
   const openMobileDrawer = mobileDrawerState.openMobileDrawer;
-  const lastMobileDrawerSyncRef = useRef<{
-    isOpen: boolean;
-    side: MobileDrawerSide;
-  } | null>(null);
 
   useEffect(() => {
     if (!isPageLayoutMobile) return;
     if (mobileDrawerOpen === undefined) return;
 
-    const previousSync = lastMobileDrawerSyncRef.current;
-
     if (!mobileDrawerOpen) {
-      lastMobileDrawerSyncRef.current = {
-        isOpen: false,
-        side: mobileDrawerSide,
-      };
       if (mobileDrawerCloseWhenClosed) {
         closeMobileDrawer();
       }
       return;
     }
 
-    if (!previousSync?.isOpen || previousSync.side !== mobileDrawerSide) {
-      openMobileDrawer(mobileDrawerSide);
-    }
-
-    lastMobileDrawerSyncRef.current = {
-      isOpen: true,
-      side: mobileDrawerSide,
-    };
+    openMobileDrawer(mobileDrawerSide);
   }, [
     closeMobileDrawer,
     isPageLayoutMobile,

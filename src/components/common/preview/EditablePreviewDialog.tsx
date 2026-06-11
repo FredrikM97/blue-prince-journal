@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { PenLine, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/common/Button";
@@ -51,6 +51,30 @@ export function EditablePreviewDialog({
 
   const isEditingCurrentEntity = isEditing && editingEntityKey === entityKey;
 
+  const saveDetails = useCallback(() => {
+    void (async () => {
+      await onSaveDraft(detailsDraft);
+      closeEditDetails();
+      toast.success(saveSuccessMessage);
+    })();
+  }, [detailsDraft, onSaveDraft, saveSuccessMessage]);
+
+  useEffect(() => {
+    if (!open || !isEditingCurrentEntity) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        saveDetails();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isEditingCurrentEntity, open, saveDetails]);
+
   return (
     <PreviewDialog
       open={open}
@@ -72,13 +96,7 @@ export function EditablePreviewDialog({
             <Button
               variant="brass"
               size="default"
-              onClick={() => {
-                void (async () => {
-                  await onSaveDraft(detailsDraft);
-                  closeEditDetails();
-                  toast.success(saveSuccessMessage);
-                })();
-              }}
+              onClick={saveDetails}
             >
               <Save className="h-3.5 w-3.5" />
               Save
@@ -96,7 +114,7 @@ export function EditablePreviewDialog({
           </Button>
         )
       }
-      showHeaderClose
+      showHeaderClose={false}
       dialogVariant={isEditingCurrentEntity ? "expand" : viewDialogVariant}
       bodyVariant={isEditingCurrentEntity ? "dialog-scroll-body-tall" : "dialog-scroll-body"}
     >

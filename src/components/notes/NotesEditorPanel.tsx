@@ -98,7 +98,7 @@ export function NotesEditorPanel({
         <InputField
           label="Title"
           value={draft.title}
-          onChange={(nextTitle) => setDraft({ ...draft, title: nextTitle })}
+          onChange={(nextTitle) => setDraft((prev) => ({ ...prev, title: nextTitle }))}
           placeholder="Title"
         />
       </SuggestionsDropdown>
@@ -106,7 +106,7 @@ export function NotesEditorPanel({
       <SuggestionsDropdown>
         <InputField
           value={draft.body}
-          onChange={(value) => setDraft({ ...draft, body: value })}
+          onChange={(value) => setDraft((prev) => ({ ...prev, body: value }))}
           markdown
           placeholder="Details (markdown supported)…"
         />
