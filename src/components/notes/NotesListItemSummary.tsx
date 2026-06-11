@@ -1,7 +1,7 @@
 import { memo } from "react";
 import type { Note } from "@/lib/types";
 import { Lightbulb } from "lucide-react";
-import { TYPE_ICON, TYPE_LABEL, relTime } from "@/lib/noteMetadata";
+import { NOTE_TYPE_META, relTime } from "@/lib/noteMetadata";
 import { Chip } from "@/components/common/Chip";
 import { Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
@@ -24,7 +24,7 @@ const TYPE_ICON_VARIANT: Record<
 };
 
 export const NotesListItemSummary = memo(function NotesListItemSummary({ note }: { note: Note }) {
-  const Icon = TYPE_ICON[note.type] ?? Lightbulb;
+  const Icon = NOTE_TYPE_META[note.type]?.icon ?? Lightbulb;
   const iconClassName = `mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md transition-colors ${TYPE_ICON_VARIANT[note.type]}`;
 
   return (
@@ -32,7 +32,7 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
       <Stack as="span" gap="0" className={iconClassName}>
         <Icon
           className="h-4 w-4 transition-transform group-hover:scale-110"
-          aria-label={`Type: ${TYPE_LABEL[note.type]}`}
+          aria-label={`Type: ${NOTE_TYPE_META[note.type]?.label ?? "Note"}`}
         />
       </Stack>
       <Stack gap="0" className="min-w-0 flex-1">

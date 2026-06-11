@@ -13,6 +13,16 @@ export default defineConfig({
     __APP_COMMIT_HASH__: JSON.stringify(appCommitHash),
   },
   plugins: [tsconfigPaths(), tailwindcss(), react()],
+  optimizeDeps: {
+    include: [
+      "@tanstack/react-query",
+      "@tanstack/react-router",
+      "dexie",
+      "dexie-react-hooks",
+      "lucide-react",
+      "sonner",
+    ],
+  },
   resolve: {
     dedupe: [
       "react",

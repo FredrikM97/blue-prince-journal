@@ -67,8 +67,6 @@
 :root {
   /* Shared shape token */
   --radius: 0.5rem;
-  --sidebar-width: 20rem;
-  --sidebar-panel-width: 24rem;
   --font-sans: "Atkinson Hyperlegible", "Segoe UI", "Noto Sans", system-ui, sans-serif;
   --font-serif: "Atkinson Hyperlegible", "Segoe UI", "Noto Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", "SFMono-Regular", Menlo, monospace;
@@ -187,22 +185,9 @@
   color-scheme: dark;
 }
 
-@media (min-width: 48rem) {
-  :root {
-    --sidebar-panel-width: 28rem;
-  }
-}
-
-@media (min-width: 64rem) {
-  :root {
-    --sidebar-panel-width: 40rem;
-  }
-}
-
-@media (min-width: 80rem) {
-  :root {
-    --sidebar-panel-width: 48rem;
-  }
+/* Dark mode prose text readability fix */
+:root.dark .prose {
+  --tw-prose-body: oklch(0.9 0.02 80);
 }
 
 @layer base {

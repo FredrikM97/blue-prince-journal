@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { PenLine, Save } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
-import { db } from "@/data/db";
 import { saveNote, removeNote } from "@/data/mutations/noteMutations";
 import { removeTodo } from "@/data/mutations/todoMutations";
 import type { Note, NoteType, Todo } from "@/lib/types";
@@ -20,13 +19,55 @@ import { NotesFilterPanel } from "./NotesFilterPanel";
 import { NotesView } from "./NotesView";
 import { useNotesPageUI } from "@/components/notes/hooks/useNotesPageUI";
 import { TodoRightPanel } from "@/components/todos/TodoRightPanel";
+import { TodoPreviewDialog } from "@/components/todos/TodoPreviewDialog";
 import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
 import { SidePanelLeft, SidePanelRight } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
-import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
+import { useAppData } from "@/hooks/useAppData";
 import { buildCapturePanelKey } from "@/components/notes/capturePanelKey";
+import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
+
+type ExpandedPreviewState =
+  | { kind: "none" }
+  | { kind: "note"; note: Note }
+  | { kind: "todo"; todo: Todo };
+
+function getNotesMobileDrawerKey({
+  captureOpen,
+  captureDefault,
+  captureEditNoteId,
+  captureEditTodoId,
+  previewTodoId,
+  activeNoteId,
+  panelMode,
+}: {
+  captureOpen: boolean;
+  captureDefault: "note" | "todo";
+  captureEditNoteId?: string;
+  captureEditTodoId?: string;
+  previewTodoId: string | null;
+  activeNoteId: string | null;
+  panelMode: "edit" | "preview";
+}) {
+  if (captureOpen) {
+    if (captureEditNoteId) {
+      return `capture:edit-note:${captureEditNoteId}`;
+    }
+    if (captureEditTodoId) {
+      return `capture:edit-todo:${captureEditTodoId}`;
+    }
+    return `capture:new:${captureDefault}`;
+  }
+  if (previewTodoId) {
+    return `todo:${previewTodoId}`;
+  }
+  if (activeNoteId) {
+    return `${panelMode}:${activeNoteId}`;
+  }
+  return false;
+}
 
 export function NotesPage({
   filterType,
@@ -37,8 +78,9 @@ export function NotesPage({
   title: string;
   emptyHint?: string;
 }) {
-  const notes: Note[] = useLiveQueryArray(() => db.notes.orderBy("updatedAt").reverse().toArray());
-  const todos: Todo[] = useLiveQueryArray(() => db.todos.orderBy("updatedAt").reverse().toArray());
+  const [expandedPreview, setExpandedPreview] = useState<ExpandedPreviewState>({ kind: "none" });
+  const { notes, todos, notesLoading, todosLoading } = useAppData();
+  const isPageDataLoading = notesLoading || todosLoading;
   const search = useStore((s) => s.search);
   const openCapture = useStore((s) => s.openCapture);
   const captureOpen = useStore((s) => s.captureOpen);
@@ -54,11 +96,11 @@ export function NotesPage({
     activeNote,
     currentDraft,
     previewTodo,
-    setPreviewTodo,
     setEditorDraft,
     openCaptureForNotes,
     openEditFromList,
     openPreviewFromList,
+    openPreviewAfterCreate,
     deleteFromList,
     executePendingDelete,
     filterState,
@@ -74,6 +116,106 @@ export function NotesPage({
     onDeleteTodo: removeTodo,
   });
 
+  const handleStartEditActiveNote = useCallback(() => {
+    if (!activeNote) return;
+    uiActions.openEdit(activeNote);
+  }, [activeNote, uiActions]);
+
+  const handleSaveActiveNote = useCallback(async () => {
+    if (!currentDraft) return;
+    await saveNote(currentDraft);
+    uiActions.openPreview(currentDraft);
+  }, [currentDraft, uiActions]);
+
+  const handleCloseActivePanel = useCallback(() => {
+    uiActions.clearSelection();
+    closeCapture();
+  }, [closeCapture, uiActions]);
+
+  const handleCloseTodoPreviewPanel = useCallback(() => {
+    uiActions.setPreviewTodoId(null);
+  }, [uiActions]);
+
+  const handleEditTodoFromPreviewPanel = useCallback(() => {
+    if (!previewTodo) return;
+    uiActions.setPreviewTodoId(null);
+    openCapture({ todo: previewTodo });
+  }, [openCapture, previewTodo, uiActions]);
+
+  const handleTodoEditSaved = useCallback(
+    async (todo: Todo) => {
+      closeCapture();
+      uiActions.clearSelection();
+      uiActions.setPreviewTodoId(todo.id);
+    },
+    [closeCapture, uiActions],
+  );
+
+  const handleExpandedPreviewOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      setExpandedPreview({ kind: "none" });
+    }
+  }, []);
+
+  const handlePendingDeleteOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        uiActions.setPendingDelete(null);
+      }
+    },
+    [uiActions],
+  );
+
+  const handleCancelPendingDelete = useCallback(() => {
+    uiActions.setPendingDelete(null);
+  }, [uiActions]);
+
+  const handleConfirmPendingDelete = useCallback(() => {
+    void executePendingDelete();
+  }, [executePendingDelete]);
+
+  const handleExpandPreview = useCallback((note: Note) => {
+    setExpandedPreview({ kind: "note", note });
+  }, []);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      const typing =
+        target &&
+        (/input|textarea|select/i.test(target.tagName) || (target as HTMLElement).isContentEditable);
+
+      // Cmd/Ctrl+S — save active note (works from any context)
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+        if (currentDraft) {
+          e.preventDefault();
+          void handleSaveActiveNote();
+        }
+        return;
+      }
+
+      if (typing || captureOpen) return;
+
+      // ArrowUp/ArrowDown — navigate between filtered notes
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        if (filtered.length === 0) return;
+        e.preventDefault();
+        const activeIndex = activeNote
+          ? filtered.findIndex((n) => n.id === activeNote.id)
+          : -1;
+        const offset = e.key === "ArrowUp" ? -1 : 1;
+        const next =
+          activeIndex < 0
+            ? filtered[0]
+            : filtered[(activeIndex + offset + filtered.length) % filtered.length];
+        if (next) openPreviewFromList(next);
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeNote, captureOpen, currentDraft, filtered, handleSaveActiveNote, openPreviewFromList]);
+
   let rightPanelContent: React.ReactNode = (
     <SidePanelRight title="Preview">
       <MetaText>Select a note to preview or edit details.</MetaText>
@@ -88,18 +230,10 @@ export function NotesPage({
         draft={currentDraft}
         panelMode={uiState.panelMode}
         setDraft={setEditorDraft}
-        onStartEdit={() => {
-          uiActions.openEdit(activeNote);
-        }}
-        onSave={async () => {
-          if (!currentDraft) return;
-          await saveNote(currentDraft);
-          uiActions.openPreview(currentDraft);
-        }}
-        onClose={() => {
-          uiActions.clearSelection();
-          closeCapture();
-        }}
+        onStartEdit={handleStartEditActiveNote}
+        onSave={handleSaveActiveNote}
+        onClose={handleCloseActivePanel}
+        onExpandPreview={handleExpandPreview}
       />
     );
   }
@@ -108,11 +242,8 @@ export function NotesPage({
     rightPanelContent = (
       <TodoRightPanel
         todo={previewTodo}
-        onClose={() => setPreviewTodo(null)}
-        onEdit={() => {
-          setPreviewTodo(null);
-          openCapture({ todo: previewTodo });
-        }}
+        onClose={handleCloseTodoPreviewPanel}
+        onEdit={handleEditTodoFromPreviewPanel}
       />
     );
   }
@@ -129,11 +260,8 @@ export function NotesPage({
         <NotesCreatePanel
           key={capturePanelKey}
           defaultNoteType={filterType}
-          onEditSaved={(savedNote) => {
-            closeCapture();
-            setPreviewTodo(null);
-            uiActions.openPreview(savedNote);
-          }}
+          onEditSaved={openPreviewAfterCreate}
+          onTodoEditSaved={handleTodoEditSaved}
         />
       );
     }
@@ -157,9 +285,43 @@ export function NotesPage({
     entryLabel = "entry";
   }
 
+  const todoById = useMemo(() => {
+    return new Map(todos.map((todo) => [todo.id, todo]));
+  }, [todos]);
+
+  const handleOpenExpand = useCallback(
+    (note: Note) => {
+      closeCapture();
+      uiActions.setPreviewTodoId(null);
+
+      if (note.id.startsWith("todo:")) {
+        const todoId = note.id.slice(5);
+        if (!todoId) return;
+        const todo = todoById.get(todoId);
+        if (!todo) return;
+        setExpandedPreview({ kind: "todo", todo });
+        return;
+      }
+
+      setExpandedPreview({ kind: "note", note });
+    },
+    [closeCapture, todoById, uiActions],
+  );
+
+  const mobileDrawerOpenSignal = getNotesMobileDrawerKey({
+    captureOpen,
+    captureDefault,
+    captureEditNoteId: captureEditNoteId ?? undefined,
+    captureEditTodoId: captureEditTodoId ?? undefined,
+    previewTodoId: previewTodo?.id ?? null,
+    activeNoteId: activeNote?.id ?? null,
+    panelMode: uiState.panelMode,
+  });
+  const mobileDrawerProps = usePageLayoutMobileDrawerProps({ mobileDrawerOpen: mobileDrawerOpenSignal });
+
   return (
     <>
-      <PageLayout variant="panel" mobileDrawerOpen={captureOpen} mobileDrawerSide="right">
+      <PageLayout variant="panel" {...mobileDrawerProps}>
         <PageLayout.Left>
           <SidePanelLeft title={title} subtitle={`${filtered.length} ${entryLabel}`}>
             <NotesFilterPanel filters={filterState} actions={filterActions} />
@@ -168,45 +330,57 @@ export function NotesPage({
         <PageLayout.Middle>
           <NotesView
             emptyHint={emptyHint}
+            loading={isPageDataLoading}
             filtered={filtered}
             openCapture={openCaptureForNotes}
             onOpenEdit={openEditFromList}
             onOpenPreview={openPreviewFromList}
+            onOpenExpand={handleOpenExpand}
             onDelete={deleteFromList}
           />
         </PageLayout.Middle>
         <PageLayout.Right>{rightPanelContent}</PageLayout.Right>
       </PageLayout>
 
-      <Dialog
-        open={!!uiState.pendingDelete}
-        onOpenChange={(open) => !open && uiActions.setPendingDelete(null)}
-      >
-        <DialogContent variant="compact">
-          <DialogHeader>
-            <DialogTitle>{deleteTitle}</DialogTitle>
-            <DialogDescription>{deleteDescription}</DialogDescription>
-          </DialogHeader>
-          <Inline gap="2" justify="end">
-            <Button variant="ghost" onClick={() => uiActions.setPendingDelete(null)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                void executePendingDelete();
-              }}
-            >
-              Delete
-            </Button>
-          </Inline>
-        </DialogContent>
-      </Dialog>
+      {expandedPreview.kind === "note" ? (
+        <NotePreviewDialog
+          note={expandedPreview.note}
+          open
+          onOpenChange={handleExpandedPreviewOpenChange}
+        />
+      ) : null}
+
+      {expandedPreview.kind === "todo" ? (
+        <TodoPreviewDialog
+          todo={expandedPreview.todo}
+          open
+          onOpenChange={handleExpandedPreviewOpenChange}
+        />
+      ) : null}
+
+      {uiState.pendingDelete ? (
+        <Dialog open onOpenChange={handlePendingDeleteOpenChange}>
+          <DialogContent variant="compact">
+            <DialogHeader>
+              <DialogTitle>{deleteTitle}</DialogTitle>
+              <DialogDescription>{deleteDescription}</DialogDescription>
+            </DialogHeader>
+            <Inline gap="2" justify="end">
+              <Button variant="ghost" onClick={handleCancelPendingDelete}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmPendingDelete}>
+                Delete
+              </Button>
+            </Inline>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </>
   );
 }
 
-function NotesRightPanel({
+const NotesRightPanel = memo(function NotesRightPanel({
   activeNote,
   draft,
   panelMode,
@@ -214,6 +388,7 @@ function NotesRightPanel({
   onStartEdit,
   onSave,
   onClose,
+  onExpandPreview,
 }: {
   activeNote: Note | null;
   draft: Note | null;
@@ -222,9 +397,8 @@ function NotesRightPanel({
   onStartEdit: () => void;
   onSave: () => Promise<void>;
   onClose: () => void;
+  onExpandPreview: (note: Note) => void;
 }) {
-  const [previewExpanded, setPreviewExpanded] = useState(false);
-
   if (!activeNote) {
     return null;
   }
@@ -280,15 +454,12 @@ function NotesRightPanel({
       subtitle={subtitle}
       panelKey={`note-preview:${activeNote.id}`}
       onClose={onClose}
-      onExpand={() => setPreviewExpanded(true)}
+      onExpand={() => onExpandPreview(activeNote)}
       headerActions={previewHeaderActions}
-      expandDialog={
-        <NotePreviewDialog note={activeNote} open={previewExpanded} onOpenChange={setPreviewExpanded} />
-      }
     >
       <Stack gap="2" variant="dialog-scroll-body">
         <NotePreviewContent note={activeNote} />
       </Stack>
     </SidePanelRight>
   );
-}
+});

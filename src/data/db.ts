@@ -47,30 +47,6 @@ class JournalDb extends Dexie {
 
 export const db = new JournalDb();
 
-/**
- * @deprecated Temporary compatibility shim for pre-body todo records.
- * Remove after one stable release cycle once all active clients have migrated.
- */
-async function migrateLegacyTodoBodyField(): Promise<void> {
-  const todos = await db.todos.toArray();
-  const updates: Todo[] = [];
-
-  for (const todo of todos) {
-    const legacy = todo as Todo & { notes?: string };
-    if (legacy.body !== undefined) continue;
-    if (legacy.notes === undefined) continue;
-
-    const { notes: _legacyNotes, ...rest } = legacy;
-    updates.push({
-      ...rest,
-      body: legacy.notes,
-    });
-  }
-
-  if (updates.length === 0) return;
-  await db.todos.bulkPut(updates);
-}
-
 // ---------------------------------------------------------------------------
 // Snapshot read / write
 // ---------------------------------------------------------------------------
@@ -155,7 +131,6 @@ export async function clearAllData(): Promise<void> {
 const BUILTIN_SECTIONS: SectionDef[] = [
   { id: "notes", label: "Notes", builtin: "notes", order: 0 },
   { id: "todos", label: "Todo", builtin: "todos", order: 1 },
-  { id: "books", label: "Story", filter: { type: "story" }, order: 2 },
   { id: "map", label: "Map", builtin: "map", order: 3 },
   { id: "graph", label: "Graph", builtin: "graph", order: 4 },
   { id: "images", label: "Images", builtin: "images", order: 5 },
@@ -167,15 +142,8 @@ const SEEDED_MAP_CELLS: Array<Pick<GridCell, "row" | "col" | "roomName" | "statu
 ];
 
 export async function ensureBootSeed(): Promise<void> {
-  await migrateLegacyTodoBodyField();
-
   const existing = await db.sections.toArray();
   const existingById = new Map(existing.map((s) => [s.id, s]));
-
-  const deprecatedIds = ["codes"];
-  for (const id of deprecatedIds) {
-    if (existingById.has(id)) await db.sections.delete(id);
-  }
 
   for (const builtin of BUILTIN_SECTIONS) {
     const prev = existingById.get(builtin.id);

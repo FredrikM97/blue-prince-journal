@@ -59,6 +59,20 @@ test("settings smoke: mobile content scrolls without clipping", async ({ page })
   budgets.assert();
 });
 
+test("settings smoke: seed flow reports 70 generated images", async ({ page }) => {
+  const budgets = createConsoleBudget(page);
+  await enableWelcomeBypass(page);
+
+  await page.goto("/settings");
+
+  await page.getByRole("button", { name: "Seed graph test data with images" }).click();
+  await page.getByRole("button", { name: "Seed data" }).click();
+
+  await expect(page.getByText(/with 70 images/i)).toBeVisible({ timeout: 60_000 });
+
+  budgets.assert();
+});
+
 test("settings visual: desktop spacing and alignment drift", async ({ page }) => {
   const budgets = createConsoleBudget(page);
   await page.addInitScript(() => {

@@ -1,7 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { PageLayout } from "@/components/common/PageLayout";
 import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
+
+vi.mock("@tanstack/react-router", () => ({
+  useRouterState: ({ select }: { select: (state: { location: { pathname: string } }) => unknown }) =>
+    select({ location: { pathname: "/" } }),
+}));
 
 function MobileDrawerTrigger() {
   const controls = usePageLayoutMobileDrawerControls();
@@ -65,6 +70,20 @@ describe("PageLayout", () => {
   });
 
   it("opens the right mobile drawer through the shared controls", () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: true,
+        media: "(max-width: 767px)",
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
+
     const { container } = render(
       <PageLayout>
         <PageLayout.Middle>
@@ -80,6 +99,40 @@ describe("PageLayout", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Open right" }));
 
-    expect(container.querySelector(".page-layout-mobile-drawer-right")).not.toBeNull();
+    expect(screen.getByText("right drawer content")).toBeInTheDocument();
+  });
+
+  it("does not render desktop grid track classes in mobile mode", () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: true,
+        media: "(max-width: 767px)",
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
+
+    const { container } = render(
+      <PageLayout>
+        <PageLayout.Left>
+          <div>left</div>
+        </PageLayout.Left>
+        <PageLayout.Middle>
+          <div>middle</div>
+        </PageLayout.Middle>
+        <PageLayout.Right>
+          <div>right</div>
+        </PageLayout.Right>
+      </PageLayout>,
+    );
+
+    expect(container.firstElementChild?.className).not.toContain(
+      "grid-cols-[var(--sidebar-width)_minmax(0,1fr)_var(--sidebar-width)]",
+    );
   });
 });

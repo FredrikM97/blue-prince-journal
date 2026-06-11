@@ -1,4 +1,4 @@
-import { useCallback, useDeferredValue, useMemo, useReducer, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useReducer } from "react";
 import type { Note, NoteType, Todo } from "@/lib/types";
 import { buildNoteListItems, buildRooms, buildTags, filterNotesList } from "@/domain/notesPage";
 
@@ -8,6 +8,7 @@ interface NotesPageUiState {
   tagFilter: string | null;
   statusFilter: "open" | "solved" | null;
   activeNoteId: string | null;
+  previewTodoId: string | null;
   panelMode: "edit" | "preview";
   draft: Note | null;
   pendingDelete: Note | null;
@@ -18,6 +19,7 @@ type NotesPageAction =
   | { type: "setRoomFilters"; value: string[] }
   | { type: "setTagFilter"; value: string | null }
   | { type: "setStatusFilter"; value: "open" | "solved" | null }
+  | { type: "setPreviewTodoId"; value: string | null }
   | { type: "openEdit"; note: Note }
   | { type: "openPreview"; note: Note }
   | { type: "clearSelection" }
@@ -31,6 +33,7 @@ const INITIAL_UI_STATE: NotesPageUiState = {
   tagFilter: null,
   statusFilter: "open",
   activeNoteId: null,
+  previewTodoId: null,
   panelMode: "edit",
   draft: null,
   pendingDelete: null,
@@ -51,6 +54,8 @@ function notesPageReducer(state: NotesPageUiState, action: NotesPageAction): Not
       return state.tagFilter === action.value ? state : { ...state, tagFilter: action.value };
     case "setStatusFilter":
       return state.statusFilter === action.value ? state : { ...state, statusFilter: action.value };
+    case "setPreviewTodoId":
+      return state.previewTodoId === action.value ? state : { ...state, previewTodoId: action.value };
     case "openEdit":
       if (
         state.panelMode === "edit" &&
@@ -115,6 +120,10 @@ function useNotesPageState() {
     (value: "open" | "solved" | null) => dispatch({ type: "setStatusFilter", value }),
     [],
   );
+  const setPreviewTodoId = useCallback(
+    (value: string | null) => dispatch({ type: "setPreviewTodoId", value }),
+    [],
+  );
   const openEdit = useCallback((note: Note) => dispatch({ type: "openEdit", note }), []);
   const openPreview = useCallback((note: Note) => dispatch({ type: "openPreview", note }), []);
   const clearSelection = useCallback(() => dispatch({ type: "clearSelection" }), []);
@@ -134,6 +143,7 @@ function useNotesPageState() {
       setRoomFilters,
       setTagFilter,
       setStatusFilter,
+      setPreviewTodoId,
       openEdit,
       openPreview,
       clearSelection,
@@ -146,6 +156,7 @@ function useNotesPageState() {
       setRoomFilters,
       setTagFilter,
       setStatusFilter,
+      setPreviewTodoId,
       openEdit,
       openPreview,
       clearSelection,
@@ -204,17 +215,24 @@ export function useNotesPageUI({
 }) {
   const deferredSearch = useDeferredValue(search);
   const { state: uiState, actions: uiActions } = useNotesPageState();
-  const [previewTodo, setPreviewTodo] = useState<Todo | null>(null);
 
   const effectiveType = filterType ?? uiState.typeFilter;
 
-  const todoByVirtualId = useMemo(() => {
+  const todoById = useMemo(() => {
     const index = new Map<string, Todo>();
     todos.forEach((todo) => {
-      index.set(`todo:${todo.id}`, todo);
+      index.set(todo.id, todo);
     });
     return index;
   }, [todos]);
+
+  const todoByVirtualId = useMemo(() => {
+    const index = new Map<string, Todo>();
+    todoById.forEach((todo, id) => {
+      index.set(`todo:${id}`, todo);
+    });
+    return index;
+  }, [todoById]);
 
   const resolveTodoForListItem = useCallback(
     (note: Note) => {
@@ -225,11 +243,11 @@ export function useNotesPageUI({
       const todoId = note.id.slice(5);
       if (!todoId) return null;
 
-      const fallbackMatch = todos.find((todo) => todo.id === todoId);
+      const fallbackMatch = todoById.get(todoId);
       if (!fallbackMatch) return null;
       return fallbackMatch;
     },
-    [todoByVirtualId, todos],
+    [todoById, todoByVirtualId],
   );
 
   const noteListItems = useMemo(() => {
@@ -263,6 +281,11 @@ export function useNotesPageUI({
     [notes, uiState.activeNoteId],
   );
 
+  const previewTodo = useMemo(
+    () => (uiState.previewTodoId ? (todoById.get(uiState.previewTodoId) ?? null) : null),
+    [todoById, uiState.previewTodoId],
+  );
+
   const currentDraft = useMemo(() => {
     if (!activeNote) return null;
     if (uiState.draft && uiState.draft.id === activeNote.id) return uiState.draft;
@@ -278,7 +301,7 @@ export function useNotesPageUI({
 
   const openCaptureForNotes = useCallback(() => {
     uiActions.clearSelection();
-    setPreviewTodo(null);
+    uiActions.setPreviewTodoId(null);
     openCapture({ kind: "note", noteType: filterType });
   }, [filterType, openCapture, uiActions]);
 
@@ -287,11 +310,11 @@ export function useNotesPageUI({
       const todo = resolveTodoForListItem(note);
       if (todo) {
         uiActions.clearSelection();
-        setPreviewTodo(null);
+        uiActions.setPreviewTodoId(null);
         openCapture({ todo });
         return;
       }
-      setPreviewTodo(null);
+      uiActions.setPreviewTodoId(null);
       closeCapture();
       uiActions.openEdit(note);
     },
@@ -304,14 +327,23 @@ export function useNotesPageUI({
       if (todo) {
         uiActions.clearSelection();
         closeCapture();
-        setPreviewTodo(todo);
+        uiActions.setPreviewTodoId(todo.id);
         return;
       }
-      setPreviewTodo(null);
+      uiActions.setPreviewTodoId(null);
       closeCapture();
       uiActions.openPreview(note);
     },
     [closeCapture, resolveTodoForListItem, uiActions],
+  );
+
+  const openPreviewAfterCreate = useCallback(
+    (note: Note) => {
+      closeCapture();
+      uiActions.setPreviewTodoId(null);
+      uiActions.openPreview(note);
+    },
+    [closeCapture, uiActions],
   );
 
   const deleteFromList = useCallback(
@@ -362,11 +394,11 @@ export function useNotesPageUI({
     activeNote,
     currentDraft,
     previewTodo,
-    setPreviewTodo,
     setEditorDraft,
     openCaptureForNotes,
     openEditFromList,
     openPreviewFromList,
+    openPreviewAfterCreate,
     deleteFromList,
     executePendingDelete,
     filterState,

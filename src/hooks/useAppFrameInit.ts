@@ -28,14 +28,14 @@ export function useAppFrameInit({
         await cleanupOrphanedImageRefs();
         setLoaded(true);
 
-        const noteCount = await db.notes.count();
-        const todoCount = await db.todos.count();
-        const localIsEmpty = noteCount === 0 && todoCount === 0;
+        const initialNoteCount = await db.notes.count();
+        const initialTodoCount = await db.todos.count();
+        const localIsEmpty = initialNoteCount === 0 && initialTodoCount === 0;
         const { folderName } = await syncRuntime.boot(localIsEmpty);
         if (folderName) setSyncFolderName(folderName);
 
         const welcomed = getLocalStorageFlag("bp-welcomed");
-        const hasData = (await db.notes.count()) > 0 || (await db.todos.count()) > 0;
+        const hasData = initialNoteCount > 0 || initialTodoCount > 0;
         const hasSyncFolder = Boolean(syncRuntime.getActiveFolderName());
 
         if (!welcomed && !hasData && !hasSyncFolder) {

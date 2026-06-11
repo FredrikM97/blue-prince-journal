@@ -84,6 +84,24 @@ export function ImageZoomDialogContent({
     setDragging(false);
   }, []);
 
+  useEffect(() => {
+    resetView();
+  }, [imageId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        onPreviousImage?.();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        onNextImage?.();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onPreviousImage, onNextImage]);
+
   const onPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;

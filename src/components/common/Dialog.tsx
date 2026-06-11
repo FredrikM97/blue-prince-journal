@@ -17,19 +17,19 @@ export type DialogOverlayVariant = "default" | "subtle";
 
 function getDialogContentClass(variant: DialogVariant): string {
   const baseClassName =
-    "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border border-border bg-card shadow-lg duration-200 sm:rounded-lg data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95";
+    "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border border-border bg-card shadow-lg duration-150 sm:rounded-lg data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0";
   const bodyUtilityClass =
     "[&_.dialog-scroll-body]:min-h-0 [&_.dialog-scroll-body]:flex [&_.dialog-scroll-body]:flex-1 [&_.dialog-scroll-body]:flex-col [&_.dialog-scroll-body]:overflow-y-auto [&_.dialog-scroll-body-tall]:min-h-0 [&_.dialog-scroll-body-tall]:flex [&_.dialog-scroll-body-tall]:flex-1 [&_.dialog-scroll-body-tall]:flex-col [&_.dialog-scroll-body-tall]:overflow-y-auto";
 
   if (variant === "compact") return `${baseClassName} grid w-full max-w-md gap-4 p-6`;
   if (variant === "preview") {
-    return `${baseClassName} ${bodyUtilityClass} flex h-[calc(100dvh-2rem)] max-h-[calc(100dvh-2rem)] w-[96vw] max-w-5xl flex-col gap-4 overflow-hidden p-6`;
+    return `${baseClassName} ${bodyUtilityClass} flex h-auto max-h-[calc(100dvh-2rem)] w-[96vw] max-w-5xl flex-col gap-4 overflow-hidden p-6`;
   }
   if (variant === "expand") {
     return `${baseClassName} ${bodyUtilityClass} flex max-h-[calc(100dvh-2rem)] w-[90vw] max-w-4xl flex-col gap-3 overflow-hidden p-6`;
   }
   if (variant === "wide") {
-    return `${baseClassName} ${bodyUtilityClass} flex h-[calc(100dvh-2rem)] max-h-[calc(100dvh-2rem)] w-[90vw] max-w-5xl flex-col gap-3 overflow-hidden p-4`;
+    return `${baseClassName} ${bodyUtilityClass} flex h-auto max-h-[calc(100dvh-2rem)] w-[90vw] max-w-5xl flex-col gap-3 overflow-hidden p-4`;
   }
   if (variant === "fullscreen") {
     return `${baseClassName} flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col gap-0 p-3 pr-10`;
@@ -45,8 +45,8 @@ function getDefaultShowClose(variant: DialogVariant): boolean {
 
 function getDialogOverlayClass(variant: DialogOverlayVariant): string {
   const baseOverlayClass =
-    "fixed inset-0 z-50 bg-background/35 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0";
-  if (variant === "subtle") return `${baseOverlayClass} bg-background/25 backdrop-blur-[2px]`;
+    "fixed inset-0 z-50 bg-background/35 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0";
+  if (variant === "subtle") return `${baseOverlayClass} bg-background/25`;
   return baseOverlayClass;
 }
 

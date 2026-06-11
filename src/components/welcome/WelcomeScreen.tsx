@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { FolderOpen, Sparkles, Upload, Waypoints } from "lucide-react";
 import { Heading, Text } from "@/components/common/Typography";
-import { CenteredContent, Inline } from "@/components/common/LayoutPrimitives";
+import { CenteredContent } from "@/components/common/LayoutPrimitives";
 import { Button } from "@/components/common/Button";
 import { Stack } from "@/components/common/general/Stack";
 import {
@@ -23,7 +23,7 @@ function WelcomeCard({
   disabled?: boolean;
 }) {
   return (
-    <Stack className="w-full max-w-sm" gap="0">
+    <Stack className="w-full sm:w-[18rem]" gap="0">
       <Button
         type="button"
         variant="ghost"
@@ -35,14 +35,23 @@ function WelcomeCard({
         direction="column"
         justify="start"
         textAlign="center"
-        className="flex w-full max-w-sm flex-col items-center justify-start gap-3 rounded-xl border border-border bg-card px-4 py-4 text-center whitespace-normal shadow-sm transition-colors hover:border-brass hover:bg-card disabled:pointer-events-none disabled:opacity-50 sm:min-h-[8rem] sm:w-[18rem]"
+        className="gap-3 rounded-xl border border-border bg-card px-4 py-4 whitespace-normal shadow-sm hover:border-brass hover:bg-card sm:min-h-[8rem]"
       >
         <Icon className="text-brass" />
-        <Stack gap="1" variant="default">
-          <Text size="base" weight="medium">
+        <Stack gap="1" variant="default" className="w-full px-1">
+          <Text
+            size="base"
+            weight="medium"
+            className="min-h-[1.5rem] w-full whitespace-normal break-words leading-tight"
+          >
             {title}
           </Text>
-          <Text size="xs" tone="muted" marginTop="1">
+          <Text
+            size="xs"
+            tone="muted"
+            marginTop="1"
+            className="min-h-[2.5rem] w-full whitespace-normal break-words leading-snug"
+          >
             {description}
           </Text>
         </Stack>
@@ -69,6 +78,8 @@ export function WelcomeScreen({
     handleConnectFolder,
     handleImport,
   } = useWelcomeScreenActions({ onDone });
+  const showContinueCard = Boolean(showContinueSuggestion && onContinue);
+  const actionsLayoutClassName = "mx-auto flex w-full max-w-[56rem] flex-wrap justify-center gap-2";
 
   return (
     <Stack
@@ -95,8 +106,8 @@ export function WelcomeScreen({
           </Text>
         </Stack>
 
-        <Inline gap="2" justify="center" wrap>
-          {showContinueSuggestion && onContinue ? (
+        <div className={actionsLayoutClassName}>
+          {showContinueCard && onContinue ? (
             <WelcomeCard
               icon={Waypoints}
               title="Continue"
@@ -126,7 +137,7 @@ export function WelcomeScreen({
             onClick={handleConnectFolder}
             disabled={busy}
           />
-        </Inline>
+        </div>
 
         <Text size="xs" tone="muted">
           You can always import, export, or configure a sync folder later in{" "}

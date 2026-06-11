@@ -115,7 +115,7 @@ export function ImagesLeftPanel({
             <Text size="xs" tone="muted">
               Connected: {steamSync.folderName}
             </Text>
-            <Inline gap="2">
+            <Inline gap="2" wrap>
               <Button
                 variant="outline"
                 size="sm"

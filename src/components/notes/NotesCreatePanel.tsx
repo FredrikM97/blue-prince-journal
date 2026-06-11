@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { usePasteImages } from "@/hooks/usePasteImages";
 import { ImagePlus, Save } from "lucide-react";
 import type { NoteType, Priority } from "@/lib/types";
-import { NOTE_TYPES } from "@/lib/noteMetadata";
+import { NOTE_TYPE_OPTIONS } from "@/lib/noteMetadata";
 import { PendingImageList } from "@/components/notes/PendingImageList";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
@@ -235,7 +235,7 @@ function NotesMetaFields({
       <NoteMetadataFields
         typeValue={type}
         onTypeChange={(value) => setType(value as NoteType)}
-        typeOptions={NOTE_TYPES}
+        typeOptions={NOTE_TYPE_OPTIONS}
         roomValue={room}
         onRoomChange={setRoom}
         tagsValue={tagsInput}
@@ -358,6 +358,7 @@ function useTodoSubmit({
   editTodoId,
   existingTodos,
   closeWithReturn,
+  onTodoEditSaved,
   title,
   body,
   selectedImageIds,
@@ -371,6 +372,7 @@ function useTodoSubmit({
   editTodoId: NotesStoreSlice["editTodoId"];
   existingTodos: NotesStoreSlice["todos"];
   closeWithReturn: () => Promise<void>;
+  onTodoEditSaved?: (todo: Todo) => void | Promise<void>;
   title: NotesFormState["title"];
   body: NotesFormState["body"];
   selectedImageIds: NotesFormState["selectedImageIds"];
@@ -389,7 +391,7 @@ function useTodoSubmit({
     if (editTodoId) {
       const existing = existingTodos.find((t) => t.id === editTodoId);
       if (existing) {
-        await saveTodo({
+        const savedTodo: Todo = {
           ...existing,
           title: title.trim() || "Untitled",
           room: room || undefined,
@@ -397,8 +399,16 @@ function useTodoSubmit({
           priority,
           body: body.trim() || undefined,
           imageIds: selectedImageIds,
-        });
+        };
+
+        await saveTodo(savedTodo);
         toast.success("Todo updated");
+
+        if (onTodoEditSaved) {
+          await onTodoEditSaved(savedTodo);
+          return;
+        }
+
         await closeWithReturn();
         return;
       }
@@ -513,9 +523,11 @@ function useNoteSubmit({
 export function NotesCreatePanel({
   defaultNoteType,
   onEditSaved,
+  onTodoEditSaved,
 }: {
   defaultNoteType?: NoteType;
   onEditSaved?: (note: Note) => void | Promise<void>;
+  onTodoEditSaved?: (todo: Todo) => void | Promise<void>;
 }) {
   const navigate = useNavigate();
   const store = useNotesStoreSlice();
@@ -555,6 +567,7 @@ export function NotesCreatePanel({
     editTodoId: store.editTodoId,
     existingTodos: store.todos,
     closeWithReturn,
+    onTodoEditSaved,
     title: form.title,
     body: form.body,
     selectedImageIds: form.selectedImageIds,

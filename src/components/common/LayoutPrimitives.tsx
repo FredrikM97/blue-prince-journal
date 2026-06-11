@@ -119,14 +119,6 @@ export function SectionHeaderActions({
     </Inline>
   );
 }
-export {
-  PageLayoutFrame,
-  PageLayoutMobileControls,
-  PageLayoutMobileDrawer,
-  PageLayoutSidebar,
-  PageLayoutContent,
-} from "./pageLayoutPrimitives";
-
 export function CenteredContent({
   max = "6xl",
   align = "center",

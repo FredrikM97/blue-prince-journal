@@ -148,7 +148,7 @@ function buildSeedSvg(index: number): string {
   ].join("");
 }
 
-export function buildSeedTestImageSpecs(count = 12): SeedImageSpec[] {
+export function buildSeedTestImageSpecs(count = 70): SeedImageSpec[] {
   const specs: SeedImageSpec[] = [];
   for (let i = 0; i < count; i++) {
     const svg = buildSeedSvg(i);

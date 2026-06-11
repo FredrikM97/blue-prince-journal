@@ -1,8 +1,7 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useStore } from "@/hooks/useStore";
-import { db } from "@/data/db";
 import { addImage, removeImage, updateImage } from "@/data/mutations/imageMutations";
-import type { StoredImage, Note } from "@/lib/types";
+import type { StoredImage } from "@/lib/types";
 import { PageLayout } from "@/components/common/PageLayout";
 import {
   ImagesLeftPanel,
@@ -28,16 +27,58 @@ import {
 } from "@/data/import/steamImport";
 import { syncRuntime } from "@/data/sync/sync";
 import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storage/storageHealth";
-import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
 import { getImageLabel } from "@/lib/imageLabel";
 import { useSteamFolderSync } from "@/hooks/useSteamFolderSync";
+import { useMobileAwarePanel } from "@/hooks/useMobileAwarePanel";
+import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import {
+  getPageLayoutMinMaxMediaQuery,
+  PAGE_LAYOUT_MOBILE_BREAKPOINT,
+  type PageLayoutMode,
+  usePageLayoutMobileState,
+} from "@/hooks/usePageLayoutMobile";
+import { useAppData } from "@/hooks/useAppData";
+import { useProgressiveVisibleCount } from "@/hooks/useProgressiveVisibleCount";
+
+const IMAGES_TABLET_MAX_WIDTH = 1279.98;
+const IMAGES_TABLET_MEDIA_QUERY = getPageLayoutMinMaxMediaQuery(
+  PAGE_LAYOUT_MOBILE_BREAKPOINT,
+  IMAGES_TABLET_MAX_WIDTH,
+);
+
+type GalleryDensity = "mobile" | "tablet" | "desktop";
+
+function resolveGalleryDensity(mode: PageLayoutMode, isTabletWidth: boolean): GalleryDensity {
+  if (mode === "mobile") return "mobile";
+  if (isTabletWidth) return "tablet";
+  return "desktop";
+}
+
+function galleryGridColumnsClassName(density: GalleryDensity): string {
+  if (density === "mobile") return "grid-cols-2 sm:grid-cols-3";
+  if (density === "tablet") {
+    return "[grid-template-columns:repeat(auto-fit,minmax(11rem,1fr))]";
+  }
+  return "grid-cols-5";
+}
 
 export function ImagesPage() {
-  const images: StoredImage[] = useLiveQueryArray(() => db.images.toArray());
-  const notes: Note[] = useLiveQueryArray(() => db.notes.toArray());
+  const { images, notes, imagesLoading, notesLoading } = useAppData();
+  const isPageDataLoading = imagesLoading || notesLoading;
   const search = useStore((s) => s.search);
   const deferredSearch = useDeferredValue(search);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const {
+    panelValue: selectedId,
+    setPanelValue: setSelectedId,
+    mobileDrawerOpen,
+  } = useMobileAwarePanel<string>({
+    getSignal: (value) => value,
+  });
+  const mobileDrawerProps = usePageLayoutMobileDrawerProps({ mobileDrawerOpen });
+  const pageLayoutMobileState = usePageLayoutMobileState();
+  const isTabletGalleryWidth = useMediaQuery(IMAGES_TABLET_MEDIA_QUERY, false);
+  const galleryDensity = resolveGalleryDensity(pageLayoutMobileState.mode, isTabletGalleryWidth);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"library" | "deleted-imports">("library");
   const [sortMode, setSortMode] = useState<ImagesSortMode>("newest");
@@ -142,8 +183,11 @@ export function ImagesPage() {
         e.preventDefault();
         setPreviewOpen(true);
       } else if (e.key === "Escape") {
-        setPreviewOpen(false);
-        setSelectedId(null);
+        if (previewOpen) {
+          setPreviewOpen(false);
+        } else {
+          setSelectedId(null);
+        }
       }
     }
 
@@ -160,7 +204,7 @@ export function ImagesPage() {
   }
 
   return (
-    <PageLayout variant="panel" mobileDrawerOpen={Boolean(selectedId)} mobileDrawerSide="right">
+    <PageLayout variant="panel" {...mobileDrawerProps}>
       <PageLayout.Left>
         <ImagesLeftPanel
           total={filtered.length}
@@ -173,20 +217,37 @@ export function ImagesPage() {
       </PageLayout.Left>
 
       <PageLayout.Middle>
-        {viewMode === "library" && filtered.length === 0 && (
+        {viewMode === "library" && isPageDataLoading && (
+          <Grid as="div" variant="default" gap="3" className={galleryGridColumnsClassName(galleryDensity)}>
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div
+                key={`image-skeleton-${index}`}
+                className="aspect-square animate-pulse rounded-lg border border-border bg-muted/55"
+              />
+            ))}
+          </Grid>
+        )}
+
+        {viewMode === "library" && !isPageDataLoading && filtered.length === 0 && (
           <EmptyState>
             <Text>No images yet. Add one from note capture or from a note editor.</Text>
           </EmptyState>
         )}
 
-        {viewMode === "library" && filtered.length > 0 && (
-          <ImagesGrid filtered={filtered} selectedId={selectedId} setSelectedId={setSelectedId} />
+        {viewMode === "library" && !isPageDataLoading && filtered.length > 0 && (
+          <ImagesGrid
+            filtered={filtered}
+            selectedId={selectedId}
+            setSelectedId={setSelectedId}
+            galleryDensity={galleryDensity}
+          />
         )}
 
         {viewMode === "deleted-imports" && (
           <DeletedImportsList
             entries={filteredDeletedImports}
             busy={steamSync.busy}
+            galleryDensity={galleryDensity}
             onUndelete={async (sourceKey, fileName) => {
               const restored = await steamSync.undeleteImport(sourceKey, fileName);
               if (restored) {
@@ -252,12 +313,14 @@ export function ImagesPage() {
 function DeletedImportsList({
   entries,
   busy,
+  galleryDensity,
   onUndelete,
   onHardDelete,
   loadPreview,
 }: {
   entries: Array<{ sourceKey: string; fileName: string; deletedAt: number }>;
   busy: boolean;
+  galleryDensity: GalleryDensity;
   onUndelete: (sourceKey: string, fileName: string) => Promise<void>;
   onHardDelete: (sourceKey: string, fileName: string) => Promise<void>;
   loadPreview: (sourceKey: string) => Promise<Blob | null>;
@@ -271,7 +334,7 @@ function DeletedImportsList({
   }
 
   return (
-    <Grid as="div" variant="gallery" gap="3">
+    <Grid as="div" variant="default" gap="3" className={galleryGridColumnsClassName(galleryDensity)}>
       {entries.map((entry) => (
         <DeletedImportThumbCard
           key={entry.sourceKey}
@@ -325,9 +388,7 @@ function useSteamSyncPanel(
     setDeleteBusy(true);
     try {
       const imageIds = await getSteamImportedImageIdsForSource(sourceKey);
-      for (const imageId of imageIds) {
-        await removeImage(imageId);
-      }
+      await Promise.all(imageIds.map((imageId) => removeImage(imageId)));
       await permanentlyDeleteSteamImport(sourceKey);
       await refreshDeletedImports();
     } finally {
@@ -363,14 +424,24 @@ function ImagesGrid({
   filtered,
   selectedId,
   setSelectedId,
+  galleryDensity,
 }: {
   filtered: StoredImage[];
   selectedId: string | null;
   setSelectedId: (id: string | null) => void;
+  galleryDensity: GalleryDensity;
 }) {
+  const visibleCount = useProgressiveVisibleCount({
+    total: filtered.length,
+    enabled: filtered.length > 120,
+    initial: 60,
+    step: 60,
+  });
+  const visibleImages = filtered.slice(0, visibleCount);
+
   return (
-    <Grid as="div" variant="gallery" gap="3">
-      {filtered.map((img) => (
+    <Grid as="div" variant="default" gap="3" className={galleryGridColumnsClassName(galleryDensity)}>
+      {visibleImages.map((img) => (
         <ImageThumb
           key={img.id}
           img={img}
@@ -380,6 +451,9 @@ function ImagesGrid({
           }}
         />
       ))}
+      {visibleCount < filtered.length && (
+        <div className="aspect-square animate-pulse rounded-lg border border-border bg-muted/55" />
+      )}
     </Grid>
   );
 }

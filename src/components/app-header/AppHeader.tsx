@@ -31,6 +31,18 @@ import { Stack } from "@/components/common/general/Stack";
 import { KeyboardKey } from "@/components/common/KeyboardKey";
 import { Text } from "@/components/common/Typography";
 
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return /input|textarea|select/i.test(target.tagName) || target.isContentEditable;
+}
+
+function isShortcutAllowed(event: KeyboardEvent, allowCtrlOrMeta = false): boolean {
+  if (isTypingTarget(event.target)) return false;
+  if (event.altKey) return false;
+  if (!allowCtrlOrMeta && (event.ctrlKey || event.metaKey)) return false;
+  return true;
+}
+
 export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
   const buyMeACoffeeUrl = "https://buymeacoffee.com/fredrikm97";
   const sections = useSections();
@@ -80,9 +92,20 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      const tgt = e.target as HTMLElement;
-      const typing = (tgt && /input|textarea|select/i.test(tgt.tagName)) || tgt?.isContentEditable;
-      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+      // Ctrl+K or bare "/" focuses the search bar
+      const isCtrlK = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k";
+      const isSlash = !e.ctrlKey && e.key === "/";
+      if (isCtrlK || isSlash) {
+        if (!isShortcutAllowed(e, true)) return;
+        e.preventDefault();
+        const input = searchInputRef.current;
+        if (!input) return;
+        input.focus();
+        input.select();
+        return;
+      }
+
+      if (!isShortcutAllowed(e)) return;
       if (e.key !== "n" && e.key !== "N" && e.key !== "+") return;
       e.preventDefault();
       if (!canCreateInPlace) {
@@ -98,27 +121,6 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [openCapture, canCreateInPlace, defaultCaptureNoteType, navigate, pathname]);
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      const tgt = e.target as HTMLElement;
-      const typing = (tgt && /input|textarea|select/i.test(tgt.tagName)) || tgt?.isContentEditable;
-      if (typing || e.metaKey || e.altKey) return;
-
-      // Ctrl+K or bare "/" focuses the search bar
-      const isCtrlK = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k";
-      const isSlash = !e.ctrlKey && e.key === "/";
-      if (!isCtrlK && !isSlash) return;
-
-      e.preventDefault();
-      const input = searchInputRef.current;
-      if (!input) return;
-      input.focus();
-      input.select();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   function hrefFor(s: { id: string; builtin?: string; filter?: { type?: string } }) {
     if (s.builtin === "notes") return "/";
@@ -169,11 +171,11 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
 
       <Stack
         as="header"
-        className="sticky top-0 z-40 border-b border-border bg-background px-3 backdrop-blur lg:px-6"
+        className="sticky top-0 z-40 border-b border-border bg-background px-3 backdrop-blur lg:px-6 flex justify-center"
         gap="0"
       >
         <Stack
-          className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-3 py-2 sm:px-4 lg:flex-nowrap lg:px-6"
+          className="mx-auto flex w-full max-w-[104rem] flex-wrap items-center gap-2 px-3 py-2 sm:px-4 lg:flex-nowrap lg:px-6"
           gap="0"
         >
           <Link
@@ -191,7 +193,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
             </Text>
             <Text
               as="span"
-              className="max-w-40 truncate whitespace-nowrap text-base sm:max-w-none"
+              className="hidden max-w-40 truncate whitespace-nowrap text-base sm:inline sm:max-w-none"
               size="base"
               tone="default"
             >
@@ -207,12 +209,12 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
                 gap="0"
               >
                 {sections
-                  .filter((s) => !s.hidden && (Boolean(s.builtin) || s.id === "books"))
+                  .filter((s) => !s.hidden && Boolean(s.builtin))
                   .map((s) => {
                     const href = hrefFor(s);
                     const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
                     let linkClass =
-                      "rounded px-2 py-1 text-sm text-muted-foreground hover:bg-accent hover:text-foreground";
+                      "rounded px-2 py-1 text-sm text-muted-foreground dark:text-foreground/70 hover:bg-accent hover:text-foreground";
                     if (isActive) {
                       linkClass = `${linkClass} bg-secondary text-foreground`;
                     }
@@ -248,13 +250,14 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
                   </Link>
                 )}
                 <Stack
-                  className={`relative w-28 [&_.capture-suggestion-field]:relative [&_.capture-suggestion-dropdown]:left-0 [&_.capture-suggestion-dropdown]:right-auto [&_.capture-suggestion-dropdown]:top-[calc(100%+0.25rem)] [&_.capture-suggestion-dropdown]:min-w-56 [&_.capture-suggestion-dropdown]:max-w-80 [&_.input-base]:h-8 [&_.input-base]:w-full sm:w-36 lg:w-auto lg:[&_.input-base]:w-44 ${hasSearchText ? "[&_.input-base]:pl-3" : "[&_.input-base]:pl-8"}`}
+                  className="relative w-28 sm:w-36 lg:w-auto"
                   gap="0"
                 >
                   <Search
                     className={`pointer-events-none absolute left-2.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground ${hasSearchText ? "hidden" : ""}`}
                   />
                   <SuggestionsDropdown
+                    dropdownClassName="left-0 right-auto top-[calc(100%+0.25rem)] min-w-56 max-w-80"
                     showSuggestionHint={false}
                     displayMode="plain"
                     includeTypeSuggestions={false}
@@ -276,6 +279,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
                       }}
                       placeholder=" "
                       size="sm"
+                      inputClassName={`w-full lg:w-44 ${hasSearchText ? "pl-3" : "pl-8"}`}
                     />
                   </SuggestionsDropdown>
                 </Stack>

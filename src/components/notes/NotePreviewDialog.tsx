@@ -80,6 +80,7 @@ export function NotePreviewDialog({
       editAriaLabel="Edit note"
       initialDraft={activeNote.body}
       saveSuccessMessage="Note saved"
+      viewDialogVariant="expand"
       onSaveDraft={async (nextDraft) => {
         const next: Note = {
           ...activeNote,

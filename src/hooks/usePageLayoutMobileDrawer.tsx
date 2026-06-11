@@ -1,9 +1,10 @@
-import { createContext, useContext, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import type { PageLayoutMode } from "@/hooks/usePageLayoutMobile";
 
 export type MobileDrawerSide = "left" | "right";
 
 export type MobileDrawerControls = {
-  isPageLayoutMobile: boolean;
+  pageLayoutMode: PageLayoutMode;
   openMobileDrawer: (side: MobileDrawerSide) => void;
   closeMobileDrawer: () => void;
 };
@@ -40,7 +41,7 @@ export function useSyncPageLayoutMobileDrawer({
   const drawerControls = usePageLayoutMobileDrawerControls();
 
   useEffect(() => {
-    if (!drawerControls?.isPageLayoutMobile) return;
+    if (drawerControls?.pageLayoutMode !== "mobile") return;
     if (!isOpen) {
       if (closeWhenClosed) {
         drawerControls.closeMobileDrawer();
@@ -53,4 +54,20 @@ export function useSyncPageLayoutMobileDrawer({
 
 export function useSyncPageLayoutMobileRightDrawer(isOpen: boolean) {
   useSyncPageLayoutMobileDrawer({ isOpen, side: "right" });
+}
+
+export function usePageLayoutMobileDrawerProps({
+  mobileDrawerOpen,
+  mobileDrawerSide = "right",
+}: {
+  mobileDrawerOpen: boolean | string | number;
+  mobileDrawerSide?: MobileDrawerSide;
+}) {
+  return useMemo(
+    () => ({
+      mobileDrawerOpen,
+      mobileDrawerSide,
+    }),
+    [mobileDrawerOpen, mobileDrawerSide],
+  );
 }

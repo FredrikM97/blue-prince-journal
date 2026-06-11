@@ -11,6 +11,7 @@ export function SteamImportSection() {
   const setSteamFolderName = useStore((s) => s.setSteamFolderName);
   const steamSync = useSteamFolderSync({
     addImage,
+    syncOnConnect: true,
     onFolderNameChange: setSteamFolderName,
     connectSuccessMessage: (name) => `Connected Steam images folder: ${name}`,
   });

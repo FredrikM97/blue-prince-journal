@@ -410,6 +410,7 @@ function SuggestionItems({
   style,
   showHint = true,
   displayMode = "token",
+  className,
 }: {
   suggestions: TokenSuggestion[];
   activeIndex: number;
@@ -419,11 +420,15 @@ function SuggestionItems({
   style?: CSSProperties;
   showHint?: boolean;
   displayMode?: TokenDisplayMode;
+  className?: string;
 }) {
   if (!isOpen || suggestions.length === 0) return null;
+  let dropdownClassName =
+    "absolute z-40 max-h-44 min-w-44 max-w-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md";
+  if (className) dropdownClassName = `${dropdownClassName} ${className}`;
   return (
     <div
-      className="absolute z-40 max-h-44 min-w-44 max-w-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md"
+      className={dropdownClassName}
       role="listbox"
       aria-label="Token suggestions"
       style={style}
@@ -494,6 +499,8 @@ export function SuggestionsDropdown({
   includeDateSuggestions = true,
   dropdownAlign = "token",
   preservePrefixesInPlainMode = [],
+  containerClassName,
+  dropdownClassName,
 }: {
   children: ReactNode;
   /** Optional: called with keepOpen=true when Shift is held during Cmd/Ctrl+Enter. */
@@ -504,6 +511,8 @@ export function SuggestionsDropdown({
   includeDateSuggestions?: boolean;
   dropdownAlign?: DropdownAlignMode;
   preservePrefixesInPlainMode?: string[];
+  containerClassName?: string;
+  dropdownClassName?: string;
 }) {
   const sharedSuggestions = useSuggestionSources();
   const [localValue, setLocalValue] = useState("");
@@ -561,9 +570,12 @@ export function SuggestionsDropdown({
     alignMode: dropdownAlign,
   });
 
+  let wrapperClassName = "relative";
+  if (containerClassName) wrapperClassName = `${wrapperClassName} ${containerClassName}`;
+
   return (
     <div
-      className="relative"
+      className={wrapperClassName}
       onChange={(e) => syncFromEl(e.target)} // value+cursor in one update → fixes @ lag
       onKeyUp={(e) => syncFromEl(e.target)} // catches cursor moves (arrow keys)
       onClick={(e) => syncFromEl(e.target)} // catches click-to-reposition cursor
@@ -588,6 +600,7 @@ export function SuggestionsDropdown({
         style={dropdownStyle}
         showHint={showSuggestionHint}
         displayMode={displayMode}
+        className={dropdownClassName}
       />
     </div>
   );

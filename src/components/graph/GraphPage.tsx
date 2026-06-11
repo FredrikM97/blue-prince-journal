@@ -10,16 +10,13 @@ import { SidePanelLeft } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
 import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
-import { db } from "@/data/db";
 import { GraphPreviewContent } from "@/components/graph/GraphRightPanel";
-import type { Note, Todo } from "@/lib/types";
-import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
+import type { Note } from "@/lib/types";
 import {
   buildGraph,
   buildRenderedEdges,
   edgeAppearance,
   indexNodes,
-  toGraphEntries,
   trim,
   type GraphCluster,
   type GraphNode,
@@ -31,6 +28,8 @@ import {
   useNonPassiveWheel,
 } from "@/hooks/useNonPassiveWheel";
 import { themeVars } from "@/components/graph/themeVars";
+import { NOTE_TYPE_META } from "@/lib/noteMetadata";
+import { useAppData } from "@/hooks/useAppData";
 
 const ALL_NOTE_TYPES = ["clue", "code", "observation", "theory", "story", "task"] as const;
 
@@ -63,9 +62,9 @@ const TYPE_ICON: Record<
   task: ListTodo,
 };
 export function GraphPage() {
-  const notes: Note[] = useLiveQueryArray(() => db.notes.toArray());
-  const todos: Todo[] = useLiveQueryArray(() => db.todos.toArray());
-  const dataVersion = notes.length + todos.length;
+  const { graphEntries, graphModel: cachedGraphModel, notesLoading, todosLoading } = useAppData();
+  const isPageDataLoading = notesLoading || todosLoading;
+  const dataVersion = graphEntries.length;
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [hiddenRooms, setHiddenRooms] = useState<Set<string>>(new Set());
   const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set());
@@ -73,11 +72,10 @@ export function GraphPage() {
   const [hideIsolated, setHideIsolated] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  const graphEntries = useMemo(() => toGraphEntries(notes, todos), [notes, todos]);
-
   const allRooms = useMemo(() => {
-    const rooms = new Set<string>();
-    for (const n of graphEntries) rooms.add(n.room?.trim() || "");
+    const rooms = new Set(
+      graphEntries.map((n) => n.room?.trim() || ""),
+    );
     return [...rooms].sort((a, b) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b)));
   }, [graphEntries]);
 
@@ -93,16 +91,19 @@ export function GraphPage() {
     [graphEntries, hiddenRooms, hiddenTypes],
   );
 
-  const { nodes, edges, clusters } = useMemo(() => buildGraph(visibleEntries), [visibleEntries]);
+  const usesCachedGraphModel = hiddenRooms.size === 0 && hiddenTypes.size === 0;
+  const graphModel = useMemo(() => {
+    if (usesCachedGraphModel) return cachedGraphModel;
+    return buildGraph(visibleEntries);
+  }, [cachedGraphModel, usesCachedGraphModel, visibleEntries]);
+
+  const { nodes, edges, clusters } = graphModel;
 
   // IDs of nodes that have at least one edge (used by the isolated-nodes filter)
   const connectedNodeIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const e of edges) {
-      ids.add(e.from);
-      ids.add(e.to);
-    }
-    return ids;
+    return new Set(
+      edges.flatMap((e) => [e.from, e.to]),
+    );
   }, [edges]);
 
   // Nodes to actually render — optionally hiding isolated (no-edge) ones
@@ -138,11 +139,21 @@ export function GraphPage() {
     [displayNodes, selectedNodeId],
   );
 
+  const edgeDegreeByNodeId = useMemo(() => {
+    const incoming = new Map<string, number>();
+    const outgoing = new Map<string, number>();
+    for (const edge of edges) {
+      outgoing.set(edge.from, (outgoing.get(edge.from) ?? 0) + 1);
+      incoming.set(edge.to, (incoming.get(edge.to) ?? 0) + 1);
+    }
+    return { incoming, outgoing };
+  }, [edges]);
+
   const incomingCount = selectedNode
-    ? edges.filter((edge) => edge.to === selectedNode.id).length
+    ? (edgeDegreeByNodeId.incoming.get(selectedNode.id) ?? 0)
     : 0;
   const outgoingCount = selectedNode
-    ? edges.filter((edge) => edge.from === selectedNode.id).length
+    ? (edgeDegreeByNodeId.outgoing.get(selectedNode.id) ?? 0)
     : 0;
 
   useEffect(() => {
@@ -164,7 +175,7 @@ export function GraphPage() {
 
   const typeFilterItems = ALL_NOTE_TYPES.map((type) => ({
     key: type,
-    label: type,
+    label: NOTE_TYPE_META[type].label,
     active: !hiddenTypes.has(type),
     dotColor: TYPE_COLOR[type],
     onToggle: () =>
@@ -263,13 +274,22 @@ export function GraphPage() {
           </SidePanelLeft>
         </PageLayout.Left>
         <PageLayout.Middle>
-          <Stack className="flex h-full min-h-0 flex-col overflow-hidden h-[calc(100dvh-5.5rem)]" gap="0">
-            {nodes.length === 0 && (
+          <Stack className="flex h-full min-h-0 flex-col overflow-hidden max-[1023.98px]:h-auto" gap="0">
+            {isPageDataLoading && (
+              <Stack className="rounded-lg border border-border bg-card p-2" gap="2">
+                <Stack className="flex items-center justify-between px-1" gap="0">
+                  <div className="h-3 w-36 animate-pulse rounded bg-muted/60" />
+                  <div className="h-8 w-24 animate-pulse rounded bg-muted/55" />
+                </Stack>
+                <div className="h-[55vh] animate-pulse rounded border border-border/70 bg-muted/50" />
+              </Stack>
+            )}
+            {!isPageDataLoading && nodes.length === 0 && (
               <EmptyState>
                 No notes or todos yet. Add entries to build your connection graph.
               </EmptyState>
             )}
-            {nodes.length > 0 && (
+            {!isPageDataLoading && nodes.length > 0 && (
               <GraphCanvas
                 {...canvasProps}
                 actions={
@@ -380,8 +400,8 @@ function GraphCanvas({
 
   function startDrag(event: PointerEvent<SVGSVGElement>) {
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    const tag = (event.target as Element).tagName.toLowerCase();
-    if (tag !== "svg" && tag !== "rect") return;
+    const target = event.target as Element;
+    if (target.closest("[data-graph-node='true']")) return;
     const svgPt = toSvgPoint(event.clientX, event.clientY, event.currentTarget);
     dragRef.current = {
       startSvgX: svgPt.x,
@@ -454,8 +474,8 @@ function GraphCanvas({
   let frameClassName = "flex flex-col gap-2 overflow-hidden rounded-lg border border-border bg-card p-2";
   if (plain) frameClassName = "flex flex-col gap-2 overflow-hidden rounded-lg p-2";
 
-  let svgClassName = "min-h-0 flex-1 touch-none cursor-grab";
-  if (isDragging) svgClassName = "min-h-0 flex-1 touch-none cursor-grabbing";
+  let svgClassName = "min-h-0 flex-1 touch-none select-none cursor-grab";
+  if (isDragging) svgClassName = "min-h-0 flex-1 touch-none select-none cursor-grabbing";
 
   return (
     <Stack className={frameClassName} gap="0">
@@ -520,6 +540,8 @@ function GraphCanvas({
         width="100%"
         height="100%"
         className={svgClassName}
+        style={{ userSelect: "none", WebkitUserSelect: "none" }}
+        onDragStart={(event) => event.preventDefault()}
         onPointerDown={startDrag}
         onPointerMove={updateDrag}
         onPointerUp={stopDrag}
@@ -629,6 +651,7 @@ function renderNode(
       key={node.id}
       role="button"
       tabIndex={0}
+      data-graph-node="true"
       className="cursor-pointer"
       onMouseDown={(event) => event.preventDefault()}
       onClick={onSelect}
@@ -654,7 +677,11 @@ function renderNode(
         <Icon size={NODE_ICON_SIZE} className="text-black/80" />
       </g>
 
-      <g transform={`translate(${node.x + 18} ${node.y + 5}) scale(${labelScale})`}>
+      <g
+        transform={`translate(${node.x + 18} ${node.y + 5}) scale(${labelScale})`}
+        pointerEvents="none"
+        style={{ userSelect: "none", WebkitUserSelect: "none" }}
+      >
         <text fill={themeVars.foreground} fontSize="14" fontWeight="500" opacity="0.92">
           {trim(node.note.title, 22)}
         </text>
@@ -685,6 +712,8 @@ function renderCluster(cluster: GraphCluster) {
         fontSize="10"
         textAnchor="middle"
         fontStyle="italic"
+        pointerEvents="none"
+        style={{ userSelect: "none", WebkitUserSelect: "none" }}
       >
         {cluster.label}
       </text>

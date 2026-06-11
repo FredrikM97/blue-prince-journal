@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { matchesMediaQuery } from "@/hooks/useMediaQuery";
@@ -13,8 +13,21 @@ function resolveInitialTheme(): Theme {
 }
 
 function applyTheme(theme: Theme) {
+  const disableTransitions = document.createElement("style");
+  disableTransitions.appendChild(
+    document.createTextNode("*{transition:none!important;animation:none!important}"),
+  );
+  document.head.appendChild(disableTransitions);
+
   document.documentElement.classList.toggle("dark", theme === "dark");
+  document.documentElement.style.colorScheme = theme;
   window.localStorage.setItem("bp-theme", theme);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      disableTransitions.remove();
+    });
+  });
 }
 
 /** Self-contained theme toggle. Manages its own state, reads/writes localStorage,
@@ -22,7 +35,7 @@ function applyTheme(theme: Theme) {
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>(() => resolveInitialTheme());
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     applyTheme(theme);
   }, [theme]);
 
