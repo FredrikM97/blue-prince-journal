@@ -78,6 +78,7 @@ export function ImagesRightPanel({
           <ImageZoomDialogContent
             imageId={img.id}
             alt={img.name}
+            imageBlob={img.blob}
             onPreviousImage={onPrev}
             onNextImage={onNext}
           />
@@ -142,7 +143,12 @@ function ImagesInspectorPanel({
       >
         <Stack gap="2">
           <ImagePreviewContainer>
-            <StoredImageView id={img.id} alt={img.name} className="h-full w-full object-cover" />
+            <StoredImageView
+              id={img.id}
+              alt={img.name}
+              blob={img.blob}
+              className="h-full w-full object-cover"
+            />
           </ImagePreviewContainer>
         </Stack>
 

@@ -1,7 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import { execSync } from "node:child_process";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 const base = process.env.BASE_PATH ?? "/";
@@ -12,7 +11,7 @@ export default defineConfig({
   define: {
     __APP_COMMIT_HASH__: JSON.stringify(appCommitHash),
   },
-  plugins: [tsconfigPaths(), tailwindcss(), react()],
+  plugins: [tailwindcss(), react()],
   optimizeDeps: {
     include: [
       "@tanstack/react-query",
@@ -24,6 +23,7 @@ export default defineConfig({
     ],
   },
   resolve: {
+    tsconfigPaths: true,
     dedupe: [
       "react",
       "react-dom",
@@ -37,30 +37,15 @@ export default defineConfig({
     target: "es2022",
     outDir: "dist",
     sourcemap: false,
+    cssCodeSplit: false,
     reportCompressedSize: true,
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
+      output: {},
+    },
+    rolldownOptions: {
       output: {
-        manualChunks(id) {
-          if (
-            id.includes("node_modules/react/") ||
-            id.includes("node_modules/react-dom/") ||
-            id.includes("node_modules/@tanstack/react-router/") ||
-            id.includes("node_modules/@tanstack/react-query/")
-          ) {
-            return "vendor";
-          }
-          if (
-            id.includes("node_modules/react-markdown/") ||
-            id.includes("node_modules/remark-gfm/")
-          ) {
-            return "markdown";
-          }
-          if (id.includes("node_modules/jszip/")) {
-            return "zip";
-          }
-          return undefined;
-        },
+        codeSplitting: false,
       },
     },
   },

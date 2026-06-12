@@ -1,6 +1,7 @@
 const THUMB_MAX_EDGE = 320;
 const THUMB_CACHE_MAX = 250;
 const THUMB_CONCURRENCY = 6;
+const FULL_CACHE_MAX = 80;
 
 type ThumbCacheEntry = {
   key: string;
@@ -8,6 +9,7 @@ type ThumbCacheEntry = {
 };
 
 const thumbCache = new Map<string, ThumbCacheEntry>();
+const fullCache = new Map<string, ThumbCacheEntry>();
 let thumbRunning = 0;
 const thumbQueue: Array<() => void> = [];
 
@@ -64,6 +66,38 @@ export function cacheThumbUrl(id: string, blob: Blob, url: string): void {
     const oldest = thumbCache.get(oldestKey);
     if (oldest) URL.revokeObjectURL(oldest.url);
     thumbCache.delete(oldestKey);
+  }
+}
+
+export function getCachedFullUrl(id: string, blob: Blob): string | null {
+  const key = getBlobCacheKey(blob);
+  const cached = fullCache.get(id);
+  if (!cached) return null;
+  if (cached.key !== key) {
+    URL.revokeObjectURL(cached.url);
+    fullCache.delete(id);
+    return null;
+  }
+
+  fullCache.delete(id);
+  fullCache.set(id, cached);
+  return cached.url;
+}
+
+export function cacheFullUrl(id: string, blob: Blob, url: string): void {
+  const previous = fullCache.get(id);
+  if (previous) {
+    URL.revokeObjectURL(previous.url);
+    fullCache.delete(id);
+  }
+
+  fullCache.set(id, { key: getBlobCacheKey(blob), url });
+  while (fullCache.size > FULL_CACHE_MAX) {
+    const oldestKey = fullCache.keys().next().value;
+    if (!oldestKey) break;
+    const oldest = fullCache.get(oldestKey);
+    if (oldest) URL.revokeObjectURL(oldest.url);
+    fullCache.delete(oldestKey);
   }
 }
 

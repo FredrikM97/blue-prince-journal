@@ -149,6 +149,10 @@ function getAppFrameShellClass(isPageLayoutMobile: boolean) {
 
 function AppFrame({ children }: { children: React.ReactNode }) {
   const [routesPreloaded, setRoutesPreloaded] = useState(false);
+  const router = useRouter();
+  const pathname = router.state.location.pathname;
+  const isImagesRouteActive = pathname === "/section/images";
+  const [hasMountedImagesRoute, setHasMountedImagesRoute] = useState(isImagesRouteActive);
 
   // Call all hooks unconditionally FIRST
   const { notes, todos } = useAppData();
@@ -178,6 +182,12 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 
     void preloadAllRoutes();
   }, []);
+
+  useEffect(() => {
+    if (isImagesRouteActive) {
+      setHasMountedImagesRoute(true);
+    }
+  }, [isImagesRouteActive]);
 
   // When a new version of the app is deployed, chunk URLs change. Instead of
   // crashing or silently breaking, show a persistent notification so users can
@@ -238,7 +248,12 @@ function AppFrame({ children }: { children: React.ReactNode }) {
       <HeadContent />
       <AppHeader />
       <div className={appContentClass}>
-        {children}
+        {hasMountedImagesRoute && (
+          <div className={isImagesRouteActive ? "contents" : "hidden"} aria-hidden={!isImagesRouteActive}>
+            <ImagesPageRoute />
+          </div>
+        )}
+        {!isImagesRouteActive && children}
       </div>
       <Toaster />
     </div>
@@ -337,9 +352,7 @@ export function SectionView({ id }: { id: string }) {
     );
   }
   if (section.builtin === "images") {
-    return (
-      <ImagesPageRoute />
-    );
+    return null;
   }
   if (section.id === "settings") {
     return (

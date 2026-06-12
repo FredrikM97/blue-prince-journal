@@ -5,12 +5,14 @@ import { Text } from "@/components/common/Typography";
 export function ImageThumbButton({
   imageId,
   imageName,
+  imageBlob,
   label,
   selected,
   onClick,
 }: {
   imageId: string;
   imageName: string;
+  imageBlob: Blob;
   label: string;
   selected: boolean;
   onClick: () => void;
@@ -46,6 +48,7 @@ export function ImageThumbButton({
       <StoredImageView
         id={imageId}
         alt={imageName}
+        blob={imageBlob}
         className="h-full w-full object-cover"
         mode="thumb"
         lazy={!visible}

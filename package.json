@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "dev:bundled": "sh -c 'trap \"kill 0\" EXIT; vite build --mode development --watch & vite preview --strictPort --port 8080'",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "test": "npm run check:types && npm run test:vitest",

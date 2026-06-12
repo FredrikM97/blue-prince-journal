@@ -474,6 +474,7 @@ function ImageThumb({
     <ImageThumbButton
       imageId={img.id}
       imageName={img.name}
+      imageBlob={img.blob}
       label={getImageLabel(img)}
       selected={selected}
       onClick={onClick}

@@ -26,11 +26,13 @@ function clampZoom(value: number): number {
 export function ImageZoomDialogContent({
   imageId,
   alt,
+  imageBlob,
   onPreviousImage,
   onNextImage,
 }: {
   imageId: string;
   alt: string;
+  imageBlob?: Blob;
   onPreviousImage?: () => void;
   onNextImage?: () => void;
 }) {
@@ -311,6 +313,7 @@ export function ImageZoomDialogContent({
           <StoredImageView
             id={imageId}
             alt={alt}
+            blob={imageBlob}
             className="h-auto max-h-full w-auto max-w-full select-none object-contain [-webkit-user-drag:none]"
           />
         </div>
