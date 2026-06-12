@@ -13,6 +13,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/hooks/useStore";
 import { exportAll, importAll } from "@/data/storage/backup";
 import { submitFeedback } from "@/data/feedback";
+import type { FeedbackType } from "@/data/feedback";
 import { useSections } from "./useSections";
 import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/input/InputField";
@@ -52,6 +53,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackContact, setFeedbackContact] = useState("");
+  const [feedbackType, setFeedbackType] = useState<FeedbackType>("general");
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const deferredSearchInput = useDeferredValue(searchInput);
   const openCapture = useStore((s) => s.openCapture);
@@ -141,10 +143,12 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
         message,
         contact: feedbackContact.trim(),
         appVersion: __APP_COMMIT_HASH__,
+        type: feedbackType,
       });
       toast.success("Feedback sent");
       setFeedbackMessage("");
       setFeedbackContact("");
+      setFeedbackType("general");
       setFeedbackOpen(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to send feedback");
@@ -162,6 +166,8 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
         onMessageChange={setFeedbackMessage}
         contact={feedbackContact}
         onContactChange={setFeedbackContact}
+        type={feedbackType}
+        onTypeChange={setFeedbackType}
         submitting={feedbackSubmitting}
         buildHash={__APP_COMMIT_HASH__}
         onSubmit={() => {
