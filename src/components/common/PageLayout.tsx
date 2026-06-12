@@ -78,7 +78,7 @@ function getColumnLayoutClass(hasLeft: boolean, hasRight: boolean, isPageLayoutM
 
 function getSidebarClass(side: MobileDrawerSide, variant: PageLayoutVariant): string {
   let className =
-    "sticky top-0 min-h-0 self-start overflow-y-auto bg-card [overscroll-behavior:contain]";
+    "sticky top-0 h-full min-h-0 max-h-full self-start overflow-y-auto bg-card [overscroll-behavior:contain]";
   if (side === "left") {
     className = `${className} rounded-l-lg border-r border-border`;
   }

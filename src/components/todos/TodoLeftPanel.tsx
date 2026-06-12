@@ -31,21 +31,23 @@ export function TodoLeftPanel({
 
   return (
     <SidePanelLeft title="Todo" subtitle={`${total} ${itemLabel}`}>
-      <Stack gap="4">
-        <Stack gap="1">
-          <MetaText>Open: {openCount}</MetaText>
-          <MetaText>In progress: {progressCount}</MetaText>
-          <MetaText>Done: {doneCount}</MetaText>
-        </Stack>
+      <Stack gap="0" className="min-h-0 flex-1 overflow-y-auto">
+        <Stack gap="4">
+          <Stack gap="1">
+            <MetaText>Open: {openCount}</MetaText>
+            <MetaText>In progress: {progressCount}</MetaText>
+            <MetaText>Done: {doneCount}</MetaText>
+          </Stack>
 
-        <FilterSection title="Scope">
-          <FilterButtonGroup
-            value={scopeFilter}
-            options={scopeOptions}
-            onChange={setScopeFilter}
-            allLabel="All"
-          />
-        </FilterSection>
+          <FilterSection title="Scope">
+            <FilterButtonGroup
+              value={scopeFilter}
+              options={scopeOptions}
+              onChange={setScopeFilter}
+              allLabel="All"
+            />
+          </FilterSection>
+        </Stack>
       </Stack>
     </SidePanelLeft>
   );

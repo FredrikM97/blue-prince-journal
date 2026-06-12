@@ -148,7 +148,7 @@ function SidePanelComponent({
   }, [mobileDrawerControls, mobileDrawerKey, mobileDrawerSide]);
 
   return (
-    <Stack gap="0" className="flex flex-col gap-3 rounded-lg p-2.5 text-sm sm:p-3">
+    <Stack gap="0" className="flex h-full min-h-0 flex-col gap-3 rounded-lg p-2.5 text-sm sm:p-3">
       <PanelHeader
         title={title}
         textSize={textSize}
@@ -160,7 +160,7 @@ function SidePanelComponent({
         showCloseOnDesktop={false}
         forceShowClose={forceShowClose}
       />
-      {children}
+      <div className="min-h-0 flex-1">{children}</div>
       {expandDialog}
     </Stack>
   );

@@ -63,7 +63,7 @@ export function PreviewDialog({
             actionsClassName="ml-auto -mr-2 shrink-0 items-center gap-1.5"
           />
         </DialogHeader>
-        <div className="preview-wrapper">
+        <div className="preview-wrapper flex min-h-0 flex-1 flex-col">
           <Stack gap="2" className={bodyClassName}>
             {children}
           </Stack>

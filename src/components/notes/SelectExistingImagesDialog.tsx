@@ -112,7 +112,7 @@ export function SelectExistingImagesDialog({
           Selected: {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"}
         </MetaText>
 
-        <Stack className="dialog-scroll-body-tall" gap="0">
+        <Stack className="dialog-scroll-body dialog-scroll-body-tall" gap="0">
           {sortedImages.length > 0 ? (
             <Grid variant="auto-fill-card" gap="3">
               {pageImages.map((img) => {

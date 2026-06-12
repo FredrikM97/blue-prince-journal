@@ -216,60 +216,62 @@ export function GraphPage() {
             title="Graph"
             subtitle={`${displayNodes.length} entries · ${edges.length} links`}
           >
-            <Stack gap="3">
-              <FilterSection
-                title="Types"
-                collapsible
-                defaultOpen
-                width="fit"
-                variant="compact"
-                onReset={onResetTypes}
-              >
-                <FilterToggleGrid
-                  items={typeFilterItems}
-                  size="compact"
-                  layout="wrap"
-                  width="fit"
-                  activeStyle="filled"
-                />
-              </FilterSection>
-
-              {allRooms.length > 1 && (
-                <GroupedRoomFilterSection
-                  rooms={allRooms}
-                  isRoomActive={(room) => !hiddenRooms.has(room)}
-                  onToggleRoom={(room) => {
-                    setHiddenRooms((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(room)) next.delete(room);
-                      else next.add(room);
-                      return next;
-                    });
-                  }}
-                  onResetAll={onResetRooms}
-                  title="Rooms"
-                  defaultOpen={false}
-                />
-              )}
-
-              {isolatedCount > 0 && (
+            <Stack gap="0" className="min-h-0 flex-1 overflow-y-auto">
+              <Stack gap="3">
                 <FilterSection
-                  title="Visibility"
+                  title="Types"
                   collapsible
                   defaultOpen
                   width="fit"
                   variant="compact"
+                  onReset={onResetTypes}
                 >
                   <FilterToggleGrid
-                    items={visibilityFilterItems}
-                    leftAligned
+                    items={typeFilterItems}
                     size="compact"
                     layout="wrap"
                     width="fit"
                     activeStyle="filled"
                   />
                 </FilterSection>
-              )}
+
+                {allRooms.length > 1 && (
+                  <GroupedRoomFilterSection
+                    rooms={allRooms}
+                    isRoomActive={(room) => !hiddenRooms.has(room)}
+                    onToggleRoom={(room) => {
+                      setHiddenRooms((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(room)) next.delete(room);
+                        else next.add(room);
+                        return next;
+                      });
+                    }}
+                    onResetAll={onResetRooms}
+                    title="Rooms"
+                    defaultOpen={false}
+                  />
+                )}
+
+                {isolatedCount > 0 && (
+                  <FilterSection
+                    title="Visibility"
+                    collapsible
+                    defaultOpen
+                    width="fit"
+                    variant="compact"
+                  >
+                    <FilterToggleGrid
+                      items={visibilityFilterItems}
+                      leftAligned
+                      size="compact"
+                      layout="wrap"
+                      width="fit"
+                      activeStyle="filled"
+                    />
+                  </FilterSection>
+                )}
+              </Stack>
             </Stack>
           </SidePanelLeft>
         </PageLayout.Left>

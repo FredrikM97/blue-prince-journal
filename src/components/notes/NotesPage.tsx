@@ -343,7 +343,9 @@ export function NotesPage({
       <PageLayout variant="panel" {...mobileDrawerProps}>
         <PageLayout.Left>
           <SidePanelLeft title={title} subtitle={`${filtered.length} ${entryLabel}`}>
-            <NotesFilterPanel filters={filterState} actions={filterActions} />
+            <Stack gap="0" className="min-h-0 flex-1 overflow-y-auto">
+              <NotesFilterPanel filters={filterState} actions={filterActions} />
+            </Stack>
           </SidePanelLeft>
         </PageLayout.Left>
         <PageLayout.Middle>
