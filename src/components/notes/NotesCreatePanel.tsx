@@ -680,7 +680,7 @@ export function NotesCreatePanel({
             label="Title"
             value={form.title}
             onChange={form.setTitle}
-            placeholder={form.mode === "todo" ? "Check Den bookshelf" : "Parlor safe = 4271"}
+            placeholder="Title"
             size="lg"
             autoFocus
           />
