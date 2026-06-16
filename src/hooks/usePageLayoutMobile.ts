@@ -40,6 +40,19 @@ export function isPageLayoutMobileWidth(width: number) {
   return width <= PAGE_LAYOUT_MOBILE_MAX_WIDTH;
 }
 
+export function getAppFrameShellClass(isPageLayoutMobile: boolean) {
+  const responsiveOverflow = getPageLayoutResponsiveClassNames({
+    mobile: "overflow-auto",
+    desktop: "overflow-hidden",
+  });
+  return [
+    "flex h-dvh w-full flex-col",
+    isPageLayoutMobile ? "overflow-auto" : "overflow-hidden",
+    responsiveOverflow,
+    "bg-background text-foreground",
+  ].join(" ");
+}
+
 export function useIsPageLayoutMobile() {
   return useMediaQuery(PAGE_LAYOUT_MOBILE_MEDIA_QUERY, isPageLayoutMobileWidth(getViewportWidth()));
 }
