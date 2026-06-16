@@ -1,6 +1,6 @@
 ---
 name: analyze
-description: Analyze codebase and create a clean TODO queue.
+description: Analyze codebase and maintain a clean TODO queue.
 agent: agent
 ---
 
@@ -26,7 +26,7 @@ Output ONLY if:
 
 ## Goal
 
-Create a clean, minimal, high-impact TODO queue.
+Maintain a clean, minimal, high-impact TODO queue.
 
 - prioritize important issues
 - avoid full system analysis
@@ -50,8 +50,11 @@ Avoid:
 
 ## Task Limit
 
-- MAX 10 tasks
-- highest impact only
+- MAX 10 tasks (soft limit)
+
+If exceeded:
+- prefer keeping existing valid tasks
+- only drop clearly lower-value or redundant new tasks
 
 ---
 
@@ -120,13 +123,42 @@ Examples:
 - ALWAYS rewrite docs/todo-architecture.md completely
 - output a clean list of tasks only
 
-Remove:
+Preserve:
 
-- duplicates
-- invalid tasks
-- low-value tasks
+- all valid, unresolved tasks from the existing TODO
 
-Replace tasks if better understanding is found
+Remove ONLY:
+
+- exact duplicates
+- clearly invalid tasks
+- tasks that are fully obsolete due to other tasks
+
+Optional:
+
+- merge tasks ONLY if clearly overlapping in scope
+- refine wording for clarity without changing intent
+
+DO NOT:
+
+- remove tasks due to reprioritization alone
+- remove tasks just to meet MAX limit
+- replace or drop valid existing tasks with new ones
+
+Priority Rule:
+
+- existing tasks have priority over newly discovered tasks
+- only add new tasks if they bring clear additional value
+
+---
+
+## Continuity Rule (MANDATORY)
+
+- existing tasks MUST persist across runs unless:
+  - completed
+  - invalid
+  - exact duplicate
+
+- new analysis must EXTEND the TODO, not rebuild it
 
 ---
 
@@ -134,7 +166,9 @@ Replace tasks if better understanding is found
 
 - prefer delete > simplify > add
 - generate atomic tasks
-- keep TODO minimal and clear
+- keep TODO minimal and stable
+- never discard valid work
 
 If input implies code change:
 → convert to task
+``

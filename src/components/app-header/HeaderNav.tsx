@@ -7,6 +7,7 @@ const NAV_ROUTES = [
   { to: "/map" as const, label: "Map" },
   { to: "/graph" as const, label: "Graph" },
   { to: "/images" as const, label: "Images" },
+  { to: "/dartboard" as const, label: "Dartboard" },
 ] as const;
 
 export function HeaderNav({ pathname }: { pathname: string }) {

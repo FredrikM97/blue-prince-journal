@@ -26,6 +26,7 @@ import {
   getAppFrameShellClass,
   useIsPageLayoutMobile,
 } from "@/hooks/usePageLayoutMobile";
+import { DartboardPage } from "@/components/dartboard/DartboardPage";
 
 type RouterContext = {
   queryClient: QueryClient;
@@ -222,14 +223,14 @@ const graphRoute = createRoute({
 const imagesRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "images",
-  component: () => null,
+  component: () => <ImagesPage />,
   head: () => ({ meta: [{ title: "Images - Blue Prince Journal" }] }),
 });
 
 const dartboardRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "dartboard",
-  component: () => null,
+  component: () => <DartboardPage />,
   head: () => ({ meta: [{ title: "Dartboard - Blue Prince Journal" }] }),
 });
 

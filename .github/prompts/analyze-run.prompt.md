@@ -1,6 +1,6 @@
 ---
 name: analyze-run
-description: Execute TODO tasks with grouping and minimal safe refactoring.
+description: Execute TODO tasks one at a time with minimal safe refactoring.
 agent: agent
 ---
 
@@ -10,123 +10,74 @@ Use docs/todo-architecture.md.
 
 ## Mode
 
-- process up to 10 tasks
-- allow stopping anytime
-- prefer grouped execution over strict sequencing
+- process exactly ONE task per iteration
+- no grouping
+- continue automatically until limit or no tasks
 
 ---
 
 ## Step 1 — Load TODO
 
 - reload docs/todo-architecture.md
-- remove duplicates
-- remove invalid tasks
+- remove duplicates and invalid tasks
 
-If no tasks:
+If empty:
 → Final Validation
 
 ---
 
-## Step 2 — Group Tasks
+## Step 2 — Select Task
 
-Group tasks if ANY of these match:
-
-- same file (scope)
-- overlapping responsibility (e.g. css cleanup, layout)
-- shared tags
-
-Rules:
-
-- grouped tasks MUST be executable together safely
-- DO NOT merge unrelated scopes
-- prefer grouping over strict one-by-one execution
-
-Result:
-
-- select FIRST group (not just first task)
+- pick the FIRST valid task only
 
 ---
 
-## Step 3 — Execute Group
+## Step 3 — Execute
 
-For all tasks in the group:
-
-Extract:
-- type
-- scope
-- intent
-
-Then:
-
-- execute changes together in ONE cohesive pass
-
----
-
-## Execution Rules
-
-- minimal change
+- complete only the selected task
+- apply minimal changes
 - preserve behavior
-- no scope expansion outside the group
-- no new patterns
-- resolve dependencies within group
+- no scope expansion
 
 If blocked:
-
-- apply smallest possible fix
-- continue group execution
+- apply smallest fix needed to complete it
 
 ---
 
 ## Step 4 — Update TODO
 
-- MUST rewrite docs/todo-architecture.md
-
-Remove:
-
-- all executed tasks in the group
-- duplicates
-- invalid tasks
-- tasks made obsolete by execution
+- rewrite docs/todo-architecture.md
+- remove:
+  - executed task
+  - duplicates / invalid entries
+  - tasks fully resolved by this change
 
 ---
 
-## Step 5 — Validate State
+## Step 5 — Validate
 
 - reload TODO
-- task count MUST decrease
-
-Also verify:
-
-- no broken references
-- no partial removals
-- no inconsistent state
-
-If issues:
-
-- fix immediately with minimal change
+- task count must decrease
+- ensure no inconsistencies
 
 ---
 
 ## Step 6 — Continue
 
 If:
-
 - tasks remain
 - limit not reached
 
 → repeat from Step 1
 
-Else STOP
+Else:
+→ STOP
 
 ---
 
 ## Final Validation
 
-Run ONLY if:
-
-- requested OR no tasks remain
-
-Commands:
+Run only if requested or no tasks remain:
 
 - npm run build
 - npx tsc --noEmit
@@ -137,19 +88,13 @@ Fix minimally if failing
 
 ## Output
 
-ONLY if:
-
-- execution fails
-- TODO update fails
+Only if failure occurs
 
 ---
 
-## Hard Rules
+## Rules
 
-- prefer grouping over strict sequencing
-- never leave partial refactors
-- always remove fully completed concerns
-- allow local re-evaluation after each group
-- no new tasks
-- no global re-analysis
-- no explanations
+- one task per iteration
+- no grouping
+- no cross-task refactoring
+- always complete the current task before moving on

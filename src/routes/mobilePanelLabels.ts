@@ -14,6 +14,7 @@ const MOBILE_PANEL_LABELS_BY_PATH: Record<string, MobilePanelLabels> = {
   "/graph": { left: "Filters", right: "Details" },
   "/map": { left: "Filters", right: "Details" },
   "/images": { left: "Library", right: "Details" },
+  "/dartboard": { left: "Board", right: "Controls" },
   "/todos": { left: "Filters" },
 };
 

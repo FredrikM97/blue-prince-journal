@@ -107,6 +107,17 @@
   --color-chart-3: oklch(0.55 0.18 30);
   --color-chart-4: oklch(0.7 0.12 150);
   --color-chart-5: oklch(0.55 0.18 320);
+  --op-blue: oklch(0.62 0.13 240);
+  --op-pink: oklch(0.72 0.18 330);
+  --op-yellow: oklch(0.82 0.13 88);
+  --op-purple: oklch(0.61 0.16 305);
+  --board-red: oklch(0.72 0.01 260);
+  --board-green: oklch(0.34 0.01 260);
+  --board-cream: oklch(0.92 0.02 95);
+  --board-black: oklch(0.18 0.012 260);
+  --board-number: oklch(0.88 0.01 80);
+  --board-stroke: oklch(0.08 0.01 260 / 92%);
+  --board-select: var(--color-brass);
 
   /* Light mode: graph nodes and links */
   --color-graph-node-clue: oklch(0.85 0.11 80);
@@ -182,6 +193,17 @@
   --color-graph-link-tag: oklch(0.74 0.11 235 / 90%);
   --color-graph-link-both: oklch(0.71 0.12 305 / 90%);
   --color-graph-link-note: oklch(0.8 0.15 145 / 90%);
+  --op-blue: oklch(0.7 0.14 240);
+  --op-pink: oklch(0.76 0.18 330);
+  --op-yellow: oklch(0.88 0.13 88);
+  --op-purple: oklch(0.69 0.16 305);
+  --board-red: oklch(0.78 0.01 260);
+  --board-green: oklch(0.26 0.01 260);
+  --board-cream: oklch(0.88 0.02 95);
+  --board-black: oklch(0.14 0.01 260);
+  --board-number: oklch(0.96 0.01 85);
+  --board-stroke: oklch(0.02 0 0 / 96%);
+  --board-select: var(--color-brass);
   color-scheme: dark;
 }
 
