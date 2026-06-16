@@ -56,7 +56,7 @@ vi.mock("@/components/graph/GraphPage", () => ({
   GraphPage: () => <div data-testid="graph-page">graph</div>,
 }));
 
-import { NotFoundView, NotesIndexView, SectionView } from "@/routes/__root";
+import { NotFoundView, NotesIndexView } from "@/routes/__root";
 
 describe("route views smoke snapshots", () => {
   beforeEach(() => {
@@ -73,45 +73,4 @@ describe("route views smoke snapshots", () => {
     expect(asFragment()).toMatchSnapshot();
   });
 
-  it("matches snapshot for builtin section route mapping", () => {
-    mockStoreState.sections = [
-      { id: "todos", label: "Todo", builtin: "todos" },
-      { id: "map", label: "Map", builtin: "map" },
-      { id: "graph", label: "Graph", builtin: "graph" },
-      { id: "images", label: "Images", builtin: "images" },
-      { id: "settings", label: "Settings" },
-    ];
-
-    const todosView = render(<SectionView id="todos" />);
-    const mapView = render(<SectionView id="map" />);
-    const graphView = render(<SectionView id="graph" />);
-    const imagesView = render(<SectionView id="images" />);
-    const settingsView = render(<SectionView id="settings" />);
-
-    expect(todosView.asFragment()).toMatchSnapshot();
-    expect(mapView.asFragment()).toMatchSnapshot();
-    expect(graphView.asFragment()).toMatchSnapshot();
-    expect(imagesView.asFragment()).toMatchSnapshot();
-    expect(settingsView.asFragment()).toMatchSnapshot();
-  });
-
-  it("matches snapshot for custom notes section route", () => {
-    mockStoreState.sections = [
-      {
-        id: "books",
-        label: "Story",
-        filter: { type: "story" },
-      },
-    ];
-
-    const { asFragment } = render(<SectionView id="books" />);
-    expect(asFragment()).toMatchSnapshot();
-  });
-
-  it("matches snapshot for missing section route", () => {
-    mockStoreState.sections = [{ id: "notes", label: "Notes", builtin: "notes" }];
-
-    const { asFragment } = render(<SectionView id="missing" />);
-    expect(asFragment()).toMatchSnapshot();
-  });
 });

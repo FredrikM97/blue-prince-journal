@@ -59,7 +59,7 @@ export const TodoItem = memo(function TodoItem({
                   <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" variant="select">
+              <DropdownMenuContent align="end" variant="select" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuItem onSelect={() => onOpenPreview(todo)}>
                   <Eye className="h-3.5 w-3.5" />
                   <Text as="span" size="sm">

@@ -134,13 +134,13 @@ describe("UIState (store)", () => {
       tags: ["tag1"],
     });
 
-    useStore.getState().openCapture({ note, returnTo: "/section/map" });
+    useStore.getState().openCapture({ note, returnTo: "/map" });
 
     const state = useStore.getState();
     expect(state.captureOpen).toBe(true);
     expect(state.captureEditNoteId).toBe("n1");
     expect(state.capturePrefill).toBe("Door code");
-    expect(state.captureReturnTo).toBe("/section/map");
+    expect(state.captureReturnTo).toBe("/map");
 
     state.closeCapture();
     expect(useStore.getState().captureOpen).toBe(false);

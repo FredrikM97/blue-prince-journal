@@ -66,15 +66,19 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const activeSection = useMemo(() => {
-    const match = pathname.match(/^\/section\/([^/]+)$/);
-    if (!match) return null;
-    const sectionId = decodeURIComponent(match[1]);
-    return sections.find((s) => s.id === sectionId) ?? null;
+    const pathToBuiltin: Record<string, string> = {
+      "/notes": "notes",
+      "/todos": "todos",
+      "/map": "map",
+      "/graph": "graph",
+      "/images": "images",
+    };
+    const builtin = pathToBuiltin[pathname];
+    if (!builtin) return null;
+    return sections.find((s) => s.builtin === builtin) ?? null;
   }, [pathname, sections]);
 
-  const canCreateInPlace =
-    pathname === "/" ||
-    (pathname.startsWith("/section/") && (!activeSection || !activeSection.builtin));
+  const canCreateInPlace = pathname === "/notes";
 
   const defaultCaptureNoteType = activeSection?.filter?.type;
   const showMainControls = !welcomeMode;
@@ -111,7 +115,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
       if (e.key !== "n" && e.key !== "N" && e.key !== "+") return;
       e.preventDefault();
       if (!canCreateInPlace) {
-        void navigate({ to: "/" });
+        void navigate({ to: "/notes" });
       }
       openCapture({
         kind: "note",
@@ -125,8 +129,12 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
   }, [openCapture, canCreateInPlace, defaultCaptureNoteType, navigate, pathname]);
 
   function hrefFor(s: { id: string; builtin?: string; filter?: { type?: string } }) {
-    if (s.builtin === "notes") return "/";
-    return `/section/${s.id}`;
+    if (s.builtin === "notes") return "/notes";
+    if (s.builtin === "todos") return "/todos";
+    if (s.builtin === "map") return "/map";
+    if (s.builtin === "graph") return "/graph";
+    if (s.builtin === "images") return "/images";
+    return "/notes";
   }
 
   function openWelcomeScreen() {
@@ -218,7 +226,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
                   .filter((s) => !s.hidden && Boolean(s.builtin))
                   .map((s) => {
                     const href = hrefFor(s);
-                    const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+                    const isActive = pathname === href || pathname.startsWith(`${href}/`);
                     let linkClass =
                       "rounded px-2 py-1 text-sm text-muted-foreground dark:text-foreground/70 hover:bg-accent hover:text-foreground";
                     if (isActive) {
@@ -293,7 +301,7 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
                   size="sm"
                   onClick={() => {
                     if (!canCreateInPlace) {
-                      void navigate({ to: "/" });
+                      void navigate({ to: "/notes" });
                     }
                     openCapture({
                       kind: "note",

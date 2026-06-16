@@ -123,7 +123,8 @@ describe("AppHeader", () => {
     });
   });
 
-  it("opens note capture from add button on root", () => {
+  it("opens note capture from add button on notes", () => {
+    mockState.pathname = "/notes";
     render(<AppHeader />);
     fireEvent.click(screen.getByRole("button", { name: /Add note/i }));
 
@@ -136,21 +137,21 @@ describe("AppHeader", () => {
   });
 
   it("navigates home and opens capture from non-creatable section", () => {
-    mockState.pathname = "/section/todos";
+    mockState.pathname = "/todos";
     render(<AppHeader />);
 
     fireEvent.keyDown(window, { key: "n" });
 
-    expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
+    expect(mockNavigate).toHaveBeenCalledWith({ to: "/notes" });
     expect(mockState.openCapture).toHaveBeenCalledWith({
       kind: "note",
       noteType: undefined,
-      returnTo: "/section/todos",
+      returnTo: "/todos",
     });
   });
 
   it("closes capture when route cannot create in place", () => {
-    mockState.pathname = "/section/todos";
+    mockState.pathname = "/todos";
     mockState.captureOpen = true;
 
     render(<AppHeader />);

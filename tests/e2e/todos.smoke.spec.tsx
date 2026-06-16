@@ -5,7 +5,7 @@ test("todos smoke: board shells and scope controls", async ({ page }) => {
   const budgets = createConsoleBudget(page);
   await enableWelcomeBypass(page);
 
-  await page.goto("/section/todos");
+  await page.goto("/todos");
 
   await expect(page.getByRole("heading", { name: "Todo" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Open" })).toBeVisible();
@@ -24,7 +24,7 @@ test("todos smoke: mobile tabs switch single status column", async ({ page }) =>
   await enableWelcomeBypass(page);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/section/todos");
+  await page.goto("/todos");
 
   await expect(page.getByRole("tab", { name: /Open/ })).toBeVisible();
   await expect(page.getByRole("tab", { name: /In progress/ })).toBeVisible();

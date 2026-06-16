@@ -52,8 +52,8 @@ export function MapRightPanel({
 
   async function openCaptureFromMap(kind: "note" | "todo") {
     if (!activeRoom) return;
-    await navigate({ to: "/" });
-    openCapture({ kind, room: activeRoom, returnTo: "/section/map" });
+    await navigate({ to: "/notes" });
+    openCapture({ kind, room: activeRoom, returnTo: "/map" });
   }
 
   return (

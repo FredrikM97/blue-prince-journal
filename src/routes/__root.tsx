@@ -6,14 +6,22 @@ import {
   HeadContent,
   Link,
   Outlet,
+  useNavigate,
   useRouter,
 } from "@tanstack/react-router";
-import { lazy, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/app-header/AppHeader";
 import { ThemeToggle } from "@/components/app-header/ThemeToggle";
+import { GraphPage } from "@/components/graph/GraphPage";
+import { ImagesPage } from "@/components/images/ImagesPage";
+import { MapPage } from "@/components/map/MapPage";
+import { NotesPage } from "@/components/notes/NotesPage";
+import { SettingsPage } from "@/components/settings/SettingsPage";
+import { TodosPage } from "@/components/todos/TodosPage";
+import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
 import { Toaster } from "@/routes/Sonner";
 import { toast } from "sonner";
-import { AppDataProvider, useAppData, fetchAppSnapshot } from "@/hooks/useAppData";
+import { AppDataProvider, useAppData } from "@/hooks/useAppData";
 import { syncRuntime } from "@/data/sync/sync";
 import { useAppFrameInit } from "@/hooks/useAppFrameInit";
 import {
@@ -24,87 +32,6 @@ import {
 type RouterContext = {
   queryClient: QueryClient;
 };
-
-function RouteSuspenseFallback() {
-  return (
-    <div className="flex min-h-96 items-center justify-center">
-      <div className="text-center">
-        <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-foreground" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </div>
-    </div>
-  );
-}
-
-function loadWelcomeScreenRoute() {
-  return import("@/components/welcome/WelcomeScreen");
-}
-
-function loadNotesPageRoute() {
-  return import("@/components/notes/NotesPage");
-}
-
-function loadSettingsPageRoute() {
-  return import("@/components/settings/SettingsPage");
-}
-
-function loadTodosPageRoute() {
-  return import("@/components/todos/TodosPage");
-}
-
-function loadMapPageRoute() {
-  return import("@/components/map/MapPage");
-}
-
-function loadImagesPageRoute() {
-  return import("@/components/images/ImagesPage");
-}
-
-function loadGraphPageRoute() {
-  return import("@/components/graph/GraphPage");
-}
-
-const WelcomeScreenRoute = lazy(() =>
-  loadWelcomeScreenRoute().then((module) => ({
-    default: module.WelcomeScreen,
-  })),
-);
-
-const NotesPageRoute = lazy(() =>
-  loadNotesPageRoute().then((module) => ({
-    default: module.NotesPage,
-  })),
-);
-
-const SettingsPageRoute = lazy(() =>
-  loadSettingsPageRoute().then((module) => ({
-    default: module.SettingsPage,
-  })),
-);
-
-const TodosPageRoute = lazy(() =>
-  loadTodosPageRoute().then((module) => ({
-    default: module.TodosPage,
-  })),
-);
-
-const MapPageRoute = lazy(() =>
-  loadMapPageRoute().then((module) => ({
-    default: module.MapPage,
-  })),
-);
-
-const ImagesPageRoute = lazy(() =>
-  loadImagesPageRoute().then((module) => ({
-    default: module.ImagesPage,
-  })),
-);
-
-const GraphPageRoute = lazy(() =>
-  loadGraphPageRoute().then((module) => ({
-    default: module.GraphPage,
-  })),
-);
 
 export function RootShellView({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
@@ -148,10 +75,11 @@ function getAppFrameShellClass(isPageLayoutMobile: boolean) {
 }
 
 function AppFrame({ children }: { children: React.ReactNode }) {
-  const [routesPreloaded, setRoutesPreloaded] = useState(false);
   const router = useRouter();
+  const navigate = useNavigate();
   const pathname = router.state.location.pathname;
-  const isImagesRouteActive = pathname === "/section/images";
+  const isWelcomeRouteActive = pathname === "/";
+  const isImagesRouteActive = pathname === "/images";
   const [hasMountedImagesRoute, setHasMountedImagesRoute] = useState(isImagesRouteActive);
 
   // Call all hooks unconditionally FIRST
@@ -160,28 +88,10 @@ function AppFrame({ children }: { children: React.ReactNode }) {
   const todoCount = todos.length;
   const isPageLayoutMobile = useIsPageLayoutMobile();
 
-  const { effectiveInitState, continueWelcome, completeWelcome } = useAppFrameInit({
+  useAppFrameInit({
     noteCount,
     todoCount,
   });
-
-  useEffect(() => {
-    async function preloadAllRoutes() {
-      await Promise.allSettled([
-        loadWelcomeScreenRoute(),
-        loadNotesPageRoute(),
-        loadSettingsPageRoute(),
-        loadTodosPageRoute(),
-        loadMapPageRoute(),
-        loadImagesPageRoute(),
-        loadGraphPageRoute(),
-        fetchAppSnapshot(), // fetch first 50 notes/todos in parallel with routes
-      ]);
-      setRoutesPreloaded(true);
-    }
-
-    void preloadAllRoutes();
-  }, []);
 
   useEffect(() => {
     if (isImagesRouteActive) {
@@ -209,21 +119,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
     "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 lg:px-6 flex justify-center";
   const appFrameShellClass = getAppFrameShellClass(isPageLayoutMobile);
 
-  // Show loading screen only while routes are preloading
-  // Once routes are ready, show page structure immediately (data populates in background)
-  if (!routesPreloaded) {
-    return (
-      <div className={appFrameShellClass}>
-        <WelcomeHeaderShell />
-        <div className={appContentClass}>
-          <RouteSuspenseFallback />
-        </div>
-      </div>
-    );
-  }
-
-  // Routes are preloaded, now decide what to show
-  if (effectiveInitState === "welcome") {
+  if (isWelcomeRouteActive) {
     const hasExistingConfiguration =
       noteCount > 0 || todoCount > 0 || Boolean(syncRuntime.getActiveFolderName());
 
@@ -231,10 +127,14 @@ function AppFrame({ children }: { children: React.ReactNode }) {
       <div className={appFrameShellClass}>
         <WelcomeHeaderShell />
         <div className={appContentClass}>
-          <WelcomeScreenRoute
+          <WelcomeScreen
             showContinueSuggestion={hasExistingConfiguration}
-            onContinue={continueWelcome}
-            onDone={completeWelcome}
+            onContinue={() => {
+              void navigate({ to: "/notes" });
+            }}
+            onDone={() => {
+              void navigate({ to: "/notes" });
+            }}
           />
         </div>
         <Toaster />
@@ -250,7 +150,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
       <div className={appContentClass}>
         {hasMountedImagesRoute && (
           <div className={isImagesRouteActive ? "contents" : "hidden"} aria-hidden={!isImagesRouteActive}>
-            <ImagesPageRoute />
+            <ImagesPage />
           </div>
         )}
         {!isImagesRouteActive && children}
@@ -320,48 +220,7 @@ export function ErrorView({ error, reset }: { error: Error; reset: () => void })
 
 export function NotesIndexView() {
   return (
-    <NotesPageRoute title="Notes" emptyHint="No notes yet. Press N anywhere to add one." />
-  );
-}
-
-export function SectionView({ id }: { id: string }) {
-  const { sections } = useAppData();
-  const section = useMemo(() => sections.find((s) => s.id === id), [sections, id]);
-
-  if (!section) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">
-        Section not found.
-      </div>
-    );
-  }
-
-  if (section.builtin === "todos") {
-    return (
-      <TodosPageRoute />
-    );
-  }
-  if (section.builtin === "map") {
-    return (
-      <MapPageRoute />
-    );
-  }
-  if (section.builtin === "graph") {
-    return (
-      <GraphPageRoute />
-    );
-  }
-  if (section.builtin === "images") {
-    return null;
-  }
-  if (section.id === "settings") {
-    return (
-      <SettingsPageRoute />
-    );
-  }
-
-  return (
-    <NotesPageRoute filterType={section.filter?.type} title={section.label} />
+    <NotesPage title="Notes" emptyHint="No notes yet. Press N anywhere to add one." />
   );
 }
 
@@ -386,6 +245,13 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
+  component: () => null,
+  head: () => ({ meta: [{ title: "Welcome - Blue Prince Journal" }] }),
+});
+
+const notesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "notes",
   component: NotesIndexView,
   head: () => ({
     meta: [
@@ -399,19 +265,48 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "settings",
   component: () => (
-    <SettingsPageRoute />
+    <SettingsPage />
   ),
   head: () => ({ meta: [{ title: "Settings - Blue Prince Journal" }] }),
 });
 
-const sectionRoute = createRoute({
+const todosRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "section/$id",
-  component: () => <SectionView id={sectionRoute.useParams().id} />,
-  head: () => ({ meta: [{ title: "Section - Blue Prince Journal" }] }),
+  path: "todos",
+  component: () => <TodosPage />,
+  head: () => ({ meta: [{ title: "Todos - Blue Prince Journal" }] }),
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, settingsRoute, sectionRoute]);
+const mapRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "map",
+  component: () => <MapPage />,
+  head: () => ({ meta: [{ title: "Map - Blue Prince Journal" }] }),
+});
+
+const graphRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "graph",
+  component: () => <GraphPage />,
+  head: () => ({ meta: [{ title: "Graph - Blue Prince Journal" }] }),
+});
+
+const imagesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "images",
+  component: () => null,
+  head: () => ({ meta: [{ title: "Images - Blue Prince Journal" }] }),
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  notesRoute,
+  settingsRoute,
+  todosRoute,
+  mapRoute,
+  graphRoute,
+  imagesRoute,
+]);
 
 export const getRouter = () => {
   const queryClient = new QueryClient();

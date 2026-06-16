@@ -5,10 +5,10 @@ test("images smoke: gallery and inspector", async ({ page }) => {
   const budgets = createConsoleBudget(page);
   await enableWelcomeBypass(page);
 
-  await page.goto("/");
+  await page.goto("/notes");
   await createNoteWithImage(page, `E2E image smoke ${Date.now().toString(36)}`);
 
-  await page.goto("/section/images");
+  await page.goto("/images");
 
   await expect(page.getByRole("heading", { name: "Images" })).toBeVisible();
   await page.locator(".images-thumb").first().click();

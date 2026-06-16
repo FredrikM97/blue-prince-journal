@@ -10,10 +10,11 @@ const DEFAULT_MOBILE_PANEL_LABELS: MobilePanelLabels = {
 
 const MOBILE_PANEL_LABELS_BY_PATH: Record<string, MobilePanelLabels> = {
   "/": { left: "Filters", right: "Preview" },
-  "/section/graph": { left: "Filters", right: "Details" },
-  "/section/map": { left: "Filters", right: "Details" },
-  "/section/images": { left: "Library", right: "Details" },
-  "/section/todos": { left: "Filters" },
+  "/notes": { left: "Filters", right: "Preview" },
+  "/graph": { left: "Filters", right: "Details" },
+  "/map": { left: "Filters", right: "Details" },
+  "/images": { left: "Library", right: "Details" },
+  "/todos": { left: "Filters" },
 };
 
 export function resolveMobilePanelLabels(pathname: string): MobilePanelLabels {

@@ -5,7 +5,7 @@ test("map smoke: open and edit a cell panel", async ({ page }) => {
   const budgets = createConsoleBudget(page);
   await enableWelcomeBypass(page);
 
-  await page.goto("/section/map");
+  await page.goto("/map");
 
   await expect(page.getByRole("heading", { name: "House Map" })).toBeVisible();
   await expect(page.locator(".map-cell")).toHaveCount(45);
