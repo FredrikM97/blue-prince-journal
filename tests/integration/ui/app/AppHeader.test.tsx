@@ -193,17 +193,6 @@ describe("AppHeader", () => {
     });
   });
 
-  it("dispatches welcome event when brand link is clicked", () => {
-    const listener = vi.fn();
-    window.addEventListener("bp:show-welcome", listener);
-    render(<AppHeader />);
-
-    fireEvent.click(screen.getByRole("link", { name: /Blue Prince Journal/i }));
-
-    expect(listener).toHaveBeenCalled();
-    window.removeEventListener("bp:show-welcome", listener);
-  });
-
   it("opens the feedback dialog and sends a submission", async () => {
     render(<AppHeader />);
 

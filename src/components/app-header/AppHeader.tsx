@@ -134,11 +134,8 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
     if (s.builtin === "map") return "/map";
     if (s.builtin === "graph") return "/graph";
     if (s.builtin === "images") return "/images";
+    if (s.builtin === "dartboard") return "/dartboard";
     return "/notes";
-  }
-
-  function openWelcomeScreen() {
-    window.dispatchEvent(new CustomEvent("bp:show-welcome"));
   }
 
   async function sendFeedback() {
@@ -195,7 +192,6 @@ export function AppHeader({ welcomeMode = false }: { welcomeMode?: boolean }) {
           <Link
             to="/"
             className="mr-2 inline-flex shrink-0 items-center gap-2 rounded-md px-1.5 py-1 hover:bg-accent"
-            onClick={openWelcomeScreen}
           >
             <Text
               as="span"

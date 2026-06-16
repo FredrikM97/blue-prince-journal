@@ -8,6 +8,7 @@ import {
   Outlet,
   useNavigate,
   useRouter,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/app-header/AppHeader";
@@ -22,7 +23,7 @@ import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
 import { Toaster } from "@/routes/Sonner";
 import { toast } from "sonner";
 import { AppDataProvider, useAppData } from "@/hooks/useAppData";
-import { syncRuntime } from "@/data/sync/sync";
+import { useStore } from "@/hooks/useStore";
 import { useAppFrameInit } from "@/hooks/useAppFrameInit";
 import {
   getPageLayoutResponsiveClassNames,
@@ -74,24 +75,35 @@ function getAppFrameShellClass(isPageLayoutMobile: boolean) {
   ].join(" ");
 }
 
-function AppFrame({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+function WelcomeView() {
   const navigate = useNavigate();
-  const pathname = router.state.location.pathname;
-  const isWelcomeRouteActive = pathname === "/";
+  const isPageLayoutMobile = useIsPageLayoutMobile();
+  const { notes, todos } = useAppData();
+  const syncFolderName = useStore((s) => s.syncFolderName);
+  const hasExistingData = notes.length > 0 || todos.length > 0 || Boolean(syncFolderName);
+  const appFrameShellClass = getAppFrameShellClass(isPageLayoutMobile);
+  const appContentClass =
+    "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 lg:px-6 flex justify-center";
+  return (
+    <div className={appFrameShellClass}>
+      <WelcomeHeaderShell />
+      <div className={appContentClass}>
+        <WelcomeScreen
+          showContinueSuggestion={hasExistingData}
+          onContinue={() => void navigate({ to: "/notes" })}
+          onDone={() => void navigate({ to: "/notes" })}
+        />
+      </div>
+      <Toaster />
+    </div>
+  );
+}
+
+function AppFrame({ children }: { children: React.ReactNode }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isImagesRouteActive = pathname === "/images";
   const [hasMountedImagesRoute, setHasMountedImagesRoute] = useState(isImagesRouteActive);
-
-  // Call all hooks unconditionally FIRST
-  const { notes, todos } = useAppData();
-  const noteCount = notes.length;
-  const todoCount = todos.length;
   const isPageLayoutMobile = useIsPageLayoutMobile();
-
-  useAppFrameInit({
-    noteCount,
-    todoCount,
-  });
 
   useEffect(() => {
     if (isImagesRouteActive) {
@@ -115,34 +127,10 @@ function AppFrame({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("vite:preloadError", onPreloadError);
   }, []);
 
-  let appContentClass =
+  const appContentClass =
     "min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 lg:px-6 flex justify-center";
   const appFrameShellClass = getAppFrameShellClass(isPageLayoutMobile);
 
-  if (isWelcomeRouteActive) {
-    const hasExistingConfiguration =
-      noteCount > 0 || todoCount > 0 || Boolean(syncRuntime.getActiveFolderName());
-
-    return (
-      <div className={appFrameShellClass}>
-        <WelcomeHeaderShell />
-        <div className={appContentClass}>
-          <WelcomeScreen
-            showContinueSuggestion={hasExistingConfiguration}
-            onContinue={() => {
-              void navigate({ to: "/notes" });
-            }}
-            onDone={() => {
-              void navigate({ to: "/notes" });
-            }}
-          />
-        </div>
-        <Toaster />
-      </div>
-    );
-  }
-
-  // Main app: show page immediately with empty states while data loads
   return (
     <div className={appFrameShellClass}>
       <HeadContent />
@@ -161,14 +149,21 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 }
 
 export function RootLayoutView({ queryClient }: { queryClient: QueryClient }) {
+  useAppFrameInit();
   return (
     <QueryClientProvider client={queryClient}>
       <AppDataProvider>
-        <AppFrame>
-          <Outlet />
-        </AppFrame>
+        <Outlet />
       </AppDataProvider>
     </QueryClientProvider>
+  );
+}
+
+export function AppLayoutView() {
+  return (
+    <AppFrame>
+      <Outlet />
+    </AppFrame>
   );
 }
 
@@ -245,12 +240,18 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => null,
+  component: WelcomeView,
   head: () => ({ meta: [{ title: "Welcome - Blue Prince Journal" }] }),
 });
 
-const notesRoute = createRoute({
+const appLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: "app",
+  component: AppLayoutView,
+});
+
+const notesRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
   path: "notes",
   component: NotesIndexView,
   head: () => ({
@@ -262,50 +263,58 @@ const notesRoute = createRoute({
 });
 
 const settingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: "settings",
-  component: () => (
-    <SettingsPage />
-  ),
+  component: () => <SettingsPage />,
   head: () => ({ meta: [{ title: "Settings - Blue Prince Journal" }] }),
 });
 
 const todosRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: "todos",
   component: () => <TodosPage />,
   head: () => ({ meta: [{ title: "Todos - Blue Prince Journal" }] }),
 });
 
 const mapRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: "map",
   component: () => <MapPage />,
   head: () => ({ meta: [{ title: "Map - Blue Prince Journal" }] }),
 });
 
 const graphRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: "graph",
   component: () => <GraphPage />,
   head: () => ({ meta: [{ title: "Graph - Blue Prince Journal" }] }),
 });
 
 const imagesRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: "images",
   component: () => null,
   head: () => ({ meta: [{ title: "Images - Blue Prince Journal" }] }),
 });
 
+const dartboardRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "dartboard",
+  component: () => null,
+  head: () => ({ meta: [{ title: "Dartboard - Blue Prince Journal" }] }),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  notesRoute,
-  settingsRoute,
-  todosRoute,
-  mapRoute,
-  graphRoute,
-  imagesRoute,
+  appLayoutRoute.addChildren([
+    notesRoute,
+    settingsRoute,
+    todosRoute,
+    mapRoute,
+    graphRoute,
+    imagesRoute,
+    dartboardRoute,
+  ]),
 ]);
 
 export const getRouter = () => {
