@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { exportAll, importAll } from "@/data/storage/backup";
-import { submitFeedback } from "@/data/feedback";
-import type { FeedbackType } from "@/data/feedback";
-import { FeedbackDialog } from "@/components/app-header/FeedbackDialog";
+import {
+  FeedbackDialog,
+} from "@/components/app-header/FeedbackDialog";
 import { Button } from "@/components/common/Button";
 import { toast } from "sonner";
 import {
@@ -25,52 +25,9 @@ export function HeaderMenu() {
   const buyMeACoffeeUrl = "https://buymeacoffee.com/fredrikm97";
   const fileRef = useRef<HTMLInputElement>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [feedbackMessage, setFeedbackMessage] = useState("");
-  const [feedbackContact, setFeedbackContact] = useState("");
-  const [feedbackType, setFeedbackType] = useState<FeedbackType>("general");
-  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
-
-  async function sendFeedback() {
-    const message = feedbackMessage.trim();
-    if (!message) return;
-
-    setFeedbackSubmitting(true);
-    try {
-      await submitFeedback({
-        message,
-        contact: feedbackContact.trim(),
-        appVersion: __APP_COMMIT_HASH__,
-        type: feedbackType,
-      });
-      toast.success("Feedback sent");
-      setFeedbackMessage("");
-      setFeedbackContact("");
-      setFeedbackType("general");
-      setFeedbackOpen(false);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to send feedback");
-    } finally {
-      setFeedbackSubmitting(false);
-    }
-  }
 
   return (
     <>
-      <FeedbackDialog
-        open={feedbackOpen}
-        onOpenChange={setFeedbackOpen}
-        message={feedbackMessage}
-        onMessageChange={setFeedbackMessage}
-        contact={feedbackContact}
-        onContactChange={setFeedbackContact}
-        type={feedbackType}
-        onTypeChange={setFeedbackType}
-        submitting={feedbackSubmitting}
-        buildHash={__APP_COMMIT_HASH__}
-        onSubmit={() => {
-          void sendFeedback();
-        }}
-      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Settings">
@@ -117,6 +74,7 @@ export function HeaderMenu() {
           e.target.value = "";
         }}
       />
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </>
   );
 }

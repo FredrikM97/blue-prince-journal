@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { useState } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import {
@@ -13,7 +14,9 @@ import { InputField } from "@/components/common/input/InputField";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
 import { MetaText, Text } from "@/components/common/Typography";
+import { submitFeedback } from "@/data/feedback";
 import type { FeedbackType } from "@/data/feedback";
+import { toast } from "sonner";
 
 const FEEDBACK_TYPE_OPTIONS = [
   { value: "bug", label: "Bug" },
@@ -25,30 +28,38 @@ const FEEDBACK_TYPE_OPTIONS = [
 type FeedbackDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  message: string;
-  onMessageChange: (value: string) => void;
-  contact: string;
-  onContactChange: (value: string) => void;
-  type: FeedbackType;
-  onTypeChange: (value: FeedbackType) => void;
-  submitting: boolean;
-  buildHash: string;
-  onSubmit: () => void;
 };
 
-export function FeedbackDialog({
-  open,
-  onOpenChange,
-  message,
-  onMessageChange,
-  contact,
-  onContactChange,
-  type,
-  onTypeChange,
-  submitting,
-  buildHash,
-  onSubmit,
-}: FeedbackDialogProps) {
+export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
+  const [message, setMessage] = useState("");
+  const [contact, setContact] = useState("");
+  const [type, setType] = useState<FeedbackType>("general");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit() {
+    const trimmedMessage = message.trim();
+    if (!trimmedMessage) return;
+
+    setSubmitting(true);
+    try {
+      await submitFeedback({
+        message: trimmedMessage,
+        contact: contact.trim(),
+        appVersion: __APP_COMMIT_HASH__,
+        type,
+      });
+      toast.success("Feedback sent");
+      setMessage("");
+      setContact("");
+      setType("general");
+      onOpenChange(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to send feedback");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   let submitLabel = "Send";
   if (submitting) {
     submitLabel = "Sending...";
@@ -70,7 +81,7 @@ export function FeedbackDialog({
               size="xs"
               tone="default"
             >
-              {buildHash}
+              {__APP_COMMIT_HASH__}
             </Text>{" "}
           </MetaText>
         </DialogHeader>
@@ -78,7 +89,7 @@ export function FeedbackDialog({
         <form
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            onSubmit();
+            void onSubmit();
           }}
         >
           <Stack gap="3">
@@ -88,7 +99,7 @@ export function FeedbackDialog({
               </Text>
               <DropdownSelect
                 value={type}
-                onValueChange={(value) => onTypeChange(value as FeedbackType)}
+                onValueChange={(value) => setType(value as FeedbackType)}
                 options={FEEDBACK_TYPE_OPTIONS}
                 triggerWidth="fit"
               />
@@ -100,14 +111,14 @@ export function FeedbackDialog({
               markdown
               rows={6}
               value={message}
-              onChange={onMessageChange}
+              onChange={setMessage}
               placeholder="Tell me what happened or what you'd like to see..."
             />
 
             <InputField
               label="Contact"
               value={contact}
-              onChange={onContactChange}
+              onChange={setContact}
               placeholder="Email or handle, optional"
             />
 
