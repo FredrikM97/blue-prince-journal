@@ -10,19 +10,11 @@ const hoisted = vi.hoisted(() => ({
 }));
 
 const mockState = {
-  sections: [
-    { id: "notes", label: "Notes", builtin: "notes" },
-    { id: "todos", label: "Todo", builtin: "todos" },
-    { id: "map", label: "Map", builtin: "map" },
-    { id: "books", label: "Story", filter: { type: "story" } },
-    { id: "hidden", label: "Hidden", builtin: "graph", hidden: true },
-  ],
   search: "",
   setSearch: vi.fn(),
   openCapture: vi.fn(),
   captureOpen: false,
   closeCapture: vi.fn(),
-  load: vi.fn(async () => {}),
   syncFolderName: null as string | null,
   pathname: "/",
 };
@@ -94,7 +86,6 @@ describe("AppHeader", () => {
     mockState.setSearch.mockClear();
     mockState.openCapture.mockClear();
     mockState.closeCapture.mockClear();
-    mockState.load.mockClear();
     mockNavigate.mockClear();
     hoisted.mockExportAll.mockClear();
     hoisted.mockImportAll.mockClear();
@@ -110,13 +101,13 @@ describe("AppHeader", () => {
     expect(screen.getByRole("link", { name: "Notes" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Todo" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Map" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Story" })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Hidden" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Graph" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Images" })).toBeInTheDocument();
   });
 
   it("updates search value through store setter", async () => {
     render(<AppHeader />);
-    fireEvent.change(screen.getByLabelText("Search notes"), { target: { value: "entrance" } });
+    fireEvent.change(screen.getByLabelText("Search"), { target: { value: "entrance" } });
 
     await waitFor(() => {
       expect(mockState.setSearch).toHaveBeenCalledWith("entrance");
@@ -175,7 +166,6 @@ describe("AppHeader", () => {
 
     await waitFor(() => {
       expect(hoisted.mockImportAll).toHaveBeenCalledWith(file, "merge");
-      expect(mockState.load).toHaveBeenCalled();
       expect(toastSuccess).toHaveBeenCalledWith("Imported");
     });
   });
