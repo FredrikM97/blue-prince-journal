@@ -134,10 +134,11 @@ export function DartboardCanvas({
   });
 
   return (
-    <div className="relative inline-block w-full max-w-[720px]">
+    <div className="relative flex h-full w-full min-h-0 items-center justify-center">
+      <div className="relative aspect-square w-full max-w-[480px] sm:h-full sm:w-auto sm:max-w-full sm:max-h-full">
       <svg
         viewBox={`${-boardFrame.viewboxPadding} ${-boardFrame.viewboxPadding} ${boardFrame.boardSize + boardFrame.viewboxPadding * 2} ${boardFrame.boardSize + boardFrame.viewboxPadding * 2}`}
-        className="block h-auto w-full select-none"
+        className="block h-full w-full select-none"
         style={BOARD_SVG_STYLE}
       >
         <defs>
@@ -182,7 +183,7 @@ export function DartboardCanvas({
 
         <circle cx={boardCenter.x} cy={boardCenter.y} r={boardFrame.outerRadius} fill="url(#shade)" pointerEvents="none" />
       </svg>
-
+      </div>
     </div>
   );
 }

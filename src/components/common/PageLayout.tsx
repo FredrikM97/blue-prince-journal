@@ -329,7 +329,7 @@ function PageLayoutMobileDrawers({
 
       {mobileLeftOpen && hasLeft && (
         <aside
-          className={`fixed bottom-0 top-0 left-0 z-50 ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerHeight} overflow-y-auto rounded-none border border-r border-border bg-background px-3 pb-3 shadow-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerWidth}`}
+          className={`fixed bottom-0 top-0 left-0 z-50 ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerHeight} overflow-y-auto rounded-none bg-background px-3 pb-3 shadow-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerWidth}`}
         >
           {resolvedPanels.left}
         </aside>
@@ -337,7 +337,7 @@ function PageLayoutMobileDrawers({
 
       {mobileRightOpen && hasRight && (
         <aside
-          className={`fixed bottom-0 top-0 right-0 z-50 ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerHeight} overflow-y-auto rounded-none border border-l border-border bg-background pl-3 pr-3 pb-3 shadow-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerWidth}`}
+          className={`fixed bottom-0 top-0 right-0 z-50 ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerHeight} overflow-y-auto rounded-none bg-background pl-3 pr-3 pb-3 shadow-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.drawerWidth}`}
         >
           {resolvedPanels.right}
         </aside>

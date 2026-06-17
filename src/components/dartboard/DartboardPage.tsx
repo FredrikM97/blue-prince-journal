@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Settings } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { PageLayout } from "@/components/common/PageLayout";
 import { ResultPanel } from "./ResultPanel";
@@ -35,6 +36,7 @@ export function DartboardPage() {
   const [paintMode, setPaintMode] = useState<PaintMode>("filled");
   const [activeColor, setActiveColor] = useState<OpColor | null>(null);
   const [clearMode, setClearMode] = useState(false);
+  const [modifierHintVisible, setModifierHintVisible] = useState(false);
   const [activeModifierZone, setActiveModifierZone] = useState<ModifierZone>("outer");
   const [activeOuterModifierId, setActiveOuterModifierId] = useState<string | null>(null);
   const [outerModifierColorByWedge, setOuterModifierColorByWedge] = useState<(OpColor | null)[]>(
@@ -48,6 +50,7 @@ export function DartboardPage() {
   const [modifiers, setModifiers] = useState<ModifierState>(() => emptyModifierState());
 
   const resultState = useMemo(() => compute(board, { advanced, modifiers }), [advanced, board, modifiers]);
+  const hasActiveColor = activeColor !== null;
   const activeBullseyeModifierGlyph = useMemo(() => {
     const activeId = [...modifiers.bullseye][0];
     if (!activeId) return null;
@@ -75,6 +78,7 @@ export function DartboardPage() {
   function handlePaintColor(color: OpColor) {
     setActiveColor(color);
     setClearMode(false);
+    setModifierHintVisible(false);
   }
 
   function handleSelectZone(zone: SelectedTarget) {
@@ -107,7 +111,12 @@ export function DartboardPage() {
   }
 
   function handleToggleModifier(zone: ModifierZone, id: string) {
-    if (!activeColor) return;
+    if (!activeColor) {
+      setModifierHintVisible(true);
+      return;
+    }
+
+    setModifierHintVisible(false);
 
     if (zone === "outer") {
       setActiveOuterModifierId((current) => (current === id ? null : id));
@@ -179,8 +188,8 @@ export function DartboardPage() {
       mobilePanelLabels={{ left: "Board", right: "Controls" }}
     >
       <PageLayout.Middle>
-        <div className="flex h-full min-h-0 flex-col gap-4">
-          <div className="relative flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-amber-300/45 bg-card/40 p-4">
+        <div className="flex h-auto min-h-0 flex-col gap-4 sm:h-full">
+          <div className="relative flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-amber-300/45 bg-card/40 p-2 sm:p-4">
             <div className="pointer-events-none absolute left-3 top-3 rounded border border-amber-300/60 bg-amber-200/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200/90">
               WIP
             </div>
@@ -204,27 +213,23 @@ export function DartboardPage() {
       </PageLayout.Middle>
 
       <PageLayout.Right>
-        <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden p-4 pb-6">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex h-full min-h-0 flex-col gap-5 overflow-y-auto px-0 py-2 text-[16px] pb-4 divide-y divide-border/30 sm:px-4 sm:py-4 sm:text-base sm:pb-6">
+          <div className="pb-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="font-serif text-lg text-foreground">Controls</h2>
                 <p className="text-xs text-muted-foreground">Select a zone, then paint it with an operator.</p>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Button variant="outline" size="sm" className="h-7 px-2 text-[10px]" onClick={handleClearBoard}>
-                  Clear dartboard
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  active={advanced}
-                  surface="mobile-toggle"
-                  onClick={() => setAdvanced((current) => !current)}
-                >
-                  Advanced
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                active={advanced}
+                onClick={() => setAdvanced((current) => !current)}
+                title="Toggle advanced mode"
+                className="h-7 w-7 p-0"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
             </div>
 
             <div className="space-y-3">
@@ -240,30 +245,36 @@ export function DartboardPage() {
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-            <div className="sticky top-0 z-10 rounded-xl border border-border bg-card/95 p-2 shadow-sm backdrop-blur-sm">
-              <div className="mb-2 grid grid-cols-3 gap-1">
-                {([
-                  { zone: "bullseye", label: "Bullseye" },
-                  { zone: "center", label: "Inner" },
-                  { zone: "outer", label: "Outer" },
-                ] as const).map((option) => (
-                  <Button
-                    key={option.zone}
-                    variant={activeModifierZone === option.zone ? "outline" : "ghost"}
-                    size="sm"
-                    active={activeModifierZone === option.zone}
-                    className={activeModifierZone === option.zone
-                      ? "h-7 border-border bg-background px-2 text-[10px] font-semibold text-foreground"
-                      : "h-7 border border-transparent px-2 text-[10px] text-muted-foreground hover:border-border/70 hover:text-foreground"
-                    }
-                    onClick={() => setActiveModifierZone(option.zone)}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
+          <div className="pt-4">
+            <div className="mb-2 text-[12px] uppercase tracking-wider text-muted-foreground">Modifiers</div>
+            {modifierHintVisible && !hasActiveColor ? (
+              <div className="mb-2 rounded-md border border-amber-400/30 bg-amber-300/10 px-3 py-2 text-[12px] text-amber-200 sm:text-[11px]">
+                Select a color first, then use these tabs to place modifiers.
               </div>
+            ) : null}
+            <div className="grid grid-cols-3 gap-1 rounded-t-xl border border-border/40 border-b-0 bg-muted/20 p-1 pb-0.5 shadow-[inset_0_-1px_0_0_var(--color-border)]">
+              {([
+                { zone: "bullseye", label: "Bullseye" },
+                { zone: "center", label: "Inner" },
+                { zone: "outer", label: "Outer" },
+              ] as const).map((option) => (
+                <Button
+                  key={option.zone}
+                  variant={activeModifierZone === option.zone ? "outline" : "ghost"}
+                  size="sm"
+                  active={activeModifierZone === option.zone}
+                  className={activeModifierZone === option.zone
+                    ? "relative -mb-px h-11 rounded-b-none border-border border-b-background bg-background px-4 text-[14px] font-semibold text-foreground shadow-sm before:absolute before:inset-x-3 before:bottom-0 before:h-0.5 before:rounded-full before:bg-brass sm:h-8 sm:px-2 sm:text-[10px]"
+                    : "relative -mb-px h-11 rounded-b-none border border-transparent border-b-0 bg-transparent px-4 text-[14px] text-muted-foreground hover:border-border/70 hover:bg-background/65 hover:text-foreground sm:h-8 sm:px-2 sm:text-[10px]"
+                  }
+                  onClick={() => setActiveModifierZone(option.zone)}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </div>
 
+            <div className="-mt-px rounded-b-xl border border-border/40 border-t-0 bg-background/10 px-1 pb-1 pt-3 shadow-[inset_0_1px_0_0_var(--color-border)]">
               <ModifierPanel
                 zone={activeModifierZone}
                 title={activeModifierPanel.title}
@@ -271,6 +282,8 @@ export function DartboardPage() {
                 active={activeModifierPanel.active}
                 onToggle={(id) => handleToggleModifier(activeModifierZone, id)}
                 accentSwatch={activeModifierPanel.accentSwatch}
+                disabled={!hasActiveColor}
+                onBlockedAttempt={() => setModifierHintVisible(true)}
                 compact
                 singleSelect
               />
