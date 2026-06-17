@@ -7,24 +7,34 @@ import {
 } from "./computeUtils";
 import {
   OPERATORS,
-  RINGS,
   WEDGE_ORDER,
   type BoardState,
   type ModifierState,
   type OpColor,
   type RingKey,
+  emptyModifierState,
 } from "./types";
+import { getBoardAreas } from "./boardAreas";
 
 export type Step = {
   kind: "start" | "operation" | "modifier";
   ring: RingKey | "center";
   wedgeIndex: number; // -1 for center
   wedgeValue: number;
-  color: OpColor | "bullseye" | "modifier";
+  color: OpColor | "meta";
   symbol: string;
   before: number;
   after: number;
   label: string;
+};
+
+type OperationEntry = {
+  ring: RingKey;
+  wedgeIndex: number;
+  color: OpColor;
+  operand: number;
+  symbol: string;
+  label: (result: number) => string;
 };
 
 export { roundNice };
@@ -41,20 +51,12 @@ function pushModifierStep(
     ring: "center",
     wedgeIndex: -1,
     wedgeValue: 0,
-    color: "modifier",
+    color: "meta",
     symbol,
     before,
     after,
     label: formatModifierStepLabel(label, after),
   });
-}
-
-function createEmptyModifierState(): ModifierState {
-  return {
-    center: new Set<string>(),
-    bullseye: new Set<string>(),
-    outer: Array(WEDGE_ORDER.length).fill(null),
-  };
 }
 
 function repeatLastOperation(
@@ -86,102 +88,125 @@ export function compute(
   opts: { advanced: boolean; modifiers?: ModifierState },
 ): { result: number | null; steps: Step[]; error?: string } {
   const steps: Step[] = [];
-  const modifiers = opts.modifiers ?? createEmptyModifierState();
+  const modifiers = opts.modifiers ?? emptyModifierState();
   let acc = 0;
   steps.push({
     kind: "start",
     ring: "center",
     wedgeIndex: -1,
     wedgeValue: acc,
-    color: "bullseye",
+    color: "meta",
     symbol: "=",
     before: 0,
     after: acc,
     label: `start = ${acc}`,
   });
 
-  const activeRings: RingKey[] = RINGS;
   const activeCenterModifiers = modifiers.center;
   const activeBullseyeModifiers = modifiers.bullseye;
-  const activeOuterModifiers = new Set(
-    modifiers.outer.filter((id): id is string => id !== null),
-  );
   let lastOperation: { color: OpColor; operand: number; ring: RingKey; wedgeIndex: number } | null = null;
 
-  for (const ring of activeRings) {
-    const row = board.wedges[ring];
-    const thirdRow = board.thirds[ring];
+  function collectOperationEntriesFromRow(
+    entries: OperationEntry[],
+    ring: RingKey,
+    row: (OpColor | null)[],
+    operandForIndex: (index: number) => number,
+    symbolForColor: (color: OpColor) => string,
+    labelFor: (color: OpColor, operand: number, result: number) => string,
+  ) {
     for (let i = 0; i < row.length; i++) {
       const color = row[i];
       if (!color) continue;
 
-      const operationColor = color;
-      const operand = WEDGE_ORDER[i];
-      const before = acc;
-      try {
-        acc = applyOperator(acc, operationColor, operand);
-      } catch (error) {
-        return {
-          result: null,
-          steps,
-          error: error instanceof Error ? error.message : "Unable to apply operation.",
-        };
-      }
-
-      steps.push({
-        kind: "operation",
+      const operand = operandForIndex(i);
+      entries.push({
         ring,
         wedgeIndex: i,
-        wedgeValue: operand,
-        color: operationColor,
-        symbol: OPERATORS[operationColor].symbol,
-        before,
-        after: acc,
-        label: formatOperationStepLabel(ring, operationColor, operand, acc),
+        color,
+        operand,
+        symbol: symbolForColor(color),
+        label: (result) => labelFor(color, operand, result),
       });
-
-      lastOperation = { color: operationColor, operand, ring, wedgeIndex: i };
-    }
-
-    for (let i = 0; i < thirdRow.length; i++) {
-      const color = thirdRow[i];
-      if (!color) continue;
-
-      const operationColor = color;
-      const operand = WEDGE_ORDER[i] / 3;
-      const before = acc;
-      try {
-        acc = applyOperator(acc, operationColor, operand);
-      } catch (error) {
-        return {
-          result: null,
-          steps,
-          error: error instanceof Error ? error.message : "Unable to apply operation.",
-        };
-      }
-
-      steps.push({
-        kind: "operation",
-        ring,
-        wedgeIndex: i,
-        wedgeValue: operand,
-        color: operationColor,
-        symbol: `${OPERATORS[operationColor].symbol}⅓`,
-        before,
-        after: acc,
-        label: `${ring} · ${OPERATORS[operationColor].symbol} ${roundNice(operand)} (1/3) → ${roundNice(acc)}`,
-      });
-
-      lastOperation = { color: operationColor, operand, ring, wedgeIndex: i };
     }
   }
 
-  function applyFinalModifier(zone: "center" | "bullseye" | "outer", activeIds: Set<string>) {
-    const modifier = MODIFIER_PRESETS[zone].find((item) => activeIds.has(item.id));
+  function buildAreaFullWedgeEntries(entries: OperationEntry[], ring: RingKey) {
+    collectOperationEntriesFromRow(
+      entries,
+      ring,
+      board.wedges[ring],
+      (index) => WEDGE_ORDER[index],
+      (color) => OPERATORS[color].symbol,
+      (color, operand, result) => formatOperationStepLabel(ring, color, operand, result),
+    );
+  }
+
+  function buildAreaThirdWedgeEntries(entries: OperationEntry[], ring: RingKey) {
+    collectOperationEntriesFromRow(
+      entries,
+      ring,
+      board.thirds[ring],
+      (index) => WEDGE_ORDER[index] / 3,
+      (color) => `${OPERATORS[color].symbol}⅓`,
+      (color, operand, result) =>
+        `${ring} · ${OPERATORS[color].symbol} ${roundNice(operand)} (1/3) → ${roundNice(result)}`,
+    );
+  }
+
+  function buildOperationEntries(): OperationEntry[] {
+    const entries: OperationEntry[] = [];
+    for (const area of getBoardAreas()) {
+      const { ring, computeIntent } = area;
+      if (computeIntent.includeFullWedge) {
+        buildAreaFullWedgeEntries(entries, ring);
+      }
+
+      if (computeIntent.includeThirdWedge) {
+        buildAreaThirdWedgeEntries(entries, ring);
+      }
+    }
+    return entries;
+  }
+
+  const operationEntries = buildOperationEntries();
+  for (const entry of operationEntries) {
+    const { ring, wedgeIndex, color, operand, symbol, label } = entry;
+      const before = acc;
+      try {
+        acc = applyOperator(acc, color, operand);
+      } catch (error) {
+        return {
+          result: null,
+          steps,
+          error: error instanceof Error ? error.message : "Unable to apply operation.",
+        };
+      }
+
+      steps.push({
+        kind: "operation",
+        ring,
+        wedgeIndex,
+        wedgeValue: operand,
+        color,
+        symbol,
+        before,
+        after: acc,
+        label: label(acc),
+      });
+
+      lastOperation = { color, operand, ring, wedgeIndex };
+  }
+
+  function applyFinalModifierById(
+    zone: "center" | "bullseye" | "outer",
+    id: string,
+    labelPrefix = `${zone} modifier`,
+  ) {
+    const modifier = MODIFIER_PRESETS[zone].find((item) => item.id === id);
     if (!modifier) return;
 
     const effect = MODIFIER_EFFECTS[zone][modifier.id];
-    if (!effect || effect.kind === "none") return;
+    if (!effect) return;
 
     const before = acc;
     const context = {
@@ -194,13 +219,32 @@ export function compute(
 
     acc = effect.operator(acc, context);
     if (before !== acc) {
-      pushModifierStep(steps, `${zone} modifier · ${modifier.label}`, before, acc, modifier.glyph);
+      pushModifierStep(steps, `${labelPrefix} · ${modifier.label}`, before, acc, modifier.glyph);
     }
   }
 
-  applyFinalModifier("bullseye", activeBullseyeModifiers);
-  applyFinalModifier("center", activeCenterModifiers);
-  applyFinalModifier("outer", activeOuterModifiers);
+  function applyBullseyeModifiersPhase() {
+    const activeBullseyeId = MODIFIER_PRESETS.bullseye.find((item) => activeBullseyeModifiers.has(item.id))?.id;
+    if (!activeBullseyeId) return;
+    applyFinalModifierById("bullseye", activeBullseyeId);
+  }
+
+  function applyCenterModifiersPhase() {
+    const activeCenterId = MODIFIER_PRESETS.center.find((item) => activeCenterModifiers.has(item.id))?.id;
+    if (!activeCenterId) return;
+    applyFinalModifierById("center", activeCenterId);
+  }
+
+  function applyOuterModifiersPhase() {
+    modifiers.outer.forEach((id, wedgeIndex) => {
+      if (!id) return;
+      applyFinalModifierById("outer", id, `outer modifier · wedge ${WEDGE_ORDER[wedgeIndex]}`);
+    });
+  }
+
+  applyBullseyeModifiersPhase();
+  applyCenterModifiersPhase();
+  applyOuterModifiersPhase();
 
   return { result: acc, steps };
 }

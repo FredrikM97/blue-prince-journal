@@ -3,7 +3,9 @@ import { Button } from "@/components/common/Button";
 import { PageLayout } from "@/components/common/PageLayout";
 import { ResultPanel } from "./ResultPanel";
 import { compute } from "./compute";
-import { DartboardBoard } from "./DartboardBoard";
+import { DartboardCanvas } from "./DartboardCanvas";
+import { DartboardColorToolPalette } from "./DartboardColorToolPalette";
+import { DartboardPaintModeRow } from "./DartboardPaintModeRow";
 import { ModifierPanel } from "./ModifierPanel";
 import { MODIFIER_PRESETS } from "./modifiers";
 import {
@@ -11,12 +13,12 @@ import {
   applyPaintSelection,
   createBoardSelectionTarget,
   DEFAULT_SELECTED_TARGET,
-  PAINT_MODE_OPTIONS,
   type PaintMode,
   type SelectedTarget,
 } from "./dartboardState";
 import {
   OPERATORS,
+  WEDGE_COUNT,
   emptyBoard,
   emptyModifierState,
   type BoardState,
@@ -33,7 +35,11 @@ export function DartboardPage() {
   const [paintMode, setPaintMode] = useState<PaintMode>("filled");
   const [activeColor, setActiveColor] = useState<OpColor | null>(null);
   const [clearMode, setClearMode] = useState(false);
+  const [activeModifierZone, setActiveModifierZone] = useState<ModifierZone>("outer");
   const [activeOuterModifierId, setActiveOuterModifierId] = useState<string | null>(null);
+  const [outerModifierColorByWedge, setOuterModifierColorByWedge] = useState<(OpColor | null)[]>(
+    () => Array(WEDGE_COUNT).fill(null),
+  );
   const [modifierColorByZone, setModifierColorByZone] = useState<Record<ModifierZone, OpColor | null>>({
     center: null,
     bullseye: null,
@@ -50,7 +56,7 @@ export function DartboardPage() {
   }, [modifiers.bullseye]);
   const activeCenterModifierGlyph = useMemo(() => {
     const activeId = [...modifiers.center][0];
-    if (!activeId || activeId === "none") return null;
+    if (!activeId) return null;
     const activeModifier = MODIFIER_PRESETS.center.find((item) => item.id === activeId);
     return activeModifier?.glyph ?? null;
   }, [modifiers.center]);
@@ -79,7 +85,15 @@ export function DartboardPage() {
     const wedgeIndex = zone.wedgeIndex;
     setModifiers((currentModifiers) => {
       const nextOuter = [...currentModifiers.outer];
-      nextOuter[wedgeIndex] = nextOuter[wedgeIndex] === activeOuterModifierId ? null : activeOuterModifierId;
+      const shouldClear = nextOuter[wedgeIndex] === activeOuterModifierId;
+      nextOuter[wedgeIndex] = shouldClear ? null : activeOuterModifierId;
+
+      setOuterModifierColorByWedge((currentColors) => {
+        const nextColors = [...currentColors];
+        nextColors[wedgeIndex] = shouldClear ? null : modifierColorByZone.outer;
+        return nextColors;
+      });
+
       return {
         ...currentModifiers,
         outer: nextOuter,
@@ -109,11 +123,6 @@ export function DartboardPage() {
       if (currentModifiers[zone].has(id)) {
         nextZoneModifiers.delete(id);
       } else {
-        if (id === "none") {
-          nextZoneModifiers.clear();
-        } else {
-          nextZoneModifiers.delete("none");
-        }
         nextZoneModifiers.add(id);
       }
       return {
@@ -132,7 +141,36 @@ export function DartboardPage() {
     setBoard(emptyBoard());
     setModifiers(emptyModifierState());
     setSelection(DEFAULT_SELECTED_TARGET);
+    setActiveOuterModifierId(null);
+    setOuterModifierColorByWedge(Array(WEDGE_COUNT).fill(null));
   }
+
+  function getModifierPanelState(zone: ModifierZone) {
+    if (zone === "outer") {
+      return {
+        title: "Outer modifiers",
+        subtitle: "Select an outer modifier, then click an outer ring slot to place it.",
+        active: new Set(activeOuterModifierId ? [activeOuterModifierId] : []),
+        accentSwatch: modifierColorByZone.outer ? OPERATORS[modifierColorByZone.outer].swatch : null,
+      };
+    }
+    if (zone === "center") {
+      return {
+        title: "Inner modifiers",
+        subtitle: "At most one inner modifier can be active.",
+        active: modifiers.center,
+        accentSwatch: modifierColorByZone.center ? OPERATORS[modifierColorByZone.center].swatch : null,
+      };
+    }
+    return {
+      title: "Bullseye modifiers",
+      subtitle: "At most one inner-center modifier can be active.",
+      active: modifiers.bullseye,
+      accentSwatch: modifierColorByZone.bullseye ? OPERATORS[modifierColorByZone.bullseye].swatch : null,
+    };
+  }
+
+  const activeModifierPanel = getModifierPanelState(activeModifierZone);
 
   return (
     <PageLayout
@@ -146,11 +184,12 @@ export function DartboardPage() {
             <div className="pointer-events-none absolute left-3 top-3 rounded border border-amber-300/60 bg-amber-200/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200/90">
               WIP
             </div>
-            <DartboardBoard
+            <DartboardCanvas
               board={board}
               advanced={advanced}
               selection={selection}
               outerModifierAssignments={modifiers.outer}
+              outerModifierColors={outerModifierColorByWedge}
               bullseyeModifierGlyph={activeBullseyeModifierGlyph}
               centerModifierGlyph={activeCenterModifierGlyph}
               centerModifierColor={modifierColorByZone.center}
@@ -165,7 +204,7 @@ export function DartboardPage() {
       </PageLayout.Middle>
 
       <PageLayout.Right>
-        <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-4">
+        <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden p-4 pb-6">
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -189,129 +228,54 @@ export function DartboardPage() {
             </div>
 
             <div className="space-y-3">
-              <div>
-                <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Select color</div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={handleSelectClearTool}
-                    title="Clear tool"
-                    aria-label="Clear tool"
-                    aria-pressed={clearMode}
-                    className={`inline-flex h-18 w-16 flex-col items-center justify-center gap-1.5 rounded-md border text-base font-semibold transition-colors ${
-                      clearMode
-                        ? "border-accent bg-accent/20 text-foreground ring-2 ring-accent ring-offset-1 ring-offset-background"
-                        : "border-border bg-background/40 text-muted-foreground hover:border-accent/50 hover:text-foreground"
-                    }`}
-                    style={
-                      clearMode
-                        ? {
-                            boxShadow:
-                              "0 0 0 1px var(--accent) inset, 0 0 16px color-mix(in oklab, var(--accent) 55%, transparent)",
-                          }
-                        : undefined
-                    }
-                  >
-                    <span className="inline-block h-5 w-5 rounded-full border border-black/30 bg-transparent" />
-                    <span className="leading-none text-foreground">Clear</span>
-                  </button>
-                  {(Object.keys(OPERATORS) as OpColor[]).map((color) => {
-                    const operator = OPERATORS[color];
-                    const isActive = activeColor === color;
-                    return (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => handlePaintColor(color)}
-                        title={operator.label}
-                        aria-label={`${operator.label} operator`}
-                        aria-pressed={isActive}
-                        aria-current={isActive ? "true" : undefined}
-                        className={`relative inline-flex h-18 w-16 flex-col items-center justify-center gap-1.5 rounded-md border text-base font-semibold transition-colors ${
-                          isActive
-                            ? "border-[3px] border-foreground bg-accent/20 text-foreground ring-4 ring-foreground/50 ring-offset-2 ring-offset-background"
-                            : "border-border bg-background/40 text-muted-foreground hover:border-accent/50 hover:text-foreground"
-                        }`}
-                        style={
-                          isActive
-                            ? {
-                                boxShadow:
-                                  "0 0 0 2px var(--foreground) inset, 0 0 20px color-mix(in oklab, var(--foreground) 35%, transparent)",
-                                background: `color-mix(in oklab, ${operator.swatch} 26%, var(--background))`,
-                                transform: "translateY(-1px)",
-                              }
-                            : { background: `color-mix(in oklab, ${operator.swatch} 18%, var(--background))` }
-                        }
-                      >
-                        <span
-                          className="inline-block h-5 w-5 rounded-full border border-black/30"
-                          style={{ background: operator.swatch }}
-                        />
-                        <span className="leading-none text-foreground">{operator.symbol}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              <DartboardColorToolPalette
+                activeColor={activeColor}
+                clearMode={clearMode}
+                onSelectClearTool={handleSelectClearTool}
+                onSelectColor={handlePaintColor}
+              />
 
-              <div>
-                <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Paint mode</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {PAINT_MODE_OPTIONS.map((mode) => (
-                    <Button
-                      key={mode.value}
-                      variant={paintMode === mode.value ? "brass" : "outline"}
-                      size="sm"
-                      onClick={() => setPaintMode(mode.value)}
-                      className="h-7 px-2 text-[10px]"
-                      title={mode.note}
-                    >
-                      {mode.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+              <DartboardPaintModeRow paintMode={paintMode} onSelectMode={setPaintMode} />
 
             </div>
           </div>
 
-          <ModifierPanel
-            zone="bullseye"
-            title="Bullseye modifiers"
-            subtitle="At most one inner-center modifier can be active."
-            active={modifiers.bullseye}
-            onToggle={(id) => handleToggleModifier("bullseye", id)}
-            accentSwatch={
-              modifierColorByZone.bullseye ? OPERATORS[modifierColorByZone.bullseye].swatch : null
-            }
-            compact
-            singleSelect
-            collapsible
-          />
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+            <div className="sticky top-0 z-10 rounded-xl border border-border bg-card/95 p-2 shadow-sm backdrop-blur-sm">
+              <div className="mb-2 grid grid-cols-3 gap-1">
+                {([
+                  { zone: "bullseye", label: "Bullseye" },
+                  { zone: "center", label: "Inner" },
+                  { zone: "outer", label: "Outer" },
+                ] as const).map((option) => (
+                  <Button
+                    key={option.zone}
+                    variant={activeModifierZone === option.zone ? "outline" : "ghost"}
+                    size="sm"
+                    active={activeModifierZone === option.zone}
+                    className={activeModifierZone === option.zone
+                      ? "h-7 border-border bg-background px-2 text-[10px] font-semibold text-foreground"
+                      : "h-7 border border-transparent px-2 text-[10px] text-muted-foreground hover:border-border/70 hover:text-foreground"
+                    }
+                    onClick={() => setActiveModifierZone(option.zone)}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
 
-          <ModifierPanel
-            zone="center"
-            title="Inner modifiers"
-            subtitle="At most one inner modifier can be active."
-            active={modifiers.center}
-            onToggle={(id) => handleToggleModifier("center", id)}
-            accentSwatch={modifierColorByZone.center ? OPERATORS[modifierColorByZone.center].swatch : null}
-            compact
-            singleSelect
-            collapsible
-          />
-
-          <ModifierPanel
-            zone="outer"
-            title="Outer modifiers"
-            subtitle="Select an outer modifier, then click an outer ring slot to place it."
-            active={new Set(activeOuterModifierId ? [activeOuterModifierId] : [])}
-            onToggle={(id) => handleToggleModifier("outer", id)}
-            accentSwatch={modifierColorByZone.outer ? OPERATORS[modifierColorByZone.outer].swatch : null}
-            compact
-            singleSelect
-            collapsible
-          />
+              <ModifierPanel
+                zone={activeModifierZone}
+                title={activeModifierPanel.title}
+                subtitle={activeModifierPanel.subtitle}
+                active={activeModifierPanel.active}
+                onToggle={(id) => handleToggleModifier(activeModifierZone, id)}
+                accentSwatch={activeModifierPanel.accentSwatch}
+                compact
+                singleSelect
+              />
+            </div>
+          </div>
         </div>
       </PageLayout.Right>
     </PageLayout>

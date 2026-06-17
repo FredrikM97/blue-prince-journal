@@ -31,7 +31,7 @@ export function ModifierPanel({
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
+    <div className="rounded-xl p-1">
       <div className="mb-3 flex items-baseline justify-between">
         <button
           type="button"
@@ -50,7 +50,7 @@ export function ModifierPanel({
         </button>
       </div>
       {collapsed ? null : (
-        <div className="flex flex-wrap justify-center gap-1">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(3.65rem,1fr))] gap-1">
           {items.map((m) => {
             const isOn = active.has(m.id);
             return (
@@ -60,7 +60,7 @@ export function ModifierPanel({
                 onClick={() => onToggle(m.id)}
                 title={`${m.label} — ${m.note}`}
                 aria-pressed={isOn}
-                className={`group flex h-[5.25rem] w-[5.25rem] min-h-0 min-w-0 flex-col items-center justify-center gap-0 rounded-md border px-0.5 py-0.5 text-center transition-all ${
+                className={`group flex h-[3.65rem] min-h-0 w-full min-w-0 flex-col items-center justify-center gap-0 rounded-md border px-0.5 py-0.5 text-center transition-all sm:h-[4rem] ${
                   isOn
                     ? "border-accent bg-accent/15 text-foreground"
                     : "border-border bg-background/40 text-muted-foreground hover:border-accent/50 hover:text-foreground"
@@ -78,8 +78,8 @@ export function ModifierPanel({
                     : undefined
                 }
               >
-                <span className={`${compact ? "text-sm" : "font-serif text-sm"} leading-none`}>{m.glyph}</span>
-                <span className={`line-clamp-2 leading-tight ${compact ? "text-[8px]" : "text-[9px] uppercase tracking-wider"}`}>
+                <span className={`${compact ? "text-[13px] sm:text-sm" : "font-serif text-sm"} leading-none`}>{m.glyph}</span>
+                <span className={`line-clamp-2 leading-tight ${compact ? "text-[7px] sm:text-[8px]" : "text-[9px] uppercase tracking-wider"}`}>
                   {m.label}
                 </span>
               </button>

@@ -18,6 +18,24 @@ export type BoardState = {
   thirds: Record<RingKey, (OpColor | null)[]>;
 };
 
+export type BoardPaintSourceKey = keyof BoardState;
+
+export type BoardAreaComputeIntent = {
+  includeFullWedge: boolean;
+  includeThirdWedge: boolean;
+};
+
+export type BoardAreaModel = {
+  id: string;
+  ring: RingKey;
+  geometryKey: RingKey;
+  paintSources: {
+    full: BoardPaintSourceKey;
+    third: BoardPaintSourceKey;
+  };
+  computeIntent: BoardAreaComputeIntent;
+};
+
 export type ModifierZone = "center" | "bullseye" | "outer";
 
 export type ModifierState = {
