@@ -1,6 +1,6 @@
 <img width="1147" height="361" alt="image" src="https://github.com/user-attachments/assets/2f7b266e-6e08-4eee-8331-a63386a0099b" />
 
-A client-first notes and todo tracker for Blue Prince. Blue Prince Journal is currently hosted on [GitHub Pages](https://fredrikm97.github.io/blue-prince-journal/). It is local-first and supports downloading or uploading your data.
+A client-first notes and todo tracker for Blue Prince. Blue Prince Journal is currently hosted on [Cloudflare Pages](https://blue-prince-journal.pages.dev/). It is local-first and supports downloading or uploading your data.
 
 # Features
 
