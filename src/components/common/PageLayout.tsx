@@ -286,6 +286,9 @@ function PageLayoutMobileDrawers({
 
   const leftLabel = labels.left;
   const rightLabel = labels.right;
+  const mobileToggleDockBorderClass = mobileDrawerOpen
+    ? "border-brass/80"
+    : "border-border/60 hover:border-accent focus-within:border-accent";
 
   return (
     <>
@@ -299,7 +302,9 @@ function PageLayoutMobileDrawers({
       )}
 
       {(hasLeft || hasRight) && (
-        <div className="fixed inset-x-0 bottom-2 z-30 mx-auto flex w-fit items-center gap-2 rounded-full bg-background px-2 py-1.5 shadow-lg backdrop-blur">
+        <div
+          className={`fixed inset-x-0 bottom-2 z-30 mx-auto flex w-fit items-center gap-0 overflow-hidden rounded-full border bg-background/85 p-0 shadow-lg backdrop-blur transition-colors ${mobileToggleDockBorderClass}`}
+        >
           {hasLeft && (
             <Button
               variant="ghost"

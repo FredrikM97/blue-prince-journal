@@ -54,12 +54,12 @@ const GHOST_TONE: Record<GhostTone, string> = {
 
 const GHOST_SURFACE: Record<GhostSurface, string> = {
   default: "",
-  "mobile-toggle": "shrink-0 !rounded-full",
+  "mobile-toggle": "shrink-0 !rounded-full h-10 px-4 text-sm",
 };
 
 const GHOST_SURFACE_ACTIVE: Record<GhostSurface, string> = {
   default: "",
-  "mobile-toggle": "bg-brass text-brass-foreground",
+  "mobile-toggle": "bg-brass text-brass-foreground ring-1 ring-inset ring-brass/80",
 };
 
 const BUTTON_WIDTH: Record<ButtonWidth, string> = {
