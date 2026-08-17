@@ -42,10 +42,6 @@ jobs:
             echo "## What's Changed"
             echo ""
             echo "$COMMITS"
-            if [[ -n "$PREV_TAG" ]]; then
-              echo ""
-              echo "**Full changelog:** \`${PREV_TAG}...main\`"
-            fi
           } > /tmp/release_notes.md
 
       # ── Recreate the rolling draft so it always reflects HEAD of main ──────
