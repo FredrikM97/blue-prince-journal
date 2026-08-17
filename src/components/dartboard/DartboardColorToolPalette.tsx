@@ -16,7 +16,7 @@ export function DartboardColorToolPalette({
 }: Props) {
   return (
     <div>
-      <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Select color</div>
+      <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-foreground/90">Select color</div>
       <div className="flex flex-wrap gap-1 sm:gap-2">
         <button
           type="button"
@@ -24,7 +24,7 @@ export function DartboardColorToolPalette({
           title="Clear tool"
           aria-label="Clear tool"
           aria-pressed={clearMode}
-          className={`inline-flex h-12 w-12 items-center justify-center rounded-md border transition-colors sm:h-14 sm:w-14 ${
+          className={`inline-flex h-[3.75rem] w-[3.75rem] items-center justify-center rounded-md border transition-colors sm:h-[4.25rem] sm:w-[4.25rem] ${
             clearMode
               ? "border-accent bg-accent/20 text-foreground ring-2 ring-accent ring-offset-1 ring-offset-background"
               : "border-border bg-background/40 text-muted-foreground hover:border-accent/50 hover:text-foreground"
@@ -38,7 +38,7 @@ export function DartboardColorToolPalette({
               : undefined
           }
         >
-          <Eraser className="h-4 w-4 sm:h-5 sm:w-5" />
+          <Eraser className="h-6 w-6 sm:h-7 sm:w-7" />
         </button>
         {(Object.keys(OPERATORS) as OpColor[]).map((color) => {
           const operator = OPERATORS[color];
@@ -52,7 +52,7 @@ export function DartboardColorToolPalette({
               aria-label={`${operator.label} operator`}
               aria-pressed={isActive}
               aria-current={isActive ? "true" : undefined}
-              className={`relative inline-flex h-12 w-12 flex-col items-center justify-center gap-0.5 rounded-md border text-xs font-semibold transition-colors sm:h-14 sm:w-14 sm:gap-1 sm:text-sm ${
+              className={`relative inline-flex h-[3.75rem] w-[3.75rem] flex-col items-center justify-center gap-0.5 rounded-md border text-sm font-semibold transition-colors sm:h-[4.25rem] sm:w-[4.25rem] sm:gap-1 sm:text-base ${
                 isActive
                   ? "border-[3px] border-foreground bg-accent/20 text-foreground ring-4 ring-foreground/50 ring-offset-2 ring-offset-background"
                   : "border-border bg-background/40 text-muted-foreground hover:border-accent/50 hover:text-foreground"
@@ -69,7 +69,7 @@ export function DartboardColorToolPalette({
               }
             >
               <span
-                className="inline-block h-4 w-4 rounded-full border border-black/30 sm:h-5 sm:w-5"
+                className="inline-block h-6 w-6 rounded-full border border-black/30 sm:h-7 sm:w-7"
                 style={{ background: operator.swatch }}
               />
               <span className="leading-none text-foreground">{operator.symbol}</span>

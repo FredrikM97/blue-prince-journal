@@ -9,7 +9,7 @@ type Props = {
 export function DartboardPaintModeRow({ paintMode, onSelectMode }: Props) {
   return (
     <div>
-      <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Paint mode</div>
+      <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-foreground/90">Paint mode</div>
       <div className="flex flex-wrap gap-1.5">
         {PAINT_MODE_OPTIONS.map((mode) => (
           <Button
@@ -17,7 +17,7 @@ export function DartboardPaintModeRow({ paintMode, onSelectMode }: Props) {
             variant={paintMode === mode.value ? "brass" : "outline"}
             size="sm"
             onClick={() => onSelectMode(mode.value)}
-            className="h-7 px-2 text-[10px]"
+            className="h-9 px-3 text-[12px]"
             title={mode.note}
           >
             {mode.label}
