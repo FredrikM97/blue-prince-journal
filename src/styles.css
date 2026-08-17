@@ -117,7 +117,6 @@
   --board-black: oklch(0.18 0.012 260);
   --board-number: oklch(0.88 0.01 80);
   --board-stroke: oklch(0.08 0.01 260 / 92%);
-  --board-select: var(--color-brass);
 
   /* Light mode: graph nodes and links */
   --color-graph-node-clue: oklch(0.85 0.11 80);
@@ -203,7 +202,6 @@
   --board-black: oklch(0.14 0.01 260);
   --board-number: oklch(0.96 0.01 85);
   --board-stroke: oklch(0.02 0 0 / 96%);
-  --board-select: var(--color-brass);
   color-scheme: dark;
 }
 

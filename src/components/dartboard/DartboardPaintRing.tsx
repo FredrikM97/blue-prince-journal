@@ -48,15 +48,15 @@ export function DartboardPaintRing({
               aria-label={`${ring} wedge ${WEDGE_ORDER[index]}`}
               d={buildSectorPathByRadii({ rIn, rOut }, a0, a1)}
               fill={resolveFill(color, fallbackForIndex(index))}
-              stroke={isSelectedWedge ? "var(--board-number)" : "var(--board-stroke)"}
-              strokeWidth={isSelectedWedge ? 2.5 : 1}
+              stroke="var(--board-stroke)"
+              strokeWidth={1}
               onClick={() => {
                 onCycleWedge(ring, index);
               }}
               style={{
                 cursor: "pointer",
                 transition: "fill 120ms, stroke 120ms",
-                filter: isSelectedWedge ? "drop-shadow(0 0 12px rgba(255,255,255,0.24))" : undefined,
+                opacity: isSelectedWedge ? 1 : 0.96,
               }}
             >
               <title>{`${ring} · wedge ${WEDGE_ORDER[index]} — click to cycle color`}</title>

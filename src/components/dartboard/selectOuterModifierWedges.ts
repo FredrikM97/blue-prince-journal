@@ -39,8 +39,8 @@ export function selectOuterModifierWedges(params: {
         isActive && assignedId
           ? `color-mix(in oklab, ${operatorSwatches[index] ?? "var(--accent)"} 55%, var(--board-black))`
           : DEFAULT_OUTER_MODIFIER_FILL,
-      stroke: isSelected ? "var(--board-number)" : "var(--board-stroke)",
-      strokeWidth: isSelected ? 2.5 : 1,
+      stroke: "var(--board-stroke)",
+      strokeWidth: 1,
       isSelected,
       isActive,
     };

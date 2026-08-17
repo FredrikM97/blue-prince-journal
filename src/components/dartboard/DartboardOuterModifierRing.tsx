@@ -35,7 +35,6 @@ export function DartboardOuterModifierRing({ wedges, onSelectWedge }: Props) {
             style={{
               cursor: "pointer",
               transition: "fill 120ms, stroke 120ms",
-              filter: wedge.isSelected ? "drop-shadow(0 0 10px rgba(255,255,255,0.22))" : undefined,
             }}
           >
             <title>{wedge.title}</title>

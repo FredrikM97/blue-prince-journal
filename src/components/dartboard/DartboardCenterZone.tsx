@@ -42,8 +42,8 @@ export function DartboardCenterZone({
         cy={center.y}
         r={centerShape.outerBullRadius}
         fill={centerFill}
-        stroke={centerSelected ? "var(--board-number)" : "var(--board-stroke)"}
-        strokeWidth={centerSelected ? 2.5 : 1}
+        stroke="var(--board-stroke)"
+        strokeWidth={1}
         onClick={onSelectCenter}
         style={{
           cursor: "pointer",
@@ -56,12 +56,12 @@ export function DartboardCenterZone({
         cy={center.y}
         r={centerShape.bullseyeRadius}
         fill={bullseyeFill}
-        stroke={bullseyeSelected ? "var(--board-number)" : "var(--board-stroke)"}
-        strokeWidth={bullseyeSelected ? 2.5 : 1}
+        stroke="var(--board-stroke)"
+        strokeWidth={1}
         onClick={onSelectBullseye}
         style={{
           cursor: "pointer",
-          filter: bullseyeSelected ? "drop-shadow(0 0 10px rgba(255,255,255,0.24))" : undefined,
+          opacity: bullseyeSelected ? 1 : 0.95,
         }}
       />
       {centerModifierGlyph ? (
