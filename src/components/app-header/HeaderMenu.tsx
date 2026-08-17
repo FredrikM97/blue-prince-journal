@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import {
   Settings as SettingsIcon,
-  Download,
-  Upload,
+  DownloadCloud,
+  UploadCloud,
   Coffee,
   Github,
-  Info,
+  ShieldCheck,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { exportAll, importAll } from "@/data/storage/backup";
@@ -42,28 +43,28 @@ export function HeaderMenu() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => exportAll().then(() => toast.success("Exported"))}>
-            <Download className="mr-1 h-4 w-4" /> Export all (ZIP)
+            <DownloadCloud className="mr-1 h-4 w-4 text-sky-500" /> Export all (ZIP)
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => fileRef.current?.click()}>
-            <Upload className="mr-1 h-4 w-4" /> Import…
+            <UploadCloud className="mr-1 h-4 w-4 text-emerald-500" /> Import…
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <a href={githubUrl} target="_blank" rel="noreferrer">
-              <Github className="mr-1 h-4 w-4" /> GitHub
+              <Github className="mr-1 h-4 w-4 text-foreground" /> GitHub
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setLocalFirstInfoOpen(true)}>
-            <Info className="mr-1 h-4 w-4" /> Local-first privacy
+            <ShieldCheck className="mr-1 h-4 w-4 text-amber-500" /> Local-first privacy
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <a href={buyMeACoffeeUrl} target="_blank" rel="noreferrer">
-              <Coffee className="mr-1 h-4 w-4" /> Buy me a coffee
+              <Coffee className="mr-1 h-4 w-4 text-orange-500" /> Buy me a coffee
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link to="/settings">
-              <SettingsIcon className="mr-1 h-4 w-4" /> Settings
+              <SlidersHorizontal className="mr-1 h-4 w-4 text-violet-500" /> Settings
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
