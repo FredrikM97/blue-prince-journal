@@ -4,14 +4,19 @@ import {
   Download,
   Upload,
   Coffee,
-  MessageSquareText,
+  Github,
+  Info,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { exportAll, importAll } from "@/data/storage/backup";
-import {
-  FeedbackDialog,
-} from "@/components/app-header/FeedbackDialog";
 import { Button } from "@/components/common/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/common/Dialog";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -23,8 +28,9 @@ import {
 
 export function HeaderMenu() {
   const buyMeACoffeeUrl = "https://buymeacoffee.com/fredrikm97";
+  const githubUrl = "https://github.com/FredrikM97/blue-prince-journal";
   const fileRef = useRef<HTMLInputElement>(null);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [localFirstInfoOpen, setLocalFirstInfoOpen] = useState(false);
 
   return (
     <>
@@ -42,8 +48,13 @@ export function HeaderMenu() {
             <Upload className="mr-1 h-4 w-4" /> Import…
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => setFeedbackOpen(true)}>
-            <MessageSquareText className="mr-1 h-4 w-4" /> Send feedback
+          <DropdownMenuItem asChild>
+            <a href={githubUrl} target="_blank" rel="noreferrer">
+              <Github className="mr-1 h-4 w-4" /> GitHub
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setLocalFirstInfoOpen(true)}>
+            <Info className="mr-1 h-4 w-4" /> Local-first privacy
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <a href={buyMeACoffeeUrl} target="_blank" rel="noreferrer">
@@ -74,7 +85,21 @@ export function HeaderMenu() {
           e.target.value = "";
         }}
       />
-      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      <Dialog open={localFirstInfoOpen} onOpenChange={setLocalFirstInfoOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Local-first privacy</DialogTitle>
+            <DialogDescription>
+              Blue Prince Journal stores your notes, todos, rooms, and images locally in your
+              browser by default.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogDescription>
+            No account is required, and your data is not uploaded unless you explicitly export,
+            import, or connect a local sync folder.
+          </DialogDescription>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

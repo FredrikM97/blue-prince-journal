@@ -6,7 +6,6 @@ const mockNavigate = vi.fn();
 const hoisted = vi.hoisted(() => ({
   mockExportAll: vi.fn(async () => {}),
   mockImportAll: vi.fn(async () => {}),
-  mockSubmitFeedback: vi.fn(async () => {}),
 }));
 
 const mockState = {
@@ -40,10 +39,6 @@ vi.mock("@/hooks/useStore", () => ({
 vi.mock("@/data/storage/backup", () => ({
   exportAll: hoisted.mockExportAll,
   importAll: hoisted.mockImportAll,
-}));
-
-vi.mock("@/data/feedback", () => ({
-  submitFeedback: hoisted.mockSubmitFeedback,
 }));
 
 vi.mock("sonner", () => ({
@@ -89,7 +84,6 @@ describe("AppHeader", () => {
     mockNavigate.mockClear();
     hoisted.mockExportAll.mockClear();
     hoisted.mockImportAll.mockClear();
-    hoisted.mockSubmitFeedback.mockClear();
     toastSuccess.mockClear();
     toastError.mockClear();
   });
@@ -183,30 +177,11 @@ describe("AppHeader", () => {
     });
   });
 
-  it("opens the feedback dialog and sends a submission", async () => {
+  it("opens local-first privacy info from the menu", async () => {
     render(<AppHeader />);
 
-    fireEvent.click(screen.getByRole("button", { name: /send feedback/i }));
+    fireEvent.click(screen.getByRole("button", { name: /local-first privacy/i }));
 
-    expect(screen.getByRole("heading", { name: /send feedback/i })).toBeInTheDocument();
-
-    fireEvent.change(screen.getByLabelText("Message"), {
-      target: { value: "Great app, please add more filters." },
-    });
-    fireEvent.change(screen.getByLabelText("Contact"), {
-      target: { value: "agent@example.com" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /^send$/i }));
-
-    await waitFor(() => {
-      expect(hoisted.mockSubmitFeedback).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: "Great app, please add more filters.",
-          contact: "agent@example.com",
-          appVersion: expect.any(String),
-        }),
-      );
-      expect(toastSuccess).toHaveBeenCalledWith("Feedback sent");
-    });
+    expect(screen.getByRole("heading", { name: /local-first privacy/i })).toBeInTheDocument();
   });
 });
