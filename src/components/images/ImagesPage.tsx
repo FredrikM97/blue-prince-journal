@@ -1,4 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { Images } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
 import { addImage, removeImage, updateImage } from "@/data/mutations/imageMutations";
 import type { StoredImage } from "@/lib/types";
@@ -233,7 +234,15 @@ export function ImagesPage() {
 
         {viewMode === "library" && !isPageDataLoading && filtered.length === 0 && (
           <EmptyState>
-            <Text>No images yet. Add one from note capture or from a note editor.</Text>
+            <div className="flex flex-col items-center gap-2">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/70 text-foreground/80">
+                <Images className="h-5 w-5" />
+              </span>
+              <p className="text-base font-semibold text-foreground">Your image library is empty</p>
+              <p className="max-w-sm text-sm text-foreground/80">
+                Add an image from note capture or attach one while editing a note.
+              </p>
+            </div>
           </EmptyState>
         )}
 

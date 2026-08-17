@@ -9,7 +9,7 @@ import { PageLayout } from "@/components/common/PageLayout";
 import { SidePanelLeft } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
-import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Sparkles } from "lucide-react";
+import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Share2, Sparkles } from "lucide-react";
 import { GraphPreviewContent } from "@/components/graph/GraphRightPanel";
 import type { Note } from "@/lib/types";
 import {
@@ -288,7 +288,16 @@ export function GraphPage() {
             )}
             {!isPageDataLoading && nodes.length === 0 && (
               <EmptyState>
-                No notes or todos yet. Add entries to build your connection graph.
+                <div className="flex flex-col items-center gap-2">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/70 text-foreground/80">
+                    <Share2 className="h-5 w-5" />
+                  </span>
+                  <p className="text-base font-semibold text-foreground">Your graph is ready</p>
+                  <p className="max-w-sm text-sm text-foreground/80">
+                    Add a few notes or todos and this view will start mapping the links between
+                    them automatically.
+                  </p>
+                </div>
               </EmptyState>
             )}
             {!isPageDataLoading && nodes.length > 0 && (
