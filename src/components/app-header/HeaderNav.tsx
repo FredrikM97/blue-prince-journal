@@ -23,7 +23,11 @@ export function HeaderNav({ pathname }: { pathname: string }) {
           <Link
             key={to}
             to={to}
-            className={`rounded px-2 py-1 text-sm text-muted-foreground dark:text-foreground/70 hover:bg-accent hover:text-foreground${isActive ? " bg-secondary text-foreground" : ""}`}
+            className={`relative rounded px-2 py-1 text-sm text-muted-foreground after:absolute after:inset-x-2 after:-bottom-0.5 after:h-[3px] after:rounded-full after:transition-colors dark:text-foreground/70${
+              isActive
+                ? " font-semibold text-foreground after:bg-brass"
+                : " hover:text-foreground after:bg-transparent hover:after:bg-border"
+            }`}
           >
             {label}
           </Link>
