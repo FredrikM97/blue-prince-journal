@@ -146,13 +146,6 @@ export function DartboardPage() {
     }));
   }
 
-  function handleClearBoard() {
-    setBoard(emptyBoard());
-    setModifiers(emptyModifierState());
-    setSelection(DEFAULT_SELECTED_TARGET);
-    setActiveOuterModifierId(null);
-    setOuterModifierColorByWedge(Array(WEDGE_COUNT).fill(null));
-  }
 
   function getModifierPanelState(zone: ModifierZone) {
     if (zone === "outer") {
@@ -190,9 +183,6 @@ export function DartboardPage() {
       <PageLayout.Middle>
         <div className="flex h-auto min-h-0 flex-col gap-4 sm:h-full">
           <div className="relative flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-amber-300/45 bg-card/40 p-2 sm:p-4">
-            <div className="pointer-events-none absolute left-3 top-3 rounded border border-amber-300/60 bg-amber-200/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200/90">
-              WIP
-            </div>
             <DartboardCanvas
               board={board}
               advanced={advanced}
