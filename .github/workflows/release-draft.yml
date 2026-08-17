@@ -1,0 +1,64 @@
+name: Draft Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  draft:
+    if: github.repository == 'FredrikM97/blue-prince-notes' && github.repository_owner == 'FredrikM97'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # ── Collect every commit since the last published (non-draft) tag ─────
+      - name: Build release notes
+        shell: bash
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
+
+          if [[ -n "$PREV_TAG" ]]; then
+            RANGE="${PREV_TAG}..HEAD"
+          else
+            RANGE="HEAD"
+          fi
+
+          COMMITS=$(git log "$RANGE" --no-merges --pretty=format:"- %s (%h)")
+
+          if [[ -z "$COMMITS" ]]; then
+            COMMITS="- No changes since ${PREV_TAG:-the beginning of history}"
+          fi
+
+          {
+            echo "## What's Changed"
+            echo ""
+            echo "$COMMITS"
+            if [[ -n "$PREV_TAG" ]]; then
+              echo ""
+              echo "**Full changelog:** \`${PREV_TAG}...main\`"
+            fi
+          } > /tmp/release_notes.md
+
+      # ── Recreate the rolling draft so it always reflects HEAD of main ──────
+      - name: Update draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if gh release view unreleased >/dev/null 2>&1; then
+            gh release delete unreleased --yes
+          fi
+
+          gh release create unreleased \
+            --draft \
+            --target main \
+            --title "Unreleased" \
+            --notes-file /tmp/release_notes.md
