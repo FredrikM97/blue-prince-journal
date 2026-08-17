@@ -1,3 +1,5 @@
+# Manually cuts a version: bumps the tag and promotes the "unreleased" draft
+# (see release-draft.yml) into a real published GitHub release.
 name: Release
 
 on:
@@ -58,12 +60,17 @@ jobs:
           echo "prev_tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
           echo "next_tag=${NEXT}"     >> "$GITHUB_OUTPUT"
 
-      # ── Collect commits since previous tag ────────────────────────────────
+      # ── Reuse the rolling draft's notes, falling back to git log ──────────
       - name: Build release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           PREV="${{ steps.version.outputs.prev_tag }}"
-          NEXT="${{ steps.version.outputs.next_tag }}"
+
+          if gh release view unreleased --json body -q .body > /tmp/release_notes.md 2>/dev/null; then
+            exit 0
+          fi
 
           if [[ -n "$PREV" ]]; then
             RANGE="${PREV}..HEAD"
@@ -81,10 +88,6 @@ jobs:
             echo "## What's Changed"
             echo ""
             echo "$COMMITS"
-            if [[ -n "$PREV" ]]; then
-              echo ""
-              echo "**Full changelog:** \`${PREV}...${NEXT}\`"
-            fi
           } > /tmp/release_notes.md
 
       # ── Dry-run: print preview and exit ───────────────────────────────────
@@ -124,8 +127,8 @@ jobs:
             cat /tmp/release_notes.md
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # ── Real release: tag → GitHub Release (triggers pages deploy) ────────
-      - name: Create tag and GitHub release
+      # ── Real release: promote the draft (or create fresh) → GitHub Release ─
+      - name: Publish GitHub release
         if: inputs.dry_run == false
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -133,21 +136,22 @@ jobs:
         run: |
           NEXT="${{ steps.version.outputs.next_tag }}"
 
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name  "github-actions[bot]"
-          git tag -a "$NEXT" -m "Release $NEXT"
-          git push origin "$NEXT"
+          if gh release view unreleased >/dev/null 2>&1; then
+            gh release edit unreleased \
+              --tag "$NEXT" \
+              --title "$NEXT" \
+              --notes-file /tmp/release_notes.md \
+              --draft=false \
+              --latest
+          else
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git config user.name  "github-actions[bot]"
+            git tag -a "$NEXT" -m "Release $NEXT"
+            git push origin "$NEXT"
 
-          gh release create "$NEXT" \
-            --title "$NEXT" \
-            --notes-file /tmp/release_notes.md \
-            --latest
+            gh release create "$NEXT" \
+              --title "$NEXT" \
+              --notes-file /tmp/release_notes.md \
+              --latest
+          fi
 
-  deploy-pages:
-    needs: release
-    if: inputs.dry_run == false
-    uses: ./.github/workflows/deploy-pages.yml
-    permissions:
-      contents: read
-      pages: write
-      id-token: write

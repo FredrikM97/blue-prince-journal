@@ -1,3 +1,5 @@
+# Keeps a rolling draft release (tag "unreleased") current with every push to main,
+# so direct-to-main commits are never missed when release.yml later cuts a version.
 name: Draft Release
 
 on:

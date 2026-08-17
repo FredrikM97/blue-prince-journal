@@ -1,3 +1,4 @@
+# Type-checks, builds and tests every push/PR to main.
 name: CI
 
 on:
