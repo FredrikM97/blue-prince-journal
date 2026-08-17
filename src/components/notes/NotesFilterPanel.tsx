@@ -3,6 +3,7 @@ import { NOTE_TYPE_META, NOTE_TYPE_ORDER } from "@/lib/noteMetadata";
 import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { GroupedRoomFilterSection } from "@/components/common/filter/GroupedRoomFilterSection";
+import { Stack } from "@/components/common/general/Stack";
 
 const TYPE_OPTIONS: { value: NoteType; label: string }[] = NOTE_TYPE_ORDER.map((value) => ({
   value,
@@ -48,7 +49,7 @@ export function NotesFilterPanel({
   const tagOptions = tags.map((t) => ({ value: t, label: `#${t}` }));
 
   return (
-    <>
+    <Stack gap="0" className="divide-y divide-border">
       {!filterType && (
         <FilterSection title="Type" collapsible defaultOpen width="fit" variant="compact">
           <FilterButtonGroup value={typeFilter} options={typeOptions} onChange={setTypeFilter} />
@@ -101,6 +102,6 @@ export function NotesFilterPanel({
           <FilterButtonGroup value={tagFilter} options={tagOptions} onChange={setTagFilter} />
         </FilterSection>
       )}
-    </>
+    </Stack>
   );
 }

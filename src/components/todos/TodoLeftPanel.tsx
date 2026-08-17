@@ -32,8 +32,8 @@ export function TodoLeftPanel({
   return (
     <SidePanelLeft title="Todo" subtitle={`${total} ${itemLabel}`}>
       <Stack gap="0" className="min-h-0 flex-1 overflow-y-auto">
-        <Stack gap="4">
-          <Stack gap="1">
+        <Stack gap="0" className="divide-y divide-border">
+          <Stack gap="1" className="pb-2.5">
             <MetaText>Open: {openCount}</MetaText>
             <MetaText>In progress: {progressCount}</MetaText>
             <MetaText>Done: {doneCount}</MetaText>

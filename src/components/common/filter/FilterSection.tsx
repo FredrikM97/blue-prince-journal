@@ -44,7 +44,7 @@ export function FilterSection({
     "px-1 py-0.5 text-[11px] normal-case text-brass hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
   return (
-    <Stack gap="0" className="space-y-1.5">
+    <Stack gap="0" className="space-y-1.5 py-2.5 first:pt-0 last:pb-0">
       {collapsible && (
         <Stack gap="0" className={headerClassName}>
           <Button

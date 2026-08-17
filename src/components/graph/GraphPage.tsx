@@ -193,7 +193,7 @@ export function GraphPage() {
       label: `Connected only (${isolatedCount} hidden)`,
       active: hideIsolated,
       onToggle: () => setHideIsolated((value) => !value),
-      dotColor: hideIsolated ? "#f59e0b" : "#64748b",
+      dotColor: hideIsolated ? "var(--color-brass)" : "var(--color-muted-foreground)",
     },
   ];
 
@@ -217,7 +217,7 @@ export function GraphPage() {
             subtitle={`${displayNodes.length} entries · ${edges.length} links`}
           >
             <Stack gap="0" className="min-h-0 flex-1 overflow-y-auto">
-              <Stack gap="3">
+              <Stack gap="0" className="divide-y divide-border">
                 <FilterSection
                   title="Types"
                   collapsible
@@ -228,6 +228,7 @@ export function GraphPage() {
                 >
                   <FilterToggleGrid
                     items={typeFilterItems}
+                    leftAligned
                     size="compact"
                     layout="wrap"
                     width="fit"

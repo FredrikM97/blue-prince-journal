@@ -18,19 +18,19 @@ function getToggleButtonClass(options: {
 }) {
   const alignClass = options.leftAligned ? "justify-start text-left" : "justify-center text-center";
   const sizeClass =
-    options.size === "compact" ? "h-5 px-1.5 py-0.5 text-[11px]" : "px-2 py-1 text-[11px]";
+    options.size === "compact" ? "h-6 px-1.5 py-0.5 text-[11px]" : "px-2 py-1 text-[11px]";
   const widthClass = options.width === "fit" ? "w-auto" : "w-full";
 
-  let stateClass = "opacity-75";
+  let stateClass = "text-muted-foreground";
   if (options.active && options.activeStyle === "filled") {
-    stateClass = "border-primary bg-primary text-primary-foreground opacity-100";
+    stateClass = "border-primary bg-primary text-primary-foreground";
   }
   if (options.active && options.activeStyle === "outline") {
-    stateClass = "border-primary bg-card text-foreground opacity-100";
+    stateClass = "border-primary bg-card text-foreground";
   }
 
   return [
-    "flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card text-foreground transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+    "flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card transition-colors hover:border-primary hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
     alignClass,
     sizeClass,
     widthClass,
@@ -58,7 +58,7 @@ export function FilterToggleGrid({
 
   if (layout === "wrap") {
     return (
-      <Inline as="div" gap="1.5" wrap className="w-full">
+      <Inline as="div" gap="1.5" wrap className="w-full gap-y-1.5">
         {items.map((item) => {
           const buttonClassName = getToggleButtonClass({
             active: item.active,
@@ -91,7 +91,7 @@ export function FilterToggleGrid({
 
   return (
     <Grid
-      className="w-full gap-x-2 gap-y-0.5 [grid-template-columns:repeat(auto-fit,minmax(min(6.75rem,100%),1fr))]"
+      className="w-full gap-x-2 gap-y-1.5 [grid-template-columns:repeat(auto-fit,minmax(min(6.75rem,100%),1fr))]"
     >
       {items.map((item) => {
         const buttonClassName = getToggleButtonClass({
