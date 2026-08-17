@@ -147,7 +147,7 @@ export function AppHeader() {
             <span className="max-sm:hidden">Add note</span>
             <KeyboardKey
               variant="shortcut"
-              className="rounded border border-border bg-background px-1 py-0 text-[10px] font-semibold leading-4 text-foreground opacity-100 max-sm:hidden"
+              className="rounded border border-border bg-background px-1 py-0 text-[11px] font-semibold leading-4 text-foreground opacity-100 max-sm:hidden"
             >
               N
             </KeyboardKey>

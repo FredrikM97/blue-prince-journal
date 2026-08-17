@@ -465,7 +465,7 @@ function SuggestionItems({
             >
               <span>{displayValue}</span>
               {showHint && (
-                <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                <span className="rounded bg-secondary px-1.5 py-0.5 text-[11px] text-muted-foreground">
                   {suggestion.hint}
                 </span>
               )}

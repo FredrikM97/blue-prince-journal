@@ -614,7 +614,7 @@ function GraphCanvas({
         </g>
       </svg>
 
-      <Stack className="flex shrink-0 flex-wrap items-center gap-4 text-[10px] text-muted-foreground" gap="0">
+      <Stack className="flex shrink-0 flex-wrap items-center gap-4 text-[11px] text-muted-foreground" gap="0">
         <MetaText as="span" className="font-medium uppercase tracking-wide">
           Links:
         </MetaText>

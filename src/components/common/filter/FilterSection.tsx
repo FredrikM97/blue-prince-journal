@@ -35,13 +35,13 @@ export function FilterSection({
   const ChevronIcon = open ? ChevronDown : ChevronRight;
   const chevronIconClassName = "h-2.5 w-2.5";
   const headerClassName =
-    "flex items-center justify-between text-[10px] font-medium uppercase tracking-wide text-muted-foreground";
+    "flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground";
   const controlButtonClassName = [
-    "flex min-h-6 cursor-pointer select-none items-center justify-between gap-1 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+    "flex min-h-6 cursor-pointer select-none items-center justify-between gap-1 px-1 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
     CONTROL_WIDTH_CLASS_BY_VARIANT[width],
   ].join(" ");
   const actionButtonClassName =
-    "px-1 py-0.5 text-[10px] normal-case text-brass hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+    "px-1 py-0.5 text-[11px] normal-case text-brass hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
   return (
     <Stack gap="0" className="space-y-1.5">

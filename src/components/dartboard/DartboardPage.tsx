@@ -16,6 +16,7 @@ import { DartboardCanvas } from "./DartboardCanvas";
 import { DartboardColorToolPalette } from "./DartboardColorToolPalette";
 import { DartboardPaintModeRow } from "./DartboardPaintModeRow";
 import { ModifierPanel } from "./ModifierPanel";
+import { ModifierZoneTabs } from "./ModifierZoneTabs";
 import { MODIFIER_PRESETS } from "./modifiers";
 import {
   applyClearSelection,
@@ -247,7 +248,7 @@ export function DartboardPage() {
 
           <div className="pt-3">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="text-[13px] font-semibold uppercase tracking-wide text-foreground/90">Modifiers</div>
+              <div className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">Modifiers</div>
               <Button
                 variant="ghost"
                 size="icon-h2"
@@ -262,29 +263,9 @@ export function DartboardPage() {
                 <CircleHelp className="h-4 w-4" />
               </Button>
             </div>
-            <div className="grid grid-cols-3 gap-1 rounded-t-xl border border-border/40 border-b-0 bg-muted/20 p-1 pb-0.5 shadow-[inset_0_-1px_0_0_var(--color-border)]">
-              {([
-                { zone: "bullseye", label: "Bullseye" },
-                { zone: "center", label: "Inner" },
-                { zone: "outer", label: "Outer" },
-              ] as const).map((option) => (
-                <Button
-                  key={option.zone}
-                  variant={activeModifierZone === option.zone ? "outline" : "ghost"}
-                  size="sm"
-                  active={activeModifierZone === option.zone}
-                  className={activeModifierZone === option.zone
-                    ? "relative -mb-px h-11 rounded-b-none border-border border-b-background bg-background px-4 text-[14px] font-semibold text-foreground shadow-sm before:absolute before:inset-x-3 before:bottom-0 before:h-0.5 before:rounded-full before:bg-brass"
-                    : "relative -mb-px h-11 rounded-b-none border border-transparent border-b-0 bg-transparent px-4 text-[14px] text-foreground/80 hover:border-border/70 hover:bg-background/65 hover:text-foreground"
-                  }
-                  onClick={() => setActiveModifierZone(option.zone)}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
+            <ModifierZoneTabs value={activeModifierZone} onChange={setActiveModifierZone} />
 
-            <div className="-mt-px rounded-b-xl border border-border/40 border-t-0 bg-background/10 px-1 pb-1 pt-3 shadow-[inset_0_1px_0_0_var(--color-border)]">
+            <div className="mt-2 px-1 pb-1 pt-3">
               <ModifierPanel
                 zone={activeModifierZone}
                 active={activeModifierPanel.active}
@@ -307,9 +288,9 @@ export function DartboardPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="dialog-scroll-body space-y-4 pr-1">
-              <section className="rounded-md border border-border/60 bg-background/60 px-3 py-3">
+              <section className="rounded-md border border-border bg-muted/30 px-3 py-3">
                 <h4 className="text-sm font-semibold text-foreground">What the zones mean</h4>
-                <ul className="mt-2 space-y-1 text-sm text-foreground/90">
+                <ul className="mt-2 space-y-1 text-sm text-foreground">
                   <li>
                     <span className="font-semibold">Bullseye:</span> center-most modifier slot.
                   </li>
@@ -324,41 +305,22 @@ export function DartboardPage() {
               </section>
 
               <section>
-                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-foreground/75">
+                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Select modifiers
                 </div>
-                <div className="grid grid-cols-3 gap-1 rounded-t-xl border border-border/60 border-b-0 bg-muted/20 p-1 pb-0.5 shadow-[inset_0_-1px_0_0_var(--color-border)]">
-                  {([
-                    { zone: "bullseye", label: "Bullseye" },
-                    { zone: "center", label: "Inner" },
-                    { zone: "outer", label: "Outer" },
-                  ] as const).map((option) => (
-                    <Button
-                      key={option.zone}
-                      variant={modifierGuideZone === option.zone ? "outline" : "ghost"}
-                      size="sm"
-                      className={modifierGuideZone === option.zone
-                        ? "relative -mb-px h-9 rounded-b-none border-border border-b-background bg-background px-3 text-[12px] font-semibold text-foreground shadow-sm before:absolute before:inset-x-3 before:bottom-0 before:h-0.5 before:rounded-full before:bg-brass"
-                        : "relative -mb-px h-9 rounded-b-none border border-transparent border-b-0 bg-transparent px-3 text-[12px] text-foreground/75 hover:border-border/60 hover:bg-background/60 hover:text-foreground"
-                      }
-                      onClick={() => setModifierGuideZone(option.zone)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-                <div className="-mt-px rounded-b-xl border border-border/60 border-t-0 bg-background/40 px-3 pb-3 pt-2 shadow-[inset_0_1px_0_0_var(--color-border)]">
+                <ModifierZoneTabs value={modifierGuideZone} onChange={setModifierGuideZone} size="compact" />
+                <div className="mt-2 px-3 pb-3 pt-2">
                   <div className="space-y-2">
                   {activeModifierGuideItems.map((modifier) => (
                     <div
                       key={modifier.id}
-                      className="rounded-md border border-border/60 bg-background/60 px-3 py-2"
+                      className="rounded-md border border-border bg-muted/30 px-3 py-2"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-lg font-semibold text-foreground">{modifier.glyph}</span>
                         <span className="text-sm font-semibold text-foreground">{modifier.label}</span>
                       </div>
-                      <p className="mt-1 text-sm text-foreground/85">{modifier.note}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{modifier.note}</p>
                     </div>
                   ))}
                   </div>

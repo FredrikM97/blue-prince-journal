@@ -16,7 +16,7 @@ export function DartboardColorToolPalette({
 }: Props) {
   return (
     <div>
-      <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-foreground/90">Select color</div>
+      <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">Select color</div>
       <div className="flex flex-wrap gap-1 sm:gap-2">
         <button
           type="button"
@@ -27,7 +27,7 @@ export function DartboardColorToolPalette({
           className={`inline-flex h-[3.75rem] w-[3.75rem] items-center justify-center rounded-md border transition-colors sm:h-[4.25rem] sm:w-[4.25rem] ${
             clearMode
               ? "border-accent bg-accent/20 text-foreground ring-2 ring-accent ring-offset-1 ring-offset-background"
-              : "border-border bg-background/40 text-muted-foreground hover:border-accent/50 hover:text-foreground"
+              : "border-border bg-card text-muted-foreground hover:border-accent/50 hover:text-foreground"
           }`}
           style={
             clearMode
@@ -55,7 +55,7 @@ export function DartboardColorToolPalette({
               className={`relative inline-flex h-[3.75rem] w-[3.75rem] flex-col items-center justify-center gap-0.5 rounded-md border text-sm font-semibold transition-colors sm:h-[4.25rem] sm:w-[4.25rem] sm:gap-1 sm:text-base ${
                 isActive
                   ? "border-[3px] border-foreground bg-accent/20 text-foreground ring-4 ring-foreground/50 ring-offset-2 ring-offset-background"
-                  : "border-border bg-background/40 text-muted-foreground hover:border-accent/50 hover:text-foreground"
+                  : "border-border bg-card text-muted-foreground hover:border-accent/50 hover:text-foreground"
               }`}
               style={
                 isActive

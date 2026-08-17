@@ -41,7 +41,7 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
         </Text>
         <Stack gap="0" className="mt-0.5 flex min-w-0 flex-col items-start gap-1">
           <Stack gap="0" className="flex w-full min-w-0 flex-wrap items-center gap-1.5">
-            <Stack as="span" gap="0" className="shrink-0 whitespace-nowrap text-[10px] text-muted-foreground">
+            <Stack as="span" gap="0" className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">
               {relTime(note.updatedAt)}
             </Stack>
             <Stack as="span" gap="0" className="inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap">
@@ -49,7 +49,7 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
                 <Stack
                   as="span"
                   gap="0"
-                  className="mr-0.5 inline-flex rounded border border-border px-1.5 py-0.5 text-[10px] text-foreground"
+                  className="mr-0.5 inline-flex rounded border border-border px-1.5 py-0.5 text-[11px] text-foreground"
                 >
                   {note.date}
                 </Stack>
@@ -65,7 +65,7 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
               <Stack
                 as="span"
                 gap="0"
-                className="inline-flex rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                className="inline-flex rounded border border-border bg-secondary px-1.5 py-0.5 text-[11px] text-muted-foreground"
               >
                 solved
               </Stack>
@@ -74,7 +74,7 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
               <Stack
                 as="span"
                 gap="0"
-                className="rounded border border-border px-1 py-0.5 text-[10px] text-muted-foreground transition-colors group-hover:border-primary group-hover:text-primary"
+                className="rounded border border-border px-1 py-0.5 text-[11px] text-muted-foreground transition-colors group-hover:border-primary group-hover:text-primary"
               >
                 📎 {note.imageIds.length}
               </Stack>

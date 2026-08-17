@@ -87,7 +87,7 @@ function MarkdownShortcutHelp() {
               right: "var(--md-shortcut-right)",
             } as CSSProperties}
           >
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               Token shortcuts
             </p>
             <div className="grid grid-cols-[max-content_1fr] items-center gap-x-2 gap-y-1.5">

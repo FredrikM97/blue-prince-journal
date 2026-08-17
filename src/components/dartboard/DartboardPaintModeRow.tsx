@@ -9,7 +9,7 @@ type Props = {
 export function DartboardPaintModeRow({ paintMode, onSelectMode }: Props) {
   return (
     <div>
-      <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-foreground/90">Paint mode</div>
+      <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">Paint mode</div>
       <div className="flex flex-wrap gap-1.5">
         {PAINT_MODE_OPTIONS.map((mode) => (
           <Button

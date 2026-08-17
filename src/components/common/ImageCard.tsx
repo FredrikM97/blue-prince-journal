@@ -48,7 +48,7 @@ export function ImageCard({
         className="absolute bottom-0 left-0 right-0 flex items-center gap-1 bg-background px-1.5 py-0.5"
         title={label}
       >
-        <span className="min-w-0 flex-1 truncate text-[10px] leading-tight text-foreground">{label}</span>
+        <span className="min-w-0 flex-1 truncate text-[11px] leading-tight text-foreground">{label}</span>
         {badge}
       </span>
       {onRemove && (

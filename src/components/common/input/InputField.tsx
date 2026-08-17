@@ -35,7 +35,7 @@ function getInputClass({
 
 function getLabelClass({ size, hideLabel }: { size: InputFieldSize; hideLabel: boolean }) {
   let className = "mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
-  if (size === "sm") className = `${className} text-[10px]`;
+  if (size === "sm") className = `${className} text-[11px]`;
   if (size === "lg") className = `${className} text-xs`;
   if (hideLabel) className = `${className} sr-only`;
   return className;

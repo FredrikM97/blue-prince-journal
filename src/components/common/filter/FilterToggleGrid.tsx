@@ -18,7 +18,7 @@ function getToggleButtonClass(options: {
 }) {
   const alignClass = options.leftAligned ? "justify-start text-left" : "justify-center text-center";
   const sizeClass =
-    options.size === "compact" ? "h-5 px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-[11px]";
+    options.size === "compact" ? "h-5 px-1.5 py-0.5 text-[11px]" : "px-2 py-1 text-[11px]";
   const widthClass = options.width === "fit" ? "w-auto" : "w-full";
 
   let stateClass = "opacity-75";
