@@ -3,10 +3,10 @@
 exports[`PageLayout > matches snapshot for single-column layout 1`] = `
 <DocumentFragment>
   <div
-    class="mx-auto grid h-full min-h-0 w-full items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 flex flex-col"
+    class="mx-auto grid h-full min-h-0 w-full max-w-[104rem] items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 flex flex-col"
   >
     <main
-      class="min-h-0 min-w-0 overflow-y-auto [overscroll-behavior:contain] h-full flex-1"
+      class="min-h-0 min-w-0 [overscroll-behavior:contain] h-full overflow-y-auto flex-1"
     >
       <div>
         settings-like-content
@@ -19,24 +19,24 @@ exports[`PageLayout > matches snapshot for single-column layout 1`] = `
 exports[`PageLayout > matches snapshot for three-column layout 1`] = `
 <DocumentFragment>
   <div
-    class="mx-auto grid h-full min-h-0 w-full items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 grid-cols-[var(--sidebar-width)_minmax(0,1fr)_var(--sidebar-width)]"
+    class="mx-auto grid h-full min-h-0 w-full max-w-[104rem] items-start gap-3 px-3 py-2 sm:gap-6 sm:px-4 sm:py-3 lg:px-6 grid-cols-[20rem_minmax(0,1fr)_10rem] md:grid-cols-[20rem_minmax(0,1fr)_20rem] lg:grid-cols-[20rem_minmax(0,1fr)_34rem] xl:grid-cols-[20rem_minmax(0,1fr)_40rem]"
   >
     <aside
-      class="sticky top-0 min-h-0 self-start overflow-y-auto bg-card [overscroll-behavior:contain] rounded-l-lg border-r border-border"
+      class="sticky top-0 h-full min-h-0 max-h-full self-start overflow-y-auto bg-card [overscroll-behavior:contain] rounded-l-lg border-r border-border"
     >
       <div>
         left
       </div>
     </aside>
     <main
-      class="min-h-0 min-w-0 overflow-y-auto [overscroll-behavior:contain] h-full"
+      class="min-h-0 min-w-0 [overscroll-behavior:contain] h-full overflow-y-auto"
     >
       <div>
         middle
       </div>
     </main>
     <aside
-      class="sticky top-0 min-h-0 self-start overflow-y-auto bg-card [overscroll-behavior:contain] rounded-r-lg border-l border-border"
+      class="sticky top-0 h-full min-h-0 max-h-full self-start overflow-y-auto bg-card [overscroll-behavior:contain] rounded-r-lg border-l border-border"
     >
       <div>
         right

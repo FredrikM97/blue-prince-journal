@@ -4,35 +4,35 @@ import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
 
 const hoisted = vi.hoisted(() => ({
   mockImportAll: vi.fn(async () => {}),
-  mockPickSyncFolder: vi.fn<() => Promise<{ name: string } | null>>(async () => null),
-  mockReadFromSyncFolder: vi.fn<
-    () => Promise<{ manifest: { app: string }; images: unknown[] } | null>
+  mockStartFresh: vi.fn(async () => {}),
+  mockGetLocalJournalItemCount: vi.fn(async () => 0),
+  mockConnectSyncFolderWithConflictResolution: vi.fn<
+    () => Promise<{
+      resolution: "connected-empty" | "use-folder-data" | "keep-local-data";
+      handle: { name: string };
+    } | null>
   >(async () => null),
-  mockImportSyncManifest: vi.fn<(payload: unknown) => Promise<void>>(async () => {}),
-  mockGetActiveSyncFolderName: vi.fn(() => null as string | null),
+  mockGetActiveFolderName: vi.fn(() => null as string | null),
 }));
-
-const mockStore = {
-  load: vi.fn(async () => {}),
-  startFresh: vi.fn(async () => {}),
-};
 
 const toastSuccess = vi.fn();
 const toastError = vi.fn();
 
-vi.mock("@/data/store", () => ({
-  useStore: (selector: (state: typeof mockStore) => unknown) => selector(mockStore),
-}));
-
-vi.mock("@/data/io", () => ({
+vi.mock("@/data/storage/backup", () => ({
   importAll: hoisted.mockImportAll,
 }));
 
+vi.mock("@/data/mutations/lifecycleMutations", () => ({
+  startFresh: hoisted.mockStartFresh,
+}));
+
+vi.mock("@/data/welcome", () => ({
+  getLocalJournalItemCount: hoisted.mockGetLocalJournalItemCount,
+}));
+
 vi.mock("@/data/sync/sync", () => ({
-  pickSyncFolder: hoisted.mockPickSyncFolder,
-  readFromSyncFolder: hoisted.mockReadFromSyncFolder,
-  importSyncManifest: hoisted.mockImportSyncManifest,
-  getActiveSyncFolderName: hoisted.mockGetActiveSyncFolderName,
+  connectSyncFolderWithConflictResolution: hoisted.mockConnectSyncFolderWithConflictResolution,
+  syncRuntime: { getActiveFolderName: hoisted.mockGetActiveFolderName },
 }));
 
 vi.mock("sonner", () => ({
@@ -44,13 +44,11 @@ vi.mock("sonner", () => ({
 
 describe("WelcomeScreen", () => {
   beforeEach(() => {
-    mockStore.load.mockClear();
-    mockStore.startFresh.mockClear();
     hoisted.mockImportAll.mockClear();
-    hoisted.mockPickSyncFolder.mockClear();
-    hoisted.mockReadFromSyncFolder.mockClear();
-    hoisted.mockImportSyncManifest.mockClear();
-    hoisted.mockGetActiveSyncFolderName.mockClear();
+    hoisted.mockStartFresh.mockClear();
+    hoisted.mockGetLocalJournalItemCount.mockClear();
+    hoisted.mockConnectSyncFolderWithConflictResolution.mockClear();
+    hoisted.mockGetActiveFolderName.mockClear();
     toastSuccess.mockClear();
     toastError.mockClear();
   });
@@ -70,14 +68,14 @@ describe("WelcomeScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: /Start fresh/i }));
 
     await waitFor(() => {
-      expect(mockStore.startFresh).toHaveBeenCalled();
+      expect(hoisted.mockStartFresh).toHaveBeenCalled();
       expect(toastSuccess).toHaveBeenCalledWith("Started fresh");
       expect(onDone).toHaveBeenCalled();
     });
   });
 
   it("handles start fresh failure", async () => {
-    mockStore.startFresh.mockRejectedValueOnce(new Error("fail"));
+    hoisted.mockStartFresh.mockRejectedValueOnce(new Error("fail"));
     render(<WelcomeScreen onDone={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Start fresh/i }));
@@ -87,44 +85,46 @@ describe("WelcomeScreen", () => {
     });
   });
 
-  it("connects folder with existing manifest and imports data", async () => {
+  it("connects folder as empty and finishes onboarding", async () => {
     const onDone = vi.fn();
-    hoisted.mockPickSyncFolder.mockResolvedValueOnce({ name: "SyncDir" });
-    hoisted.mockReadFromSyncFolder.mockResolvedValueOnce({
-      manifest: { app: "blue-prince-notes" },
-      images: [],
+    hoisted.mockConnectSyncFolderWithConflictResolution.mockResolvedValueOnce({
+      resolution: "connected-empty",
+      handle: { name: "SyncDir" },
     });
-
-    render(<WelcomeScreen onDone={onDone} />);
-    fireEvent.click(screen.getByRole("button", { name: /Sync folder/i }));
-
-    await waitFor(() => {
-      expect(hoisted.mockImportSyncManifest).toHaveBeenCalled();
-      expect(mockStore.load).toHaveBeenCalled();
-      expect(toastSuccess).toHaveBeenCalledWith('Loaded data from "SyncDir"');
-      expect(onDone).toHaveBeenCalledWith("SyncDir");
-    });
-  });
-
-  it("connects folder without existing manifest", async () => {
-    const onDone = vi.fn();
-    hoisted.mockPickSyncFolder.mockResolvedValueOnce({ name: "SyncDir" });
-    hoisted.mockReadFromSyncFolder.mockResolvedValueOnce(null);
-    hoisted.mockGetActiveSyncFolderName.mockReturnValueOnce("ActiveFolder");
+    hoisted.mockGetActiveFolderName.mockReturnValueOnce("SyncDir");
 
     render(<WelcomeScreen onDone={onDone} />);
     fireEvent.click(screen.getByRole("button", { name: /Sync folder/i }));
 
     await waitFor(() => {
       expect(toastSuccess).toHaveBeenCalledWith(
-        'Connected to "SyncDir" — data will sync here automatically',
+        'Connected to "SyncDir" - data will sync here automatically',
       );
-      expect(onDone).toHaveBeenCalledWith("ActiveFolder");
+      expect(onDone).toHaveBeenCalledWith("SyncDir");
+    });
+  });
+
+  it("connects folder using existing folder data", async () => {
+    const onDone = vi.fn();
+    hoisted.mockConnectSyncFolderWithConflictResolution.mockResolvedValueOnce({
+      resolution: "use-folder-data",
+      handle: { name: "SyncDir" },
+    });
+    hoisted.mockGetActiveFolderName.mockReturnValueOnce("SyncDir");
+
+    render(<WelcomeScreen onDone={onDone} />);
+    fireEvent.click(screen.getByRole("button", { name: /Sync folder/i }));
+
+    await waitFor(() => {
+      expect(toastSuccess).toHaveBeenCalledWith('Using folder data from "SyncDir"');
+      expect(onDone).toHaveBeenCalledWith("SyncDir");
     });
   });
 
   it("handles restricted folder error", async () => {
-    hoisted.mockPickSyncFolder.mockRejectedValueOnce(new Error("Sensitive system files"));
+    hoisted.mockConnectSyncFolderWithConflictResolution.mockRejectedValueOnce(
+      new Error("Sensitive system files"),
+    );
     render(<WelcomeScreen onDone={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Sync folder/i }));
@@ -146,7 +146,6 @@ describe("WelcomeScreen", () => {
 
     await waitFor(() => {
       expect(hoisted.mockImportAll).toHaveBeenCalledWith(file, "replace");
-      expect(mockStore.load).toHaveBeenCalled();
       expect(toastSuccess).toHaveBeenCalledWith("Data imported");
       expect(onDone).toHaveBeenCalled();
     });
@@ -165,3 +164,4 @@ describe("WelcomeScreen", () => {
     });
   });
 });
+

@@ -25,44 +25,51 @@ vi.mock("@/components/common/PageLayout", async () => {
   };
 });
 
+function getResultText() {
+  return document.querySelector(".font-serif.text-5xl.font-bold")?.textContent;
+}
+
 describe("DartboardPage", () => {
-  it("cycles wedge colors and recomputes the result", () => {
+  it("paints a wedge and computes the additive result", () => {
     render(<DartboardPage />);
 
-    fireEvent.change(screen.getByLabelText("Bullseye starting value"), { target: { value: "5" } });
+    fireEvent.click(screen.getByLabelText("Add operator"));
     fireEvent.click(screen.getByLabelText("inner wedge 20"));
 
-    expect(screen.getByText("25")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByLabelText("inner wedge 20"));
-
-    expect(screen.getByText("100")).toBeInTheDocument();
+    expect(getResultText()).toBe("20");
   });
 
-  it("keeps modifier toggles active and shows modifier-applied steps in the result", () => {
+  it("clicking the same painted wedge again clears it", () => {
     render(<DartboardPage />);
 
-    fireEvent.change(screen.getByLabelText("Bullseye starting value"), { target: { value: "5" } });
-    fireEvent.click(screen.getAllByTitle("Square — Square the number (n²).", { exact: true })[1]);
+    fireEvent.click(screen.getByLabelText("Add operator"));
     fireEvent.click(screen.getByLabelText("inner wedge 20"));
-
-    expect(screen.getAllByTitle("Square — Square the number (n²).", { exact: true })[1]).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText("625")).toBeInTheDocument();
-    expect(
-      screen.getByText((content) => content.includes("center modifier") && content.includes("Square")),
-    ).toBeInTheDocument();
+    expect(getResultText()).toBe("20");
 
     fireEvent.click(screen.getByLabelText("inner wedge 20"));
+    expect(getResultText()).toBe("0");
+  });
 
-    expect(screen.getAllByTitle("Square — Square the number (n²).", { exact: true })[1]).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText("10000")).toBeInTheDocument();
+  it("applies a center modifier after painting", () => {
+    render(<DartboardPage />);
+
+    fireEvent.click(screen.getByLabelText("Add operator"));
+    fireEvent.click(screen.getByLabelText("inner wedge 20"));
+    fireEvent.click(screen.getByRole("button", { name: "Inner" }));
+    fireEvent.click(screen.getByTitle("Square — Square the number (n²).", { exact: true }));
+
+    expect(getResultText()).toBe("400");
   });
 
   it("keeps only one center modifier active at a time", () => {
     render(<DartboardPage />);
 
-    const squareButton = screen.getAllByTitle("Square — Square the number (n²).", { exact: true })[1];
-    const roundButton = screen.getAllByTitle("Round to 10 — Round to the nearest 10.", { exact: true })[1];
+    fireEvent.click(screen.getByLabelText("Add operator"));
+    fireEvent.click(screen.getByLabelText("inner wedge 20"));
+    fireEvent.click(screen.getByRole("button", { name: "Inner" }));
+
+    const squareButton = screen.getByTitle("Square — Square the number (n²).", { exact: true });
+    const roundButton = screen.getByTitle("Round to 10 — Round to the nearest 10.", { exact: true });
 
     fireEvent.click(squareButton);
     fireEvent.click(roundButton);
@@ -71,43 +78,33 @@ describe("DartboardPage", () => {
     expect(roundButton).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("applies an exclusive outer operator after the main result", () => {
+  it("applies an outer modifier placed on the outer modifier ring", () => {
     render(<DartboardPage />);
 
-    fireEvent.change(screen.getByLabelText("Bullseye starting value"), { target: { value: "5" } });
+    fireEvent.click(screen.getByLabelText("Add operator"));
     fireEvent.click(screen.getByLabelText("inner wedge 20"));
-    fireEvent.click(screen.getByRole("button", { name: /diagonal line/i }));
+    fireEvent.click(screen.getByTitle("Toggle advanced mode"));
+    fireEvent.click(screen.getByRole("button", { name: "Outer" }));
+    fireEvent.click(screen.getByTitle("Diagonal Line — Divide the final number by 2.", { exact: true }));
+    fireEvent.click(screen.getByLabelText("outer modifier wedge 20"));
 
-    expect(screen.getByText("12.5")).toBeInTheDocument();
-    expect(screen.getByText(/outer modifier · Diagonal Line/i)).toBeInTheDocument();
-  });
-
-  it("routes the advanced outer ring to outer modifier selection", () => {
-    render(<DartboardPage />);
-
-    fireEvent.change(screen.getByLabelText("Bullseye starting value"), { target: { value: "5" } });
-    fireEvent.click(screen.getByLabelText("inner wedge 20"));
-    fireEvent.click(screen.getByRole("button", { name: /advanced/i }));
-    fireEvent.click(screen.getByLabelText("outer modifier Diagonal Line"));
-
-    expect(screen.getByText("12.5")).toBeInTheDocument();
+    expect(getResultText()).toBe("10");
   });
 
   it("clears the selected area and the whole dartboard independently", () => {
     render(<DartboardPage />);
 
-    fireEvent.change(screen.getByLabelText("Bullseye starting value"), { target: { value: "5" } });
+    fireEvent.click(screen.getByLabelText("Add operator"));
     fireEvent.click(screen.getByLabelText("inner wedge 20"));
-    expect(screen.getByText("25")).toBeInTheDocument();
+    expect(getResultText()).toBe("20");
 
-    fireEvent.click(screen.getByRole("button", { name: /clear selection/i }));
-    expect(screen.getByText("5", { selector: "div" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Inner" }));
+    fireEvent.click(screen.getByTitle("Square — Square the number (n²).", { exact: true }));
+    expect(getResultText()).toBe("400");
 
+    fireEvent.click(screen.getByLabelText("Clear tool"));
     fireEvent.click(screen.getByLabelText("inner wedge 20"));
-    fireEvent.click(screen.getAllByTitle("Square — Square the number (n²).", { exact: true })[1]);
-    fireEvent.click(screen.getByRole("button", { name: /clear dartboard/i }));
 
-    expect(screen.getByText("Enter the bullseye starting value.")).toBeInTheDocument();
-    expect(screen.getAllByTitle("Square — Square the number (n²).", { exact: true })[1]).toHaveAttribute("aria-pressed", "false");
+    expect(getResultText()).toBe("0");
   });
 });

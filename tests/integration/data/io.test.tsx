@@ -2,22 +2,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GridCell, Note, RoomState, SectionDef, StoredImage, Todo } from "@/lib/types";
 import { buildNote, buildStoredImage, buildTodo } from "../../fixtures/domainBuilders";
 
+function makeTable<T>() {
+  const toArray = vi.fn<() => Promise<T[]>>(async () => []);
+  return {
+    toArray,
+    orderBy: vi.fn(() => ({ reverse: () => ({ toArray }) })),
+    put: vi.fn(async (_v: T) => {}),
+    bulkPut: vi.fn(async (_v: T[]) => {}),
+    clear: vi.fn(async () => {}),
+  };
+}
+
 const db = {
-  listNotes: vi.fn<() => Promise<Note[]>>(async () => []),
-  listTodos: vi.fn<() => Promise<Todo[]>>(async () => []),
-  listImages: vi.fn<() => Promise<StoredImage[]>>(async () => []),
-  listRoomStates: vi.fn<() => Promise<RoomState[]>>(async () => []),
-  listSections: vi.fn<() => Promise<SectionDef[]>>(async () => []),
-  listGridCells: vi.fn<() => Promise<GridCell[]>>(async () => []),
-  putNote: vi.fn(async () => {}),
-  putTodo: vi.fn(async () => {}),
-  putImage: vi.fn(async () => {}),
-  putRoomState: vi.fn(async () => {}),
-  putSection: vi.fn(async () => {}),
-  putGridCell: vi.fn(async () => {}),
-  deleteNote: vi.fn(async () => {}),
-  deleteTodo: vi.fn(async () => {}),
-  deleteImage: vi.fn(async () => {}),
+  notes: makeTable<Note>(),
+  todos: makeTable<Todo>(),
+  images: makeTable<StoredImage>(),
+  rooms: makeTable<RoomState>(),
+  sections: makeTable<SectionDef>(),
+  grid: makeTable<GridCell>(),
 };
 
 const rooms = {
@@ -63,7 +65,7 @@ class FakeZip {
   }
 }
 
-vi.mock("@/data/db", () => db);
+vi.mock("@/data/db", () => ({ db }));
 vi.mock("@/data/rooms/rooms", () => rooms);
 vi.mock("jszip", () => ({ default: FakeZip }));
 
@@ -80,9 +82,9 @@ describe("io boundaries", () => {
   });
 
   it("exports data into zip and triggers download", async () => {
-    db.listNotes.mockResolvedValueOnce([buildNote({ id: "n1", title: "note" })]);
-    db.listTodos.mockResolvedValueOnce([buildTodo({ id: "t1", title: "todo" })]);
-    db.listImages.mockResolvedValueOnce([
+    db.notes.toArray.mockResolvedValueOnce([buildNote({ id: "n1", title: "note" })]);
+    db.todos.toArray.mockResolvedValueOnce([buildTodo({ id: "t1", title: "todo" })]);
+    db.images.toArray.mockResolvedValueOnce([
       buildStoredImage({ id: "img-1", name: "image.png", caption: "c" }),
     ]);
 
@@ -123,8 +125,8 @@ describe("io boundaries", () => {
 
     await io.importAll(file, "merge");
 
-    expect(db.putNote).toHaveBeenCalled();
-    expect(db.putTodo).toHaveBeenCalled();
+    expect(db.notes.put).toHaveBeenCalled();
+    expect(db.todos.put).toHaveBeenCalled();
   });
 
   it("imports zip manifest and image blobs", async () => {
@@ -163,9 +165,9 @@ describe("io boundaries", () => {
     } as File;
     await io.importAll(zipFile, "replace");
 
-    expect(db.putNote).toHaveBeenCalled();
-    expect(db.putTodo).toHaveBeenCalled();
-    expect(db.putImage).toHaveBeenCalled();
+    expect(db.notes.put).toHaveBeenCalled();
+    expect(db.todos.put).toHaveBeenCalled();
+    expect(db.images.put).toHaveBeenCalled();
     expect(rooms.replaceCustomRooms).toHaveBeenCalled();
   });
 });
