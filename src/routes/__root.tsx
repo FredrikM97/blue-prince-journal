@@ -158,12 +158,35 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Blue Prince Journal" },
+      { title: "Blue Prince Journal — Blue Prince Notes Taking App & Companion" },
       {
         name: "description",
-        content: "A keyboard-first journal and todos tracker for Blue Prince.",
+        content:
+          "Blue Prince Journal is a free Blue Prince notes taking app and companion tracker — local-first notes, todos, map, graph and dartboard solver for the Blue Prince puzzle game. Log clues, codes, theories, observations, rooms and stories, track your solved and open todos, and connect discoveries on an interactive graph.",
+      },
+      {
+        name: "keywords",
+        content:
+          "Blue Prince notes app, Blue Prince notes taking app, Blue Prince companion app, Blue Prince tracker, Blue Prince journal, Blue Prince todo tracker, Blue Prince dartboard solver, Blue Prince map",
+      },
+      { name: "robots", content: "index, follow" },
+      { property: "og:type", content: "website" },
+      { property: "og:title", content: "Blue Prince Journal — Blue Prince Notes Taking App & Companion" },
+      {
+        property: "og:description",
+        content:
+          "Free Blue Prince notes taking app and companion tracker — local-first notes, todos, map, graph and dartboard solver for the Blue Prince puzzle game.",
+      },
+      { property: "og:url", content: "https://blue-prince-journal.pages.dev/" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Blue Prince Journal — Blue Prince Notes Taking App & Companion" },
+      {
+        name: "twitter:description",
+        content:
+          "Free Blue Prince notes taking app and companion tracker — local-first notes, todos, map, graph and dartboard solver for the Blue Prince puzzle game.",
       },
     ],
+    links: [{ rel: "canonical", href: "https://blue-prince-journal.pages.dev/" }],
   }),
 });
 
@@ -187,7 +210,11 @@ const notesRoute = createRoute({
   head: () => ({
     meta: [
       { title: "Notes - Blue Prince Journal" },
-      { name: "description", content: "All your Blue Prince notes, clues, codes and theories." },
+      {
+        name: "description",
+        content:
+          "The Blue Prince notes taking app for logging clues, codes, theories, observations and stories, organized by room and tag.",
+      },
     ],
   }),
 });
@@ -196,42 +223,87 @@ const settingsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "settings",
   component: () => <SettingsPage />,
-  head: () => ({ meta: [{ title: "Settings - Blue Prince Journal" }] }),
+  head: () => ({
+    meta: [
+      { title: "Settings - Blue Prince Journal" },
+      { name: "description", content: "Configure sync, backups and preferences for your Blue Prince Journal." },
+    ],
+  }),
 });
 
 const todosRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "todos",
   component: () => <TodosPage />,
-  head: () => ({ meta: [{ title: "Todos - Blue Prince Journal" }] }),
+  head: () => ({
+    meta: [
+      { title: "Todos - Blue Prince Journal" },
+      {
+        name: "description",
+        content: "Track open, in-progress and completed Blue Prince todos, tasks and objectives by room.",
+      },
+    ],
+  }),
 });
 
 const mapRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "map",
   component: () => <MapPage />,
-  head: () => ({ meta: [{ title: "Map - Blue Prince Journal" }] }),
+  head: () => ({
+    meta: [
+      { title: "Map - Blue Prince Journal" },
+      {
+        name: "description",
+        content: "Interactive Blue Prince mansion map with rooms, notes and progress tracking.",
+      },
+    ],
+  }),
 });
 
 const graphRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "graph",
   component: () => <GraphPage />,
-  head: () => ({ meta: [{ title: "Graph - Blue Prince Journal" }] }),
+  head: () => ({
+    meta: [
+      { title: "Graph - Blue Prince Journal" },
+      {
+        name: "description",
+        content: "Visualize connections between Blue Prince clues, codes, theories, rooms and tags in an interactive graph.",
+      },
+    ],
+  }),
 });
 
 const imagesRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "images",
   component: () => <ImagesPage />,
-  head: () => ({ meta: [{ title: "Images - Blue Prince Journal" }] }),
+  head: () => ({
+    meta: [
+      { title: "Images - Blue Prince Journal" },
+      {
+        name: "description",
+        content: "Browse and manage screenshots and reference images attached to your Blue Prince notes.",
+      },
+    ],
+  }),
 });
 
 const dartboardRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "dartboard",
   component: () => <DartboardPage />,
-  head: () => ({ meta: [{ title: "Dartboard - Blue Prince Journal" }] }),
+  head: () => ({
+    meta: [
+      { title: "Dartboard - Blue Prince Journal" },
+      {
+        name: "description",
+        content: "Solve the Blue Prince dartboard puzzle with an interactive operator and modifier calculator.",
+      },
+    ],
+  }),
 });
 
 const routeTree = rootRoute.addChildren([

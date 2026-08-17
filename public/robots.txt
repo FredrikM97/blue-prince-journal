@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://blue-prince-journal.pages.dev/sitemap.xml
