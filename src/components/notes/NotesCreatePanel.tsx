@@ -193,11 +193,11 @@ function NotesModeTabs({
 }) {
   return (
     <Tabs className="shrink-0" value={mode} onValueChange={(v) => setMode(v as "note" | "todo")}>
-      <TabsList className="grid h-9 w-full grid-cols-2 rounded-md border border-input bg-muted/30 p-0.5">
-        <TabsTrigger className="h-7 w-full rounded-sm text-xs" value="note">
+      <TabsList className="grid h-9 w-full grid-cols-2 rounded-md bg-muted">
+        <TabsTrigger className="w-full rounded-sm text-xs" value="note">
           📝 Note
         </TabsTrigger>
-        <TabsTrigger className="h-7 w-full rounded-sm text-xs" value="todo">
+        <TabsTrigger className="w-full rounded-sm text-xs" value="todo">
           ✓ Todo
         </TabsTrigger>
       </TabsList>

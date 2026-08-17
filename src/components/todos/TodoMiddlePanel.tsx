@@ -95,9 +95,9 @@ export function TodoMiddlePanel({
         value={activeColumn.value}
         onValueChange={(value) => onActiveMobileStatusChange?.(value as TodoStatus)}
       >
-        <TabsList className="grid h-9 w-full grid-cols-3 rounded-md border border-input bg-muted/30 p-0.5">
+        <TabsList className="grid h-9 w-full grid-cols-3 rounded-md bg-muted">
           {TODO_STATUS_COLUMNS.map((col) => (
-            <TabsTrigger key={col.value} className="h-7 w-full rounded-sm text-xs" value={col.value}>
+            <TabsTrigger key={col.value} className="w-full rounded-sm text-xs" value={col.value}>
               <span className="mr-1">{col.label}</span>
               <span className="text-[11px] text-muted-foreground">
                 {loading ? 0 : grouped[col.value].length}

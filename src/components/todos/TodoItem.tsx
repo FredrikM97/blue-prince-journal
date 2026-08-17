@@ -35,7 +35,7 @@ export const TodoItem = memo(function TodoItem({
   return (
     <li>
       <div
-        className="cursor-pointer rounded-lg border border-border bg-card px-3 py-2 hover:bg-muted"
+        className="cursor-pointer px-3 py-2 hover:bg-muted"
         onClick={() => onOpenPreview(todo)}
       >
         <Stack gap="0" className="min-w-0 space-y-1">
