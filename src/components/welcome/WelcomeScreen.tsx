@@ -133,7 +133,7 @@ export function WelcomeScreen({
           <WelcomeCard
             icon={FolderOpen}
             title="Sync folder"
-            description="Pick a local or cloud-backed folder to auto-sync"
+            description="Pick a local folder to auto-sync"
             onClick={handleConnectFolder}
             disabled={busy}
           />
