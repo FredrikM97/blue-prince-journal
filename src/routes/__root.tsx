@@ -167,7 +167,7 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
       {
         name: "keywords",
         content:
-          "Blue Prince notes app, Blue Prince notes taking app, Blue Prince companion app, Blue Prince tracker, Blue Prince journal, Blue Prince todo tracker, Blue Prince dartboard solver, Blue Prince map",
+          "Blue Prince notes app, Blue Prince notes taking app, Blue Prince companion app, Blue Prince notes, Blue Prince journal, Blue Prince todo tracker, Blue Prince dartboard solver, Blue Prince map",
       },
       { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
