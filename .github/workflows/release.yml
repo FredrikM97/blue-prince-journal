@@ -27,6 +27,7 @@ jobs:
   release:
     if: github.repository == 'FredrikM97/blue-prince-journal' && github.repository_owner == 'FredrikM97'
     runs-on: ubuntu-latest
+    environment: cloudflare-pages
 
     steps:
       - name: Checkout (full history)
@@ -155,9 +156,10 @@ jobs:
               --latest
           fi
 
-      # ── Move the "release" branch to this commit so Cloudflare Pages'   ────
-      # ── own git integration (production branch = "release") deploys it ────
-      - name: Promote release branch
+      # ── Trigger a Cloudflare Pages build+deploy for this release ───────────
+      - name: Trigger Cloudflare Pages deploy hook
         if: inputs.dry_run == false
-        run: git push origin HEAD:refs/heads/release --force
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK_URL }}
+        run: curl -fsS -X POST "$DEPLOY_HOOK_URL"
 
