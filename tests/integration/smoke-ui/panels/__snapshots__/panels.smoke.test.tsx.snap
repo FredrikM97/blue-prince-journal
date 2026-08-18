@@ -998,7 +998,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
                       <span
                         class="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground"
                       >
-                        20682d
+                        20453d
                       </span>
                       <span
                         class="inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap"

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotesView } from "@/components/notes/NotesView";
 import { MapLeftPanel } from "@/components/map/MapLeftPanel";
 import { MapMiddlePanel } from "@/components/map/MapMiddlePanel";
@@ -27,6 +27,14 @@ const baseNote: Note = {
 };
 
 describe("smoke panels", () => {
+  beforeEach(() => {
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("matches snapshot for notes list row and actions", () => {
     const onOpenEdit = vi.fn();
     const onOpenPreview = vi.fn();
