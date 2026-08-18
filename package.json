@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite dev",
     "dev:bundled": "sh -c 'trap \"kill 0\" EXIT; vite build --mode development --watch & vite preview --strictPort --port 8080'",
-    "build": "vite build",
+    "dev:prod": "npm run build && wrangler pages dev dist --compatibility-date=2026-06-05",
+    "build": "vite build && node scripts/generate-redirects.mjs && cp dist/index.html dist/404.html",
     "build:dev": "vite build --mode development",
     "test": "npm run check:types && npm run test:vitest",
     "test:vitest": "vitest run",
