@@ -155,3 +155,9 @@ jobs:
               --latest
           fi
 
+      # ── Move the "release" branch to this commit so Cloudflare Pages'   ────
+      # ── own git integration (production branch = "release") deploys it ────
+      - name: Promote release branch
+        if: inputs.dry_run == false
+        run: git push origin HEAD:refs/heads/release --force
+
