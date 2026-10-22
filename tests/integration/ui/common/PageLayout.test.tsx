@@ -4,8 +4,11 @@ import { PageLayout } from "@/components/common/PageLayout";
 import { usePageLayoutMobileDrawerControls } from "@/hooks/usePageLayoutMobileDrawer";
 
 vi.mock("@tanstack/react-router", () => ({
-  useRouterState: ({ select }: { select: (state: { location: { pathname: string } }) => unknown }) =>
-    select({ location: { pathname: "/" } }),
+  useRouterState: ({
+    select,
+  }: {
+    select: (state: { location: { pathname: string } }) => unknown;
+  }) => select({ location: { pathname: "/" } }),
 }));
 
 function MobileDrawerTrigger() {

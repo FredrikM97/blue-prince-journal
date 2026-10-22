@@ -1,6 +1,6 @@
+import type { Note } from "@/lib/types";
 import { db } from "../db";
 import { syncRuntime } from "../sync/sync";
-import type { Note } from "@/lib/types";
 
 export async function saveNote(n: Note): Promise<void> {
   const updated = { ...n, updatedAt: Date.now() };

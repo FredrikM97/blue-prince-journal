@@ -1,12 +1,19 @@
 import { useMemo, useState } from "react";
-import { addCustomRoom, getAllRoomGroups, listCustomRooms, removeCustomRoom, ROOM_GROUPS, type RoomCategory } from "@/data/rooms/rooms";
+import { toast } from "sonner";
 import { Button } from "@/components/common/Button";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
+import { Stack } from "@/components/common/general/Stack";
 import { InputField } from "@/components/common/input/InputField";
 import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/general/Stack";
 import { Heading, MetaText } from "@/components/common/Typography";
-import { toast } from "sonner";
+import {
+  addCustomRoom,
+  getAllRoomGroups,
+  listCustomRooms,
+  ROOM_GROUPS,
+  type RoomCategory,
+  removeCustomRoom,
+} from "@/data/rooms/rooms";
 import { SettingsSection } from "./SettingsSection";
 
 export function SettingsRoomsSection() {
@@ -54,7 +61,12 @@ export function SettingsRoomsSection() {
         </MetaText>
 
         <Inline gap="2" wrap align="end">
-          <InputField value={newRoomName} onChange={setNewRoomName} placeholder="New room name" grow />
+          <InputField
+            value={newRoomName}
+            onChange={setNewRoomName}
+            placeholder="New room name"
+            grow
+          />
 
           <DropdownSelect
             value={newRoomCategory}

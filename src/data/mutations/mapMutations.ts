@@ -1,7 +1,7 @@
-import { db } from "../db";
-import { syncRuntime } from "../sync/sync";
-import { cellId } from "../rooms/rooms";
 import type { GridCell } from "@/lib/types";
+import { db } from "../db";
+import { cellId } from "../rooms/rooms";
+import { syncRuntime } from "../sync/sync";
 
 export async function upsertCell(
   patch: Partial<GridCell> & { row: number; col: number },

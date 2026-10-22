@@ -1,10 +1,10 @@
 import { Search } from "lucide-react";
-import { useDeferredValue, useEffect, useState } from "react";
 import type { RefObject } from "react";
-import { useStore } from "@/hooks/useStore";
+import { useDeferredValue, useEffect, useState } from "react";
+import { Stack } from "@/components/common/general/Stack";
 import { InputField } from "@/components/common/input/InputField";
 import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
-import { Stack } from "@/components/common/general/Stack";
+import { useStore } from "@/hooks/useStore";
 
 export function HeaderSearch({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> }) {
   const search = useStore((s) => s.search);

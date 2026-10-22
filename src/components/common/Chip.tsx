@@ -12,7 +12,8 @@ type ChipVariant =
 const CHIP_CLASS: Record<ChipVariant, string> = {
   default:
     "inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground",
-  solid: "inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[11px] text-foreground",
+  solid:
+    "inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[11px] text-foreground",
   room: "inline-flex items-center rounded border border-brass px-1.5 py-0.5 text-[11px] text-brass",
   tag: "inline-flex items-center rounded border border-border bg-secondary px-1.5 py-0.5 text-[11px] text-foreground",
   "priority-high":

@@ -1,11 +1,14 @@
-import { db, deleteMeta, getMeta, setMeta } from "../db";
 import type { StoredImage } from "@/lib/types";
-import type { FsDirectoryHandle as SteamDirHandle, FsFileHandle as SteamFileHandle } from "../sync/fileAccessTypes";
+import { db, deleteMeta, getMeta, setMeta } from "../db";
+import type {
+  FsDirectoryHandle as SteamDirHandle,
+  FsFileHandle as SteamFileHandle,
+} from "../sync/fileAccessTypes";
 import {
   loadSteamImportManifest,
-  saveSteamImportManifest,
   type SteamDeletedImportEntry,
   type SteamImportManifest,
+  saveSteamImportManifest,
 } from "./steamImportManifest";
 
 export type { SteamDeletedImportEntry } from "./steamImportManifest";

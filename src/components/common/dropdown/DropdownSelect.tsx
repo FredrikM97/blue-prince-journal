@@ -3,16 +3,16 @@
  * Use when you need a compact single-value picker without a native <select>.
  */
 
-import { memo } from "react";
 import { ChevronDown } from "lucide-react";
+import { memo } from "react";
 import { Button } from "@/components/common/Button";
-import { MetaText, Text } from "@/components/common/Typography";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/common/menu/DropdownMenu";
+import { MetaText, Text } from "@/components/common/Typography";
 
 type SelectOption = {
   value: string;
@@ -46,12 +46,14 @@ export function DropdownSelectComponent({
   let triggerWrapperClassName = "w-full";
   if (isFit) triggerWrapperClassName = "w-auto min-w-40";
 
-  let triggerButtonClassName = "h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:border-input hover:bg-secondary";
+  let triggerButtonClassName =
+    "h-9 w-full justify-between border-input bg-secondary px-3 py-2 text-sm font-normal hover:border-input hover:bg-secondary";
   if (isFit) {
     triggerButtonClassName = `${triggerButtonClassName} w-auto min-w-40`;
   }
   if (isFlat) {
-    triggerButtonClassName = "h-9 w-full justify-between border-transparent bg-transparent px-3 py-2 text-sm font-normal shadow-none hover:bg-transparent";
+    triggerButtonClassName =
+      "h-9 w-full justify-between border-transparent bg-transparent px-3 py-2 text-sm font-normal shadow-none hover:bg-transparent";
   }
 
   return (

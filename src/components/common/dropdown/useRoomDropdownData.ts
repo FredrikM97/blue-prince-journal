@@ -74,7 +74,9 @@ export function useRoomDropdownData({
     return results;
   }, [allGroups, groupQuery, groupedRooms, hasSlash, normalizedQuery, roomQuery]);
 
-  const targetGroup: RoomCategory = hasSlash ? toTitleCase(groupRaw) || "Custom Rooms" : "Custom Rooms";
+  const targetGroup: RoomCategory = hasSlash
+    ? toTitleCase(groupRaw) || "Custom Rooms"
+    : "Custom Rooms";
   const targetRoom = roomRaw;
 
   const exactMatchExists = useMemo(

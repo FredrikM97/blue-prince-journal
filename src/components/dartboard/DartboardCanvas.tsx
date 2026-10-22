@@ -1,17 +1,12 @@
-import { OPERATORS, WEDGE_ORDER, type BoardState, type OpColor, type RingKey } from "./types";
-import type { SelectedTarget } from "./dartboardState";
-import {
-  DartboardOuterModifierRing,
-} from "./DartboardOuterModifierRing";
-import { DartboardNumberRingBackground } from "./DartboardNumberRingBackground";
-import { DartboardCenterZone } from "./DartboardCenterZone";
-import { getBoardAreas } from "./boardAreas";
 import { renderBoardArea } from "./boardAreaRenderRegistry";
+import { getBoardAreas } from "./boardAreas";
+import { DartboardCenterZone } from "./DartboardCenterZone";
+import { DartboardNumberRingBackground } from "./DartboardNumberRingBackground";
+import { DartboardOuterModifierRing } from "./DartboardOuterModifierRing";
+import { getBoardCenter, getBoardFrameGeometry } from "./dartboardGeometry";
+import type { SelectedTarget } from "./dartboardState";
 import { selectOuterModifierWedges } from "./selectOuterModifierWedges";
-import {
-  getBoardCenter,
-  getBoardFrameGeometry,
-} from "./dartboardGeometry";
+import { type BoardState, OPERATORS, type OpColor, type RingKey, WEDGE_ORDER } from "./types";
 
 type Props = {
   board: BoardState;
@@ -65,7 +60,9 @@ function selectOuterModifierRingWedges(args: {
     selection: args.selection,
     startBase: args.startBase,
     wedgeAngle: args.wedgeAngle,
-    operatorSwatches: args.outerModifierColors.map((color) => (color ? OPERATORS[color].swatch : null)),
+    operatorSwatches: args.outerModifierColors.map((color) =>
+      color ? OPERATORS[color].swatch : null,
+    ),
   });
 }
 
@@ -77,12 +74,7 @@ function selectCenterZoneProps(args: {
   bullseyeModifierColor: OpColor | null;
   onSelectZone: (zone: SelectedTarget) => void;
 }): Parameters<typeof DartboardCenterZone>[0] {
-  const {
-    selection,
-    centerModifierGlyph,
-    bullseyeModifierGlyph,
-    onSelectZone,
-  } = args;
+  const { selection, centerModifierGlyph, bullseyeModifierGlyph, onSelectZone } = args;
 
   const centerSelected = selection.zone === "center";
   const bullseyeSelected = selection.zone === "bullseye";
@@ -136,53 +128,64 @@ export function DartboardCanvas({
   return (
     <div className="relative flex h-full w-full min-h-0 items-center justify-center">
       <div className="relative aspect-square w-full max-w-[480px] sm:h-full sm:w-auto sm:max-w-full sm:max-h-full">
-      <svg
-        viewBox={`${-boardFrame.viewboxPadding} ${-boardFrame.viewboxPadding} ${boardFrame.boardSize + boardFrame.viewboxPadding * 2} ${boardFrame.boardSize + boardFrame.viewboxPadding * 2}`}
-        className="block h-full w-full select-none"
-        style={BOARD_SVG_STYLE}
-      >
-        <defs>
-          <radialGradient id="cabinet-grad" cx="50%" cy="40%" r="70%">
-            <stop offset="0%" stopColor="oklch(0.30 0.02 260)" />
-            <stop offset="100%" stopColor="oklch(0.08 0.01 260)" />
-          </radialGradient>
-          <radialGradient id="shade" cx="50%" cy="40%" r="65%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.07)" />
-            <stop offset="70%" stopColor="rgba(0,0,0,0)" />
-            <stop offset="100%" stopColor="rgba(0,0,0,0.45)" />
-          </radialGradient>
-        </defs>
+        <svg
+          viewBox={`${-boardFrame.viewboxPadding} ${-boardFrame.viewboxPadding} ${boardFrame.boardSize + boardFrame.viewboxPadding * 2} ${boardFrame.boardSize + boardFrame.viewboxPadding * 2}`}
+          className="block h-full w-full select-none"
+          style={BOARD_SVG_STYLE}
+        >
+          <defs>
+            <radialGradient id="cabinet-grad" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="oklch(0.30 0.02 260)" />
+              <stop offset="100%" stopColor="oklch(0.08 0.01 260)" />
+            </radialGradient>
+            <radialGradient id="shade" cx="50%" cy="40%" r="65%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.07)" />
+              <stop offset="70%" stopColor="rgba(0,0,0,0)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0.45)" />
+            </radialGradient>
+          </defs>
 
-        <circle cx={boardCenter.x} cy={boardCenter.y} r={boardFrame.outerRadius} fill="url(#cabinet-grad)" />
-
-        {advanced ? (
-          <DartboardOuterModifierRing
-            wedges={outerModifierWedges}
-            onSelectWedge={(wedgeIndex) => {
-              onSelectZone({ zone: "outerModifier", wedgeIndex });
-            }}
+          <circle
+            cx={boardCenter.x}
+            cy={boardCenter.y}
+            r={boardFrame.outerRadius}
+            fill="url(#cabinet-grad)"
           />
-        ) : null}
 
-        <DartboardNumberRingBackground startBase={startBase} wedgeAngle={wedgeAngle} />
+          {advanced ? (
+            <DartboardOuterModifierRing
+              wedges={outerModifierWedges}
+              onSelectWedge={(wedgeIndex) => {
+                onSelectZone({ zone: "outerModifier", wedgeIndex });
+              }}
+            />
+          ) : null}
 
-        {getBoardAreas().map((area) => {
-          return renderBoardArea({
-            area,
-            board,
-            selection,
-            wedgeAngle,
-            startBase,
-            onCycleWedge,
-            resolveFill,
-            fallbackByRing: areaFallbackByRing,
-          });
-        })}
+          <DartboardNumberRingBackground startBase={startBase} wedgeAngle={wedgeAngle} />
 
-        <DartboardCenterZone {...centerZoneProps} />
+          {getBoardAreas().map((area) => {
+            return renderBoardArea({
+              area,
+              board,
+              selection,
+              wedgeAngle,
+              startBase,
+              onCycleWedge,
+              resolveFill,
+              fallbackByRing: areaFallbackByRing,
+            });
+          })}
 
-        <circle cx={boardCenter.x} cy={boardCenter.y} r={boardFrame.outerRadius} fill="url(#shade)" pointerEvents="none" />
-      </svg>
+          <DartboardCenterZone {...centerZoneProps} />
+
+          <circle
+            cx={boardCenter.x}
+            cy={boardCenter.y}
+            r={boardFrame.outerRadius}
+            fill="url(#shade)"
+            pointerEvents="none"
+          />
+        </svg>
       </div>
     </div>
   );

@@ -1,11 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeToggle } from "@/components/app-header/ThemeToggle";
 import { CenteredContent } from "@/components/common/LayoutPrimitives";
-import { Toaster } from "@/routes/Sonner";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -13,6 +12,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/common/menu/DropdownMenu";
+import { Toaster } from "@/routes/Sonner";
 
 const sonnerSpy = vi.fn<(props: unknown) => ReactElement>((_props) => <div data-testid="sonner" />);
 
@@ -160,10 +160,7 @@ describe("CenteredContent", () => {
     const wrapper = container.firstElementChild as HTMLElement;
     expect(wrapper.className).toContain("text-left");
 
-    const mainSource = readFileSync(
-      resolve(process.cwd(), "src/main.tsx"),
-      "utf8",
-    );
+    const mainSource = readFileSync(resolve(process.cwd(), "src/main.tsx"), "utf8");
 
     expect(mainSource).toContain('import "./styles.css";');
   });

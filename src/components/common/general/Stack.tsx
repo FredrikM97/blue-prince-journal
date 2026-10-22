@@ -12,10 +12,7 @@ type StackElement =
   | "form"
   | "span";
 type StackGap = "0" | "1" | "1.5" | "2" | "3" | "4" | "5";
-type StackVariant =
-  | "default"
-  | "panel-card"
-  | "dialog-scroll-body";
+type StackVariant = "default" | "panel-card" | "dialog-scroll-body";
 type StackMarginTop = "0" | "2";
 
 const STACK_GAP_CLASS: Record<StackGap, string> = {

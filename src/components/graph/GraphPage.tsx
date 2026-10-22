@@ -1,35 +1,35 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Share2, Sparkles } from "lucide-react";
+import { type PointerEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { EmptyState } from "@/components/common/EmptyState";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { FilterToggleGrid } from "@/components/common/filter/FilterToggleGrid";
 import { GroupedRoomFilterSection } from "@/components/common/filter/GroupedRoomFilterSection";
+import { Stack } from "@/components/common/general/Stack";
 import { PageLayout } from "@/components/common/PageLayout";
 import { SidePanelLeft } from "@/components/common/SidePanel";
 import { MetaText } from "@/components/common/Typography";
-import { Stack } from "@/components/common/general/Stack";
-import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Share2, Sparkles } from "lucide-react";
 import { GraphPreviewContent } from "@/components/graph/GraphRightPanel";
-import type { Note } from "@/lib/types";
+import { themeVars } from "@/components/graph/themeVars";
 import {
   buildGraph,
   buildRenderedEdges,
   edgeAppearance,
-  indexNodes,
-  trim,
   type GraphCluster,
   type GraphNode,
+  indexNodes,
   type RenderedEdge,
+  trim,
 } from "@/domain/graph";
+import { useAppData } from "@/hooks/useAppData";
 import {
   computeZoomPanFromWheelDelta,
   summarizeWheelZoomEvents,
   useNonPassiveWheel,
 } from "@/hooks/useNonPassiveWheel";
-import { themeVars } from "@/components/graph/themeVars";
 import { NOTE_TYPE_META } from "@/lib/noteMetadata";
-import { useAppData } from "@/hooks/useAppData";
+import type { Note } from "@/lib/types";
 
 const ALL_NOTE_TYPES = ["clue", "code", "observation", "theory", "story", "task"] as const;
 
@@ -73,9 +73,7 @@ export function GraphPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const allRooms = useMemo(() => {
-    const rooms = new Set(
-      graphEntries.map((n) => n.room?.trim() || ""),
-    );
+    const rooms = new Set(graphEntries.map((n) => n.room?.trim() || ""));
     return [...rooms].sort((a, b) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b)));
   }, [graphEntries]);
 
@@ -101,9 +99,7 @@ export function GraphPage() {
 
   // IDs of nodes that have at least one edge (used by the isolated-nodes filter)
   const connectedNodeIds = useMemo(() => {
-    return new Set(
-      edges.flatMap((e) => [e.from, e.to]),
-    );
+    return new Set(edges.flatMap((e) => [e.from, e.to]));
   }, [edges]);
 
   // Nodes to actually render — optionally hiding isolated (no-edge) ones
@@ -149,12 +145,8 @@ export function GraphPage() {
     return { incoming, outgoing };
   }, [edges]);
 
-  const incomingCount = selectedNode
-    ? (edgeDegreeByNodeId.incoming.get(selectedNode.id) ?? 0)
-    : 0;
-  const outgoingCount = selectedNode
-    ? (edgeDegreeByNodeId.outgoing.get(selectedNode.id) ?? 0)
-    : 0;
+  const incomingCount = selectedNode ? (edgeDegreeByNodeId.incoming.get(selectedNode.id) ?? 0) : 0;
+  const outgoingCount = selectedNode ? (edgeDegreeByNodeId.outgoing.get(selectedNode.id) ?? 0) : 0;
 
   useEffect(() => {
     if (!selectedNode) {
@@ -208,9 +200,7 @@ export function GraphPage() {
 
   return (
     <>
-      <PageLayout
-        variant="panel"
-      >
+      <PageLayout variant="panel">
         <PageLayout.Left>
           <SidePanelLeft
             title="Graph"
@@ -277,7 +267,10 @@ export function GraphPage() {
           </SidePanelLeft>
         </PageLayout.Left>
         <PageLayout.Middle>
-          <Stack className="flex h-full min-h-0 flex-col overflow-hidden max-[1023.98px]:h-auto" gap="0">
+          <Stack
+            className="flex h-full min-h-0 flex-col overflow-hidden max-[1023.98px]:h-auto"
+            gap="0"
+          >
             {isPageDataLoading && (
               <Stack className="rounded-lg border border-border bg-card p-2" gap="2">
                 <Stack className="flex items-center justify-between px-1" gap="0">
@@ -295,8 +288,8 @@ export function GraphPage() {
                   </span>
                   <p className="text-base font-semibold text-foreground">Your graph is ready</p>
                   <p className="max-w-sm text-sm text-foreground/80">
-                    Add a few notes or todos and this view will start mapping the links between
-                    them automatically.
+                    Add a few notes or todos and this view will start mapping the links between them
+                    automatically.
                   </p>
                 </div>
               </EmptyState>
@@ -483,7 +476,8 @@ function GraphCanvas({
     },
   );
 
-  let frameClassName = "flex flex-col gap-2 overflow-hidden rounded-lg border border-border bg-card p-2";
+  let frameClassName =
+    "flex flex-col gap-2 overflow-hidden rounded-lg border border-border bg-card p-2";
   if (plain) frameClassName = "flex flex-col gap-2 overflow-hidden rounded-lg p-2";
 
   let svgClassName = "min-h-0 flex-1 touch-none select-none cursor-grab";
@@ -491,7 +485,10 @@ function GraphCanvas({
 
   return (
     <Stack className={frameClassName} gap="0">
-      <Stack className="flex shrink-0 items-center justify-between text-sm text-muted-foreground" gap="0">
+      <Stack
+        className="flex shrink-0 items-center justify-between text-sm text-muted-foreground"
+        gap="0"
+      >
         <MetaText as="p" size="xs" className="hidden text-xs sm:block">
           Drag to pan · scroll to zoom.
         </MetaText>
@@ -615,7 +612,10 @@ function GraphCanvas({
         </g>
       </svg>
 
-      <Stack className="flex shrink-0 flex-wrap items-center gap-4 text-[11px] text-muted-foreground" gap="0">
+      <Stack
+        className="flex shrink-0 flex-wrap items-center gap-4 text-[11px] text-muted-foreground"
+        gap="0"
+      >
         <MetaText as="span" className="font-medium uppercase tracking-wide">
           Links:
         </MetaText>
@@ -625,7 +625,12 @@ function GraphCanvas({
           { color: themeVars.graphLink.both, label: "room + tag" },
           { color: themeVars.graphLink.note, label: "note" },
         ].map(({ color, label }) => (
-          <Stack key={label} as="span" className="flex items-center gap-1.5 uppercase tracking-wide" gap="0">
+          <Stack
+            key={label}
+            as="span"
+            className="flex items-center gap-1.5 uppercase tracking-wide"
+            gap="0"
+          >
             <span
               style={{
                 background: color,
@@ -732,4 +737,3 @@ function renderCluster(cluster: GraphCluster) {
     </g>
   );
 }
-

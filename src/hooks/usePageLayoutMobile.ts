@@ -1,9 +1,5 @@
 import { useEffect, useMemo } from "react";
-import {
-  getViewportWidth,
-  subscribeToMediaQuery,
-  useMediaQuery,
-} from "@/hooks/useMediaQuery";
+import { getViewportWidth, subscribeToMediaQuery, useMediaQuery } from "@/hooks/useMediaQuery";
 
 // Keep this in sync with the page-layout desktop/mobile media queries in PageLayout.
 export const PAGE_LAYOUT_MOBILE_BREAKPOINT = 1400;

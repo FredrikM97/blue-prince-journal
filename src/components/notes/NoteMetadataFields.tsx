@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
+import { Stack } from "@/components/common/general/Stack";
 import { InputField } from "@/components/common/input/InputField";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/general/Stack";
 import { MetaText } from "@/components/common/Typography";
 
 type SelectOption = {

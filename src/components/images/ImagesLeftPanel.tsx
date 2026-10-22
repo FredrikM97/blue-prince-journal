@@ -1,11 +1,11 @@
 import { Button } from "@/components/common/Button";
-import { Heading, Text } from "@/components/common/Typography";
-import { Inline } from "@/components/common/LayoutPrimitives";
+import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { Stack } from "@/components/common/general/Stack";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import { SidePanelLeft } from "@/components/common/SidePanel";
+import { Heading, Text } from "@/components/common/Typography";
 import type { SteamDeletedImportEntry } from "@/data/import/steamImport";
 import type { StoredImage } from "@/lib/types";
-import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 
 export type ImagesSortMode = "newest" | "oldest" | "name-asc" | "name-desc";
 

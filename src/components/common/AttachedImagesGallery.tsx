@@ -1,14 +1,14 @@
-import { useMemo, useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
-import { Button } from "@/components/common/Button";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/data/db";
-import type { StoredImage } from "@/lib/types";
-import { Inline } from "@/components/common/LayoutPrimitives";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/common/Button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { Stack } from "@/components/common/general/Stack";
 import { ImageCard } from "@/components/common/ImageCard";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import { ImageZoomDialogContent } from "@/components/images/ImageZoomDialogContent";
+import { db } from "@/data/db";
+import type { StoredImage } from "@/lib/types";
 
 function useImageZoom(availableImageIds: string[]) {
   const [zoomedImageId, setZoomedImageId] = useState<string | null>(null);
@@ -83,7 +83,8 @@ export function AttachedImagesGallery({
     ? `${zoom.zoomedImageIndex + 1} / ${availableImageIds.length}`
     : "";
 
-  const headerSuffix = zoom.hasZoomedImage && zoom.hasMultipleImages ? ` (${zoomedCounterText})` : "";
+  const headerSuffix =
+    zoom.hasZoomedImage && zoom.hasMultipleImages ? ` (${zoomedCounterText})` : "";
 
   return (
     <Stack as="section" gap="0" className="space-y-2">

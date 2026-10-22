@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
+import * as React from "react";
 
 export type DialogVariant =
   | "default"
@@ -111,7 +111,11 @@ export const DialogTitle = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >((props, ref) => (
-  <DialogPrimitive.Title ref={ref} className="text-lg font-semibold leading-none tracking-tight" {...props} />
+  <DialogPrimitive.Title
+    ref={ref}
+    className="text-lg font-semibold leading-none tracking-tight"
+    {...props}
+  />
 ));
 
 export const DialogDescription = React.forwardRef<

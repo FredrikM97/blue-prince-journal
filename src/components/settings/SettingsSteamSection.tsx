@@ -1,11 +1,11 @@
 import { FolderOpen, FolderSync, Unlink } from "lucide-react";
-import { addImage } from "@/data/mutations/imageMutations";
-import { useStore } from "@/hooks/useStore";
 import { Button } from "@/components/common/Button";
-import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import { MetaText, Text } from "@/components/common/Typography";
+import { addImage } from "@/data/mutations/imageMutations";
 import { useSteamFolderSync } from "@/hooks/useSteamFolderSync";
+import { useStore } from "@/hooks/useStore";
 
 export function SteamImportSection() {
   const setSteamFolderName = useStore((s) => s.setSteamFolderName);

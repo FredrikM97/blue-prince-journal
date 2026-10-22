@@ -1,12 +1,12 @@
-import { useEffect, useRef, type ReactNode } from "react";
 import { Maximize2 } from "lucide-react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { Button } from "@/components/common/Button";
-import { Heading, MetaText } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
 import { TitleActionHeader } from "@/components/common/TitleActionHeader";
+import { Heading, MetaText } from "@/components/common/Typography";
 import {
-  usePageLayoutMobileDrawerControls,
   type MobileDrawerSide,
+  usePageLayoutMobileDrawerControls,
 } from "@/hooks/usePageLayoutMobileDrawer";
 
 type SidePanelBaseProps = {

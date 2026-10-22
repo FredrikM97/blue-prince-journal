@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { PenLine, Save } from "lucide-react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/common/Button";
-import { PreviewDialog } from "@/components/common/preview/PreviewDialog";
+import { Stack } from "@/components/common/general/Stack";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { MarkdownEditor } from "@/components/common/markdown/MarkdownEditor";
-import { Stack } from "@/components/common/general/Stack";
+import { PreviewDialog } from "@/components/common/preview/PreviewDialog";
 
 export function EditablePreviewDialog({
   open,
@@ -93,11 +93,7 @@ export function EditablePreviewDialog({
             <Button variant="ghost" size="default" onClick={closeEditDetails}>
               Cancel
             </Button>
-            <Button
-              variant="brass"
-              size="default"
-              onClick={saveDetails}
-            >
+            <Button variant="brass" size="default" onClick={saveDetails}>
               <Save className="h-3.5 w-3.5" />
               Save
             </Button>

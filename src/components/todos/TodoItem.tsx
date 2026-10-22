@@ -1,12 +1,9 @@
-import { memo } from "react";
-import type { Todo, TodoStatus } from "@/lib/types";
-import { Chip } from "@/components/common/Chip";
 import { CheckCircle2, Circle, Eye, MoreHorizontal, Trash2 } from "lucide-react";
+import { memo } from "react";
 import { Button } from "@/components/common/Button";
-import { getTodoPriorityChipVariant } from "@/components/todos/todoPriority";
-import { Inline } from "@/components/common/LayoutPrimitives";
+import { Chip } from "@/components/common/Chip";
 import { Stack } from "@/components/common/general/Stack";
-import { Text } from "@/components/common/Typography";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +14,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/common/menu/DropdownMenu";
+import { Text } from "@/components/common/Typography";
+import { getTodoPriorityChipVariant } from "@/components/todos/todoPriority";
+import type { Todo, TodoStatus } from "@/lib/types";
 
 export const TodoItem = memo(function TodoItem({
   todo,
@@ -34,10 +34,7 @@ export const TodoItem = memo(function TodoItem({
 
   return (
     <li>
-      <div
-        className="cursor-pointer px-3 py-2 hover:bg-muted"
-        onClick={() => onOpenPreview(todo)}
-      >
+      <div className="cursor-pointer px-3 py-2 hover:bg-muted" onClick={() => onOpenPreview(todo)}>
         <Stack gap="0" className="min-w-0 space-y-1">
           <Stack gap="0" className="flex min-w-0 items-center justify-between gap-2">
             <Stack gap="0" className="min-w-0 flex-1 overflow-hidden">
@@ -55,11 +52,20 @@ export const TodoItem = memo(function TodoItem({
             </Stack>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-h2" aria-label="Todo actions" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  variant="ghost"
+                  size="icon-h2"
+                  aria-label="Todo actions"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" variant="select" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuContent
+                align="end"
+                variant="select"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <DropdownMenuItem onSelect={() => onOpenPreview(todo)}>
                   <Eye className="h-3.5 w-3.5" />
                   <Text as="span" size="sm">
@@ -82,7 +88,9 @@ export const TodoItem = memo(function TodoItem({
                         Open
                       </Text>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => onToggle(todo.id, "in-progress" as TodoStatus)}>
+                    <DropdownMenuItem
+                      onSelect={() => onToggle(todo.id, "in-progress" as TodoStatus)}
+                    >
                       <Circle className="h-3.5 w-3.5" />
                       <Text as="span" size="sm">
                         In progress

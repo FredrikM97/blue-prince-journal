@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { X } from "lucide-react";
+import type { ReactNode } from "react";
 import { Button } from "@/components/common/Button";
 
 export function TitleActionHeader({
@@ -23,7 +23,8 @@ export function TitleActionHeader({
   titleWrapClassName?: string;
   actionsClassName?: string;
 }) {
-  const shouldRenderActions = Boolean(actions) || (showClose && (Boolean(onClose) || Boolean(closeSlot)));
+  const shouldRenderActions =
+    Boolean(actions) || (showClose && (Boolean(onClose) || Boolean(closeSlot)));
 
   return (
     <div className={rowClassName}>
@@ -36,7 +37,13 @@ export function TitleActionHeader({
           {actions}
           {showClose && closeSlot}
           {showClose && !closeSlot && onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose} title="Close" aria-label="Close panel">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              title="Close"
+              aria-label="Close panel"
+            >
               <X className="h-4 w-4" />
             </Button>
           )}

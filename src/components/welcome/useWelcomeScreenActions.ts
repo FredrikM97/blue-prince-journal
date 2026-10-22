@@ -1,16 +1,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { importAll } from "@/data/storage/backup";
-import { getLocalJournalItemCount } from "@/data/welcome";
-import { connectSyncFolderWithConflictResolution, syncRuntime } from "@/data/sync/sync";
 import { startFresh } from "@/data/mutations/lifecycleMutations";
+import { importAll } from "@/data/storage/backup";
 import type { SyncConflictChoice } from "@/data/sync/sync";
+import { connectSyncFolderWithConflictResolution, syncRuntime } from "@/data/sync/sync";
+import { getLocalJournalItemCount } from "@/data/welcome";
 
-export function useWelcomeScreenActions({
-  onDone,
-}: {
-  onDone: (syncFolderName?: string) => void;
-}) {
+export function useWelcomeScreenActions({ onDone }: { onDone: (syncFolderName?: string) => void }) {
   const [busy, setBusy] = useState(false);
   const [conflictResolve, setConflictResolve] = useState<
     ((choice: SyncConflictChoice) => void) | null

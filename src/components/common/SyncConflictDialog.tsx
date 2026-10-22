@@ -1,3 +1,4 @@
+import { Button } from "@/components/common/Button";
 import {
   Dialog,
   DialogContent,
@@ -5,9 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/common/Dialog";
-import { Button } from "@/components/common/Button";
-import { Inline } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import { Text } from "@/components/common/Typography";
 import type { SyncConflictChoice } from "@/data/sync/sync";
 

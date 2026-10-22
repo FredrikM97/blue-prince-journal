@@ -1,11 +1,11 @@
-import { memo } from "react";
-import type { Note } from "@/lib/types";
-import { Button } from "@/components/common/Button";
-import { NotesListItemSummary } from "./NotesListItemSummary";
 import { Maximize2, Pencil, Trash2 } from "lucide-react";
-import { Text } from "@/components/common/Typography";
+import { memo } from "react";
+import { Button } from "@/components/common/Button";
 import { Stack } from "@/components/common/general/Stack";
+import { Text } from "@/components/common/Typography";
 import { useProgressiveVisibleCount } from "@/hooks/useProgressiveVisibleCount";
+import type { Note } from "@/lib/types";
+import { NotesListItemSummary } from "./NotesListItemSummary";
 
 export function NotesView({
   emptyHint,

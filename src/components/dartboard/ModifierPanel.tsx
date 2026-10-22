@@ -45,8 +45,8 @@ export function ModifierPanel({
                 disabled
                   ? "cursor-not-allowed border-border bg-muted/50 text-foreground/70"
                   : isOn
-                  ? "border-accent bg-accent/30 text-foreground"
-                  : "border-border bg-card text-foreground hover:border-accent hover:bg-accent/20"
+                    ? "border-accent bg-accent/30 text-foreground"
+                    : "border-border bg-card text-foreground hover:border-accent hover:bg-accent/20"
               }`}
               style={
                 isOn

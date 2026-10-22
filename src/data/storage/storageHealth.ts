@@ -1,4 +1,4 @@
-import type { Note, Todo, RoomState, SectionDef, GridCell } from "@/lib/types";
+import type { GridCell, Note, RoomState, SectionDef, Todo } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // localStorage utilities
@@ -50,4 +50,3 @@ export interface LocalBackupSnapshot {
   sections: SectionDef[];
   gridCells: GridCell[];
 }
-

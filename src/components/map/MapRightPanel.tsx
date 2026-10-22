@@ -1,15 +1,15 @@
-import { Button } from "@/components/common/Button";
 import { useNavigate } from "@tanstack/react-router";
-import { PagedNotesList } from "@/components/map/PagedNotesList";
-import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
-import { InputField } from "@/components/common/input/InputField";
-import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
 import { Eraser, Trash2 } from "lucide-react";
-import type { GridCell, Note, Todo } from "@/lib/types";
+import { Button } from "@/components/common/Button";
+import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
+import { Stack } from "@/components/common/general/Stack";
+import { InputField } from "@/components/common/input/InputField";
 import { Inline } from "@/components/common/LayoutPrimitives";
 import { SidePanelRight } from "@/components/common/SidePanel";
-import { Stack } from "@/components/common/general/Stack";
+import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
 import { MetaText, Text } from "@/components/common/Typography";
+import { PagedNotesList } from "@/components/map/PagedNotesList";
+import type { GridCell, Note, Todo } from "@/lib/types";
 
 export interface MapRightPanelProps {
   coordLabel: string;

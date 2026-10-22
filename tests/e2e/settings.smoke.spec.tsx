@@ -31,9 +31,7 @@ test("settings smoke: data and room controls are visible", async ({ page }) => {
 
   expect(storageHealthBox).not.toBeNull();
   expect(importReplaceBox).not.toBeNull();
-  expect(storageHealthBox!.y - (importReplaceBox!.y + importReplaceBox!.height)).toBeGreaterThan(
-    8,
-  );
+  expect(storageHealthBox!.y - (importReplaceBox!.y + importReplaceBox!.height)).toBeGreaterThan(8);
 
   budgets.assert();
 });
@@ -46,7 +44,9 @@ test("settings smoke: mobile content scrolls without clipping", async ({ page })
   await page.goto("/settings");
 
   const main = page.locator("main");
-  const mainCanScroll = await main.evaluate((element) => element.scrollHeight > element.clientHeight);
+  const mainCanScroll = await main.evaluate(
+    (element) => element.scrollHeight > element.clientHeight,
+  );
   expect(mainCanScroll).toBe(true);
 
   await main.evaluate((element) => {
@@ -54,7 +54,9 @@ test("settings smoke: mobile content scrolls without clipping", async ({ page })
   });
 
   await expect(page.getByRole("heading", { name: "Keyboard" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Seed graph test data with images" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Seed graph test data with images" }),
+  ).toBeVisible();
 
   budgets.assert();
 });

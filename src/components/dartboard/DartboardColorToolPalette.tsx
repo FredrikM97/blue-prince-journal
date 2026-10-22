@@ -16,7 +16,9 @@ export function DartboardColorToolPalette({
 }: Props) {
   return (
     <div>
-      <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">Select color</div>
+      <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
+        Select color
+      </div>
       <div className="flex flex-wrap gap-1 sm:gap-2">
         <button
           type="button"

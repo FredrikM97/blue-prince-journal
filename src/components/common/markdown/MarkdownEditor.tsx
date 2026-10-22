@@ -1,13 +1,12 @@
-import { useRef, useState, type RefObject } from "react";
 import { Bold, Italic, List, ListOrdered, Table } from "lucide-react";
+import { type RefObject, useRef, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
+import { Stack } from "@/components/common/general/Stack";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import {
   MarkdownToolbar,
   type MarkdownToolbarAction,
 } from "@/components/common/markdown/MarkdownToolbar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
-
-import { Stack } from "@/components/common/general/Stack";
 
 interface TableBlock {
   start: number;
@@ -465,7 +464,11 @@ export function MarkdownEditor({
       />
 
       {preview && (
-        <Stack as="div" gap="0" className="min-h-[6rem] rounded-b-md border border-input bg-background p-3">
+        <Stack
+          as="div"
+          gap="0"
+          className="min-h-[6rem] rounded-b-md border border-input bg-background p-3"
+        >
           <MarkdownPreview>{value}</MarkdownPreview>
         </Stack>
       )}

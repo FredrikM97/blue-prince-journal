@@ -10,7 +10,9 @@ describe("compute small ring contribution", () => {
     const result = compute(board, { advanced: false });
 
     expect(result.result).toBe(20);
-    expect(result.steps.some((step) => step.kind === "operation" && step.ring === "inner")).toBe(true);
+    expect(result.steps.some((step) => step.kind === "operation" && step.ring === "inner")).toBe(
+      true,
+    );
   });
 
   it("includes triple ring wedges", () => {
@@ -20,7 +22,9 @@ describe("compute small ring contribution", () => {
     const result = compute(board, { advanced: false });
 
     expect(result.result).toBe(20);
-    expect(result.steps.some((step) => step.kind === "operation" && step.ring === "triple")).toBe(true);
+    expect(result.steps.some((step) => step.kind === "operation" && step.ring === "triple")).toBe(
+      true,
+    );
   });
 
   it("includes middle ring wedges", () => {
@@ -30,6 +34,8 @@ describe("compute small ring contribution", () => {
     const result = compute(board, { advanced: false });
 
     expect(result.result).toBe(20);
-    expect(result.steps.some((step) => step.kind === "operation" && step.ring === "middle")).toBe(true);
+    expect(result.steps.some((step) => step.kind === "operation" && step.ring === "middle")).toBe(
+      true,
+    );
   });
 });

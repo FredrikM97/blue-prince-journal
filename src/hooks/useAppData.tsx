@@ -1,8 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useMemo } from "react";
 import { db } from "@/data/db";
-import type { GridCell, Note, SectionDef, StoredImage, Todo } from "@/lib/types";
+import { buildGraph, type GraphModel, toGraphEntries } from "@/domain/graph";
 import { useLiveQueryArrayState } from "@/hooks/useLiveQueryArray";
-import { buildGraph, toGraphEntries, type GraphModel } from "@/domain/graph";
+import type { GridCell, Note, SectionDef, StoredImage, Todo } from "@/lib/types";
 
 type AppDataContextValue = {
   notes: Note[];
@@ -59,8 +59,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const notesState = useLiveQueryArrayState(queryNotes, { initialData: snapshot?.notes ?? [] });
   const todosState = useLiveQueryArrayState(queryTodos, { initialData: snapshot?.todos ?? [] });
   const imagesState = useLiveQueryArrayState(queryImages, { initialData: snapshot?.images ?? [] });
-  const gridCellsState = useLiveQueryArrayState(queryGridCells, { initialData: snapshot?.gridCells ?? [] });
-  const sectionsState = useLiveQueryArrayState(querySections, { initialData: snapshot?.sections ?? [] });
+  const gridCellsState = useLiveQueryArrayState(queryGridCells, {
+    initialData: snapshot?.gridCells ?? [],
+  });
+  const sectionsState = useLiveQueryArrayState(querySections, {
+    initialData: snapshot?.sections ?? [],
+  });
 
   const graphEntries = useMemo(
     () => toGraphEntries(notesState.data, todosState.data),

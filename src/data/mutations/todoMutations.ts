@@ -1,6 +1,6 @@
+import type { Todo, TodoStatus } from "@/lib/types";
 import { db } from "../db";
 import { syncRuntime } from "../sync/sync";
-import type { Todo, TodoStatus } from "@/lib/types";
 
 export async function saveTodo(t: Todo): Promise<void> {
   const updated = { ...t, updatedAt: Date.now() };

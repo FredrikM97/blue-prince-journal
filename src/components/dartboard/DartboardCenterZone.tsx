@@ -26,12 +26,14 @@ export function DartboardCenterZone({
   const center = centerShape.center;
   const centerSwatch = centerModifierColor ? OPERATORS[centerModifierColor].swatch : null;
   const bullseyeSwatch = bullseyeModifierColor ? OPERATORS[bullseyeModifierColor].swatch : null;
-  const centerFill = centerModifierGlyph && centerSwatch
-    ? `color-mix(in oklab, ${centerSwatch} 45%, var(--board-green))`
-    : "var(--board-green)";
-  const bullseyeFill = bullseyeModifierGlyph && bullseyeSwatch
-    ? `color-mix(in oklab, ${bullseyeSwatch} 55%, var(--board-red))`
-    : "var(--board-red)";
+  const centerFill =
+    centerModifierGlyph && centerSwatch
+      ? `color-mix(in oklab, ${centerSwatch} 45%, var(--board-green))`
+      : "var(--board-green)";
+  const bullseyeFill =
+    bullseyeModifierGlyph && bullseyeSwatch
+      ? `color-mix(in oklab, ${bullseyeSwatch} 55%, var(--board-red))`
+      : "var(--board-red)";
   const modifierDisplayColor = centerSwatch ?? bullseyeSwatch ?? "white";
 
   return (

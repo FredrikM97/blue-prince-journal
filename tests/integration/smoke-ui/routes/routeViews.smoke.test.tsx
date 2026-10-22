@@ -56,7 +56,7 @@ vi.mock("@/components/graph/GraphPage", () => ({
   GraphPage: () => <div data-testid="graph-page">graph</div>,
 }));
 
-import { NotFoundView, NotesIndexView } from "@/routes/__root";
+import { NotesIndexView, NotFoundView } from "@/routes/__root";
 
 describe("route views smoke snapshots", () => {
   beforeEach(() => {
@@ -72,5 +72,4 @@ describe("route views smoke snapshots", () => {
     const { asFragment } = render(<NotesIndexView />);
     expect(asFragment()).toMatchSnapshot();
   });
-
 });

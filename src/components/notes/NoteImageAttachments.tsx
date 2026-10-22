@@ -1,7 +1,7 @@
 import type { MouseEvent } from "react";
+import { Stack } from "@/components/common/general/Stack";
 import { ImageCard } from "@/components/common/ImageCard";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/general/Stack";
 import { MetaText, Text } from "@/components/common/Typography";
 
 type NoteImageAttachmentsProps = {
@@ -35,7 +35,11 @@ export function NoteImageAttachments({
         </Inline>
       )}
 
-      {countPrefix && <MetaText>{countPrefix} {imageIds.length}</MetaText>}
+      {countPrefix && (
+        <MetaText>
+          {countPrefix} {imageIds.length}
+        </MetaText>
+      )}
 
       {imageIds.length > 0 ? (
         <Stack gap="0" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">

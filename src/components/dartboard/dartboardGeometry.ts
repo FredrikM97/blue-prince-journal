@@ -158,7 +158,9 @@ export type SectorRadii = {
   rOut: number;
 };
 
-function buildBoardAreaShapeDefinition(getRadii: () => { rIn: number; rOut: number }): BoardAreaShapeDefinition {
+function buildBoardAreaShapeDefinition(
+  getRadii: () => { rIn: number; rOut: number },
+): BoardAreaShapeDefinition {
   return {
     getRadii,
     buildPath: (a0, a1) => {

@@ -1,34 +1,34 @@
 import { useEffect, useRef, useState } from "react";
-import { useStore } from "@/hooks/useStore";
+import { toast } from "sonner";
+import { Button } from "@/components/common/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/common/Dialog";
+import { Stack } from "@/components/common/general/Stack";
+import { KeyboardKey } from "@/components/common/KeyboardKey";
+import { CenteredContent, Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
+import { PageLayout } from "@/components/common/PageLayout";
+import { Heading, MetaText, Text } from "@/components/common/Typography";
+import { addImage } from "@/data/mutations/imageMutations";
 import { saveNote } from "@/data/mutations/noteMutations";
 import { saveTodo } from "@/data/mutations/todoMutations";
-import { addImage } from "@/data/mutations/imageMutations";
-import { Button } from "@/components/common/Button";
-import { KeyboardKey } from "@/components/common/KeyboardKey";
-import { PageLayout } from "@/components/common/PageLayout";
 import { exportAll, importAll } from "@/data/storage/backup";
+import { isIndexedDbAvailable } from "@/data/storage/storageHealth";
+import { useStore } from "@/hooks/useStore";
 import {
   attachSeedImagesToNotes,
   buildGraphTestNotes,
   buildGraphTestTodos,
   buildSeedTestImageSpecs,
 } from "../../../tests/fixtures/seedGraphTest";
-import { isIndexedDbAvailable } from "@/data/storage/storageHealth";
-import { toast } from "sonner";
-import { SettingsSection, SettingsSubsection } from "./SettingsSection";
 import { SettingsRoomsSection } from "./SettingsRoomsSection";
-import { SyncFolderSection } from "./SettingsSyncSection";
+import { SettingsSection, SettingsSubsection } from "./SettingsSection";
 import { SteamImportSection } from "./SettingsSteamSection.tsx";
-import { Heading, MetaText, Text } from "@/components/common/Typography";
-import { Stack } from "@/components/common/general/Stack";
-import { CenteredContent, Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/common/Dialog";
+import { SyncFolderSection } from "./SettingsSyncSection";
 
 type StorageHealthSnapshot = {
   indexedDbAvailable: boolean;
@@ -237,5 +237,3 @@ export function SettingsPage() {
     </>
   );
 }
-
-

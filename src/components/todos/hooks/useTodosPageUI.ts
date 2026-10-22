@@ -1,8 +1,7 @@
 import { useCallback, useDeferredValue, useMemo, useReducer } from "react";
-import type { Todo } from "@/lib/types";
 import { groupTodosByStatus } from "@/components/todos/Constants";
 import { matchesSearchQuery, parseSearchQuery } from "@/lib/searchQuery";
-import type { TodoStatus } from "@/lib/types";
+import type { Todo, TodoStatus } from "@/lib/types";
 
 type TodosPageUiState = {
   scopeFilter: string | null;
@@ -71,10 +70,7 @@ function useTodosPageState() {
     (todoId: string) => dispatch({ type: "requestDelete", todoId }),
     [],
   );
-  const clearPendingDelete = useCallback(
-    () => dispatch({ type: "clearPendingDelete" }),
-    [],
-  );
+  const clearPendingDelete = useCallback(() => dispatch({ type: "clearPendingDelete" }), []);
 
   const actions = useMemo(
     () => ({
@@ -130,17 +126,12 @@ export function useTodosPageUI({ todos, search }: { todos: Todo[]; search: strin
   const doneCount = statusCounts.done;
 
   const previewTodo = useMemo(
-    () =>
-      uiState.previewTodoId
-        ? (todoById.get(uiState.previewTodoId) ?? null)
-        : null,
+    () => (uiState.previewTodoId ? (todoById.get(uiState.previewTodoId) ?? null) : null),
     [todoById, uiState.previewTodoId],
   );
   const pendingDeleteTodo = useMemo(
     () =>
-      uiState.pendingDeleteTodoId
-        ? (todoById.get(uiState.pendingDeleteTodoId) ?? null)
-        : null,
+      uiState.pendingDeleteTodoId ? (todoById.get(uiState.pendingDeleteTodoId) ?? null) : null,
     [todoById, uiState.pendingDeleteTodoId],
   );
 

@@ -1,5 +1,5 @@
-import type { Note, Todo } from "@/lib/types";
 import { mapTodosToVirtualNotes } from "@/domain/todoVirtualNotes";
+import type { Note, Todo } from "@/lib/types";
 
 const GRAPH_VB_W = 1600;
 const GRAPH_VB_H = 1100;

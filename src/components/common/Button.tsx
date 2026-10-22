@@ -1,4 +1,4 @@
-import { createElement, forwardRef, type ButtonHTMLAttributes } from "react";
+import { type ButtonHTMLAttributes, createElement, forwardRef } from "react";
 
 type Variant =
   | "default"

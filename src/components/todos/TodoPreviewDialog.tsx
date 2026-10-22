@@ -1,13 +1,17 @@
 import { useState } from "react";
-import type { Todo } from "@/lib/types";
-import { Chip } from "@/components/common/Chip";
-import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
-import { MetaRow, PreviewSection, PreviewTimestamps } from "@/components/common/preview/PreviewContent";
-import { Inline } from "@/components/common/LayoutPrimitives";
 import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
+import { Chip } from "@/components/common/Chip";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
+import { EditablePreviewDialog } from "@/components/common/preview/EditablePreviewDialog";
+import {
+  MetaRow,
+  PreviewSection,
+  PreviewTimestamps,
+} from "@/components/common/preview/PreviewContent";
 import { getTodoPriorityChipVariant } from "@/components/todos/todoPriority";
 import { saveTodo } from "@/data/mutations/todoMutations";
-import { EditablePreviewDialog } from "@/components/common/preview/EditablePreviewDialog";
+import type { Todo } from "@/lib/types";
 
 export function TodoPreviewContent({ todo }: { todo: Todo }) {
   const body = todo.body;
@@ -70,23 +74,36 @@ export function TodoPreviewDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   if (!todo) return null;
-  const activeTodo = todo;
-  const [optimisticBody, setOptimisticBody] = useState<string | undefined>(activeTodo.body);
-  const displayTodo = optimisticBody !== activeTodo.body ? { ...activeTodo, body: optimisticBody } : activeTodo;
+  return (
+    <TodoPreviewDialogContent key={todo.id} todo={todo} open={open} onOpenChange={onOpenChange} />
+  );
+}
+
+function TodoPreviewDialogContent({
+  todo,
+  open,
+  onOpenChange,
+}: {
+  todo: Todo;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [optimisticBody, setOptimisticBody] = useState<string | undefined>(todo.body);
+  const displayTodo = optimisticBody !== todo.body ? { ...todo, body: optimisticBody } : todo;
   return (
     <EditablePreviewDialog
       open={open}
       onOpenChange={onOpenChange}
-      entityKey={activeTodo.id}
-      title={activeTodo.title}
-      subtitle={`Created ${new Date(activeTodo.createdAt).toLocaleDateString()}`}
-      strikeTitle={activeTodo.status === "done"}
+      entityKey={todo.id}
+      title={todo.title}
+      subtitle={`Created ${new Date(todo.createdAt).toLocaleDateString()}`}
+      strikeTitle={todo.status === "done"}
       editAriaLabel="Edit todo"
-      initialDraft={activeTodo.body ?? ""}
+      initialDraft={todo.body ?? ""}
       saveSuccessMessage="Todo saved"
       onSaveDraft={async (nextDraft) => {
         const next: Todo = {
-          ...activeTodo,
+          ...todo,
           body: nextDraft || undefined,
         };
         setOptimisticBody(next.body);

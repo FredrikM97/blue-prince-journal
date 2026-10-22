@@ -1,20 +1,20 @@
-import { MODIFIER_EFFECTS, MODIFIER_PRESETS } from "./modifiers";
+import { getBoardAreas } from "./boardAreas";
 import {
   applyOperator,
   formatModifierStepLabel,
   formatOperationStepLabel,
   roundNice,
 } from "./computeUtils";
+import { MODIFIER_EFFECTS, MODIFIER_PRESETS } from "./modifiers";
 import {
-  OPERATORS,
-  WEDGE_ORDER,
   type BoardState,
+  emptyModifierState,
   type ModifierState,
+  OPERATORS,
   type OpColor,
   type RingKey,
-  emptyModifierState,
+  WEDGE_ORDER,
 } from "./types";
-import { getBoardAreas } from "./boardAreas";
 
 export type Step = {
   kind: "start" | "operation" | "modifier";
@@ -104,7 +104,8 @@ export function compute(
 
   const activeCenterModifiers = modifiers.center;
   const activeBullseyeModifiers = modifiers.bullseye;
-  let lastOperation: { color: OpColor; operand: number; ring: RingKey; wedgeIndex: number } | null = null;
+  let lastOperation: { color: OpColor; operand: number; ring: RingKey; wedgeIndex: number } | null =
+    null;
 
   function collectOperationEntriesFromRow(
     entries: OperationEntry[],
@@ -171,30 +172,30 @@ export function compute(
   const operationEntries = buildOperationEntries();
   for (const entry of operationEntries) {
     const { ring, wedgeIndex, color, operand, symbol, label } = entry;
-      const before = acc;
-      try {
-        acc = applyOperator(acc, color, operand);
-      } catch (error) {
-        return {
-          result: null,
-          steps,
-          error: error instanceof Error ? error.message : "Unable to apply operation.",
-        };
-      }
+    const before = acc;
+    try {
+      acc = applyOperator(acc, color, operand);
+    } catch (error) {
+      return {
+        result: null,
+        steps,
+        error: error instanceof Error ? error.message : "Unable to apply operation.",
+      };
+    }
 
-      steps.push({
-        kind: "operation",
-        ring,
-        wedgeIndex,
-        wedgeValue: operand,
-        color,
-        symbol,
-        before,
-        after: acc,
-        label: label(acc),
-      });
+    steps.push({
+      kind: "operation",
+      ring,
+      wedgeIndex,
+      wedgeValue: operand,
+      color,
+      symbol,
+      before,
+      after: acc,
+      label: label(acc),
+    });
 
-      lastOperation = { color, operand, ring, wedgeIndex };
+    lastOperation = { color, operand, ring, wedgeIndex };
   }
 
   function applyFinalModifierById(
@@ -210,7 +211,8 @@ export function compute(
 
     const before = acc;
     const context = {
-      repeatLastOperation: (repeatCount: number) => repeatLastOperation(acc, lastOperation, repeatCount, steps),
+      repeatLastOperation: (repeatCount: number) =>
+        repeatLastOperation(acc, lastOperation, repeatCount, steps),
       skipToLastOperationBefore: () => {
         const lastOperationStep = [...steps].reverse().find((step) => step.kind === "operation");
         return lastOperationStep ? lastOperationStep.before : null;
@@ -224,13 +226,17 @@ export function compute(
   }
 
   function applyBullseyeModifiersPhase() {
-    const activeBullseyeId = MODIFIER_PRESETS.bullseye.find((item) => activeBullseyeModifiers.has(item.id))?.id;
+    const activeBullseyeId = MODIFIER_PRESETS.bullseye.find((item) =>
+      activeBullseyeModifiers.has(item.id),
+    )?.id;
     if (!activeBullseyeId) return;
     applyFinalModifierById("bullseye", activeBullseyeId);
   }
 
   function applyCenterModifiersPhase() {
-    const activeCenterId = MODIFIER_PRESETS.center.find((item) => activeCenterModifiers.has(item.id))?.id;
+    const activeCenterId = MODIFIER_PRESETS.center.find((item) =>
+      activeCenterModifiers.has(item.id),
+    )?.id;
     if (!activeCenterId) return;
     applyFinalModifierById("center", activeCenterId);
   }

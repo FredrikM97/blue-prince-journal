@@ -1,4 +1,4 @@
-import { WEDGE_COUNT, nextColor, type BoardState, type OpColor, type RingKey } from "./types";
+import { type BoardState, nextColor, type OpColor, type RingKey, WEDGE_COUNT } from "./types";
 
 export type PaintMode = "third" | "filled";
 
@@ -16,7 +16,10 @@ export const PAINT_MODE_OPTIONS: { value: PaintMode; label: string; note: string
 
 export const DEFAULT_SELECTED_TARGET: SelectedTarget = { zone: "inner", wedgeIndex: 0 };
 
-export function createBoardSelectionTarget(zone: SelectedZone, wedgeIndex: number | null): SelectedTarget {
+export function createBoardSelectionTarget(
+  zone: SelectedZone,
+  wedgeIndex: number | null,
+): SelectedTarget {
   return { zone, wedgeIndex };
 }
 
@@ -82,7 +85,11 @@ function paintThirdSlices(
   };
 }
 
-function clearThirdSlicesOnly(board: BoardState, ring: RingKey, wedgeIndexes: number[]): BoardState {
+function clearThirdSlicesOnly(
+  board: BoardState,
+  ring: RingKey,
+  wedgeIndexes: number[],
+): BoardState {
   return {
     ...board,
     thirds: {
@@ -173,7 +180,11 @@ export function canPaintSelection(
   selection: SelectedTarget,
   advanced: boolean,
 ): selection is SelectedTarget & { zone: RingKey } {
-  if (selection.zone === "center" || selection.zone === "bullseye" || selection.zone === "outerModifier") {
+  if (
+    selection.zone === "center" ||
+    selection.zone === "bullseye" ||
+    selection.zone === "outerModifier"
+  ) {
     return false;
   }
   void advanced;
@@ -181,7 +192,11 @@ export function canPaintSelection(
 }
 
 export function clearSelectedBoardArea(board: BoardState, selection: SelectedTarget): BoardState {
-  if (selection.zone === "center" || selection.zone === "bullseye" || selection.zone === "outerModifier") {
+  if (
+    selection.zone === "center" ||
+    selection.zone === "bullseye" ||
+    selection.zone === "outerModifier"
+  ) {
     return board;
   }
   if (selection.wedgeIndex === null) return board;

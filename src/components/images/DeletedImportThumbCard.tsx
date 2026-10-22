@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
-import { Inline } from "@/components/common/LayoutPrimitives";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { Stack } from "@/components/common/general/Stack";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import { Text } from "@/components/common/Typography";
 
 export function DeletedImportThumbCard({

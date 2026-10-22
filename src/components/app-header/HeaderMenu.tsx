@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import {
-  Settings as SettingsIcon,
-  DownloadCloud,
-  UploadCloud,
   Coffee,
+  DownloadCloud,
   Github,
+  Settings as SettingsIcon,
   ShieldCheck,
   SlidersHorizontal,
+  UploadCloud,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import { exportAll, importAll } from "@/data/storage/backup";
+import { toast } from "sonner";
 import { Button } from "@/components/common/Button";
 import {
   Dialog,
@@ -18,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/common/Dialog";
-import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/common/menu/DropdownMenu";
+import { exportAll, importAll } from "@/data/storage/backup";
 
 export function HeaderMenu() {
   const buyMeACoffeeUrl = "https://buymeacoffee.com/fredrikm97";

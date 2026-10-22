@@ -1,8 +1,8 @@
-import { readSnapshot, applySnapshot, clearAllData } from "../db";
+import { applySnapshot, clearAllData, readSnapshot } from "../db";
 import { clearCustomRooms } from "../rooms/rooms";
+import type { SyncConflictChoice, SyncConnectResult } from "./sync";
 import { readFolder, writeFolder } from "./syncFolderIO";
 import { syncRuntime } from "./syncRuntime";
-import type { SyncConflictChoice, SyncConnectResult } from "./sync";
 
 export async function connectSyncFolderWithConflictResolution(
   localItemCount: number,

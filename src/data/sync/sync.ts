@@ -6,8 +6,9 @@
  */
 import type { FsDirectoryHandle as DirHandle } from "./fileAccessTypes";
 import { syncRuntime } from "./syncRuntime";
-export type { SyncMode, SyncStatus } from "./syncRuntime";
+
 export { connectSyncFolderWithConflictResolution } from "./syncConnect";
+export type { SyncMode, SyncStatus } from "./syncRuntime";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -42,4 +43,3 @@ export { syncRuntime };
 // ---------------------------------------------------------------------------
 // Orchestration — module-level functions with complex logic
 // ---------------------------------------------------------------------------
-

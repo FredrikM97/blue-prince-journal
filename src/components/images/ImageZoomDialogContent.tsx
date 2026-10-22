@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
 import { ChevronLeft, ChevronRight, HelpCircle, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
+import { Stack } from "@/components/common/general/Stack";
+import { Inline } from "@/components/common/LayoutPrimitives";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/common/menu/DropdownMenu";
-import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/general/Stack";
 import { StoredImageView } from "@/components/common/StoredImageView";
 import { Text } from "@/components/common/Typography";
 import { getWheelStepDelta, useNonPassiveWheel } from "@/hooks/useNonPassiveWheel";
@@ -86,9 +86,10 @@ export function ImageZoomDialogContent({
     setDragging(false);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resetView is intentionally tied to imageId changes.
   useEffect(() => {
     resetView();
-  }, [imageId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [imageId]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {

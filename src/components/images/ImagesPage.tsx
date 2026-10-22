@@ -1,9 +1,11 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Images } from "lucide-react";
-import { useStore } from "@/hooks/useStore";
-import { addImage, removeImage, updateImage } from "@/data/mutations/imageMutations";
-import type { StoredImage } from "@/lib/types";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Grid } from "@/components/common/LayoutPrimitives";
 import { PageLayout } from "@/components/common/PageLayout";
+import { Text } from "@/components/common/Typography";
+import { DeletedImportThumbCard } from "@/components/images/DeletedImportThumbCard";
 import {
   ImagesLeftPanel,
   type ImagesSortMode,
@@ -11,36 +13,34 @@ import {
 } from "@/components/images/ImagesLeftPanel";
 import { ImagesRightPanel } from "@/components/images/ImagesRightPanel";
 import { ImageThumbButton } from "@/components/images/ImageThumbButton";
-import { DeletedImportThumbCard } from "@/components/images/DeletedImportThumbCard";
-import { EmptyState } from "@/components/common/EmptyState";
-import { Grid } from "@/components/common/LayoutPrimitives";
-import { Text } from "@/components/common/Typography";
-import { toast } from "sonner";
 import {
   getActiveSteamFolderName,
-  loadSteamImportSourceBlob,
-  loadSteamDeletedImports,
-  markSteamImportedImageDeleted,
   getSteamImportedImageIdsForSource,
-  restoreDeletedSteamImportImage,
+  loadSteamDeletedImports,
+  loadSteamImportSourceBlob,
+  markSteamImportedImageDeleted,
   permanentlyDeleteSteamImport,
+  restoreDeletedSteamImportImage,
   type SteamDeletedImportEntry,
 } from "@/data/import/steamImport";
-import { syncRuntime } from "@/data/sync/sync";
+import { addImage, removeImage, updateImage } from "@/data/mutations/imageMutations";
 import { getLocalStorageFlag, setLocalStorageFlag } from "@/data/storage/storageHealth";
-import { getImageLabel } from "@/lib/imageLabel";
-import { useSteamFolderSync } from "@/hooks/useSteamFolderSync";
-import { useMobileAwarePanel } from "@/hooks/useMobileAwarePanel";
-import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
+import { syncRuntime } from "@/data/sync/sync";
+import { useAppData } from "@/hooks/useAppData";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMobileAwarePanel } from "@/hooks/useMobileAwarePanel";
 import {
   getPageLayoutMinMaxMediaQuery,
   PAGE_LAYOUT_MOBILE_BREAKPOINT,
   type PageLayoutMode,
   usePageLayoutMobileState,
 } from "@/hooks/usePageLayoutMobile";
-import { useAppData } from "@/hooks/useAppData";
+import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
 import { useProgressiveVisibleCount } from "@/hooks/useProgressiveVisibleCount";
+import { useSteamFolderSync } from "@/hooks/useSteamFolderSync";
+import { useStore } from "@/hooks/useStore";
+import { getImageLabel } from "@/lib/imageLabel";
+import type { StoredImage } from "@/lib/types";
 
 const IMAGES_TABLET_MAX_WIDTH = 1279.98;
 const IMAGES_TABLET_MEDIA_QUERY = getPageLayoutMinMaxMediaQuery(
@@ -222,7 +222,12 @@ export function ImagesPage() {
 
       <PageLayout.Middle>
         {viewMode === "library" && isPageDataLoading && (
-          <Grid as="div" variant="default" gap="3" className={galleryGridColumnsClassName(galleryDensity)}>
+          <Grid
+            as="div"
+            variant="default"
+            gap="3"
+            className={galleryGridColumnsClassName(galleryDensity)}
+          >
             {Array.from({ length: 10 }).map((_, index) => (
               <div
                 key={`image-skeleton-${index}`}
@@ -346,7 +351,12 @@ function DeletedImportsList({
   }
 
   return (
-    <Grid as="div" variant="default" gap="3" className={galleryGridColumnsClassName(galleryDensity)}>
+    <Grid
+      as="div"
+      variant="default"
+      gap="3"
+      className={galleryGridColumnsClassName(galleryDensity)}
+    >
       {entries.map((entry) => (
         <DeletedImportThumbCard
           key={entry.sourceKey}
@@ -452,7 +462,12 @@ function ImagesGrid({
   const visibleImages = filtered.slice(0, visibleCount);
 
   return (
-    <Grid as="div" variant="default" gap="3" className={galleryGridColumnsClassName(galleryDensity)}>
+    <Grid
+      as="div"
+      variant="default"
+      gap="3"
+      className={galleryGridColumnsClassName(galleryDensity)}
+    >
       {visibleImages.map((img) => (
         <ImageThumb
           key={img.id}

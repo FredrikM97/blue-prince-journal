@@ -1,17 +1,17 @@
 import { useMemo, useState } from "react";
+import { Stack } from "@/components/common/general/Stack";
 import { PageLayout } from "@/components/common/PageLayout";
+import { SidePanelRight } from "@/components/common/SidePanel";
+import { MetaText } from "@/components/common/Typography";
+import { clearCell, upsertCell } from "@/data/mutations/mapMutations";
+import { cellId, GRID_ROWS } from "@/data/rooms/rooms";
+import { useAppData } from "@/hooks/useAppData";
+import { useMobileAwarePanel } from "@/hooks/useMobileAwarePanel";
+import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
+import { useStore } from "@/hooks/useStore";
 import { MapLeftPanel } from "./MapLeftPanel";
 import { MapMiddlePanel } from "./MapMiddlePanel";
 import { MapRightPanel } from "./MapRightPanel";
-import { GRID_ROWS, cellId } from "@/data/rooms/rooms";
-import { useStore } from "@/hooks/useStore";
-import { upsertCell, clearCell } from "@/data/mutations/mapMutations";
-import { MetaText } from "@/components/common/Typography";
-import { SidePanelRight } from "@/components/common/SidePanel";
-import { Stack } from "@/components/common/general/Stack";
-import { useMobileAwarePanel } from "@/hooks/useMobileAwarePanel";
-import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
-import { useAppData } from "@/hooks/useAppData";
 
 const COL_LABELS = ["A", "B", "C", "D", "E"] as const;
 
@@ -22,11 +22,7 @@ function coordLabel(row: number, col: number) {
 type ActiveCellCoord = { row: number; col: number };
 
 export function MapPage() {
-  const {
-    gridCells,
-    notes,
-    todos,
-  } = useAppData();
+  const { gridCells, notes, todos } = useAppData();
   const openCapture = useStore((s) => s.openCapture);
   const {
     panelValue: active,

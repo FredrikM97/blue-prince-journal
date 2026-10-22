@@ -1,5 +1,5 @@
-import { useMemo, useRef } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo, useRef } from "react";
 
 export function useLiveQueryArrayState<T>(
   query: () => Promise<T[]> | T[],

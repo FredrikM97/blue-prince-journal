@@ -8,9 +8,7 @@ type TextMarginTop = "0" | "0.5" | "1" | "2";
 type TextLeading = "normal" | "tight" | "relaxed";
 type TextIntent = "default" | "warning";
 type TextDecoration = "none" | "line-through";
-type TextVariant =
-  | "default"
-  | "sr-only";
+type TextVariant = "default" | "sr-only";
 
 const TEXT_SIZE_CLASS: Record<TextSize, string> = {
   xs: "text-xs",

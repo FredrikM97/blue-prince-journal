@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { NotesView } from "@/components/notes/NotesView";
+import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
+import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
 import { MapLeftPanel } from "@/components/map/MapLeftPanel";
 import { MapMiddlePanel } from "@/components/map/MapMiddlePanel";
-import { ImagesLeftPanel, type SteamSyncPanelModel } from "@/components/images/ImagesLeftPanel";
-import { GraphRightPanel } from "@/components/graph/GraphRightPanel";
+import { NotesView } from "@/components/notes/NotesView";
 import { TodoLeftPanel } from "@/components/todos/TodoLeftPanel";
 import type { Note } from "@/lib/types";
 

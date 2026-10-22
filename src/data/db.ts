@@ -1,6 +1,6 @@
 import Dexie, { type Table } from "dexie";
-import type { Note, Todo, StoredImage, RoomState, SectionDef, GridCell } from "@/lib/types";
-import { listCustomRooms, replaceCustomRooms, cellId, type RoomCategory } from "@/data/rooms/rooms";
+import { cellId, listCustomRooms, type RoomCategory, replaceCustomRooms } from "@/data/rooms/rooms";
+import type { GridCell, Note, RoomState, SectionDef, StoredImage, Todo } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Snapshot type (used by sync and io)

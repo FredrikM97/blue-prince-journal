@@ -1,18 +1,21 @@
-import { useEffect, useRef, useState } from "react";
 import { FolderOpen, FolderSync, Unlink } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/common/Button";
+import { Stack } from "@/components/common/general/Stack";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import {
+  type SyncConflictChoice,
+  SyncConflictDialog,
+} from "@/components/common/SyncConflictDialog";
+import { MetaText, Text } from "@/components/common/Typography";
 import { db } from "@/data/db";
-import { useStore } from "@/hooks/useStore";
 import {
   connectSyncFolderWithConflictResolution,
-  syncRuntime,
   type SyncMode,
+  syncRuntime,
 } from "@/data/sync/sync";
-import { Button } from "@/components/common/Button";
-import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/general/Stack";
-import { SyncConflictDialog, type SyncConflictChoice } from "@/components/common/SyncConflictDialog";
-import { MetaText, Text } from "@/components/common/Typography";
-import { toast } from "sonner";
+import { useStore } from "@/hooks/useStore";
 
 export function SyncFolderSection() {
   const syncFolderName = useStore((s) => s.syncFolderName);
@@ -249,8 +252,8 @@ export function SyncFolderSection() {
   return (
     <Stack gap="3">
       <Text size="sm" tone="muted">
-        Connect a local folder and the app will keep <code>manifest.json</code> and an <code>images/</code>{" "}
-        folder up to date after every change.
+        Connect a local folder and the app will keep <code>manifest.json</code> and an{" "}
+        <code>images/</code> folder up to date after every change.
       </Text>
       <Inline as="label" gap="2" align="center">
         <input

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { DartboardPaintRing } from "./DartboardPaintRing";
 import { getRingRadii } from "./dartboardGeometry";
-import type { BoardAreaModel, BoardState, OpColor, RingKey } from "./types";
 import type { SelectedTarget } from "./dartboardState";
+import type { BoardAreaModel, BoardState, OpColor, RingKey } from "./types";
 
 type RenderContext = {
   area: BoardAreaModel;

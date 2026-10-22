@@ -1,12 +1,12 @@
-import { TODO_STATUS_COLUMNS } from "./Constants";
-import { TodoItem } from "./TodoItem";
-import type { Todo, TodoStatus } from "@/lib/types";
-import { Grid } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
+import { Grid } from "@/components/common/LayoutPrimitives";
 import { Heading, MetaText } from "@/components/common/Typography";
 import { Tabs, TabsList, TabsTrigger } from "@/components/notes/Tabs";
 import { useIsPageLayoutMobile } from "@/hooks/usePageLayoutMobile";
 import { useProgressiveVisibleCount } from "@/hooks/useProgressiveVisibleCount";
+import type { Todo, TodoStatus } from "@/lib/types";
+import { TODO_STATUS_COLUMNS } from "./Constants";
+import { TodoItem } from "./TodoItem";
 
 function TodoColumn({
   label,
@@ -35,7 +35,11 @@ function TodoColumn({
 
   return (
     <Stack as="section" className="rounded-lg border border-border bg-card" gap="0">
-      <Stack as="header" className="flex items-center justify-between border-b border-border px-3 py-2" gap="0">
+      <Stack
+        as="header"
+        className="flex items-center justify-between border-b border-border px-3 py-2"
+        gap="0"
+      >
         <Heading as="h2" size="base" variant="section-label">
           {label}
         </Heading>

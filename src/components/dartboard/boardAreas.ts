@@ -1,4 +1,4 @@
-import { RINGS, type BoardAreaModel, type RingKey } from "./types";
+import { type BoardAreaModel, RINGS, type RingKey } from "./types";
 
 function createRingArea(ring: RingKey): BoardAreaModel {
   return {

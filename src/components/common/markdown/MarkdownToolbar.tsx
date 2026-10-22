@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { createPortal } from "react-dom";
 import { Eye, EyeOff, HelpCircle, Maximize2, MoreHorizontal, WandSparkles } from "lucide-react";
+import { type CSSProperties, Fragment, type ReactNode, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/common/Button";
 import {
   DropdownMenu,
@@ -80,12 +80,14 @@ function MarkdownShortcutHelp() {
           <div
             ref={popupRef}
             className="fixed z-[9999] w-80 rounded-md border border-border bg-card p-3 text-[11px] shadow-lg"
-            style={{
-              "--md-shortcut-top": `${popupPos.top}px`,
-              "--md-shortcut-right": `${popupPos.right}px`,
-              top: "var(--md-shortcut-top)",
-              right: "var(--md-shortcut-right)",
-            } as CSSProperties}
+            style={
+              {
+                "--md-shortcut-top": `${popupPos.top}px`,
+                "--md-shortcut-right": `${popupPos.right}px`,
+                top: "var(--md-shortcut-top)",
+                right: "var(--md-shortcut-right)",
+              } as CSSProperties
+            }
           >
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               Token shortcuts

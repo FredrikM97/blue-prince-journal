@@ -1,6 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useReducer, useRef } from "react";
-import type { Note, NoteType, Todo } from "@/lib/types";
 import { buildNoteListItems, buildRooms, buildTags, filterNotesList } from "@/domain/notesPage";
+import type { Note, NoteType, Todo } from "@/lib/types";
 
 interface NotesPageUiState {
   typeFilter: NoteType | null;
@@ -62,7 +62,9 @@ function notesPageReducer(state: NotesPageUiState, action: NotesPageAction): Not
         ? state
         : { ...state, showHiddenFilter: action.value };
     case "setPreviewTodoId":
-      return state.previewTodoId === action.value ? state : { ...state, previewTodoId: action.value };
+      return state.previewTodoId === action.value
+        ? state
+        : { ...state, previewTodoId: action.value };
     case "openEdit":
       if (
         state.panelMode === "edit" &&

@@ -1,15 +1,6 @@
+import { BookOpen, Eye, Key, Lightbulb, ListTodo, type LucideIcon, Sparkles } from "lucide-react";
 import type { NoteType } from "@/lib/types";
-import {
-  BookOpen,
-  Eye,
-  Key,
-  Lightbulb,
-  ListTodo,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
 
-// eslint-disable-next-line react-refresh/only-export-components -- shared metadata constants, not a React component module
 export const NOTE_TYPE_ORDER: NoteType[] = [
   "observation",
   "clue",
@@ -39,7 +30,6 @@ export const NOTE_TYPE_OPTIONS = NOTE_TYPE_ORDER.map((value) => ({
 /**
  * Formats a timestamp into a short relative string for note rows.
  */
-// eslint-disable-next-line react-refresh/only-export-components -- shared utility used by row summaries
 export function relTime(ts: number) {
   const delta = Date.now() - ts;
   if (delta < 60_000) return "just now";

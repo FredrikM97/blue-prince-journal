@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
 import { db } from "@/data/db";
 import type { SectionDef } from "@/lib/types";
 

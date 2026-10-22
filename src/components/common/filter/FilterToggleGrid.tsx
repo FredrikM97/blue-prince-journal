@@ -90,9 +90,7 @@ export function FilterToggleGrid({
   }
 
   return (
-    <Grid
-      className="w-full gap-x-2 gap-y-1.5 [grid-template-columns:repeat(auto-fit,minmax(min(6.75rem,100%),1fr))]"
-    >
+    <Grid className="w-full gap-x-2 gap-y-1.5 [grid-template-columns:repeat(auto-fit,minmax(min(6.75rem,100%),1fr))]">
       {items.map((item) => {
         const buttonClassName = getToggleButtonClass({
           active: item.active,
@@ -103,12 +101,7 @@ export function FilterToggleGrid({
         });
 
         return (
-          <button
-            key={item.key}
-            type="button"
-            className={buttonClassName}
-            onClick={item.onToggle}
-          >
+          <button key={item.key} type="button" className={buttonClassName} onClick={item.onToggle}>
             {item.dotColor && (
               <span
                 className={dotClassName}

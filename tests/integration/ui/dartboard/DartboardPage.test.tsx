@@ -69,7 +69,9 @@ describe("DartboardPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Inner" }));
 
     const squareButton = screen.getByTitle("Square — Square the number (n²).", { exact: true });
-    const roundButton = screen.getByTitle("Round to 10 — Round to the nearest 10.", { exact: true });
+    const roundButton = screen.getByTitle("Round to 10 — Round to the nearest 10.", {
+      exact: true,
+    });
 
     fireEvent.click(squareButton);
     fireEvent.click(roundButton);
@@ -85,7 +87,9 @@ describe("DartboardPage", () => {
     fireEvent.click(screen.getByLabelText("inner wedge 20"));
     fireEvent.click(screen.getByTitle("Toggle advanced mode"));
     fireEvent.click(screen.getByRole("button", { name: "Outer" }));
-    fireEvent.click(screen.getByTitle("Diagonal Line — Divide the final number by 2.", { exact: true }));
+    fireEvent.click(
+      screen.getByTitle("Diagonal Line — Divide the final number by 2.", { exact: true }),
+    );
     fireEvent.click(screen.getByLabelText("outer modifier wedge 20"));
 
     expect(getResultText()).toBe("10");

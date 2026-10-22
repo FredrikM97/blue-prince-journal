@@ -2,13 +2,17 @@
  * Shared primitives for note and todo preview panels/dialogs.
  * Import from here to keep both in sync.
  */
-import { MetaText, Text } from "@/components/common/Typography";
+
 import { Inline, SectionBlock } from "@/components/common/LayoutPrimitives";
+import { MetaText, Text } from "@/components/common/Typography";
 
 export function MetaRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <Inline align="start" gap="2">
-      <MetaText as="span" className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+      <MetaText
+        as="span"
+        className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+      >
         {label}
       </MetaText>
       <Text as="div" size="sm" className="min-w-0 flex-1" minWidthZero>

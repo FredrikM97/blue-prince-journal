@@ -1,34 +1,33 @@
-import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useStore } from "@/hooks/useStore";
+import { ImagePlus, Save } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/common/Button";
+import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
+import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
+import { Stack } from "@/components/common/general/Stack";
+import { InputField } from "@/components/common/input/InputField";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { SidePanelRight } from "@/components/common/SidePanel";
+import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
+import { MetaText, Text } from "@/components/common/Typography";
+import { buildCapturePanelKey } from "@/components/notes/capturePanelKey";
+import { NoteImageAttachments } from "@/components/notes/NoteImageAttachments";
+import { NoteMetadataFields } from "@/components/notes/NoteMetadataFields";
+import { PendingImageList } from "@/components/notes/PendingImageList";
+import { SelectExistingImagesDialog } from "@/components/notes/SelectExistingImagesDialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/notes/Tabs";
 import { db } from "@/data/db";
 import { createFromCapture } from "@/data/mutations/captureMutations";
 import { saveNote } from "@/data/mutations/noteMutations";
 import { saveTodo } from "@/data/mutations/todoMutations";
-import type { Note, Todo } from "@/lib/types";
-import { Button } from "@/components/common/Button";
-import { RoomDropdown } from "@/components/common/dropdown/RoomDropdown";
-import { Tabs, TabsList, TabsTrigger } from "@/components/notes/Tabs";
-import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
-import { toast } from "sonner";
-import { usePasteImages } from "@/hooks/usePasteImages";
-import { ImagePlus, Save } from "lucide-react";
-import type { NoteType, Priority } from "@/lib/types";
-import { NOTE_TYPE_OPTIONS } from "@/lib/noteMetadata";
-import { PendingImageList } from "@/components/notes/PendingImageList";
-import { InputField } from "@/components/common/input/InputField";
-import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
-import { SidePanelRight } from "@/components/common/SidePanel";
-import { MetaText, Text } from "@/components/common/Typography";
-import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/general/Stack";
-import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
-import { SelectExistingImagesDialog } from "@/components/notes/SelectExistingImagesDialog";
-import { getImageLabel } from "@/lib/imageLabel";
 import { parseTagInput } from "@/domain/notesPage";
-import { buildCapturePanelKey } from "@/components/notes/capturePanelKey";
-import { NoteMetadataFields } from "@/components/notes/NoteMetadataFields";
-import { NoteImageAttachments } from "@/components/notes/NoteImageAttachments";
+import { useLiveQueryArray } from "@/hooks/useLiveQueryArray";
+import { usePasteImages } from "@/hooks/usePasteImages";
+import { useStore } from "@/hooks/useStore";
+import { getImageLabel } from "@/lib/imageLabel";
+import { NOTE_TYPE_OPTIONS } from "@/lib/noteMetadata";
+import type { Note, NoteType, Priority, Todo } from "@/lib/types";
 
 const NOTE_PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
@@ -774,4 +773,3 @@ export function NotesCreatePanel({
     </SidePanelRight>
   );
 }
-

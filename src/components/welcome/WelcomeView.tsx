@@ -1,13 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ThemeToggle } from "@/components/app-header/ThemeToggle";
 import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
-import { Toaster } from "@/routes/Sonner";
 import { useAppData } from "@/hooks/useAppData";
+import { getAppFrameShellClass, useIsPageLayoutMobile } from "@/hooks/usePageLayoutMobile";
 import { useStore } from "@/hooks/useStore";
-import {
-  getAppFrameShellClass,
-  useIsPageLayoutMobile,
-} from "@/hooks/usePageLayoutMobile";
+import { Toaster } from "@/routes/Sonner";
 
 function WelcomeHeaderShell() {
   return (

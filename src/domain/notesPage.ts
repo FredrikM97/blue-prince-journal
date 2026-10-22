@@ -1,6 +1,6 @@
-import type { Note, NoteType, Todo } from "@/lib/types";
-import { matchesSearchQuery, parseSearchQuery } from "@/lib/searchQuery";
 import { mapTodosToVirtualNotes } from "@/domain/todoVirtualNotes";
+import { matchesSearchQuery, parseSearchQuery } from "@/lib/searchQuery";
+import type { Note, NoteType, Todo } from "@/lib/types";
 
 export function buildNoteListItems(notes: Note[], todos: Todo[]): Note[] {
   return [...notes, ...mapTodosToVirtualNotes(todos)].sort((a, b) => b.updatedAt - a.updatedAt);

@@ -1,27 +1,23 @@
-/* eslint-disable react-refresh/only-export-components */
+import { useRouterState } from "@tanstack/react-router";
+import { PanelLeft, PanelRight } from "lucide-react";
+import type { ReactNode } from "react";
 import {
   Children,
   Fragment,
-  useCallback,
   isValidElement,
+  type ReactElement,
+  useCallback,
   useEffect,
   useMemo,
   useState,
-  type ReactElement,
 } from "react";
-import type { ReactNode } from "react";
-import { useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/common/Button";
+import { useOnPageLayoutMobileChange, usePageLayoutMobileState } from "@/hooks/usePageLayoutMobile";
 import {
-  usePageLayoutMobileState,
-  useOnPageLayoutMobileChange,
-} from "@/hooks/usePageLayoutMobile";
-import { PanelLeft, PanelRight } from "lucide-react";
-import {
-  PageLayoutMobileDrawerProvider,
   type MobileDrawerSide,
+  PageLayoutMobileDrawerProvider,
 } from "@/hooks/usePageLayoutMobileDrawer";
-import { resolveMobilePanelLabels, type MobilePanelLabels } from "@/routes/mobilePanelLabels";
+import { type MobilePanelLabels, resolveMobilePanelLabels } from "@/routes/mobilePanelLabels";
 
 type PageLayoutSlotProps = {
   children: ReactNode;
@@ -57,12 +53,18 @@ function PageLayoutRight({ children }: PageLayoutSlotProps) {
   return <Fragment>{children}</Fragment>;
 }
 
-function getColumnLayoutClass(hasLeft: boolean, hasRight: boolean, isPageLayoutMobile: boolean): string {
+function getColumnLayoutClass(
+  hasLeft: boolean,
+  hasRight: boolean,
+  isPageLayoutMobile: boolean,
+): string {
   if (isPageLayoutMobile) {
     return PAGE_LAYOUT_MOBILE_SIZE_CONFIG.stackColumns;
   }
 
-  const mobileStackClass = isPageLayoutMobile ? ` ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.stackColumns}` : "";
+  const mobileStackClass = isPageLayoutMobile
+    ? ` ${PAGE_LAYOUT_MOBILE_SIZE_CONFIG.stackColumns}`
+    : "";
 
   if (hasLeft && hasRight) {
     return `${PAGE_LAYOUT_WIDTH_CLASS_CONTRACT.threeColumns}${mobileStackClass}`;

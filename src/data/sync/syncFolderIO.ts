@@ -1,7 +1,7 @@
-import { buildUniqueFileName } from "../imageNames";
-import type { RoomCategory } from "../rooms/rooms";
 import type { StoredImage } from "@/lib/types";
 import type { AppDataSnapshot } from "../db";
+import { buildUniqueFileName } from "../imageNames";
+import type { RoomCategory } from "../rooms/rooms";
 import type { FsDirectoryHandle as DirHandle } from "./fileAccessTypes";
 
 const MANIFEST_FILE = "manifest.json";

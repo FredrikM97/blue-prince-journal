@@ -9,7 +9,9 @@ const routeSegments = [...rootRouteSource.matchAll(/path:\s*"([^"]+)"/g)]
   .filter((path) => path !== "/");
 
 if (routeSegments.length === 0) {
-  throw new Error("No app route segments found in __root.tsx — refusing to write an empty _redirects file.");
+  throw new Error(
+    "No app route segments found in __root.tsx — refusing to write an empty _redirects file.",
+  );
 }
 
 const lines = [

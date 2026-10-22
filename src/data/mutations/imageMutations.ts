@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid";
+import type { Note, StoredImage, Todo } from "@/lib/types";
 import { db } from "../db";
-import { syncRuntime } from "../sync/sync";
 import { buildUniqueFileName } from "../imageNames";
-import type { StoredImage, Note, Todo } from "@/lib/types";
+import { syncRuntime } from "../sync/sync";
 
 export async function addImage(blob: Blob, name?: string, caption?: string): Promise<StoredImage> {
   const existingImages = await db.images.toArray();

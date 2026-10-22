@@ -1,9 +1,9 @@
-import { TODO_SCOPE_OPTIONS } from "./Constants";
+import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
+import { FilterSection } from "@/components/common/filter/FilterSection";
 import { Stack } from "@/components/common/general/Stack";
 import { SidePanelLeft } from "@/components/common/SidePanel";
-import { FilterSection } from "@/components/common/filter/FilterSection";
-import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
 import { MetaText } from "@/components/common/Typography";
+import { TODO_SCOPE_OPTIONS } from "./Constants";
 
 interface TodoLeftPanelProps {
   total: number;

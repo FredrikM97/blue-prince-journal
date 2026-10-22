@@ -1,24 +1,24 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import type { Note, StoredImage } from "@/lib/types";
-import { Button } from "@/components/common/Button";
-import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
-import { db } from "@/data/db";
-import { addImage } from "@/data/mutations/imageMutations";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ImagePlus } from "lucide-react";
-import { NOTE_TYPE_OPTIONS } from "@/lib/noteMetadata";
-import { InputField } from "@/components/common/input/InputField";
-import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { usePasteImages } from "@/hooks/usePasteImages";
-import { MetaText } from "@/components/common/Typography";
-import { Inline } from "@/components/common/LayoutPrimitives";
+import { Button } from "@/components/common/Button";
+import { DropdownSelect } from "@/components/common/dropdown/DropdownSelect";
 import { Stack } from "@/components/common/general/Stack";
-import { SelectExistingImagesDialog } from "@/components/notes/SelectExistingImagesDialog";
-import { getImageLabel } from "@/lib/imageLabel";
-import { parseTagInput } from "@/domain/notesPage";
-import { NoteMetadataFields } from "@/components/notes/NoteMetadataFields";
+import { InputField } from "@/components/common/input/InputField";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { SuggestionsDropdown } from "@/components/common/suggestions/SuggestionsDropdown";
+import { MetaText } from "@/components/common/Typography";
 import { NoteImageAttachments } from "@/components/notes/NoteImageAttachments";
+import { NoteMetadataFields } from "@/components/notes/NoteMetadataFields";
+import { SelectExistingImagesDialog } from "@/components/notes/SelectExistingImagesDialog";
+import { db } from "@/data/db";
+import { addImage } from "@/data/mutations/imageMutations";
+import { parseTagInput } from "@/domain/notesPage";
+import { usePasteImages } from "@/hooks/usePasteImages";
+import { getImageLabel } from "@/lib/imageLabel";
+import { NOTE_TYPE_OPTIONS } from "@/lib/noteMetadata";
+import type { Note, StoredImage } from "@/lib/types";
 
 const NOTE_STATUS_OPTIONS = [
   { value: "open", label: "open" },

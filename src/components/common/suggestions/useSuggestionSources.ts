@@ -1,9 +1,9 @@
-import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
 import { db } from "@/data/db";
 import { getRoomCatalog } from "@/data/rooms/rooms";
-import type { Note, Todo, GridCell } from "@/lib/types";
 import { buildSuggestionSources, type SuggestionSources } from "@/domain/suggestions";
+import type { GridCell, Note, Todo } from "@/lib/types";
 
 /**
  * Reads room and tag suggestions from the full app state (notes, todos, map rooms, catalog).

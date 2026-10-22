@@ -1,7 +1,8 @@
 // ZIP-first export/import. Keeps images as binary files for better performance.
+
+import type { GridCell, Note, RoomState, SectionDef, StoredImage, Todo } from "@/lib/types";
 import { db } from "../db";
-import type { Note, Todo, StoredImage, RoomState, SectionDef, GridCell } from "@/lib/types";
-import { listCustomRooms, replaceCustomRooms, type RoomCategory } from "../rooms/rooms";
+import { listCustomRooms, type RoomCategory, replaceCustomRooms } from "../rooms/rooms";
 
 type JSZipCtor = typeof import("jszip") extends { default: infer T } ? T : typeof import("jszip");
 

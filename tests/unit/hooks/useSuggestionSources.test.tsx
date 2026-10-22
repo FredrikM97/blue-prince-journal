@@ -51,4 +51,3 @@ describe("useSuggestionSources", () => {
     expect(result.current.tagSuggestions).toEqual(["puzzle", "story", "todo-tag"]);
   });
 });
-

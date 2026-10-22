@@ -7,7 +7,7 @@
  *   </SuggestionsDropdown>
  */
 
-import { useId, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react";
+import { type KeyboardEvent as ReactKeyboardEvent, type RefObject, useId } from "react";
 import { MarkdownEditor } from "@/components/common/markdown/MarkdownEditor";
 import { MetaText } from "@/components/common/Typography";
 
@@ -34,7 +34,8 @@ function getInputClass({
 }
 
 function getLabelClass({ size, hideLabel }: { size: InputFieldSize; hideLabel: boolean }) {
-  let className = "mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
+  let className =
+    "mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
   if (size === "sm") className = `${className} text-[11px]`;
   if (size === "lg") className = `${className} text-xs`;
   if (hideLabel) className = `${className} sr-only`;

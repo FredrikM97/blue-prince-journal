@@ -1,10 +1,10 @@
-import { GRID_COLS, GRID_ROWS, cellId } from "@/data/rooms/rooms";
-import { Grid } from "@/components/common/LayoutPrimitives";
 import { Stack } from "@/components/common/general/Stack";
+import { Grid } from "@/components/common/LayoutPrimitives";
 import { Text } from "@/components/common/Typography";
-import { MapCellButton } from "./MapCellButton";
+import { cellId, GRID_COLS, GRID_ROWS } from "@/data/rooms/rooms";
 import { useIsPageLayoutMobile } from "@/hooks/usePageLayoutMobile";
 import type { GridCell } from "@/lib/types";
+import { MapCellButton } from "./MapCellButton";
 
 interface MapMiddlePanelProps {
   byId: Map<string, GridCell>;
@@ -48,7 +48,11 @@ export function MapMiddlePanel({
             }
 
             let cellBody = (
-              <Text as="span" className="text-[9px] opacity-50 sm:text-[10px] max-[40rem]:text-[9px]" size="xs">
+              <Text
+                as="span"
+                className="text-[9px] opacity-50 sm:text-[10px] max-[40rem]:text-[9px]"
+                size="xs"
+              >
                 {coordLabel(row, col)}
               </Text>
             );

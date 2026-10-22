@@ -1,10 +1,5 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PenLine, Save } from "lucide-react";
-import { useStore } from "@/hooks/useStore";
-import { hideNote, saveNote, removeNote, unhideNote } from "@/data/mutations/noteMutations";
-import { removeTodo } from "@/data/mutations/todoMutations";
-import type { Note, NoteType, Todo } from "@/lib/types";
-import { PageLayout } from "@/components/common/PageLayout";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
 import {
   Dialog,
@@ -13,21 +8,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/common/Dialog";
+import { Stack } from "@/components/common/general/Stack";
+import { Inline } from "@/components/common/LayoutPrimitives";
+import { PageLayout } from "@/components/common/PageLayout";
+import { SidePanelLeft, SidePanelRight } from "@/components/common/SidePanel";
+import { MetaText } from "@/components/common/Typography";
+import { buildCapturePanelKey } from "@/components/notes/capturePanelKey";
+import { useNotesPageUI } from "@/components/notes/hooks/useNotesPageUI";
+import { TodoPreviewDialog } from "@/components/todos/TodoPreviewDialog";
+import { TodoRightPanel } from "@/components/todos/TodoRightPanel";
+import { hideNote, removeNote, saveNote, unhideNote } from "@/data/mutations/noteMutations";
+import { removeTodo } from "@/data/mutations/todoMutations";
+import { useAppData } from "@/hooks/useAppData";
+import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
+import { useStore } from "@/hooks/useStore";
+import type { Note, NoteType, Todo } from "@/lib/types";
+import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
 import { NotesCreatePanel } from "./NotesCreatePanel";
 import { NotesEditorPanel } from "./NotesEditorPanel";
 import { NotesFilterPanel } from "./NotesFilterPanel";
 import { NotesView } from "./NotesView";
-import { useNotesPageUI } from "@/components/notes/hooks/useNotesPageUI";
-import { TodoRightPanel } from "@/components/todos/TodoRightPanel";
-import { TodoPreviewDialog } from "@/components/todos/TodoPreviewDialog";
-import { NotePreviewContent, NotePreviewDialog } from "./NotePreviewDialog";
-import { SidePanelLeft, SidePanelRight } from "@/components/common/SidePanel";
-import { MetaText } from "@/components/common/Typography";
-import { Inline } from "@/components/common/LayoutPrimitives";
-import { Stack } from "@/components/common/general/Stack";
-import { useAppData } from "@/hooks/useAppData";
-import { buildCapturePanelKey } from "@/components/notes/capturePanelKey";
-import { usePageLayoutMobileDrawerProps } from "@/hooks/usePageLayoutMobileDrawer";
 
 type ExpandedPreviewState =
   | { kind: "none" }
@@ -202,7 +202,8 @@ export function NotesPage({
       const target = e.target as HTMLElement | null;
       const typing =
         target &&
-        (/input|textarea|select/i.test(target.tagName) || (target as HTMLElement).isContentEditable);
+        (/input|textarea|select/i.test(target.tagName) ||
+          (target as HTMLElement).isContentEditable);
 
       // Ctrl+S — save active note (works from any context)
       if (e.ctrlKey && !e.metaKey && !e.altKey && e.code === "KeyS") {
@@ -217,9 +218,7 @@ export function NotesPage({
       if (e.key === "ArrowUp" || e.key === "ArrowDown") {
         if (filtered.length === 0) return;
         e.preventDefault();
-        const activeIndex = activeNote
-          ? filtered.findIndex((n) => n.id === activeNote.id)
-          : -1;
+        const activeIndex = activeNote ? filtered.findIndex((n) => n.id === activeNote.id) : -1;
         const offset = e.key === "ArrowUp" ? -1 : 1;
         const next =
           activeIndex < 0
@@ -267,23 +266,23 @@ export function NotesPage({
     );
   }
 
-    if (captureOpen) {
-      const capturePanelKey = buildCapturePanelKey({
-        captureDefault,
-        capturePrefill,
-        captureEditNoteId,
-        captureEditTodoId,
-      });
+  if (captureOpen) {
+    const capturePanelKey = buildCapturePanelKey({
+      captureDefault,
+      capturePrefill,
+      captureEditNoteId,
+      captureEditTodoId,
+    });
 
-      rightPanelContent = (
-        <NotesCreatePanel
-          key={capturePanelKey}
-          defaultNoteType={filterType}
-          onEditSaved={openPreviewAfterCreate}
-          onTodoEditSaved={handleTodoEditSaved}
-        />
-      );
-    }
+    rightPanelContent = (
+      <NotesCreatePanel
+        key={capturePanelKey}
+        defaultNoteType={filterType}
+        onEditSaved={openPreviewAfterCreate}
+        onTodoEditSaved={handleTodoEditSaved}
+      />
+    );
+  }
 
   let deleteDescription = "Delete this item?";
   let deleteTitle = "Delete item";
@@ -336,7 +335,9 @@ export function NotesPage({
     activeNoteId: activeNote?.id ?? null,
     panelMode: uiState.panelMode,
   });
-  const mobileDrawerProps = usePageLayoutMobileDrawerProps({ mobileDrawerOpen: mobileDrawerOpenSignal });
+  const mobileDrawerProps = usePageLayoutMobileDrawerProps({
+    mobileDrawerOpen: mobileDrawerOpenSignal,
+  });
 
   return (
     <>

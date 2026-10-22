@@ -1,17 +1,9 @@
 import { nanoid } from "nanoid";
+import type { Note, NoteStatus, NoteType, Priority, RunScope, Todo, TodoScope } from "@/lib/types";
 import { db } from "../db";
 import { syncRuntime } from "../sync/sync";
 import { addImage } from "./imageMutations";
 import { parseCapture } from "./parseCapture";
-import type {
-  Note,
-  Todo,
-  NoteType,
-  NoteStatus,
-  TodoScope,
-  RunScope,
-  Priority,
-} from "@/lib/types";
 
 export async function createFromCapture(
   raw: string,

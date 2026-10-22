@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { NoteType, Note, Todo, Priority } from "@/lib/types";
+import type { Note, NoteType, Priority, Todo } from "@/lib/types";
 
 interface UIState {
   loaded: boolean;

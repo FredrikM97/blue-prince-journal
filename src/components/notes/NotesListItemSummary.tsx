@@ -1,10 +1,10 @@
-import { memo } from "react";
-import type { Note } from "@/lib/types";
 import { Lightbulb } from "lucide-react";
-import { NOTE_TYPE_META, relTime } from "@/lib/noteMetadata";
+import { memo } from "react";
 import { Chip } from "@/components/common/Chip";
-import { Text } from "@/components/common/Typography";
 import { Stack } from "@/components/common/general/Stack";
+import { Text } from "@/components/common/Typography";
+import { NOTE_TYPE_META, relTime } from "@/lib/noteMetadata";
+import type { Note } from "@/lib/types";
 
 const TYPE_ICON_VARIANT: Record<
   Note["type"],
@@ -41,10 +41,18 @@ export const NotesListItemSummary = memo(function NotesListItemSummary({ note }:
         </Text>
         <Stack gap="0" className="mt-0.5 flex min-w-0 flex-col items-start gap-1">
           <Stack gap="0" className="flex w-full min-w-0 flex-wrap items-center gap-1.5">
-            <Stack as="span" gap="0" className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">
+            <Stack
+              as="span"
+              gap="0"
+              className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground"
+            >
               {relTime(note.updatedAt)}
             </Stack>
-            <Stack as="span" gap="0" className="inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+            <Stack
+              as="span"
+              gap="0"
+              className="inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap"
+            >
               {note.date && (
                 <Stack
                   as="span"

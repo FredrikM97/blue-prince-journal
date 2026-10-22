@@ -1,5 +1,5 @@
-import { OPERATORS, WEDGE_ORDER, type OpColor, type RingKey } from "./types";
 import { buildSectorPathByRadii } from "./dartboardGeometry";
+import { OPERATORS, type OpColor, type RingKey, WEDGE_ORDER } from "./types";
 
 type Props = {
   ring: RingKey;

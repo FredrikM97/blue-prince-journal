@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { syncRuntime } from "@/data/sync/sync";
 import {
   connectSteamImportFolder,
   disconnectSteamImportFolder,
@@ -9,6 +8,7 @@ import {
   restoreSteamImportFolder,
   syncConnectedSteamFolder,
 } from "@/data/import/steamImport";
+import { syncRuntime } from "@/data/sync/sync";
 import type { StoredImage } from "@/lib/types";
 
 type SyncResult = {
@@ -77,7 +77,10 @@ export function useSteamFolderSync({
       notifyMissingConnection?: boolean;
     } = {}): Promise<SyncResult | null> => {
       try {
-        const result = await syncConnectedSteamFolder(addImage, force ? { force: true } : undefined);
+        const result = await syncConnectedSteamFolder(
+          addImage,
+          force ? { force: true } : undefined,
+        );
         if (result === null) {
           if (notifyMissingConnection && !silent) {
             toast.error("No Steam folder connected");
@@ -90,7 +93,9 @@ export function useSteamFolderSync({
         setLastSkipped(result.skipped);
 
         if (result.imported > 0) {
-          toast.success(`Imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`);
+          toast.success(
+            `Imported ${result.imported} screenshot${result.imported === 1 ? "" : "s"}`,
+          );
           if (flushSyncRuntimeOnImport) {
             void syncRuntime.saveNow();
           }
@@ -175,7 +180,9 @@ export function useSteamFolderSync({
       const handle = await connectSteamImportFolder();
       if (!handle) return;
       updateFolderName(handle.name);
-      toast.success(connectSuccessMessage?.(handle.name) ?? `Connected Steam folder: ${handle.name}`);
+      toast.success(
+        connectSuccessMessage?.(handle.name) ?? `Connected Steam folder: ${handle.name}`,
+      );
       if (syncOnConnect) {
         await runSync();
       }

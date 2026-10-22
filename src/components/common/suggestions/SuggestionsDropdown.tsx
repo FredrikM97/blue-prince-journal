@@ -20,9 +20,9 @@
  *   getActiveToken, buildSuggestions, applySuggestionToValue
  */
 
-import { useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { useSuggestionSources } from "./useSuggestionSources";
+import { type CSSProperties, type ReactNode, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
+import { useSuggestionSources } from "./useSuggestionSources";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -250,7 +250,7 @@ function useDropdownStyle({
   tokenStart: number;
   alignMode?: DropdownAlignMode;
 }): CSSProperties {
-  // eslint-disable-next-line react-hooks/refs -- intentional: detects element type for layout, ref is always populated before this path is reached
+  // Intentional: detects element type for layout; the ref is populated before this path is reached.
   const isMultiline = inputRef.current instanceof HTMLTextAreaElement;
 
   const tokenAnchor = useMemo(() => {
@@ -260,7 +260,7 @@ function useDropdownStyle({
   }, [tokenStart, value]);
 
   const tokenAnchorPx = useMemo(
-    // eslint-disable-next-line react-hooks/refs -- intentional: DOM measurement in memo, ref is populated before suggestions are shown
+    // Intentional: this measures the DOM after suggestions are shown.
     () => measureTokenAnchorPx(inputRef.current, value, tokenStart),
 
     [inputRef, tokenStart, value],
@@ -427,12 +427,7 @@ function SuggestionItems({
     "absolute z-40 max-h-44 min-w-44 max-w-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md";
   if (className) dropdownClassName = `${dropdownClassName} ${className}`;
   return (
-    <div
-      className={dropdownClassName}
-      role="listbox"
-      aria-label="Token suggestions"
-      style={style}
-    >
+    <div className={dropdownClassName} role="listbox" aria-label="Token suggestions" style={style}>
       {suggestions.map((suggestion, index) => {
         let displayValue = suggestion.value;
         if (displayMode === "plain") {

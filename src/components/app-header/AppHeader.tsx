@@ -1,15 +1,15 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Plus, FolderSync } from "lucide-react";
+import { FolderSync, Plus } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { useStore } from "@/hooks/useStore";
-import { Button } from "@/components/common/Button";
 import { ThemeToggle } from "@/components/app-header/ThemeToggle";
+import { Button } from "@/components/common/Button";
 import { Stack } from "@/components/common/general/Stack";
 import { KeyboardKey } from "@/components/common/KeyboardKey";
 import { Text } from "@/components/common/Typography";
+import { useStore } from "@/hooks/useStore";
+import { HeaderMenu } from "./HeaderMenu";
 import { HeaderNav } from "./HeaderNav";
 import { HeaderSearch } from "./HeaderSearch";
-import { HeaderMenu } from "./HeaderMenu";
 
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;

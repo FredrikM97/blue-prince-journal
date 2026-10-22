@@ -20,7 +20,9 @@ export function ModifierZoneTabs({
   const triggerText = size === "compact" ? "text-[11px]" : "text-xs";
 
   return (
-    <div className={`grid ${listHeight} grid-cols-3 items-stretch justify-center rounded-md bg-muted p-0.5`}>
+    <div
+      className={`grid ${listHeight} grid-cols-3 items-stretch justify-center rounded-md bg-muted p-0.5`}
+    >
       {ZONE_OPTIONS.map((option) => {
         const isActive = value === option.zone;
         return (

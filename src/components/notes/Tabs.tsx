@@ -1,5 +1,5 @@
-import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * as React from "react";
 
 function joinClasses(...values: Array<string | undefined | false>) {
   return values.filter(Boolean).join(" ");

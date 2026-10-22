@@ -1,9 +1,9 @@
-import type { NoteType } from "@/lib/types";
-import { NOTE_TYPE_META, NOTE_TYPE_ORDER } from "@/lib/noteMetadata";
 import { FilterButtonGroup } from "@/components/common/filter/FilterButtonGroup";
 import { FilterSection } from "@/components/common/filter/FilterSection";
 import { GroupedRoomFilterSection } from "@/components/common/filter/GroupedRoomFilterSection";
 import { Stack } from "@/components/common/general/Stack";
+import { NOTE_TYPE_META, NOTE_TYPE_ORDER } from "@/lib/noteMetadata";
+import type { NoteType } from "@/lib/types";
 
 const TYPE_OPTIONS: { value: NoteType; label: string }[] = NOTE_TYPE_ORDER.map((value) => ({
   value,
@@ -41,8 +41,18 @@ export function NotesFilterPanel({
     setTagFilter: (value: string | null) => void;
   };
 }) {
-  const { filterType, typeFilter, statusFilter, showHiddenFilter, roomFilters, tagFilter, rooms, tags } = filters;
-  const { setTypeFilter, setStatusFilter, setShowHiddenFilter, setRoomFilters, setTagFilter } = actions;
+  const {
+    filterType,
+    typeFilter,
+    statusFilter,
+    showHiddenFilter,
+    roomFilters,
+    tagFilter,
+    rooms,
+    tags,
+  } = filters;
+  const { setTypeFilter, setStatusFilter, setShowHiddenFilter, setRoomFilters, setTagFilter } =
+    actions;
 
   const typeOptions = TYPE_OPTIONS;
   const statusOptions = STATUS_OPTIONS;

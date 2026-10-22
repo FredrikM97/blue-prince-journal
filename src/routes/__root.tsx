@@ -10,7 +10,9 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { AppHeader } from "@/components/app-header/AppHeader";
+import { DartboardPage } from "@/components/dartboard/DartboardPage";
 import { GraphPage } from "@/components/graph/GraphPage";
 import { ImagesPage } from "@/components/images/ImagesPage";
 import { MapPage } from "@/components/map/MapPage";
@@ -18,15 +20,10 @@ import { NotesPage } from "@/components/notes/NotesPage";
 import { SettingsPage } from "@/components/settings/SettingsPage";
 import { TodosPage } from "@/components/todos/TodosPage";
 import { WelcomeView } from "@/components/welcome/WelcomeView";
-import { Toaster } from "@/routes/Sonner";
-import { toast } from "sonner";
 import { AppDataProvider } from "@/hooks/useAppData";
 import { useAppFrameInit } from "@/hooks/useAppFrameInit";
-import {
-  getAppFrameShellClass,
-  useIsPageLayoutMobile,
-} from "@/hooks/usePageLayoutMobile";
-import { DartboardPage } from "@/components/dartboard/DartboardPage";
+import { getAppFrameShellClass, useIsPageLayoutMobile } from "@/hooks/usePageLayoutMobile";
+import { Toaster } from "@/routes/Sonner";
 
 type RouterContext = {
   queryClient: QueryClient;
@@ -54,7 +51,10 @@ function AppFrame({ children }: { children: React.ReactNode }) {
       <AppHeader />
       <div className={appContentClass}>
         {hasMountedImagesRoute && (
-          <div className={isImagesRouteActive ? "contents" : "hidden"} aria-hidden={!isImagesRouteActive}>
+          <div
+            className={isImagesRouteActive ? "contents" : "hidden"}
+            aria-hidden={!isImagesRouteActive}
+          >
             <ImagesPage />
           </div>
         )}
@@ -145,9 +145,7 @@ export function ErrorView({ error, reset }: { error: Error; reset: () => void })
 }
 
 export function NotesIndexView() {
-  return (
-    <NotesPage title="Notes" emptyHint="No notes yet. Press N anywhere to add one." />
-  );
+  return <NotesPage title="Notes" emptyHint="No notes yet. Press N anywhere to add one." />;
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
@@ -171,7 +169,10 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
       },
       { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
-      { property: "og:title", content: "Blue Prince Journal — Blue Prince Notes Taking App & Companion" },
+      {
+        property: "og:title",
+        content: "Blue Prince Journal — Blue Prince Notes Taking App & Companion",
+      },
       {
         property: "og:description",
         content:
@@ -179,7 +180,10 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
       },
       { property: "og:url", content: "https://blue-prince-journal.pages.dev/" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Blue Prince Journal — Blue Prince Notes Taking App & Companion" },
+      {
+        name: "twitter:title",
+        content: "Blue Prince Journal — Blue Prince Notes Taking App & Companion",
+      },
       {
         name: "twitter:description",
         content:
@@ -226,7 +230,10 @@ const settingsRoute = createRoute({
   head: () => ({
     meta: [
       { title: "Settings - Blue Prince Journal" },
-      { name: "description", content: "Configure sync, backups and preferences for your Blue Prince Journal." },
+      {
+        name: "description",
+        content: "Configure sync, backups and preferences for your Blue Prince Journal.",
+      },
     ],
   }),
 });
@@ -240,7 +247,8 @@ const todosRoute = createRoute({
       { title: "Todos - Blue Prince Journal" },
       {
         name: "description",
-        content: "Track open, in-progress and completed Blue Prince todos, tasks and objectives by room.",
+        content:
+          "Track open, in-progress and completed Blue Prince todos, tasks and objectives by room.",
       },
     ],
   }),
@@ -270,7 +278,8 @@ const graphRoute = createRoute({
       { title: "Graph - Blue Prince Journal" },
       {
         name: "description",
-        content: "Visualize connections between Blue Prince clues, codes, theories, rooms and tags in an interactive graph.",
+        content:
+          "Visualize connections between Blue Prince clues, codes, theories, rooms and tags in an interactive graph.",
       },
     ],
   }),
@@ -285,7 +294,8 @@ const imagesRoute = createRoute({
       { title: "Images - Blue Prince Journal" },
       {
         name: "description",
-        content: "Browse and manage screenshots and reference images attached to your Blue Prince notes.",
+        content:
+          "Browse and manage screenshots and reference images attached to your Blue Prince notes.",
       },
     ],
   }),
@@ -300,7 +310,8 @@ const dartboardRoute = createRoute({
       { title: "Dartboard - Blue Prince Journal" },
       {
         name: "description",
-        content: "Solve the Blue Prince dartboard puzzle with an interactive operator and modifier calculator.",
+        content:
+          "Solve the Blue Prince dartboard puzzle with an interactive operator and modifier calculator.",
       },
     ],
   }),

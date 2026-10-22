@@ -1,14 +1,15 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { syncRuntime } from "@/data/sync/sync";
 import { db, ensureBootSeed } from "@/data/db";
 import { cleanupOrphanedImageRefs } from "@/data/mutations/imageMutations";
+import { syncRuntime } from "@/data/sync/sync";
 import { useStore } from "@/hooks/useStore";
 
 export function useAppFrameInit() {
   const setLoaded = useStore((s) => s.setLoaded);
   const setSyncFolderName = useStore((s) => s.setSyncFolderName);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Initialization runs once when the frame mounts.
   useEffect(() => {
     async function init() {
       try {
@@ -29,6 +30,5 @@ export function useAppFrameInit() {
     }
 
     void init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

@@ -1,5 +1,5 @@
-import { WEDGE_ORDER } from "./types";
 import { buildAreaPathByKind, getNumberLabelRadius, polarToCartesian } from "./dartboardGeometry";
+import { WEDGE_ORDER } from "./types";
 
 const NUMBER_LABEL_STYLE = { letterSpacing: "0.5px" } as const;
 

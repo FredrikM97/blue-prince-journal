@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
 import { CircleHelp, Settings } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/common/Button";
-import { PageLayout } from "@/components/common/PageLayout";
 import {
   Dialog,
   DialogContent,
@@ -9,15 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/common/Dialog";
-import { toast } from "sonner";
-import { ResultPanel } from "./ResultPanel";
+import { PageLayout } from "@/components/common/PageLayout";
 import { compute } from "./compute";
 import { DartboardCanvas } from "./DartboardCanvas";
 import { DartboardColorToolPalette } from "./DartboardColorToolPalette";
 import { DartboardPaintModeRow } from "./DartboardPaintModeRow";
-import { ModifierPanel } from "./ModifierPanel";
-import { ModifierZoneTabs } from "./ModifierZoneTabs";
-import { MODIFIER_PRESETS } from "./modifiers";
 import {
   applyClearSelection,
   applyPaintSelection,
@@ -26,16 +22,20 @@ import {
   type PaintMode,
   type SelectedTarget,
 } from "./dartboardState";
+import { ModifierPanel } from "./ModifierPanel";
+import { ModifierZoneTabs } from "./ModifierZoneTabs";
+import { MODIFIER_PRESETS } from "./modifiers";
+import { ResultPanel } from "./ResultPanel";
 import {
-  OPERATORS,
-  WEDGE_COUNT,
+  type BoardState,
   emptyBoard,
   emptyModifierState,
-  type BoardState,
   type ModifierState,
   type ModifierZone,
+  OPERATORS,
   type OpColor,
   type RingKey,
+  WEDGE_COUNT,
 } from "./types";
 
 export function DartboardPage() {
@@ -52,14 +52,19 @@ export function DartboardPage() {
   const [outerModifierColorByWedge, setOuterModifierColorByWedge] = useState<(OpColor | null)[]>(
     () => Array(WEDGE_COUNT).fill(null),
   );
-  const [modifierColorByZone, setModifierColorByZone] = useState<Record<ModifierZone, OpColor | null>>({
+  const [modifierColorByZone, setModifierColorByZone] = useState<
+    Record<ModifierZone, OpColor | null>
+  >({
     center: null,
     bullseye: null,
     outer: null,
   });
   const [modifiers, setModifiers] = useState<ModifierState>(() => emptyModifierState());
 
-  const resultState = useMemo(() => compute(board, { advanced, modifiers }), [advanced, board, modifiers]);
+  const resultState = useMemo(
+    () => compute(board, { advanced, modifiers }),
+    [advanced, board, modifiers],
+  );
   const hasActiveColor = activeColor !== null;
   const activeBullseyeModifierGlyph = useMemo(() => {
     const activeId = [...modifiers.bullseye][0];
@@ -156,34 +161,35 @@ export function DartboardPage() {
     });
   }
 
-
   function getModifierPanelState(zone: ModifierZone) {
     if (zone === "outer") {
       return {
         active: new Set(activeOuterModifierId ? [activeOuterModifierId] : []),
-        accentSwatch: modifierColorByZone.outer ? OPERATORS[modifierColorByZone.outer].swatch : null,
+        accentSwatch: modifierColorByZone.outer
+          ? OPERATORS[modifierColorByZone.outer].swatch
+          : null,
       };
     }
     if (zone === "center") {
       return {
         active: modifiers.center,
-        accentSwatch: modifierColorByZone.center ? OPERATORS[modifierColorByZone.center].swatch : null,
+        accentSwatch: modifierColorByZone.center
+          ? OPERATORS[modifierColorByZone.center].swatch
+          : null,
       };
     }
     return {
       active: modifiers.bullseye,
-      accentSwatch: modifierColorByZone.bullseye ? OPERATORS[modifierColorByZone.bullseye].swatch : null,
+      accentSwatch: modifierColorByZone.bullseye
+        ? OPERATORS[modifierColorByZone.bullseye].swatch
+        : null,
     };
   }
 
   const activeModifierPanel = getModifierPanelState(activeModifierZone);
   const activeModifierGuideItems = MODIFIER_PRESETS[modifierGuideZone];
   const activeModifierGuideTitle =
-    modifierGuideZone === "outer"
-      ? "Outer"
-      : modifierGuideZone === "center"
-        ? "Inner"
-        : "Bullseye";
+    modifierGuideZone === "outer" ? "Outer" : modifierGuideZone === "center" ? "Inner" : "Bullseye";
 
   return (
     <PageLayout
@@ -219,7 +225,9 @@ export function DartboardPage() {
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="font-serif text-lg text-foreground">Controls</h2>
-                <p className="text-xs text-muted-foreground">Select a zone, then paint it with an operator.</p>
+                <p className="text-xs text-muted-foreground">
+                  Select a zone, then paint it with an operator.
+                </p>
               </div>
               <Button
                 variant="ghost"
@@ -242,13 +250,14 @@ export function DartboardPage() {
               />
 
               <DartboardPaintModeRow paintMode={paintMode} onSelectMode={setPaintMode} />
-
             </div>
           </div>
 
           <div className="pt-3">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">Modifiers</div>
+              <div className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Modifiers
+              </div>
               <Button
                 variant="ghost"
                 size="icon-h2"
@@ -295,11 +304,12 @@ export function DartboardPage() {
                     <span className="font-semibold">Bullseye:</span> center-most modifier slot.
                   </li>
                   <li>
-                    <span className="font-semibold">Inner:</span> modifier applied in the inner ring.
+                    <span className="font-semibold">Inner:</span> modifier applied in the inner
+                    ring.
                   </li>
                   <li>
-                    <span className="font-semibold">Outer:</span> assign a modifier, then tap outer ring wedges
-                    on the board to place/remove it.
+                    <span className="font-semibold">Outer:</span> assign a modifier, then tap outer
+                    ring wedges on the board to place/remove it.
                   </li>
                 </ul>
               </section>
@@ -308,21 +318,29 @@ export function DartboardPage() {
                 <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Select modifiers
                 </div>
-                <ModifierZoneTabs value={modifierGuideZone} onChange={setModifierGuideZone} size="compact" />
+                <ModifierZoneTabs
+                  value={modifierGuideZone}
+                  onChange={setModifierGuideZone}
+                  size="compact"
+                />
                 <div className="mt-2 px-3 pb-3 pt-2">
                   <div className="space-y-2">
-                  {activeModifierGuideItems.map((modifier) => (
-                    <div
-                      key={modifier.id}
-                      className="rounded-md border border-border bg-muted/30 px-3 py-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-semibold text-foreground">{modifier.glyph}</span>
-                        <span className="text-sm font-semibold text-foreground">{modifier.label}</span>
+                    {activeModifierGuideItems.map((modifier) => (
+                      <div
+                        key={modifier.id}
+                        className="rounded-md border border-border bg-muted/30 px-3 py-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-semibold text-foreground">
+                            {modifier.glyph}
+                          </span>
+                          <span className="text-sm font-semibold text-foreground">
+                            {modifier.label}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">{modifier.note}</p>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">{modifier.note}</p>
-                    </div>
-                  ))}
+                    ))}
                   </div>
                 </div>
               </section>

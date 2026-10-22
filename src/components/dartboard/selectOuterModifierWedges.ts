@@ -1,8 +1,12 @@
+import type { OuterModifierWedgeViewModel } from "./DartboardOuterModifierRing";
+import {
+  buildAreaPathByKind,
+  getOuterModifierLabelRadius,
+  polarToCartesian,
+} from "./dartboardGeometry";
+import type { SelectedTarget } from "./dartboardState";
 import { MODIFIER_PRESETS } from "./modifiers";
 import { WEDGE_ORDER } from "./types";
-import { buildAreaPathByKind, getOuterModifierLabelRadius, polarToCartesian } from "./dartboardGeometry";
-import type { SelectedTarget } from "./dartboardState";
-import type { OuterModifierWedgeViewModel } from "./DartboardOuterModifierRing";
 
 const DEFAULT_OUTER_MODIFIER_FILL = "oklch(0.20 0.02 260)";
 
@@ -18,7 +22,7 @@ export function selectOuterModifierWedges(params: {
   return WEDGE_ORDER.map((wedgeNumber, index) => {
     const assignedId = outerModifierAssignments[index] ?? null;
     const modifier = assignedId
-      ? MODIFIER_PRESETS.outer.find((item) => item.id === assignedId) ?? null
+      ? (MODIFIER_PRESETS.outer.find((item) => item.id === assignedId) ?? null)
       : null;
     const a0 = startBase + index * wedgeAngle;
     const a1 = a0 + wedgeAngle;

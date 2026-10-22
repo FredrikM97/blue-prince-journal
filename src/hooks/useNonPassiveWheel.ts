@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { type RefObject, useEffect, useRef } from "react";
 
 type WheelEventLike = Pick<WheelEvent, "clientX" | "clientY" | "ctrlKey" | "deltaY" | "deltaMode">;
 

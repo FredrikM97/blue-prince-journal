@@ -1,11 +1,4 @@
 import { useCallback } from "react";
-import { useStore } from "@/hooks/useStore";
-import { toggleTodoStatus, removeTodo } from "@/data/mutations/todoMutations";
-import type { Todo } from "@/lib/types";
-import { PageLayout } from "@/components/common/PageLayout";
-import { TodoLeftPanel } from "./TodoLeftPanel";
-import { TodoMiddlePanel } from "./TodoMiddlePanel";
-import { TodoPreviewDialog } from "./TodoPreviewDialog";
 import { Button } from "@/components/common/Button";
 import {
   Dialog,
@@ -15,8 +8,15 @@ import {
   DialogTitle,
 } from "@/components/common/Dialog";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { useAppData } from "@/hooks/useAppData";
+import { PageLayout } from "@/components/common/PageLayout";
 import { useTodosPageUI } from "@/components/todos/hooks/useTodosPageUI";
+import { removeTodo, toggleTodoStatus } from "@/data/mutations/todoMutations";
+import { useAppData } from "@/hooks/useAppData";
+import { useStore } from "@/hooks/useStore";
+import type { Todo } from "@/lib/types";
+import { TodoLeftPanel } from "./TodoLeftPanel";
+import { TodoMiddlePanel } from "./TodoMiddlePanel";
+import { TodoPreviewDialog } from "./TodoPreviewDialog";
 
 export function TodosPage() {
   const { todos, todosLoading: isLoading } = useAppData();

@@ -1,11 +1,17 @@
-import type { ReactNode } from "react";
 import { X } from "lucide-react";
+import type { ReactNode } from "react";
 import { Button } from "@/components/common/Button";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import type { DialogVariant } from "@/components/common/Dialog";
-import { MetaText } from "@/components/common/Typography";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/common/Dialog";
 import { Stack } from "@/components/common/general/Stack";
 import { TitleActionHeader } from "@/components/common/TitleActionHeader";
+import { MetaText } from "@/components/common/Typography";
 
 export function PreviewDialog({
   open,

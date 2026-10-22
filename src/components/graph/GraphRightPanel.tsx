@@ -1,11 +1,11 @@
-import { Chip } from "@/components/common/Chip";
-import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
-import { Heading, MetaText, Text } from "@/components/common/Typography";
+import { Chip } from "@/components/common/Chip";
 import { Stack } from "@/components/common/general/Stack";
 import { Inline } from "@/components/common/LayoutPrimitives";
+import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { MetaRow, PreviewSection } from "@/components/common/preview/PreviewContent";
 import { SidePanelRight } from "@/components/common/SidePanel";
+import { Heading, MetaText, Text } from "@/components/common/Typography";
 import type { Note } from "@/lib/types";
 
 type GraphPreviewContentProps = {

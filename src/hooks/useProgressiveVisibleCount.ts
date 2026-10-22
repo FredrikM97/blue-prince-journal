@@ -39,12 +39,16 @@ export function useProgressiveVisibleCount({
 
     const hasIdleCallback =
       typeof window !== "undefined" &&
-      typeof (window as Window & typeof globalThis & { requestIdleCallback?: unknown }).requestIdleCallback === "function";
+      typeof (window as Window & typeof globalThis & { requestIdleCallback?: unknown })
+        .requestIdleCallback === "function";
 
     if (hasIdleCallback) {
-      idleId = (window as Window & typeof globalThis & {
-        requestIdleCallback: (cb: IdleRequestCallback, opts?: IdleRequestOptions) => number;
-      }).requestIdleCallback(
+      idleId = (
+        window as Window &
+          typeof globalThis & {
+            requestIdleCallback: (cb: IdleRequestCallback, opts?: IdleRequestOptions) => number;
+          }
+      ).requestIdleCallback(
         () => {
           scheduleNext();
         },
@@ -59,11 +63,15 @@ export function useProgressiveVisibleCount({
       if (
         idleId !== null &&
         typeof window !== "undefined" &&
-        typeof (window as Window & typeof globalThis & { cancelIdleCallback?: unknown }).cancelIdleCallback === "function"
+        typeof (window as Window & typeof globalThis & { cancelIdleCallback?: unknown })
+          .cancelIdleCallback === "function"
       ) {
-        (window as Window & typeof globalThis & {
-          cancelIdleCallback: (id: number) => void;
-        }).cancelIdleCallback(idleId);
+        (
+          window as Window &
+            typeof globalThis & {
+              cancelIdleCallback: (id: number) => void;
+            }
+        ).cancelIdleCallback(idleId);
       }
       if (timeoutId !== null) {
         clearTimeout(timeoutId);

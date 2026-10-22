@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useStore } from "@/hooks/useStore";
 import type { Note, Todo } from "@/lib/types";
 import { buildNote, buildTodo } from "../../fixtures/domainBuilders";
-import { useStore } from "@/hooks/useStore";
 
 // ---------------------------------------------------------------------------
 // Mocks

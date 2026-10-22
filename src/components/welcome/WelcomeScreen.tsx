@@ -1,12 +1,10 @@
-import { useRef } from "react";
 import { FolderOpen, Sparkles, Upload, Waypoints } from "lucide-react";
-import { Heading, Text } from "@/components/common/Typography";
-import { CenteredContent } from "@/components/common/LayoutPrimitives";
+import { useRef } from "react";
 import { Button } from "@/components/common/Button";
 import { Stack } from "@/components/common/general/Stack";
-import {
-  SyncConflictDialog,
-} from "@/components/common/SyncConflictDialog";
+import { CenteredContent } from "@/components/common/LayoutPrimitives";
+import { SyncConflictDialog } from "@/components/common/SyncConflictDialog";
+import { Heading, Text } from "@/components/common/Typography";
 import { useWelcomeScreenActions } from "./useWelcomeScreenActions";
 
 function WelcomeCard({

@@ -1,4 +1,4 @@
-import { getMeta, setMeta, deleteMeta, readSnapshot, applySnapshot, clearAllData } from "../db";
+import { applySnapshot, clearAllData, deleteMeta, getMeta, readSnapshot, setMeta } from "../db";
 import { clearCustomRooms } from "../rooms/rooms";
 import type { FsDirectoryHandle as DirHandle } from "./fileAccessTypes";
 import { readFolder, writeFolder } from "./syncFolderIO";

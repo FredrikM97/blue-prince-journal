@@ -1,9 +1,9 @@
-import { useState } from "react";
 import { PenLine } from "lucide-react";
-import type { Todo } from "@/lib/types";
+import { useState } from "react";
 import { Button } from "@/components/common/Button";
-import { SidePanelRight } from "@/components/common/SidePanel";
 import { Stack } from "@/components/common/general/Stack";
+import { SidePanelRight } from "@/components/common/SidePanel";
+import type { Todo } from "@/lib/types";
 import { TodoPreviewContent, TodoPreviewDialog } from "./TodoPreviewDialog";
 
 export function TodoRightPanel({

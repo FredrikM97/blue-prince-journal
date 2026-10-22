@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
+import type { SectionDef } from "@/lib/types";
 import { db } from "../db";
 import { syncRuntime } from "../sync/sync";
-import type { SectionDef } from "@/lib/types";
 
 export async function addSection(label: string): Promise<void> {
   const sections = await db.sections.toArray();

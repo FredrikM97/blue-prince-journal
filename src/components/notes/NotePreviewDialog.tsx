@@ -1,12 +1,16 @@
 import { useState } from "react";
-import type { Note } from "@/lib/types";
-import { Chip } from "@/components/common/Chip";
-import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { AttachedImagesGallery } from "@/components/common/AttachedImagesGallery";
-import { MetaRow, PreviewSection, PreviewTimestamps } from "@/components/common/preview/PreviewContent";
+import { Chip } from "@/components/common/Chip";
 import { Inline } from "@/components/common/LayoutPrimitives";
-import { saveNote } from "@/data/mutations/noteMutations";
+import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { EditablePreviewDialog } from "@/components/common/preview/EditablePreviewDialog";
+import {
+  MetaRow,
+  PreviewSection,
+  PreviewTimestamps,
+} from "@/components/common/preview/PreviewContent";
+import { saveNote } from "@/data/mutations/noteMutations";
+import type { Note } from "@/lib/types";
 
 export function NotePreviewContent({ note }: { note: Note }) {
   return (

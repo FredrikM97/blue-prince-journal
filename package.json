@@ -28,8 +28,8 @@
     "deploy": "npm run build && wrangler pages deploy dist --project-name blue-prince-journal",
     "cf-typegen": "wrangler types",
     "lint": "biome ci .",
-    "format": "biome check --write .",
-    "format:check": "biome ci ."
+    "format": "biome format --write .",
+    "format:check": "biome format ."
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

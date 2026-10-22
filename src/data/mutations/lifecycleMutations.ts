@@ -1,6 +1,6 @@
-import { syncRuntime } from "../sync/sync";
-import { clearCustomRooms } from "../rooms/rooms";
 import { clearAllData } from "../db";
+import { clearCustomRooms } from "../rooms/rooms";
+import { syncRuntime } from "../sync/sync";
 
 export async function startFresh(): Promise<void> {
   if (typeof window === "undefined") return;

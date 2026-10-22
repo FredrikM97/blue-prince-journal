@@ -8,14 +8,15 @@
  * Changing the `notes` array length resets the active index via key — callers should pass an
  * appropriate `key` prop when the context changes (e.g. selected cell, selected image).
  */
-import { useState } from "react";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { Chip } from "@/components/common/Chip";
+import { Stack } from "@/components/common/general/Stack";
 import { Inline, SectionHeader, SectionHeaderActions } from "@/components/common/LayoutPrimitives";
 import { MarkdownPreview } from "@/components/common/markdown/MarkdownPreview";
 import { Heading, MetaText, Text } from "@/components/common/Typography";
-import { Stack } from "@/components/common/general/Stack";
 import type { Note } from "@/lib/types";
 
 export function PagedNotesList({
