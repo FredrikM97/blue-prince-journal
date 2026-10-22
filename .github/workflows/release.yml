@@ -1,165 +1,169 @@
-# Manually cuts a version: bumps the tag and promotes the "unreleased" draft
-# (see release-draft.yml) into a real published GitHub release.
 name: Release
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
-      bump:
-        description: "Version bump"
+      action:
+        description: "Update the draft or publish it"
         required: true
         type: choice
+        default: update_draft
+        options:
+          - update_draft
+          - publish
+      bump:
+        description: "Version bump used when publishing"
+        required: true
+        type: choice
+        default: patch
         options:
           - patch
           - minor
           - major
-        default: patch
-      dry_run:
-        description: "Dry run — preview release notes without creating a release"
-        required: false
-        type: boolean
-        default: false
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
-  release:
-    if: github.repository == 'FredrikM97/blue-prince-journal' && github.repository_owner == 'FredrikM97'
+  update_draft:
+    if: >-
+      github.repository == 'FredrikM97/blue-prince-journal' &&
+      github.repository_owner == 'FredrikM97' &&
+      (github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'update_draft'))
     runs-on: ubuntu-latest
-    environment: cloudflare-pages
-
+    permissions:
+      contents: write
     steps:
-      - name: Checkout (full history)
+      - name: Checkout code
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      # ── Compute previous and next version tags ────────────────────────────
-      - name: Compute next version
-        id: version
-        shell: bash
-        run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
-
-          if [[ -z "$PREV_TAG" ]]; then
-            BASE="0.0.0"
-          else
-            BASE="${PREV_TAG#v}"
-          fi
-
-          IFS='.' read -r MAJ MIN PAT <<< "$BASE"
-
-          case "${{ inputs.bump }}" in
-            major) MAJ=$((MAJ + 1)); MIN=0; PAT=0 ;;
-            minor) MIN=$((MIN + 1)); PAT=0 ;;
-            patch) PAT=$((PAT + 1)) ;;
-          esac
-
-          NEXT="v${MAJ}.${MIN}.${PAT}"
-
-          echo "prev_tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
-          echo "next_tag=${NEXT}"     >> "$GITHUB_OUTPUT"
-
-      # ── Reuse the rolling draft's notes, falling back to git log ──────────
       - name: Build release notes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          PREV="${{ steps.version.outputs.prev_tag }}"
+          set -euo pipefail
 
-          if gh release view unreleased --json body -q .body > /tmp/release_notes.md 2>/dev/null; then
-            exit 0
-          fi
-
-          if [[ -n "$PREV" ]]; then
-            RANGE="${PREV}..HEAD"
-          else
-            RANGE="HEAD"
+          LAST_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1)
+          RANGE="HEAD"
+          if [[ -n "$LAST_TAG" ]]; then
+            RANGE="${LAST_TAG}..HEAD"
           fi
 
           COMMITS=$(git log "$RANGE" --no-merges --pretty=format:"- %s (%h)")
-
           if [[ -z "$COMMITS" ]]; then
-            COMMITS="- No changes since ${PREV:-the beginning of history}"
+            COMMITS="- No changes since ${LAST_TAG:-the beginning of history}"
+          fi
+
+          if [[ -n "$LAST_TAG" ]]; then
+            COMPARE_URL="https://github.com/${GITHUB_REPOSITORY}/compare/${LAST_TAG}...main"
+          else
+            COMPARE_URL="https://github.com/${GITHUB_REPOSITORY}/commits/main"
           fi
 
           {
             echo "## What's Changed"
-            echo ""
-            echo "$COMMITS"
-          } > /tmp/release_notes.md
+            echo
+            printf '%s\n' "$COMMITS"
+            echo
+            echo "---"
+            echo "**Full Changelog**: $COMPARE_URL"
+          } > release-notes.md
 
-      # ── Dry-run: print preview and exit ───────────────────────────────────
-      - name: Preview release notes (dry run)
-        if: inputs.dry_run == true
-        shell: bash
-        run: |
-          PREV="${{ steps.version.outputs.prev_tag || '(none — first release)' }}"
-          NEXT="${{ steps.version.outputs.next_tag }}"
-          BUMP="${{ inputs.bump }}"
-
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  DRY RUN — no tag or release will be created"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "  Previous tag : $PREV"
-          echo "  Next tag     : $NEXT"
-          echo "  Bump type    : $BUMP"
-          echo ""
-          echo "━━━━━━ Release notes preview ━━━━━━━━━━━━━━━━━━━"
-          cat /tmp/release_notes.md
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-          # Write to GitHub Actions job summary
-          {
-            echo "## 🔍 Dry Run — Release Preview"
-            echo ""
-            echo "| | |"
-            echo "|---|---|"
-            echo "| **Previous tag** | \`${PREV}\` |"
-            echo "| **Next tag** | \`${NEXT}\` |"
-            echo "| **Bump type** | \`${BUMP}\` |"
-            echo ""
-            echo "> [!NOTE]"
-            echo "> No tag or release was created. Re-run without dry run to publish."
-            echo ""
-            cat /tmp/release_notes.md
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      # ── Real release: promote the draft (or create fresh) → GitHub Release ─
-      - name: Publish GitHub release
-        if: inputs.dry_run == false
+      - name: Update rolling draft release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          NEXT="${{ steps.version.outputs.next_tag }}"
-
           if gh release view unreleased >/dev/null 2>&1; then
             gh release edit unreleased \
-              --tag "$NEXT" \
-              --title "$NEXT" \
-              --notes-file /tmp/release_notes.md \
-              --draft=false \
-              --latest
+              --title "Unreleased" \
+              --notes-file release-notes.md \
+              --target main \
+              --draft
           else
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git config user.name  "github-actions[bot]"
-            git tag -a "$NEXT" -m "Release $NEXT"
-            git push origin "$NEXT"
-
-            gh release create "$NEXT" \
-              --title "$NEXT" \
-              --notes-file /tmp/release_notes.md \
-              --latest
+            gh release create unreleased \
+              --title "Unreleased" \
+              --notes-file release-notes.md \
+              --target main \
+              --draft
           fi
 
-      # ── Trigger a Cloudflare Pages build+deploy for this release ───────────
+  publish:
+    if: >-
+      github.repository == 'FredrikM97/blue-prince-journal' &&
+      github.repository_owner == 'FredrikM97' &&
+      github.event_name == 'workflow_dispatch' &&
+      inputs.action == 'publish'
+    runs-on: ubuntu-latest
+    environment: cloudflare-pages
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Require an existing draft to publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if ! gh release view unreleased >/dev/null 2>&1; then
+            echo "::error::No draft release found. Push to main or run the workflow with 'update_draft' first."
+            exit 1
+          fi
+
+      - name: Determine next version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump || 'patch' }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LAST_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1)
+          BASE="${LAST_TAG#v}"
+          BASE="${BASE:-0.0.0}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+
+          case "$BUMP" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+            *) echo "::error::Unsupported version bump: $BUMP"; exit 1 ;;
+          esac
+          TAG="v$MAJOR.$MINOR.$PATCH"
+
+          gh release view unreleased --json body -q .body > release-notes.md
+          sed -i "s#\\.\\.\\.main#...${TAG}#g; s#/commits/main#/commits/${TAG}#g" release-notes.md
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release edit unreleased \
+            --tag "${{ steps.version.outputs.tag }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes-file release-notes.md \
+            --target main \
+            --draft=false \
+            --latest
+
       - name: Trigger Cloudflare Pages deploy hook
-        if: inputs.dry_run == false
         env:
           DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK_URL }}
         run: curl -fsS -X POST "$DEPLOY_HOOK_URL"
-

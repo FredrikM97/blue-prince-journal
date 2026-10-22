@@ -2,34 +2,46 @@
 version: 2
 
 updates:
-  # NPM dependencies: keep non-breaking updates together
-  - package-ecosystem: npm
-    directory: /
+  # NPM dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: monthly
-
+      interval: "monthly"
+    commit-message:
+      prefix: "deps(package)"
+    labels:
+      - "dependencies"
     groups:
-      minor-and-patch-updates:
-        update-types:
-          - minor
-          - patch
+      non-major:
         patterns:
-          - '*'
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-    open-pull-requests-limit: 1
-
-  # GitHub Actions: keep non-breaking updates together
-  - package-ecosystem: github-actions
-    directory: /
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: monthly
-
+      interval: "monthly"
+    commit-message:
+      prefix: "deps(workflow)"
+    labels:
+      - "dependencies"
     groups:
-      minor-and-patch-updates:
-        update-types:
-          - minor
-          - patch
+      non-major:
         patterns:
-          - '*'
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-    open-pull-requests-limit: 1
+  # Dev Container Features
+  - package-ecosystem: "devcontainers"
+    directory: "/.devcontainer"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "deps(devcontainer)"
+    labels:
+      - "dependencies"

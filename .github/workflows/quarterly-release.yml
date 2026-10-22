@@ -1,0 +1,50 @@
+name: Quarterly Release
+
+on:
+  schedule:
+    - cron: "0 0 1 1,4,7,10 *"
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: quarterly-release
+  cancel-in-progress: false
+
+jobs:
+  check_and_publish:
+    if: github.repository == 'FredrikM97/blue-prince-journal' && github.repository_owner == 'FredrikM97'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes since the last release
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LAST_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1)
+          RANGE="HEAD"
+          if [[ -n "$LAST_TAG" ]]; then
+            RANGE="${LAST_TAG}..HEAD"
+          fi
+
+          COMMIT_COUNT=$(git rev-list --count "$RANGE")
+          if [[ "$COMMIT_COUNT" -gt 0 ]]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Found $COMMIT_COUNT commit(s) since ${LAST_TAG:-the beginning of history}."
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No changes since ${LAST_TAG:-the beginning of history}." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Publish the draft release
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run release.yml --ref main --field action=publish --field bump=patch
