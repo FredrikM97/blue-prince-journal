@@ -8,13 +8,19 @@ export function buildNoteListItems(notes: Note[], todos: Todo[]): Note[] {
 
 export function buildRooms(items: Note[]): string[] {
   const set = new Set<string>();
-  items.forEach((note) => note.room && set.add(note.room));
+  items.forEach((note) => {
+    if (note.room) set.add(note.room);
+  });
   return Array.from(set).sort();
 }
 
 export function buildTags(items: Note[]): string[] {
   const set = new Set<string>();
-  items.forEach((note) => note.tags.forEach((tag) => set.add(tag)));
+  items.forEach((note) => {
+    note.tags.forEach((tag) => {
+      set.add(tag);
+    });
+  });
   return Array.from(set).sort();
 }
 

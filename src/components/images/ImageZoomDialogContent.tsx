@@ -36,7 +36,7 @@ export function ImageZoomDialogContent({
   onPreviousImage?: () => void;
   onNextImage?: () => void;
 }) {
-  const stageRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLElement | null>(null);
   const pointersRef = useRef(new Map<number, Point>());
   const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
   const dragRef = useRef<Point | null>(null);
@@ -86,10 +86,12 @@ export function ImageZoomDialogContent({
     setDragging(false);
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: resetView is intentionally tied to imageId changes.
+  const previousImageIdRef = useRef(imageId);
   useEffect(() => {
+    if (previousImageIdRef.current === imageId) return;
+    previousImageIdRef.current = imageId;
     resetView();
-  }, [imageId]);
+  }, [imageId, resetView]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -106,7 +108,7 @@ export function ImageZoomDialogContent({
   }, [onPreviousImage, onNextImage]);
 
   const onPointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
+    (event: ReactPointerEvent<HTMLElement>) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
 
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -132,7 +134,7 @@ export function ImageZoomDialogContent({
   );
 
   const onPointerMove = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
+    (event: ReactPointerEvent<HTMLElement>) => {
       if (!pointersRef.current.has(event.pointerId)) return;
 
       pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
@@ -167,7 +169,7 @@ export function ImageZoomDialogContent({
   );
 
   const onPointerUp = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
+    (event: ReactPointerEvent<HTMLElement>) => {
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
         event.currentTarget.releasePointerCapture(event.pointerId);
       }
@@ -298,7 +300,8 @@ export function ImageZoomDialogContent({
         </Inline>
       </Stack>
 
-      <div
+      <section
+        aria-label="Image pan and zoom area"
         className={`relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden rounded-md border border-border/40 bg-background [touch-action:none] ${cursorClass}`}
         ref={stageRef}
         onPointerDown={onPointerDown}
@@ -318,7 +321,7 @@ export function ImageZoomDialogContent({
             className="h-auto max-h-full w-auto max-w-full select-none object-contain [-webkit-user-drag:none]"
           />
         </div>
-      </div>
+      </section>
     </Stack>
   );
 }

@@ -18,14 +18,33 @@ export function buildSuggestionSources({
   gridCells: GridCell[];
 }): SuggestionSources {
   const allRooms = new Set<string>();
-  roomCatalog.forEach((room) => allRooms.add(room));
-  gridCells.forEach((cell) => cell.roomName?.trim() && allRooms.add(cell.roomName.trim()));
-  notes.forEach((note) => note.room?.trim() && allRooms.add(note.room.trim()));
-  todos.forEach((todo) => todo.room?.trim() && allRooms.add(todo.room.trim()));
+  roomCatalog.forEach((room) => {
+    allRooms.add(room);
+  });
+  gridCells.forEach((cell) => {
+    const roomName = cell.roomName?.trim();
+    if (roomName) allRooms.add(roomName);
+  });
+  notes.forEach((note) => {
+    const roomName = note.room?.trim();
+    if (roomName) allRooms.add(roomName);
+  });
+  todos.forEach((todo) => {
+    const roomName = todo.room?.trim();
+    if (roomName) allRooms.add(roomName);
+  });
 
   const allTags = new Set<string>();
-  notes.forEach((note) => note.tags.forEach((tag) => allTags.add(tag)));
-  todos.forEach((todo) => todo.tags.forEach((tag) => allTags.add(tag)));
+  notes.forEach((note) => {
+    note.tags.forEach((tag) => {
+      allTags.add(tag);
+    });
+  });
+  todos.forEach((todo) => {
+    todo.tags.forEach((tag) => {
+      allTags.add(tag);
+    });
+  });
 
   const noteSuggestions = Array.from(
     new Set([...notes.map((note) => note.title), ...todos.map((todo) => todo.title)]),

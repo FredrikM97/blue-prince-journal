@@ -34,38 +34,31 @@ export const TodoItem = memo(function TodoItem({
 
   return (
     <li>
-      <div className="cursor-pointer px-3 py-2 hover:bg-muted" onClick={() => onOpenPreview(todo)}>
+      <div className="px-3 py-2 hover:bg-muted">
         <Stack gap="0" className="min-w-0 space-y-1">
           <Stack gap="0" className="flex min-w-0 items-center justify-between gap-2">
             <Stack gap="0" className="min-w-0 flex-1 overflow-hidden">
-              <Stack gap="0">
-                <Text
-                  as="span"
-                  size="sm"
-                  tone={titleTone}
-                  decoration={titleDecoration}
-                  className="line-clamp-2 whitespace-normal break-words py-0.5"
-                >
+              <Button
+                variant="ghost"
+                size="content"
+                fullWidth
+                justify="start"
+                textAlign="left"
+                className="line-clamp-2 whitespace-normal break-words py-0.5"
+                onClick={() => onOpenPreview(todo)}
+              >
+                <Text as="span" size="sm" tone={titleTone} decoration={titleDecoration}>
                   {todo.title}
                 </Text>
-              </Stack>
+              </Button>
             </Stack>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-h2"
-                  aria-label="Todo actions"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <Button variant="ghost" size="icon-h2" aria-label="Todo actions">
                   <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                variant="select"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <DropdownMenuContent align="end" variant="select">
                 <DropdownMenuItem onSelect={() => onOpenPreview(todo)}>
                   <Eye className="h-3.5 w-3.5" />
                   <Text as="span" size="sm">

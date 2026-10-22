@@ -159,7 +159,7 @@ function extractSlotsFromChildren(children: ReactNode): {
     fallback = fallbackParts[0];
   }
   if (fallbackParts.length > 1) {
-    fallback = <Fragment>{fallbackParts}</Fragment>;
+    fallback = fallbackParts;
   }
 
   return { left, middle, right, fallback, hasSlotChildren };

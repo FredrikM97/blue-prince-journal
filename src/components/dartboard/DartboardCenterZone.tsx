@@ -38,7 +38,10 @@ export function DartboardCenterZone({
 
   return (
     <>
+      {/* biome-ignore lint/a11y/useSemanticElements: The selectable area must remain an SVG circle. */}
       <circle
+        role="button"
+        tabIndex={0}
         aria-label="center outer bull"
         cx={center.x}
         cy={center.y}
@@ -47,12 +50,21 @@ export function DartboardCenterZone({
         stroke="var(--board-stroke)"
         strokeWidth={1}
         onClick={onSelectCenter}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onSelectCenter();
+          }
+        }}
         style={{
           cursor: "pointer",
           opacity: centerSelected ? 1 : 0.95,
         }}
       />
+      {/* biome-ignore lint/a11y/useSemanticElements: The selectable area must remain an SVG circle. */}
       <circle
+        role="button"
+        tabIndex={0}
         aria-label="center bullseye"
         cx={center.x}
         cy={center.y}
@@ -61,6 +73,12 @@ export function DartboardCenterZone({
         stroke="var(--board-stroke)"
         strokeWidth={1}
         onClick={onSelectBullseye}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onSelectBullseye();
+          }
+        }}
         style={{
           cursor: "pointer",
           opacity: bullseyeSelected ? 1 : 0.95,

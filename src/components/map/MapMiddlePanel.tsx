@@ -35,7 +35,8 @@ export function MapMiddlePanel({
       <Grid as="div" gap="2" className={gridClassName}>
         {Array.from({ length: GRID_ROWS }).flatMap((_, row) =>
           Array.from({ length: GRID_COLS }).map((__, col) => {
-            const cell = byId.get(cellId(row, col));
+            const id = cellId(row, col);
+            const cell = byId.get(id);
             let status: "neutral" | "cleared" = "neutral";
             if (cell?.status === "cleared") {
               status = "cleared";
@@ -83,7 +84,7 @@ export function MapMiddlePanel({
 
             return (
               <MapCellButton
-                key={`${row},${col}`}
+                key={id}
                 status={status}
                 selected={isSelected}
                 onClick={() => onOpenCell(row, col)}

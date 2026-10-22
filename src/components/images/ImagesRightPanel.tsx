@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { Stack } from "@/components/common/general/Stack";
@@ -112,11 +112,6 @@ function ImagesInspectorPanel({
 }) {
   const [labelInput, setLabelInput] = useState(getImageLabel(img));
   const [savingLabel, setSavingLabel] = useState(false);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Reset the label only when the selected image changes.
-  useEffect(() => {
-    setLabelInput(getImageLabel(img));
-  }, [img.id]);
 
   return (
     <SidePanelRight

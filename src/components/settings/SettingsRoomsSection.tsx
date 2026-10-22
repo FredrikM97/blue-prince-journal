@@ -24,10 +24,13 @@ export function SettingsRoomsSection() {
   const customRoomsByCategory = useMemo(() => {
     const allGroups = getAllRoomGroups();
     const grouped = new Map<string, string[]>();
-    allGroups.forEach((group) => grouped.set(group, []));
+    allGroups.forEach((group) => {
+      grouped.set(group, []);
+    });
     customRooms.forEach((room) => {
       if (!grouped.has(room.category)) grouped.set(room.category, []);
-      grouped.get(room.category)!.push(room.name);
+      const categoryRooms = grouped.get(room.category);
+      if (categoryRooms) categoryRooms.push(room.name);
     });
     return grouped;
   }, [customRooms]);

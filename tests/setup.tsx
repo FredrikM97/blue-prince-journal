@@ -2,7 +2,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, beforeEach, vi } from "vitest";
 
-if (!Object.prototype.hasOwnProperty.call(URL, "createObjectURL")) {
+if (!Object.hasOwn(URL, "createObjectURL")) {
   Object.defineProperty(URL, "createObjectURL", {
     value: vi.fn(() => "blob:mock"),
     configurable: true,
@@ -10,7 +10,7 @@ if (!Object.prototype.hasOwnProperty.call(URL, "createObjectURL")) {
   });
 }
 
-if (!Object.prototype.hasOwnProperty.call(URL, "revokeObjectURL")) {
+if (!Object.hasOwn(URL, "revokeObjectURL")) {
   Object.defineProperty(URL, "revokeObjectURL", {
     value: vi.fn(),
     configurable: true,
@@ -18,7 +18,7 @@ if (!Object.prototype.hasOwnProperty.call(URL, "revokeObjectURL")) {
   });
 }
 
-if (!Object.prototype.hasOwnProperty.call(globalThis, "ResizeObserver")) {
+if (!Object.hasOwn(globalThis, "ResizeObserver")) {
   class ResizeObserverMock {
     observe() {}
     unobserve() {}
@@ -32,7 +32,7 @@ if (!Object.prototype.hasOwnProperty.call(globalThis, "ResizeObserver")) {
   });
 }
 
-if (!Object.prototype.hasOwnProperty.call(globalThis, "IntersectionObserver")) {
+if (!Object.hasOwn(globalThis, "IntersectionObserver")) {
   class IntersectionObserverMock {
     root = null;
     rootMargin = "0px";

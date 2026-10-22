@@ -78,7 +78,7 @@ function sample<T>(arr: T[], n: number): T[] {
 }
 
 function toRef(room: string) {
-  return "@" + room.toLowerCase().replace(/\s+/g, "-");
+  return `@${room.toLowerCase().replace(/\s+/g, "-")}`;
 }
 
 export function buildGraphTestNotes(): Note[] {
@@ -356,8 +356,12 @@ export function buildGraphTestTodos(notes: Note[]): Todo[] {
   const roomToNoteIds = new Map<string, string[]>();
   for (const note of notes) {
     if (!note.room) continue;
-    if (!roomToNoteIds.has(note.room)) roomToNoteIds.set(note.room, []);
-    roomToNoteIds.get(note.room)!.push(note.id);
+    const noteIds = roomToNoteIds.get(note.room);
+    if (noteIds) {
+      noteIds.push(note.id);
+    } else {
+      roomToNoteIds.set(note.room, [note.id]);
+    }
   }
 
   return TODO_SEEDS.map((seed) => {

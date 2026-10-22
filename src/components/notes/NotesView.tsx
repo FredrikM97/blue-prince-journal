@@ -85,10 +85,7 @@ const NotesListRow = memo(function NotesListRow({
   onDelete: (note: Note) => void;
 }) {
   return (
-    <div
-      className="group cursor-pointer overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent"
-      onClick={() => onOpenPreview(note)}
-    >
+    <div className="group overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent">
       <Stack gap="0" className="flex items-center gap-3 px-4 py-3">
         <Stack className="min-w-0 flex-1 overflow-hidden" gap="0">
           <Button
@@ -99,10 +96,7 @@ const NotesListRow = memo(function NotesListRow({
             justify="start"
             textAlign="left"
             className="flex min-w-0 flex-1 items-start gap-0 rounded-sm bg-transparent hover:bg-transparent hover:opacity-75 focus-visible:ring-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenPreview(note);
-            }}
+            onClick={() => onOpenPreview(note)}
           >
             <NotesListItemSummary note={note} />
           </Button>
@@ -110,33 +104,19 @@ const NotesListRow = memo(function NotesListRow({
         <Button
           variant="ghost"
           size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenExpand(note);
-          }}
+          onClick={() => onOpenExpand(note)}
           aria-label="Expand note preview"
         >
           <Maximize2 className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenEdit(note);
-          }}
-          aria-label="Edit note"
-        >
+        <Button variant="ghost" size="icon" onClick={() => onOpenEdit(note)} aria-label="Edit note">
           <Pencil className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
           tone="destructive"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(note);
-          }}
+          onClick={() => onDelete(note)}
           aria-label="Delete note"
         >
           <Trash2 className="h-4 w-4" />

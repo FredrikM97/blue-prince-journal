@@ -7,14 +7,19 @@ import { X } from "lucide-react";
 import { memo, useEffect, useMemo } from "react";
 import { Button } from "@/components/common/Button";
 
+export type PendingImage = {
+  id: string;
+  blob: Blob;
+};
+
 const PendingImageItem = memo(function PendingImageItem({
   blob,
-  index,
+  id,
   onRemove,
 }: {
   blob: Blob;
-  index: number;
-  onRemove: (index: number) => void;
+  id: string;
+  onRemove: (id: string) => void;
 }) {
   const url = useMemo(() => URL.createObjectURL(blob), [blob]);
 
@@ -26,7 +31,7 @@ const PendingImageItem = memo(function PendingImageItem({
     <div className="relative h-14 w-14 overflow-hidden rounded border border-border">
       {url && <img src={url} alt="" className="h-full w-full object-cover" />}
       <Button
-        onClick={() => onRemove(index)}
+        onClick={() => onRemove(id)}
         variant="ghost"
         size="icon"
         className="absolute right-0 top-0 rounded-bl bg-black/60 p-0.5 text-white"
@@ -45,20 +50,15 @@ export function PendingImageList({
   images,
   onRemove,
 }: {
-  images: Blob[];
-  onRemove: (index: number) => void;
+  images: PendingImage[];
+  onRemove: (id: string) => void;
 }) {
   if (images.length === 0) return null;
 
   return (
     <div className="flex flex-wrap gap-2">
-      {images.map((blob, index) => (
-        <PendingImageItem
-          key={`${blob.size}-${index}`}
-          blob={blob}
-          index={index}
-          onRemove={onRemove}
-        />
+      {images.map(({ blob, id }) => (
+        <PendingImageItem key={id} blob={blob} id={id} onRemove={onRemove} />
       ))}
     </div>
   );

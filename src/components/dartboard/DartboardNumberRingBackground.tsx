@@ -11,13 +11,13 @@ type Props = {
 export function DartboardNumberRingBackground({ startBase, wedgeAngle }: Props) {
   return (
     <>
-      {WEDGE_ORDER.map((_number, index) => {
+      {WEDGE_ORDER.map((number, index) => {
         const a0 = startBase + index * wedgeAngle;
         const a1 = a0 + wedgeAngle;
         const fill = index % 2 === 0 ? "oklch(0.18 0.015 260)" : "oklch(0.28 0.02 260)";
         return (
           <path
-            key={`num-bg-${index}`}
+            key={`num-bg-${number}`}
             d={buildAreaPathByKind("numberRing", a0, a1)}
             fill={fill}
             stroke="rgba(0,0,0,0.5)"
@@ -31,7 +31,7 @@ export function DartboardNumberRingBackground({ startBase, wedgeAngle }: Props) 
         const [x, y] = polarToCartesian(getNumberLabelRadius(), a);
         return (
           <text
-            key={`num-${index}`}
+            key={`num-${number}`}
             x={x}
             y={y + 7}
             textAnchor="middle"

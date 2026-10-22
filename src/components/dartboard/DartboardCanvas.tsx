@@ -133,6 +133,7 @@ export function DartboardCanvas({
           className="block h-full w-full select-none"
           style={BOARD_SVG_STYLE}
         >
+          <title>Interactive dartboard</title>
           <defs>
             <radialGradient id="cabinet-grad" cx="50%" cy="40%" r="70%">
               <stop offset="0%" stopColor="oklch(0.30 0.02 260)" />

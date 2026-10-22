@@ -76,7 +76,7 @@ export const DialogContent = React.forwardRef<
     overlayVariant?: DialogOverlayVariant;
   }
 >(({ children, variant = "default", showClose, overlayVariant = "default", ...props }, ref) => {
-  const { ["aria-describedby"]: ariaDescribedBy, ...contentProps } = props;
+  const { "aria-describedby": ariaDescribedBy, ...contentProps } = props;
 
   let shouldShowClose = getDefaultShowClose(variant);
   if (showClose !== undefined) shouldShowClose = showClose;

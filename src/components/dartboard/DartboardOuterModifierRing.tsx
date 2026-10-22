@@ -23,7 +23,10 @@ export function DartboardOuterModifierRing({ wedges, onSelectWedge }: Props) {
     <g>
       {wedges.map((wedge) => (
         <g key={`outer-modifier-${wedge.index}`}>
+          {/* biome-ignore lint/a11y/useSemanticElements: The selectable wedge must remain an SVG path. */}
           <path
+            role="button"
+            tabIndex={0}
             aria-label={`outer modifier wedge ${wedge.wedgeNumber}`}
             d={wedge.path}
             fill={wedge.fill}
@@ -31,6 +34,12 @@ export function DartboardOuterModifierRing({ wedges, onSelectWedge }: Props) {
             strokeWidth={wedge.strokeWidth}
             onClick={() => {
               onSelectWedge(wedge.index);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onSelectWedge(wedge.index);
+              }
             }}
             style={{
               cursor: "pointer",

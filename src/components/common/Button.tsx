@@ -155,6 +155,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   return createElement("button", {
     ref,
     ...props,
+    type: props.type ?? "button",
     className: `${baseClass} ${variantClass} ${sizeClass} ${variantExtras} ${layoutClass}`.trim(),
   });
 });

@@ -75,11 +75,19 @@ export function buildGraph(notes: Note[]): GraphModel {
   return { nodes, clusters, edges };
 }
 
+function getRequiredMapValue<T>(map: ReadonlyMap<string, T>, key: string): T {
+  const value = map.get(key);
+  if (value === undefined) {
+    throw new Error(`Graph layout is missing a value for "${key}".`);
+  }
+  return value;
+}
+
 function refineNodePositions(nodes: GraphNode[], edges: GraphEdge[]): void {
   if (nodes.length <= 1 || nodes.length > 100) return;
 
   const nodeById = new Map<string, GraphNode>();
-  nodes.forEach((n) => nodeById.set(n.id, n));
+  for (const node of nodes) nodeById.set(node.id, node);
 
   const pairWeight = new Map<string, number>();
   for (const e of edges) {
@@ -92,7 +100,7 @@ function refineNodePositions(nodes: GraphNode[], edges: GraphEdge[]): void {
   }
 
   const anchor = new Map<string, { x: number; y: number }>();
-  nodes.forEach((n) => anchor.set(n.id, { x: n.x, y: n.y }));
+  for (const node of nodes) anchor.set(node.id, { x: node.x, y: node.y });
 
   const REPULSE = NODE_RADIUS * 3.4;
   const ANCHOR_K = 0.07;
@@ -101,7 +109,7 @@ function refineNodePositions(nodes: GraphNode[], edges: GraphEdge[]): void {
 
   for (let iter = 0; iter < ITERS; iter++) {
     const forces = new Map<string, { fx: number; fy: number }>();
-    nodes.forEach((n) => forces.set(n.id, { fx: 0, fy: 0 }));
+    for (const node of nodes) forces.set(node.id, { fx: 0, fy: 0 });
 
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
@@ -112,8 +120,8 @@ function refineNodePositions(nodes: GraphNode[], edges: GraphEdge[]): void {
         const dist = Math.hypot(dx, dy) || 0.01;
         if (dist < REPULSE) {
           const push = ((REPULSE - dist) / REPULSE) * 4.5;
-          const fa = forces.get(a.id)!;
-          const fb = forces.get(b.id)!;
+          const fa = getRequiredMapValue(forces, a.id);
+          const fb = getRequiredMapValue(forces, b.id);
           fa.fx += (dx / dist) * push;
           fa.fy += (dy / dist) * push;
           fb.fx -= (dx / dist) * push;
@@ -131,8 +139,8 @@ function refineNodePositions(nodes: GraphNode[], edges: GraphEdge[]): void {
       const dy = b.y - a.y;
       const dist = Math.hypot(dx, dy) || 0.01;
       const attract = ATTRACT_K * w * Math.min(dist, 90);
-      const fa = forces.get(a.id)!;
-      const fb = forces.get(b.id)!;
+      const fa = getRequiredMapValue(forces, a.id);
+      const fb = getRequiredMapValue(forces, b.id);
       fa.fx += (dx / dist) * attract;
       fa.fy += (dy / dist) * attract;
       fb.fx -= (dx / dist) * attract;
@@ -140,15 +148,15 @@ function refineNodePositions(nodes: GraphNode[], edges: GraphEdge[]): void {
     });
 
     nodes.forEach((n) => {
-      const a = anchor.get(n.id)!;
-      const f = forces.get(n.id)!;
+      const a = getRequiredMapValue(anchor, n.id);
+      const f = getRequiredMapValue(forces, n.id);
       f.fx += (a.x - n.x) * ANCHOR_K;
       f.fy += (a.y - n.y) * ANCHOR_K;
     });
 
     const temp = 7 * Math.max(0.1, 1 - iter / ITERS);
     nodes.forEach((n) => {
-      const f = forces.get(n.id)!;
+      const f = getRequiredMapValue(forces, n.id);
       const mag = Math.hypot(f.fx, f.fy) || 1;
       const step = Math.min(mag, temp);
       n.x += (f.fx / mag) * step;
@@ -159,7 +167,7 @@ function refineNodePositions(nodes: GraphNode[], edges: GraphEdge[]): void {
 
 function buildRoomWeights(notes: Note[], edges: GraphEdge[]): Map<string, number> {
   const nodeRoom = new Map<string, string>();
-  notes.forEach((n) => nodeRoom.set(n.id, n.room?.trim() || ""));
+  for (const note of notes) nodeRoom.set(note.id, note.room?.trim() || "");
 
   const weights = new Map<string, number>();
   for (const edge of edges) {
@@ -222,18 +230,18 @@ function buildClusteredLayout(
 
   for (let iter = 0; iter < ITERATIONS; iter++) {
     const forces = new Map<string, { fx: number; fy: number }>();
-    roomIds.forEach((id) => forces.set(id, { fx: 0, fy: 0 }));
+    for (const id of roomIds) forces.set(id, { fx: 0, fy: 0 });
 
     for (let i = 0; i < roomIds.length; i++) {
       for (let j = i + 1; j < roomIds.length; j++) {
-        const pa = positions.get(roomIds[i])!;
-        const pb = positions.get(roomIds[j])!;
+        const pa = getRequiredMapValue(positions, roomIds[i]);
+        const pb = getRequiredMapValue(positions, roomIds[j]);
         const dx = pa.x - pb.x;
         const dy = pa.y - pb.y;
         const dist = Math.max(Math.hypot(dx, dy), 1);
         const repulse = (k * k) / dist;
-        const fa = forces.get(roomIds[i])!;
-        const fb = forces.get(roomIds[j])!;
+        const fa = getRequiredMapValue(forces, roomIds[i]);
+        const fb = getRequiredMapValue(forces, roomIds[j]);
         fa.fx += (dx / dist) * repulse;
         fa.fy += (dy / dist) * repulse;
         fb.fx -= (dx / dist) * repulse;
@@ -262,16 +270,16 @@ function buildClusteredLayout(
     });
 
     roomIds.forEach((id) => {
-      const p = positions.get(id)!;
-      const f = forces.get(id)!;
+      const p = getRequiredMapValue(positions, id);
+      const f = getRequiredMapValue(forces, id);
       f.fx -= p.x * 0.04;
       f.fy -= p.y * 0.04;
     });
 
     const temp = k * Math.max(0.01, (1 - iter / ITERATIONS) ** 1.5);
     roomIds.forEach((id) => {
-      const p = positions.get(id)!;
-      const f = forces.get(id)!;
+      const p = getRequiredMapValue(positions, id);
+      const f = getRequiredMapValue(forces, id);
       const mag = Math.hypot(f.fx, f.fy) || 1;
       const step = Math.min(mag, temp);
       p.x += (f.fx / mag) * step;
@@ -280,12 +288,13 @@ function buildClusteredLayout(
   }
 
   if (roomIds.length === 1) {
-    const pos = positions.get(roomIds[0])!;
+    const pos = getRequiredMapValue(positions, roomIds[0]);
     pos.x = GRAPH_VB_W / 2;
     pos.y = GRAPH_VB_H / 2;
   } else if (roomIds.length > 1) {
-    const xs = roomIds.map((id) => positions.get(id)!.x);
-    const ys = roomIds.map((id) => positions.get(id)!.y);
+    const points = [...positions.values()];
+    const xs = points.map((position) => position.x);
+    const ys = points.map((position) => position.y);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
     const minY = Math.min(...ys);
@@ -299,7 +308,7 @@ function buildClusteredLayout(
     const originX = GRAPH_VB_W / 2 - ((minX + maxX) / 2) * scale;
     const originY = GRAPH_VB_H / 2 - ((minY + maxY) / 2) * scale;
     roomIds.forEach((id) => {
-      const p = positions.get(id)!;
+      const p = getRequiredMapValue(positions, id);
       p.x = originX + p.x * scale;
       p.y = originY + p.y * scale;
     });
@@ -321,8 +330,8 @@ function buildClusteredLayout(
       let anyMoved = false;
       for (let i = 0; i < roomIds.length; i++) {
         for (let j = i + 1; j < roomIds.length; j++) {
-          const pa = positions.get(roomIds[i])!;
-          const pb = positions.get(roomIds[j])!;
+          const pa = getRequiredMapValue(positions, roomIds[i]);
+          const pb = getRequiredMapValue(positions, roomIds[j]);
           const minDist =
             (clusterExclusionR.get(roomIds[i]) ?? 0) + (clusterExclusionR.get(roomIds[j]) ?? 0);
           const dx = pb.x - pa.x;
@@ -343,19 +352,20 @@ function buildClusteredLayout(
       if (!anyMoved) break;
     }
 
-    const cxs = roomIds.map((id) => positions.get(id)!.x);
-    const cys = roomIds.map((id) => positions.get(id)!.y);
+    const clusteredPoints = [...positions.values()];
+    const cxs = clusteredPoints.map((position) => position.x);
+    const cys = clusteredPoints.map((position) => position.y);
     const driftX = GRAPH_VB_W / 2 - (Math.min(...cxs) + Math.max(...cxs)) / 2;
     const driftY = GRAPH_VB_H / 2 - (Math.min(...cys) + Math.max(...cys)) / 2;
     roomIds.forEach((id) => {
-      const p = positions.get(id)!;
+      const p = getRequiredMapValue(positions, id);
       p.x += driftX;
       p.y += driftY;
     });
   }
 
   sorted.forEach(([room, roomNotes]) => {
-    const pos = positions.get(room)!;
+    const pos = getRequiredMapValue(positions, room);
     const { x: cx, y: cy } = pos;
 
     const n = roomNotes.length;
@@ -457,13 +467,17 @@ function buildEdges(
     sourceRefs.rooms.forEach((room) => {
       const roomOwners = idsByRoom.get(room);
       if (!roomOwners) return;
-      roomOwners.forEach((targetId) => candidateTargetIds.add(targetId));
+      roomOwners.forEach((targetId) => {
+        candidateTargetIds.add(targetId);
+      });
     });
 
     sourceRefs.tags.forEach((tag) => {
       const tagOwners = idsByTag.get(tag);
       if (!tagOwners) return;
-      tagOwners.forEach((targetId) => candidateTargetIds.add(targetId));
+      tagOwners.forEach((targetId) => {
+        candidateTargetIds.add(targetId);
+      });
     });
 
     candidateTargetIds.delete(source.id);
@@ -518,13 +532,13 @@ function extractReferences(note: Note): ReferenceSignals {
   const raw = `${note.title} ${note.body}`;
 
   const hashMatches = raw.match(/(?<!\w)#[\w-]+/g) ?? [];
-  hashMatches.forEach((tok) => tags.add(normalizeTag(tok.slice(1))));
+  for (const token of hashMatches) tags.add(normalizeTag(token.slice(1)));
 
   const roomMatches = raw.match(/(?<!\w)@[\w-]+/g) ?? [];
-  roomMatches.forEach((tok) => rooms.add(normalizeRoom(tok.slice(1))));
+  for (const token of roomMatches) rooms.add(normalizeRoom(token.slice(1)));
 
   const noteRefMatches = raw.match(/(?<!\w)\^[\w-]+/g) ?? [];
-  noteRefMatches.forEach((tok) => noteRefs.add(tok.slice(1).toLowerCase()));
+  for (const token of noteRefMatches) noteRefs.add(token.slice(1).toLowerCase());
 
   return { tags, rooms, noteRefs };
 }

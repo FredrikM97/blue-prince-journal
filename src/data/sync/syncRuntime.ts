@@ -154,7 +154,9 @@ class SyncRuntimeBase {
 
   private emitStatus() {
     const status = this.getStatus();
-    this.statusListeners.forEach((listener) => listener(status));
+    this.statusListeners.forEach((listener) => {
+      listener(status);
+    });
   }
 
   private clearTimers() {

@@ -14,7 +14,7 @@ import { MetaText, Text } from "@/components/common/Typography";
 import { buildCapturePanelKey } from "@/components/notes/capturePanelKey";
 import { NoteImageAttachments } from "@/components/notes/NoteImageAttachments";
 import { NoteMetadataFields } from "@/components/notes/NoteMetadataFields";
-import { PendingImageList } from "@/components/notes/PendingImageList";
+import { type PendingImage, PendingImageList } from "@/components/notes/PendingImageList";
 import { SelectExistingImagesDialog } from "@/components/notes/SelectExistingImagesDialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/notes/Tabs";
 import { db } from "@/data/db";
@@ -37,6 +37,10 @@ const NOTE_PRIORITY_OPTIONS = [
 
 type NotesStoreSlice = ReturnType<typeof useNotesStoreSlice>;
 type NotesFormState = ReturnType<typeof useNotesFormState>;
+
+function createPendingImages(blobs: Blob[]): PendingImage[] {
+  return blobs.map((blob) => ({ id: crypto.randomUUID(), blob }));
+}
 
 function useNotesStoreSlice() {
   const open = useStore((s) => s.captureOpen);
@@ -109,7 +113,7 @@ function useNotesFormState({
   const [priority, setPriority] = useState<Priority>(prefillPriority ?? "med");
   const [body, setBody] = useState(prefillBody ?? "");
   const [selectedImageIds, setSelectedImageIds] = useState<string[]>(prefillImageIds ?? []);
-  const [pendingImages, setPendingImages] = useState<Blob[]>([]);
+  const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
 
   function resetAfterSubmit() {
     setTitle("");
@@ -288,7 +292,7 @@ function NotesFooterActions({
 }: {
   submit: (keepOpen: boolean) => void | Promise<void>;
   openExistingPicker: () => void;
-  setPendingImages: React.Dispatch<React.SetStateAction<Blob[]>>;
+  setPendingImages: React.Dispatch<React.SetStateAction<PendingImage[]>>;
   showPrimarySave: boolean;
   showSaveNext: boolean;
 }) {
@@ -316,7 +320,7 @@ function NotesFooterActions({
           hidden
           onChange={(e) => {
             const files = Array.from(e.target.files ?? []);
-            setPendingImages((pending) => [...pending, ...files]);
+            setPendingImages((pending) => [...pending, ...createPendingImages(files)]);
             e.target.value = "";
           }}
         />
@@ -342,11 +346,11 @@ function useNotesGlobalEffects({
   setPendingImages,
 }: {
   open: boolean;
-  setPendingImages: React.Dispatch<React.SetStateAction<Blob[]>>;
+  setPendingImages: React.Dispatch<React.SetStateAction<PendingImage[]>>;
 }) {
   usePasteImages({
     enabled: open,
-    onImages: (files) => setPendingImages((p) => [...p, ...files]),
+    onImages: (files) => setPendingImages((p) => [...p, ...createPendingImages(files)]),
   });
 }
 
@@ -503,7 +507,7 @@ function useNoteSubmit({
     await create(title || "Untitled", {
       kind: "note",
       imageIds: selectedImageIds,
-      imageBlobs: pendingImages,
+      imageBlobs: pendingImages.map(({ blob }) => blob),
       body,
       type,
       date: dateInput || undefined,
@@ -640,7 +644,7 @@ export function NotesCreatePanel({
 
   const isEditingTodo = isEditing && form.mode === "todo";
 
-  let headerActions: React.ReactNode = undefined;
+  let headerActions: React.ReactNode;
   if (showHeaderSaveForCreate) {
     let showCancel = false;
     let showSaveNext = true;
@@ -681,7 +685,6 @@ export function NotesCreatePanel({
             onChange={form.setTitle}
             placeholder="Title"
             size="lg"
-            autoFocus
           />
         </SuggestionsDropdown>
 
@@ -712,7 +715,9 @@ export function NotesCreatePanel({
 
         <PendingImageList
           images={form.pendingImages}
-          onRemove={(index) => form.setPendingImages((p) => p.filter((_, j) => j !== index))}
+          onRemove={(id) =>
+            form.setPendingImages((pending) => pending.filter((item) => item.id !== id))
+          }
         />
 
         <NoteImageAttachments

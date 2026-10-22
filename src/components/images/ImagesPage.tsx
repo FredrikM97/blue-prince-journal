@@ -150,7 +150,7 @@ export function ImagesPage() {
       const next = (selectedIndex + offset + filtered.length) % filtered.length;
       setSelectedId(filtered[next].id);
     },
-    [filtered, selectedIndex],
+    [filtered, selectedIndex, setSelectedId],
   );
 
   useEffect(() => {
@@ -197,7 +197,7 @@ export function ImagesPage() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selectByOffset, selected]);
+  }, [previewOpen, selectByOffset, selected, setSelectedId]);
 
   function handleChangeViewMode(mode: "library" | "deleted-imports") {
     if (mode === "deleted-imports") {
@@ -228,12 +228,14 @@ export function ImagesPage() {
             gap="3"
             className={galleryGridColumnsClassName(galleryDensity)}
           >
-            {Array.from({ length: 10 }).map((_, index) => (
-              <div
-                key={`image-skeleton-${index}`}
-                className="aspect-square animate-pulse rounded-lg border border-border bg-muted/55"
-              />
-            ))}
+            {Array.from({ length: 10 }, (_, index) => `image-skeleton-${index}`).map(
+              (skeletonId) => (
+                <div
+                  key={skeletonId}
+                  className="aspect-square animate-pulse rounded-lg border border-border bg-muted/55"
+                />
+              ),
+            )}
           </Grid>
         )}
 
@@ -288,6 +290,7 @@ export function ImagesPage() {
       <PageLayout.Right>
         {viewMode === "library" && (
           <ImagesRightPanel
+            key={selected?.id ?? "image-empty"}
             img={selected}
             relatedNotes={relatedNotes}
             previewOpen={previewOpen}

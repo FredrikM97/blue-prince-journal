@@ -565,11 +565,11 @@ export function SuggestionsDropdown({
     alignMode: dropdownAlign,
   });
 
-  let wrapperClassName = "relative";
+  let wrapperClassName = "relative min-w-0 border-0 p-0";
   if (containerClassName) wrapperClassName = `${wrapperClassName} ${containerClassName}`;
 
   return (
-    <div
+    <fieldset
       className={wrapperClassName}
       onChange={(e) => syncFromEl(e.target)} // value+cursor in one update → fixes @ lag
       onKeyUp={(e) => syncFromEl(e.target)} // catches cursor moves (arrow keys)
@@ -585,6 +585,7 @@ export function SuggestionsDropdown({
         }
       }}
     >
+      <legend className="sr-only">Input with suggestions</legend>
       {children}
       <SuggestionItems
         suggestions={controller.suggestions}
@@ -597,6 +598,6 @@ export function SuggestionsDropdown({
         displayMode={displayMode}
         className={dropdownClassName}
       />
-    </div>
+    </fieldset>
   );
 }

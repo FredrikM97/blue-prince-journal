@@ -26,7 +26,9 @@ vi.mock("sonner", () => ({
 vi.mock("@radix-ui/react-dropdown-menu", () => {
   const Primitive = {
     Root: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Trigger: ({ children }: { children: React.ReactNode }) => <button>{children}</button>,
+    Trigger: ({ children }: { children: React.ReactNode }) => (
+      <button type="button">{children}</button>
+    ),
     Sub: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     Portal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     Content: ({ children, className }: { children: React.ReactNode; className?: string }) => (
@@ -42,7 +44,7 @@ vi.mock("@radix-ui/react-dropdown-menu", () => {
       children: React.ReactNode;
       className?: string;
     }) => (
-      <button data-testid="sub-trigger" className={className} {...props}>
+      <button type="button" data-testid="sub-trigger" className={className} {...props}>
         {children}
       </button>
     ),
@@ -52,7 +54,7 @@ vi.mock("@radix-ui/react-dropdown-menu", () => {
       </div>
     ),
     Item: ({ children, className }: { children: React.ReactNode; className?: string }) => (
-      <button data-testid="item" className={className}>
+      <button type="button" data-testid="item" className={className}>
         {children}
       </button>
     ),

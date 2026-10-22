@@ -44,10 +44,10 @@ export function EditablePreviewDialog({
     setIsEditing(true);
   }
 
-  function closeEditDetails() {
+  const closeEditDetails = useCallback(() => {
     setIsEditing(false);
     setEditingEntityKey(null);
-  }
+  }, []);
 
   const isEditingCurrentEntity = isEditing && editingEntityKey === entityKey;
 
@@ -57,7 +57,7 @@ export function EditablePreviewDialog({
       closeEditDetails();
       toast.success(saveSuccessMessage);
     })();
-  }, [detailsDraft, onSaveDraft, saveSuccessMessage]);
+  }, [closeEditDetails, detailsDraft, onSaveDraft, saveSuccessMessage]);
 
   useEffect(() => {
     if (!open || !isEditingCurrentEntity) return;

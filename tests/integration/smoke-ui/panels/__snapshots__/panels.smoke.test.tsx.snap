@@ -247,11 +247,13 @@ exports[`smoke panels > matches snapshot for images left panel 1`] = `
           >
             <button
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-brass text-brass-foreground shadow hover:bg-brass/90 h-8 rounded-md px-3 text-xs  justify-center text-center flex-row [&_svg]:size-4"
+              type="button"
             >
               Library
             </button>
             <button
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs  justify-center text-center flex-row [&_svg]:size-4"
+              type="button"
             >
               Deleted imports (0)
             </button>
@@ -320,16 +322,19 @@ exports[`smoke panels > matches snapshot for images left panel 1`] = `
           >
             <button
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs  justify-center text-center flex-row [&_svg]:size-4"
+              type="button"
             >
               Sync now
             </button>
             <button
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs  justify-center text-center flex-row [&_svg]:size-4"
+              type="button"
             >
               Force re-import all
             </button>
             <button
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs  justify-center text-center flex-row [&_svg]:size-4"
+              type="button"
             >
               Disconnect
             </button>
@@ -939,7 +944,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
       class="space-y-2"
     >
       <div
-        class="group cursor-pointer overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent"
+        class="group overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent"
       >
         <div
           class="flex items-center gap-3 px-4 py-3"
@@ -1023,6 +1028,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
           <button
             aria-label="Expand note preview"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9  justify-center text-center flex-row [&_svg]:size-4"
+            type="button"
           >
             <svg
               aria-hidden="true"
@@ -1054,6 +1060,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
           <button
             aria-label="Edit note"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9  justify-center text-center flex-row [&_svg]:size-4"
+            type="button"
           >
             <svg
               aria-hidden="true"
@@ -1079,6 +1086,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
           <button
             aria-label="Delete note"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 text-destructive hover:text-destructive justify-center text-center flex-row [&_svg]:size-4"
+            type="button"
           >
             <svg
               aria-hidden="true"

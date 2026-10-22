@@ -9,7 +9,6 @@ export function useAppFrameInit() {
   const setLoaded = useStore((s) => s.setLoaded);
   const setSyncFolderName = useStore((s) => s.setSyncFolderName);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Initialization runs once when the frame mounts.
   useEffect(() => {
     async function init() {
       try {
@@ -30,5 +29,5 @@ export function useAppFrameInit() {
     }
 
     void init();
-  }, []);
+  }, [setLoaded, setSyncFolderName]);
 }

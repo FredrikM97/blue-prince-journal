@@ -48,7 +48,6 @@ export function InputField({
   value,
   onChange,
   placeholder,
-  autoFocus,
   markdown = false,
   rows = 12,
   onBlur,
@@ -66,7 +65,6 @@ export function InputField({
   value: string;
   onChange: (next: string) => void;
   placeholder?: string;
-  autoFocus?: boolean;
   markdown?: boolean;
   rows?: number;
   onBlur?: () => void;
@@ -88,7 +86,6 @@ export function InputField({
   let field = (
     <input
       id={inputId}
-      autoFocus={autoFocus}
       value={value}
       onBlur={onBlur}
       onFocus={onFocus}

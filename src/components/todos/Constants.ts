@@ -19,7 +19,9 @@ export function groupTodosByStatus(todos: Todo[]): Record<TodoStatus, Todo[]> {
     "in-progress": [],
     done: [],
   };
-  todos.forEach((t) => grouped[t.status].push(t));
+  todos.forEach((todo) => {
+    grouped[todo.status].push(todo);
+  });
   return grouped;
 }
 

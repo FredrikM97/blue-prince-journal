@@ -29,9 +29,10 @@ test("settings smoke: data and room controls are visible", async ({ page }) => {
     importReplaceButton.boundingBox(),
   ]);
 
-  expect(storageHealthBox).not.toBeNull();
-  expect(importReplaceBox).not.toBeNull();
-  expect(storageHealthBox!.y - (importReplaceBox!.y + importReplaceBox!.height)).toBeGreaterThan(8);
+  if (!storageHealthBox || !importReplaceBox) {
+    throw new Error("Expected the settings controls to have visible bounding boxes.");
+  }
+  expect(storageHealthBox.y - (importReplaceBox.y + importReplaceBox.height)).toBeGreaterThan(8);
 
   budgets.assert();
 });

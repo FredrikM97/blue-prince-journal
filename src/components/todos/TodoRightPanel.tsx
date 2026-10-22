@@ -17,7 +17,7 @@ export function TodoRightPanel({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  let headerActions: React.ReactNode = undefined;
+  let headerActions: React.ReactNode;
   if (onEdit) {
     headerActions = (
       <Button variant="ghost" size="icon" onClick={onEdit} title="Edit todo" aria-label="Edit todo">

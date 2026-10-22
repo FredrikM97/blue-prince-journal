@@ -1,5 +1,13 @@
 import { BookOpen, Eye, Key, Lightbulb, ListTodo, Maximize2, Share2, Sparkles } from "lucide-react";
-import { type PointerEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type PointerEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -159,10 +167,10 @@ export function GraphPage() {
   // Isolated node count — for showing the badge on the toggle
   const isolatedCount = nodes.length - connectedNodeIds.size;
 
-  let onResetTypes: (() => void) | undefined = undefined;
+  let onResetTypes: (() => void) | undefined;
   if (hiddenTypes.size > 0) onResetTypes = () => setHiddenTypes(new Set());
 
-  let onResetRooms: (() => void) | undefined = undefined;
+  let onResetRooms: (() => void) | undefined;
   if (hiddenRooms.size > 0) onResetRooms = () => setHiddenRooms(new Set());
 
   const typeFilterItems = ALL_NOTE_TYPES.map((type) => ({
@@ -376,16 +384,19 @@ function GraphCanvas({
     panY: number;
   } | null>(null);
 
-  function applyViewportTransform(nextZoom: number, nextPan: { x: number; y: number }) {
-    zoomRef.current = nextZoom;
-    panRef.current = nextPan;
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    viewport.setAttribute(
-      "transform",
-      `matrix(${nextZoom} 0 0 ${nextZoom} ${nextPan.x} ${nextPan.y})`,
-    );
-  }
+  const applyViewportTransform = useCallback(
+    (nextZoom: number, nextPan: { x: number; y: number }) => {
+      zoomRef.current = nextZoom;
+      panRef.current = nextPan;
+      const viewport = viewportRef.current;
+      if (!viewport) return;
+      viewport.setAttribute(
+        "transform",
+        `matrix(${nextZoom} 0 0 ${nextZoom} ${nextPan.x} ${nextPan.y})`,
+      );
+    },
+    [],
+  );
 
   function toSvgPoint(clientX: number, clientY: number, element: SVGSVGElement) {
     const pt = element.createSVGPoint();
@@ -399,9 +410,9 @@ function GraphCanvas({
     return pt.matrixTransform(ctm.inverse());
   }
 
-  function resetView() {
+  const resetView = useCallback(() => {
     applyViewportTransform(1, { x: 0, y: 0 });
-  }
+  }, [applyViewportTransform]);
 
   function startDrag(event: PointerEvent<SVGSVGElement>) {
     if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -431,17 +442,19 @@ function GraphCanvas({
   }
 
   function stopDrag(event?: PointerEvent<SVGSVGElement>) {
-    if (event && event.currentTarget.hasPointerCapture(event.pointerId)) {
+    if (event?.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     dragRef.current = null;
     setIsDragging(false);
   }
 
+  const previousDataVersionRef = useRef(dataVersion);
   useEffect(() => {
+    if (previousDataVersionRef.current === dataVersion) return;
+    previousDataVersionRef.current = dataVersion;
     applyViewportTransform(1, { x: 0, y: 0 });
-    // Reset graph viewport when data set changes (React remount key covers svg internals).
-  }, [dataVersion]);
+  }, [applyViewportTransform, dataVersion]);
 
   useNonPassiveWheel(
     svgRef,
@@ -556,6 +569,7 @@ function GraphCanvas({
         onPointerUp={stopDrag}
         onPointerCancel={stopDrag}
       >
+        <title>Interactive note graph</title>
         <rect x="0" y="0" width={GRAPH_VB_W} height={GRAPH_VB_H} fill="transparent" />
         <defs>
           {(
@@ -664,6 +678,7 @@ function renderNode(
   const labelScale = 1;
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: SVG graph nodes need button semantics while staying in the SVG.
     <g
       key={node.id}
       role="button"

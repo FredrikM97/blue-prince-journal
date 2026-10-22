@@ -32,7 +32,7 @@ export function DartboardPaintRing({
 
   return (
     <g>
-      {WEDGE_ORDER.map((_number, index) => {
+      {WEDGE_ORDER.map((number, index) => {
         const a0 = startBase + index * wedgeAngle;
         const a1 = a0 + wedgeAngle;
         const aMid = (a0 + a1) / 2;
@@ -43,8 +43,11 @@ export function DartboardPaintRing({
         const isSelectedWedge = selectedWedgeIndex === index;
 
         return (
-          <g key={`${ring}-${index}`}>
+          <g key={`${ring}-${number}`}>
+            {/* biome-ignore lint/a11y/useSemanticElements: The selectable wedge must remain an SVG path. */}
             <path
+              role="button"
+              tabIndex={0}
               aria-label={`${ring} wedge ${WEDGE_ORDER[index]}`}
               d={buildSectorPathByRadii({ rIn, rOut }, a0, a1)}
               fill={resolveFill(color, fallbackForIndex(index))}
@@ -52,6 +55,12 @@ export function DartboardPaintRing({
               strokeWidth={1}
               onClick={() => {
                 onCycleWedge(ring, index);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onCycleWedge(ring, index);
+                }
               }}
               style={{
                 cursor: "pointer",

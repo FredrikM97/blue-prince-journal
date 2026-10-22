@@ -84,7 +84,7 @@ export function GroupedRoomFilterSection({
     return count;
   }, [isRoomActive, rooms]);
 
-  let badge: string | undefined = undefined;
+  let badge: string | undefined;
   if (inactiveCount > 0) {
     badge = `(${rooms.length - inactiveCount}/${rooms.length})`;
   }
@@ -105,12 +105,12 @@ export function GroupedRoomFilterSection({
         {groupedRoomFilters.map((group) => {
           const inactiveInGroup = group.rooms.filter((room) => !isRoomActive(room)).length;
 
-          let groupBadge: string | undefined = undefined;
+          let groupBadge: string | undefined;
           if (inactiveInGroup > 0) {
             groupBadge = `(${group.rooms.length - inactiveInGroup}/${group.rooms.length})`;
           }
 
-          let onResetGroup: (() => void) | undefined = undefined;
+          let onResetGroup: (() => void) | undefined;
           if (inactiveInGroup > 0) {
             onResetGroup = () => {
               for (const room of group.rooms) {

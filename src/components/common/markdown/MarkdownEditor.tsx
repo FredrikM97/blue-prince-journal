@@ -407,7 +407,7 @@ export function MarkdownEditor({
   onChange: (v: string) => void;
   onBlur?: () => void;
   onCursorChange?: (cursor: number) => void;
-  onTextKeyDown?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => boolean | void;
+  onTextKeyDown?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => boolean | undefined;
   placeholder?: string;
   rows?: number;
   textareaRef?: RefObject<HTMLTextAreaElement | null>;

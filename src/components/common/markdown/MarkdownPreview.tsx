@@ -18,7 +18,8 @@ function highlightTokensInText(text: string): React.ReactNode {
   let last = 0;
   let key = 0;
   for (const match of text.matchAll(TOKEN_PATTERN)) {
-    const i = match.index!;
+    const i = match.index;
+    if (i === undefined) continue;
     if (i > last) parts.push(text.slice(last, i));
     const tokenClassName = TOKEN_CLASS[match[0][0]];
     if (tokenClassName) {
