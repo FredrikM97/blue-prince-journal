@@ -61,7 +61,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@cloudflare/vite-plugin": "^1.39.1",
-    "@cloudflare/workers-types": "^4.20260602.1",
+    "@cloudflare/workers-types": "^5.20261019.1",
     "@playwright/test": "^1.54.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
