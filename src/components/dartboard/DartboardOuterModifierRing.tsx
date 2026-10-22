@@ -1,7 +1,11 @@
+import { useId } from "react";
+import type { getSectorBounds } from "./dartboardGeometry";
+
 export type OuterModifierWedgeViewModel = {
   index: number;
   wedgeNumber: number;
   path: string;
+  bounds: ReturnType<typeof getSectorBounds>;
   labelX: number;
   labelY: number;
   title: string;
@@ -19,32 +23,24 @@ type Props = {
 };
 
 export function DartboardOuterModifierRing({ wedges, onSelectWedge }: Props) {
+  const clipIdPrefix = useId().replaceAll(":", "");
+
   return (
     <g>
       {wedges.map((wedge) => (
         <g key={`outer-modifier-${wedge.index}`}>
-          {/* biome-ignore lint/a11y/useSemanticElements: The selectable wedge must remain an SVG path. */}
+          <defs>
+            <clipPath id={`${clipIdPrefix}-outer-${wedge.index}`} clipPathUnits="userSpaceOnUse">
+              <path d={wedge.path} />
+            </clipPath>
+          </defs>
           <path
-            role="button"
-            tabIndex={0}
-            aria-label={`outer modifier wedge ${wedge.wedgeNumber}`}
             d={wedge.path}
             fill={wedge.fill}
             stroke={wedge.stroke}
             strokeWidth={wedge.strokeWidth}
-            onClick={() => {
-              onSelectWedge(wedge.index);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                onSelectWedge(wedge.index);
-              }
-            }}
-            style={{
-              cursor: "pointer",
-              transition: "fill 120ms, stroke 120ms",
-            }}
+            pointerEvents="none"
+            style={{ transition: "fill 120ms, stroke 120ms" }}
           >
             <title>{wedge.title}</title>
           </path>
@@ -62,6 +58,21 @@ export function DartboardOuterModifierRing({ wedges, onSelectWedge }: Props) {
               {wedge.glyph}
             </text>
           ) : null}
+          <foreignObject
+            x={wedge.bounds.x}
+            y={wedge.bounds.y}
+            width={wedge.bounds.width}
+            height={wedge.bounds.height}
+            clipPath={`url(#${clipIdPrefix}-outer-${wedge.index})`}
+          >
+            <button
+              type="button"
+              aria-label={`outer modifier wedge ${wedge.wedgeNumber}`}
+              title={wedge.title}
+              onClick={() => onSelectWedge(wedge.index)}
+              className="h-full w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+            />
+          </foreignObject>
         </g>
       ))}
     </g>

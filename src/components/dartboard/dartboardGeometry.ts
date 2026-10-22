@@ -189,6 +189,28 @@ export function polarToCartesian(radius: number, angle: number) {
   ] as const;
 }
 
+export function getSectorBounds(rOut: number, a0: number, a1: number) {
+  const turn = Math.PI * 2;
+  const angles = [a0, a1];
+  for (const cardinal of [0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2]) {
+    const firstTurn = Math.ceil((a0 - cardinal) / turn);
+    const lastTurn = Math.floor((a1 - cardinal) / turn);
+    for (let turnIndex = firstTurn; turnIndex <= lastTurn; turnIndex++) {
+      const angle = cardinal + turnIndex * turn;
+      if (angle > a0 && angle < a1) angles.push(angle);
+    }
+  }
+
+  const points = angles.map((angle) => polarToCartesian(rOut, angle));
+  const xs = points.map(([x]) => x);
+  const ys = points.map(([, y]) => y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
 function buildSectorPath(rIn: number, rOut: number, a0: number, a1: number) {
   const [x1, y1] = polarToCartesian(rOut, a0);
   const [x2, y2] = polarToCartesian(rOut, a1);

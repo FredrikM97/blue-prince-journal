@@ -1,4 +1,5 @@
-import { buildSectorPathByRadii } from "./dartboardGeometry";
+import { useId } from "react";
+import { buildSectorPathByRadii, getSectorBounds } from "./dartboardGeometry";
 import { OPERATORS, type OpColor, type RingKey, WEDGE_ORDER } from "./types";
 
 type Props = {
@@ -29,6 +30,7 @@ export function DartboardPaintRing({
   fallbackForIndex,
 }: Props) {
   const wedgeThirdAngle = wedgeAngle / 3;
+  const clipIdPrefix = useId().replaceAll(":", "");
 
   return (
     <g>
@@ -41,34 +43,30 @@ export function DartboardPaintRing({
         const color = wedgeColors[index];
         const thirdColor = thirdColors[index];
         const isSelectedWedge = selectedWedgeIndex === index;
+        const path = buildSectorPathByRadii({ rIn, rOut }, a0, a1);
+        const bounds = getSectorBounds(rOut, a0, a1);
+        const clipId = `${clipIdPrefix}-${ring}-${index}`;
+        const title = `${ring} · wedge ${number} — click to cycle color`;
 
         return (
           <g key={`${ring}-${number}`}>
-            {/* biome-ignore lint/a11y/useSemanticElements: The selectable wedge must remain an SVG path. */}
+            <defs>
+              <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+                <path d={path} />
+              </clipPath>
+            </defs>
             <path
-              role="button"
-              tabIndex={0}
-              aria-label={`${ring} wedge ${WEDGE_ORDER[index]}`}
-              d={buildSectorPathByRadii({ rIn, rOut }, a0, a1)}
+              d={path}
               fill={resolveFill(color, fallbackForIndex(index))}
               stroke="var(--board-stroke)"
               strokeWidth={1}
-              onClick={() => {
-                onCycleWedge(ring, index);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onCycleWedge(ring, index);
-                }
-              }}
+              pointerEvents="none"
               style={{
-                cursor: "pointer",
                 transition: "fill 120ms, stroke 120ms",
                 opacity: isSelectedWedge ? 1 : 0.96,
               }}
             >
-              <title>{`${ring} · wedge ${WEDGE_ORDER[index]} — click to cycle color`}</title>
+              <title>{title}</title>
             </path>
             {thirdColor ? (
               <path
@@ -79,6 +77,21 @@ export function DartboardPaintRing({
                 pointerEvents="none"
               />
             ) : null}
+            <foreignObject
+              x={bounds.x}
+              y={bounds.y}
+              width={bounds.width}
+              height={bounds.height}
+              clipPath={`url(#${clipId})`}
+            >
+              <button
+                type="button"
+                aria-label={`${ring} wedge ${number}`}
+                title={title}
+                onClick={() => onCycleWedge(ring, index)}
+                className="h-full w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+              />
+            </foreignObject>
           </g>
         );
       })}

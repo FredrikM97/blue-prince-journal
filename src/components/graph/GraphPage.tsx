@@ -675,49 +675,42 @@ function renderNode(
   const Icon = TYPE_ICON[node.note.type];
   const stroke = selected ? themeVars.ring : themeVars.foreground;
   const strokeWidth = selected ? 2.2 : 1.1;
-  const labelScale = 1;
+  const label = trim(node.note.title, 22);
 
   return (
-    // biome-ignore lint/a11y/useSemanticElements: SVG graph nodes need button semantics while staying in the SVG.
-    <g
-      key={node.id}
-      role="button"
-      tabIndex={0}
-      data-graph-node="true"
-      className="cursor-pointer"
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onSelect}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onSelect();
-        }
-      }}
-    >
-      <circle
-        cx={node.x}
-        cy={node.y}
-        r={NODE_RADIUS}
-        fill={TYPE_COLOR[node.note.type]}
-        stroke={stroke}
-        strokeWidth={strokeWidth}
+    <g key={node.id}>
+      <foreignObject
+        x={node.x - NODE_RADIUS}
+        y={node.y - NODE_RADIUS}
+        width={NODE_RADIUS + 18 + 22 * 8}
+        height={NODE_RADIUS * 2}
       >
-        <title>{node.note.title}</title>
-      </circle>
-
-      <g transform={`translate(${node.x - NODE_ICON_SIZE / 2} ${node.y - NODE_ICON_SIZE / 2})`}>
-        <Icon size={NODE_ICON_SIZE} className="text-black/80" />
-      </g>
-
-      <g
-        transform={`translate(${node.x + 18} ${node.y + 5}) scale(${labelScale})`}
-        pointerEvents="none"
-        style={{ userSelect: "none", WebkitUserSelect: "none" }}
-      >
-        <text fill={themeVars.foreground} fontSize="14" fontWeight="500" opacity="0.92">
-          {trim(node.note.title, 22)}
-        </text>
-      </g>
+        <button
+          type="button"
+          aria-label={node.note.title}
+          title={node.note.title}
+          data-graph-node="true"
+          onClick={onSelect}
+          className="flex h-full w-max cursor-pointer items-center gap-0 border-0 bg-transparent p-0 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+          style={{ userSelect: "none", WebkitUserSelect: "none" }}
+        >
+          <span
+            className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
+            style={{
+              backgroundColor: TYPE_COLOR[node.note.type],
+              border: `${strokeWidth}px solid ${stroke}`,
+            }}
+          >
+            <Icon size={NODE_ICON_SIZE} className="text-black/80" />
+          </span>
+          <span
+            className="-ml-2 whitespace-nowrap text-sm font-medium"
+            style={{ color: themeVars.foreground, opacity: 0.92 }}
+          >
+            {label}
+          </span>
+        </button>
+      </foreignObject>
     </g>
   );
 }

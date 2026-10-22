@@ -38,51 +38,25 @@ export function DartboardCenterZone({
 
   return (
     <>
-      {/* biome-ignore lint/a11y/useSemanticElements: The selectable area must remain an SVG circle. */}
       <circle
-        role="button"
-        tabIndex={0}
-        aria-label="center outer bull"
         cx={center.x}
         cy={center.y}
         r={centerShape.outerBullRadius}
         fill={centerFill}
         stroke="var(--board-stroke)"
         strokeWidth={1}
-        onClick={onSelectCenter}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            onSelectCenter();
-          }
-        }}
-        style={{
-          cursor: "pointer",
-          opacity: centerSelected ? 1 : 0.95,
-        }}
+        pointerEvents="none"
+        style={{ opacity: centerSelected ? 1 : 0.95 }}
       />
-      {/* biome-ignore lint/a11y/useSemanticElements: The selectable area must remain an SVG circle. */}
       <circle
-        role="button"
-        tabIndex={0}
-        aria-label="center bullseye"
         cx={center.x}
         cy={center.y}
         r={centerShape.bullseyeRadius}
         fill={bullseyeFill}
         stroke="var(--board-stroke)"
         strokeWidth={1}
-        onClick={onSelectBullseye}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            onSelectBullseye();
-          }
-        }}
-        style={{
-          cursor: "pointer",
-          opacity: bullseyeSelected ? 1 : 0.95,
-        }}
+        pointerEvents="none"
+        style={{ opacity: bullseyeSelected ? 1 : 0.95 }}
       />
       {centerModifierGlyph ? (
         <text
@@ -116,6 +90,32 @@ export function DartboardCenterZone({
           {bullseyeModifierGlyph}
         </text>
       ) : null}
+      <foreignObject
+        x={center.x - centerShape.outerBullRadius}
+        y={center.y - centerShape.outerBullRadius}
+        width={centerShape.outerBullRadius * 2}
+        height={centerShape.outerBullRadius * 2}
+      >
+        <button
+          type="button"
+          aria-label="center outer bull"
+          onClick={onSelectCenter}
+          className="h-full w-full cursor-pointer appearance-none rounded-full border-0 bg-transparent p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+        />
+      </foreignObject>
+      <foreignObject
+        x={center.x - centerShape.bullseyeRadius}
+        y={center.y - centerShape.bullseyeRadius}
+        width={centerShape.bullseyeRadius * 2}
+        height={centerShape.bullseyeRadius * 2}
+      >
+        <button
+          type="button"
+          aria-label="center bullseye"
+          onClick={onSelectBullseye}
+          className="h-full w-full cursor-pointer appearance-none rounded-full border-0 bg-transparent p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+        />
+      </foreignObject>
     </>
   );
 }

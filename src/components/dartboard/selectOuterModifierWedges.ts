@@ -2,6 +2,8 @@ import type { OuterModifierWedgeViewModel } from "./DartboardOuterModifierRing";
 import {
   buildAreaPathByKind,
   getOuterModifierLabelRadius,
+  getOuterModifierRadii,
+  getSectorBounds,
   polarToCartesian,
 } from "./dartboardGeometry";
 import type { SelectedTarget } from "./dartboardState";
@@ -18,6 +20,7 @@ export function selectOuterModifierWedges(params: {
   operatorSwatches: (string | null)[];
 }): OuterModifierWedgeViewModel[] {
   const { outerModifierAssignments, selection, startBase, wedgeAngle, operatorSwatches } = params;
+  const outerRadius = getOuterModifierRadii().rOut;
 
   return WEDGE_ORDER.map((wedgeNumber, index) => {
     const assignedId = outerModifierAssignments[index] ?? null;
@@ -35,6 +38,7 @@ export function selectOuterModifierWedges(params: {
       index,
       wedgeNumber,
       path: buildAreaPathByKind("outerModifierRing", a0, a1),
+      bounds: getSectorBounds(outerRadius, a0, a1),
       labelX,
       labelY,
       title: modifier ? `${modifier.label} — ${modifier.note}` : "Outer modifier slot (unassigned)",
