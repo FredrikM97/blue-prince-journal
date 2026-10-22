@@ -60,8 +60,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
-    "@cloudflare/vite-plugin": "^1.39.1",
-    "@cloudflare/workers-types": "^4.20260602.1",
+    "@cloudflare/vite-plugin": "^1.64.0",
+    "@cloudflare/workers-types": "^5.20261019.1",
     "@playwright/test": "^1.54.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -75,6 +75,6 @@
     "typescript": "^5.8.3",
     "vite": "^8.3.5",
     "vitest": "^5.0.5",
-    "wrangler": "^4.96.0"
+    "wrangler": "^4.151.2"
   }
 }
