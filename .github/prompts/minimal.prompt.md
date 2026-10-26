@@ -1,4 +1,5 @@
 ---
+
 name: minimal
 description: Make the smallest possible targeted change.
 argument-hint: Describe the tiny change needed (type fix, spacing change, prop rename, text update, etc.)

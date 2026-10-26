@@ -7,13 +7,11 @@ A client-first notes and todo tracker for Blue Prince. Blue Prince Journal is cu
 ## Option 1: Dev Container (recommended)
 
 This repository includes a dev container configuration in `.devcontainer/devcontainer.json`.
-
 1. Open this repository in VS Code.
 2. Run **Dev Containers: Rebuild and Reopen in Container**.
 3. Wait for post-create tasks to finish.
 
 What happens automatically:
-
 - `ripgrep` is installed (if missing)
 - `npm ci` runs to install project dependencies
 
@@ -61,11 +59,11 @@ npm run build
 ## Troubleshooting
 
 - `npm run dev` fails with command not found or exit code 127:
-	Run `npm ci` first so local binaries (such as Vite) are installed.
+  Run `npm ci` first so local binaries (such as Vite) are installed.
 - Dependency resolution issues:
-	Remove `node_modules` and run `npm ci` again.
+  Remove `node_modules` and run `npm ci` again.
 - Playwright test failures on first run:
-	Install browsers with `npx playwright install`.
+  Install browsers with `npx playwright install`.
 
 ## Dependency updates
 

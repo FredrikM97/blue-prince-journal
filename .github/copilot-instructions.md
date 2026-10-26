@@ -1,17 +1,20 @@
 # Agent Instructions
 
 ## Goal
+
 Maintain and improve a TypeScript + React + Tailwind codebase by reducing complexity, duplication, and maintenance cost.
 
 ---
 
 ## Modes
+
 Refactor / Feature / Bugfix / Minimal  
 Do not mix modes. Default = Minimal.
 
 ---
 
 ## Execution
+
 - continue multi-step changes
 - do not ask for confirmation
 - choose simplest safe solution
@@ -21,6 +24,7 @@ Do not mix modes. Default = Minimal.
 ---
 
 ## Context
+
 - use provided code as primary context
 - modify other files only when required
 - do not assume unrelated system parts
@@ -28,6 +32,7 @@ Do not mix modes. Default = Minimal.
 ---
 
 ## Decisions
+
 - choose one solution
 - no alternatives
 - avoid exploration
@@ -35,6 +40,7 @@ Do not mix modes. Default = Minimal.
 ---
 
 ## Output
+
 - minimal changes only
 - no unrelated code
 - no explanations unless requested
@@ -42,6 +48,7 @@ Do not mix modes. Default = Minimal.
 ---
 
 ## Core Rules
+
 - prefer deletion over addition
 - avoid abstraction unless clearly required
 - no new systems unless replacing existing
@@ -51,6 +58,7 @@ Do not mix modes. Default = Minimal.
 ---
 
 ## File Responsibility
+
 - .tsx → UI only
 - .ts → logic, hooks, services, types
 
@@ -63,6 +71,7 @@ Rules:
 ---
 
 ## Structure
+
 - one concept = one component
 - no similar components with small differences
 - shared behavior must exist in one place
@@ -72,6 +81,7 @@ Rules:
 ---
 
 ## State
+
 - group related state into objects
 - avoid many independent state fields
 - avoid value/onChange prop duplication
@@ -127,13 +137,11 @@ Data (.ts):
 ### CSS Usage (LIMITED)
 
 Use CSS ONLY when:
-
 - complex selectors are required
 - cannot be expressed using Tailwind
 - defining tokens or base styles
 
 Rules:
-
 - scoped to one component
 - imported ONLY by that component
 - MUST NOT affect other components
@@ -146,13 +154,11 @@ Rules:
 - components consume tokens only
 
 Rules:
-
 - use tokens directly (var(--background))
 - Tailwind may map tokens (bg-background, text-foreground)
 - keep token system flat
 
 Forbidden:
-
 - multi-layer token mapping
 - duplicated token systems
 - inline theme systems
@@ -162,13 +168,11 @@ Forbidden:
 ### Global Styles (STRICTLY LIMITED)
 
 Allowed ONLY for:
-
 - html/body background and color
 - typography defaults
 - reset/normalization
 
 MUST NOT:
-
 - control layout
 - affect spacing or alignment
 - modify width, overflow, or centering
@@ -184,7 +188,6 @@ MUST NOT:
 - styles.css MUST NOT import component CSS
 
 Goal:
-
 - each component must render correctly in isolation
 - removing a component MUST NOT break another
 

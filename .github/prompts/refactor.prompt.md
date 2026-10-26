@@ -1,4 +1,5 @@
 ---
+
 name: refactor
 description: Reduce duplication and complexity without changing behavior.
 argument-hint: Describe what feels duplicated, over-complex, or inconsistent.

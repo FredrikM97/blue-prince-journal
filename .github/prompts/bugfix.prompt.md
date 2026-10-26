@@ -1,4 +1,5 @@
 ---
+
 name: bugfix
 description: Fix a bug at the root cause with the smallest safe change.
 argument-hint: Describe the bug, current behavior, expected behavior, and any relevant file or component.

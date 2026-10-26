@@ -1,4 +1,5 @@
 ---
+
 name: analyze
 description: Analyze codebase and maintain a clean TODO queue.
 agent: agent
@@ -27,7 +28,6 @@ Output ONLY if:
 ## Goal
 
 Maintain a clean, minimal, high-impact TODO queue.
-
 - prioritize important issues
 - avoid full system analysis
 - prefer small, actionable tasks
@@ -37,7 +37,6 @@ Maintain a clean, minimal, high-impact TODO queue.
 ## Scope
 
 Focus on:
-
 - layout issues
 - CSS problems
 - structure issues
@@ -61,7 +60,6 @@ If exceeded:
 ## Detect
 
 Look for:
-
 - layout and alignment issues
 - CSS leakage or conflicts
 - duplication or dead code
@@ -74,7 +72,6 @@ Look for:
 ## Tasks
 
 Create atomic tasks:
-
 - minimal scope (prefer 1 file)
 - no combined operations
 - safe incremental changes
@@ -97,7 +94,6 @@ tags (1–3):
 ## Escalation
 
 If unclear:
-
 - create investigation task
 - do NOT guess
 
@@ -124,28 +120,23 @@ Examples:
 - output a clean list of tasks only
 
 Preserve:
-
 - all valid, unresolved tasks from the existing TODO
 
 Remove ONLY:
-
 - exact duplicates
 - clearly invalid tasks
 - tasks that are fully obsolete due to other tasks
 
 Optional:
-
 - merge tasks ONLY if clearly overlapping in scope
 - refine wording for clarity without changing intent
 
 DO NOT:
-
 - remove tasks due to reprioritization alone
 - remove tasks just to meet MAX limit
 - replace or drop valid existing tasks with new ones
 
 Priority Rule:
-
 - existing tasks have priority over newly discovered tasks
 - only add new tasks if they bring clear additional value
 

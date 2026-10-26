@@ -1,4 +1,5 @@
 ---
+
 name: compose
 description: Build or extend a reusable shell/component using composition, props, and shared behavior.
 argument-hint: Describe the shell/component, what content/actions vary, and which behaviors should be configurable.

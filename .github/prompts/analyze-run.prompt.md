@@ -1,4 +1,5 @@
 ---
+
 name: analyze-run
 description: Execute TODO tasks one at a time with minimal safe refactoring.
 agent: agent
@@ -78,7 +79,6 @@ Else:
 ## Final Validation
 
 Run only if requested or no tasks remain:
-
 - npm run build
 - npx tsc --noEmit
 

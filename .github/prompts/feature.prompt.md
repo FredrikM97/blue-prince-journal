@@ -1,4 +1,5 @@
 ---
+
 name: feature
 description: Add or extend functionality while reusing existing components, hooks, and patterns.
 argument-hint: Describe the feature, where it belongs, and any constraints (reuse existing component, no new component, use hook, etc.)
