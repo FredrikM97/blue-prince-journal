@@ -3,6 +3,7 @@ import {
   createRootRouteWithContext,
   createRoute,
   createRouter,
+  type ErrorComponentProps,
   HeadContent,
   Link,
   Outlet,
@@ -120,14 +121,16 @@ export function NotFoundView() {
   );
 }
 
-export function ErrorView({ error, reset }: { error: Error; reset: () => void }) {
+export function ErrorView({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {error instanceof Error ? error.message : String(error)}
+        </p>
         <div className="mt-6 flex justify-center gap-2">
           <button
             type="button"
