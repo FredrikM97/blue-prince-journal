@@ -67,6 +67,14 @@ npm run build
 - Playwright test failures on first run:
 	Install browsers with `npx playwright install`.
 
+## Dependency updates
+
+Use the npm version declared in `package.json` when updating dependencies. Run
+`npm install`, commit both `package.json` and `package-lock.json`, and verify with
+`npm ci` and `npm ls --all`. CI checks the same dependency tree. Dependabot groups
+Cloudflare packages because they have peer dependencies. Major updates, including
+TypeScript, remain enabled and must pass CI before automatic merging.
+
 # Features
 
 - Track notes, rooms and the story of the world of blue prince

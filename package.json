@@ -3,6 +3,10 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "packageManager": "npm@11.19.0",
+  "engines": {
+    "node": ">=22.9.0"
+  },
   "scripts": {
     "dev": "vite dev",
     "dev:bundled": "sh -c 'trap \"kill 0\" EXIT; vite build --mode development --watch & vite preview --strictPort --port 8080'",
@@ -55,13 +59,12 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1",
     "tw-animate-css": "^1.3.4",
-    "vite-tsconfig-paths": "^6.0.2",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
-    "@cloudflare/vite-plugin": "^1.64.0",
-    "@cloudflare/workers-types": "^5.20261019.1",
+    "@cloudflare/vite-plugin": "^1.65.0",
+    "@cloudflare/workers-types": "^5.20261022.1",
     "@playwright/test": "^1.54.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -72,12 +75,20 @@
     "@vitest/coverage-v8": "^5.0.5",
     "jsdom": "^30.1.3",
     "knip": "^6.15.0",
-    "typescript": "^5.8.3",
+    "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "^5.0.5",
-    "wrangler": "^4.151.2"
+    "wrangler": "^4.152.0"
   },
   "allowScripts": {
-    "workerd": true
+    "workerd": true,
+    "sharp@0.33.5": true,
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.4": true
+  },
+  "overrides": {
+    "miniflare": {
+      "undici": "^7.30.1"
+    }
   }
 }

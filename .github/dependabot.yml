@@ -12,6 +12,10 @@ updates:
     labels:
       - "dependencies"
     groups:
+      cloudflare:
+        patterns:
+          - "@cloudflare/*"
+          - "wrangler"
       non-major:
         patterns:
           - "*"

@@ -27,9 +27,26 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Set up npm
+        run: npm install --global "$(node -p 'require("./package.json").packageManager')"
+
       - name: Install dependencies
         run: npm ci
-      
+
+      - name: Validate dependency tree
+        run: |
+          npm ls --all --json | node --input-type=module -e '
+            let input = "";
+            for await (const chunk of process.stdin) input += chunk;
+            const { problems = [] } = JSON.parse(input);
+            if (problems.length > 0) {
+              console.error(problems.join("\n"));
+              process.exitCode = 1;
+            } else {
+              console.log("No invalid, missing, or extraneous dependencies.");
+            }
+          '
+
       - name: Lint and format check
         run: npm run lint
 

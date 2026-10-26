@@ -2,11 +2,16 @@ name: Dependabot
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: write
   pull-requests: write
   checks: read
+
+concurrency:
+  group: dependabot-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   dependabot:
@@ -15,7 +20,8 @@ jobs:
 
     if: >
       github.repository == 'FredrikM97/blue-prince-journal' &&
-      github.event.pull_request.user.login == 'dependabot[bot]'
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.draft == false
 
     steps:
       - name: Wait for checks
@@ -64,6 +70,17 @@ jobs:
               ] | length
             ')
 
+            verified=$(echo "$relevant_checks" | jq '
+              [
+                .[]
+                | select(
+                    .name == "verify"
+                    and .app.slug == "github-actions"
+                    and .conclusion == "success"
+                  )
+              ] | length
+            ')
+
             echo "Checks: $total total, $pending pending, $failed failed"
 
             echo "$relevant_checks" | jq -r '
@@ -76,7 +93,7 @@ jobs:
               exit 1
             fi
 
-            if [ "$total" -gt 0 ] && [ "$pending" -eq 0 ]; then
+            if [ "$verified" -gt 0 ] && [ "$pending" -eq 0 ]; then
               echo "All checks completed."
               exit 0
             fi
@@ -95,9 +112,10 @@ jobs:
         run: |
           gh pr review "$PR_URL" --approve
 
-      - name: Enable auto-merge
+      - name: Merge verified pull request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          gh pr merge "$PR_URL" --squash --auto
+          gh pr merge "$PR_URL" --squash --match-head-commit "$SHA"
