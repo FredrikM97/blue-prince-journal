@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   Coffee,
   DownloadCloud,
-  Github,
+  GitBranch,
   Settings as SettingsIcon,
   ShieldCheck,
   SlidersHorizontal,
@@ -51,7 +51,7 @@ export function HeaderMenu() {
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <a href={githubUrl} target="_blank" rel="noreferrer">
-              <Github className="mr-1 h-4 w-4 text-foreground" /> GitHub
+              <GitBranch className="mr-1 h-4 w-4 text-foreground" /> GitHub
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setLocalFirstInfoOpen(true)}>
