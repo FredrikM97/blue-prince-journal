@@ -1032,7 +1032,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
           >
             <svg
               aria-hidden="true"
-              class="lucide lucide-maximize2 lucide-maximize-2 h-4 w-4"
+              class="lucide lucide-maximize-2 h-4 w-4"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -1090,7 +1090,7 @@ exports[`smoke panels > matches snapshot for notes list row and actions 1`] = `
           >
             <svg
               aria-hidden="true"
-              class="lucide lucide-trash2 lucide-trash-2 h-4 w-4"
+              class="lucide lucide-trash lucide-trash-2 h-4 w-4"
               fill="none"
               height="24"
               stroke="currentColor"
