@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import {
   Coffee,
   DownloadCloud,
-  Github,
   Settings as SettingsIcon,
   ShieldCheck,
   SlidersHorizontal,
